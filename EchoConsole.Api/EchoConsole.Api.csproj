@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Domain\" />
   </ItemGroup>
 
 </Project>
