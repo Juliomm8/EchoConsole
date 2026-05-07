@@ -1,6 +1,8 @@
-﻿namespace EchoConsole.Api.Hubs
+﻿using Microsoft.AspNetCore.SignalR;
+
+namespace EchoConsole.Api.Hubs;
+
+public sealed class TelemetryHub : Hub
 {
-    public class TelemetryHub
-    {
-    }
+
 }
