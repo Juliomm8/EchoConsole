@@ -5,11 +5,13 @@ using EchoConsole.Api.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EchoConsole.Api.Controllers.Client;
 
 [ApiController]
 [Route("api/client/installations")]
+[EnableRateLimiting("client-ingest")]
 public sealed class InstallationsController : ControllerBase
 {
     private const string ExpectedGameCode = "cosmic-diner";

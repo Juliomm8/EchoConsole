@@ -5,6 +5,7 @@ using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ namespace EchoConsole.Api.Controllers.Client;
 
 [ApiController]
 [Route("api/client/sessions")]
+[EnableRateLimiting("client-ingest")]
 public sealed class SessionsController : ControllerBase
 {
     private const string ExpectedGameCode = "cosmic-diner";
