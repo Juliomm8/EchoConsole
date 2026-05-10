@@ -1,6 +1,109 @@
-﻿namespace EchoConsole.Web.Views.Shared
-{
-    public class _Sidebar
-    {
-    }
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+
+    Func<string, string> navClass = controller =>
+        string.Equals(currentController, controller, System.StringComparison.OrdinalIgnoreCase)
+            ? "group flex items-center gap-3 rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-cyan-200 shadow-neon transition"
+            : "group flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-slate-400 transition hover:border-cyan-400/15 hover:bg-slate-900/70 hover:text-slate-100";
 }
+
+<div class="flex h-full flex-col p-5">
+    <div class="glass-panel neon-border rounded-2xl px-5 py-6">
+        <div class="font-display text-4xl uppercase tracking-[0.16em] text-cyan-300 text-glow-cyan">
+            Echo
+        </div>
+        <div class="font-display text-3xl uppercase tracking-[0.16em] text-cyan-300 text-glow-cyan">
+            Console
+        </div>
+        <div class="mt-2 font-display text-sm uppercase tracking-[0.42em] text-fuchsia-300 text-glow-magenta">
+            .Web
+        </div>
+
+        <div class="mt-5 h-px bg-gradient-to-r from-cyan-400/40 via-fuchsia-400/20 to-transparent"></div>
+
+        <div class="mt-5">
+            <div class="font-display text-xs uppercase tracking-[0.36em] text-slate-500" data-i18n="sidebar_modules">
+                Modules
+            </div>
+            <div class="mt-2 text-sm text-slate-400" data-i18n="sidebar_subtitle">
+                Community telemetry platform
+            </div>
+        </div>
+    </div>
+
+    <nav class="mt-6 flex-1 space-y-2">
+        <a asp-controller="Dashboard" asp-action="Index" class="@navClass("Dashboard")">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z" />
+                </svg>
+            </span>
+            <span class="font-medium" data-i18n="nav_live_monitoring">Live Monitoring</span>
+        </a>
+
+        <a asp-controller="Builds" asp-action="Index" class="@navClass("Builds")">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M8 4h8M8 8h8M4 12h16M7 16h10M9 20h6" />
+                </svg>
+            </span>
+            <span class="font-medium" data-i18n="nav_games_builds">Games and Builds</span>
+        </a>
+
+        <a asp-controller="Installations" asp-action="Index" class="@navClass("Installations")">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="4" y="5" width="16" height="11" rx="2" />
+                    <path d="M8 20h8M10 16v4M14 16v4" />
+                </svg>
+            </span>
+            <span class="font-medium" data-i18n="nav_devices_installations">Devices and Installations</span>
+        </a>
+
+        <a asp-controller="Alerts" asp-action="Index" class="@navClass("Alerts")">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 9v4M12 17h.01" />
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                </svg>
+            </span>
+            <span class="font-medium" data-i18n="nav_alerts_reports">Alerts and Reports</span>
+        </a>
+
+        <a asp-controller="Users" asp-action="Index" class="@navClass("Users")">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+                    <circle cx="9.5" cy="7" r="4" />
+                    <path d="M20 8v6M23 11h-6" />
+                </svg>
+            </span>
+            <span class="font-medium" data-i18n="nav_user_management">User Management</span>
+        </a>
+    </nav>
+
+    <div class="glass-panel neon-border-magenta rounded-2xl p-5">
+        <div class="font-display text-2xl uppercase tracking-[0.12em] text-fuchsia-300 text-glow-magenta">
+            Cosmic Diner
+        </div>
+        <p class="mt-2 text-sm text-slate-400" data-i18n="sidebar_footer_tagline">
+            Eat. Die. Repeat.
+        </p>
+
+        <div class="mt-4 grid grid-cols-2 gap-3">
+            <div class="rounded-xl border border-cyan-400/15 bg-slate-900/80 p-3">
+                <div class="font-display text-xs uppercase tracking-[0.24em] text-slate-500" data-i18n="sidebar_footer_version">
+                    Version
+                </div>
+                <div class="mt-1 text-sm font-semibold text-cyan-200">v1.2.7</div>
+            </div>
+
+            <div class="rounded-xl border border-cyan-400/15 bg-slate-900/80 p-3">
+                <div class="font-display text-xs uppercase tracking-[0.24em] text-slate-500" data-i18n="sidebar_footer_region">
+                    Region
+                </div>
+                <div class="mt-1 text-sm font-semibold text-cyan-200">Global</div>
+            </div>
+        </div>
+    </div>
+</div>
