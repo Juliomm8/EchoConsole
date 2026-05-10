@@ -1,6 +1,54 @@
-﻿namespace EchoConsole.Web.Views.Dashboard
-{
-    public class Index
-    {
-    }
+﻿@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
+
+@{
+    ViewData["Title"] = "Monitoreo en Vivo";
+}
+
+<div class="min-h-screen bg-[#070B12] text-slate-100">
+    <div class="mx-auto max-w-[1600px] px-6 py-6">
+        <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">EchoConsole Web</p>
+                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">
+                    Cosmic Diner Telemetry Control
+                </h1>
+                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base">
+                    Monitoreo en vivo de sesiones, instalaciones y telemetría operativa del videojuego.
+                </p>
+            </div>
+
+            <div class="grid gap-3 md:min-w-[340px]">
+                <div class="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3">
+                    <span class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">Telemetry Stream</span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                        @(Model.IsLive ? "Live" : "Offline")
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3">
+                    <span class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">Server Time UTC</span>
+                    <span id="server-time-value" class="font-display text-sm uppercase tracking-[0.12em] text-cyan-300">
+                        @Model.ServerTimeUtc.ToString("MMM dd, yyyy HH:mm:ss")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @await Html.PartialAsync("_KpiCardsRow", Model)
+        @await Html.PartialAsync("_LiveSessionsTable", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script src="~/js/signalr-client.js" asp-append-version="true"></script>
+    <script>
+        window.echoConsoleLiveMonitoring.init({
+            hubUrl: "/hubs/telemetry",
+            tableBodyId: "live-sessions-body",
+            activeSessionsValueId: "kpi-active-sessions",
+            serverTimeValueId: "server-time-value"
+        });
+    </script>
 }
