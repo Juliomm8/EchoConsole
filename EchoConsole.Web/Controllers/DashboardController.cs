@@ -20,153 +20,128 @@ public sealed class DashboardController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
+        DashboardOverviewApiDto overview = new();
+        IReadOnlyList<LiveSessionApiDto> liveSessions = Array.Empty<LiveSessionApiDto>();
+
+        var overviewLoaded = false;
+        var sessionsLoaded = false;
+
         try
         {
-            var overview = await _dashboardApiClient.GetOverviewAsync(cancellationToken);
-            var liveSessions = await _dashboardApiClient.GetLiveSessionsAsync(cancellationToken);
-
-            var nowUtc = overview.ServerTimeUtc == default
-                ? DateTime.UtcNow
-                : DateTime.SpecifyKind(overview.ServerTimeUtc, DateTimeKind.Utc);
-
-            var activeDurations = liveSessions
-                .Where(x => x.StartedAtUtc != default)
-                .Select(x => nowUtc - DateTime.SpecifyKind(x.StartedAtUtc, DateTimeKind.Utc))
-                .Where(x => x > TimeSpan.Zero)
-                .ToList();
-
-            var averageActiveSessionDuration = activeDurations.Count > 0
-                ? TimeSpan.FromTicks(Convert.ToInt64(activeDurations.Average(x => x.Ticks)))
-                : TimeSpan.Zero;
-
-            var latestHeartbeatAge = liveSessions.Count > 0
-                ? liveSessions
-                    .Select(x => nowUtc - DateTime.SpecifyKind(x.LastHeartbeatUtc, DateTimeKind.Utc))
-                    .Where(x => x >= TimeSpan.Zero)
-                    .DefaultIfEmpty(TimeSpan.Zero)
-                    .Min()
-                : TimeSpan.Zero;
-
-            var model = new LiveMonitoringDashboardViewModel
-            {
-                ServerTimeUtc = nowUtc,
-                IsLive = true,
-                Kpis = new List<KpiCardViewModel>
-                {
-                    new()
-                    {
-                        Title = "Registered Installations",
-                        Value = overview.RegisteredInstallations.ToString("N0"),
-                        Subtitle = "Persisted in SQL Server through the API",
-                        DeltaText = "Real data",
-                        IsPositiveDelta = true,
-                        Accent = "cyan",
-                        ValueElementId = "kpi-registered-installations"
-                    },
-                    new()
-                    {
-                        Title = "Active Sessions",
-                        Value = overview.ActiveSessions.ToString("N0"),
-                        Subtitle = "Current active sessions reported by the backend",
-                        DeltaText = "Live now",
-                        IsPositiveDelta = true,
-                        Accent = "magenta",
-                        ValueElementId = "kpi-active-sessions"
-                    },
-                    new()
-                    {
-                        Title = "Average Active Session Duration",
-                        Value = FormatDuration(averageActiveSessionDuration),
-                        Subtitle = "Calculated from current live sessions",
-                        DeltaText = "Real data",
-                        IsPositiveDelta = true,
-                        Accent = "cyan",
-                        ValueElementId = "kpi-average-duration"
-                    },
-                    new()
-                    {
-                        Title = "Most Recent Heartbeat",
-                        Value = FormatRelativeAge(latestHeartbeatAge),
-                        Subtitle = "Freshest session heartbeat received",
-                        DeltaText = "Real data",
-                        IsPositiveDelta = true,
-                        Accent = "magenta",
-                        ValueElementId = "kpi-latest-heartbeat"
-                    }
-                },
-                Sessions = liveSessions
-                    .OrderByDescending(x => x.LastHeartbeatUtc)
-                    .Select(x => new LiveSessionRowViewModel
-                    {
-                        SessionId = x.SessionId.ToString().ToUpperInvariant(),
-                        InstallationId = x.InstallationId.ToString().ToUpperInvariant(),
-                        CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene) ? "-" : x.CurrentScene,
-                        GameState = string.IsNullOrWhiteSpace(x.CurrentGameState) ? "-" : x.CurrentGameState,
-                        CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase) ? "-" : x.CurrentPhase!,
-                        LastHeartbeatLabel = FormatRelativeAge(nowUtc - DateTime.SpecifyKind(x.LastHeartbeatUtc, DateTimeKind.Utc)),
-                        StatusLabel = x.Status?.ToString() ?? "Unknown"
-                    })
-                    .ToList()
-            };
-
-            return View(model);
+            overview = await _dashboardApiClient.GetOverviewAsync(cancellationToken);
+            overviewLoaded = true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to build the live monitoring dashboard from EchoConsole.Api.");
-
-            var fallbackModel = new LiveMonitoringDashboardViewModel
-            {
-                ServerTimeUtc = DateTime.UtcNow,
-                IsLive = false,
-                Kpis = new List<KpiCardViewModel>
-                {
-                    new()
-                    {
-                        Title = "Registered Installations",
-                        Value = "0",
-                        Subtitle = "API unavailable",
-                        DeltaText = "Unavailable",
-                        IsPositiveDelta = false,
-                        Accent = "cyan",
-                        ValueElementId = "kpi-registered-installations"
-                    },
-                    new()
-                    {
-                        Title = "Active Sessions",
-                        Value = "0",
-                        Subtitle = "API unavailable",
-                        DeltaText = "Unavailable",
-                        IsPositiveDelta = false,
-                        Accent = "magenta",
-                        ValueElementId = "kpi-active-sessions"
-                    },
-                    new()
-                    {
-                        Title = "Average Active Session Duration",
-                        Value = "00:00:00",
-                        Subtitle = "API unavailable",
-                        DeltaText = "Unavailable",
-                        IsPositiveDelta = false,
-                        Accent = "cyan",
-                        ValueElementId = "kpi-average-duration"
-                    },
-                    new()
-                    {
-                        Title = "Most Recent Heartbeat",
-                        Value = "--",
-                        Subtitle = "API unavailable",
-                        DeltaText = "Unavailable",
-                        IsPositiveDelta = false,
-                        Accent = "magenta",
-                        ValueElementId = "kpi-latest-heartbeat"
-                    }
-                },
-                Sessions = Array.Empty<LiveSessionRowViewModel>()
-            };
-
-            return View(fallbackModel);
+            _logger.LogError(ex, "Failed to load dashboard overview.");
         }
+
+        try
+        {
+            liveSessions = await _dashboardApiClient.GetLiveSessionsAsync(cancellationToken);
+            sessionsLoaded = true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load live sessions.");
+        }
+
+        var nowUtc = overview.ServerTimeUtc == default
+            ? DateTime.UtcNow
+            : DateTime.SpecifyKind(overview.ServerTimeUtc, DateTimeKind.Utc);
+
+        var activeDurations = liveSessions
+            .Where(x => x.StartedAtUtc != default)
+            .Select(x => nowUtc - DateTime.SpecifyKind(x.StartedAtUtc, DateTimeKind.Utc))
+            .Where(x => x > TimeSpan.Zero)
+            .ToList();
+
+        var averageActiveSessionDuration = activeDurations.Count > 0
+            ? TimeSpan.FromTicks(Convert.ToInt64(activeDurations.Average(x => x.Ticks)))
+            : TimeSpan.Zero;
+
+        var latestHeartbeatAge = liveSessions.Count > 0
+            ? liveSessions
+                .Select(x => nowUtc - DateTime.SpecifyKind(x.LastHeartbeatUtc, DateTimeKind.Utc))
+                .Where(x => x >= TimeSpan.Zero)
+                .DefaultIfEmpty(TimeSpan.Zero)
+                .Min()
+            : TimeSpan.Zero;
+
+        var model = new LiveMonitoringDashboardViewModel
+        {
+            ServerTimeUtc = nowUtc,
+            IsLive = overviewLoaded || sessionsLoaded,
+            Kpis = new List<KpiCardViewModel>
+            {
+                new()
+                {
+                    Title = "Registered Installations",
+                    Value = overview.RegisteredInstallations.ToString("N0"),
+                    Subtitle = overviewLoaded ? "Persisted in SQL Server through the API" : "Overview unavailable",
+                    DeltaText = overviewLoaded ? "Real data" : "Unavailable",
+                    IsPositiveDelta = overviewLoaded,
+                    Accent = "cyan",
+                    ValueElementId = "kpi-registered-installations"
+                },
+                new()
+                {
+                    Title = "Active Sessions",
+                    Value = overview.ActiveSessions.ToString("N0"),
+                    Subtitle = overviewLoaded ? "Current active sessions reported by the backend" : "Overview unavailable",
+                    DeltaText = overviewLoaded ? "Live now" : "Unavailable",
+                    IsPositiveDelta = overviewLoaded,
+                    Accent = "magenta",
+                    ValueElementId = "kpi-active-sessions"
+                },
+                new()
+                {
+                    Title = "Average Active Session Duration",
+                    Value = FormatDuration(averageActiveSessionDuration),
+                    Subtitle = sessionsLoaded ? "Calculated from current live sessions" : "Sessions unavailable",
+                    DeltaText = sessionsLoaded ? "Real data" : "Unavailable",
+                    IsPositiveDelta = sessionsLoaded,
+                    Accent = "cyan",
+                    ValueElementId = "kpi-average-duration"
+                },
+                new()
+                {
+                    Title = "Most Recent Heartbeat",
+                    Value = sessionsLoaded ? FormatRelativeAge(latestHeartbeatAge) : "--",
+                    Subtitle = sessionsLoaded ? "Freshest session heartbeat received" : "Sessions unavailable",
+                    DeltaText = sessionsLoaded ? "Real data" : "Unavailable",
+                    IsPositiveDelta = sessionsLoaded,
+                    Accent = "magenta",
+                    ValueElementId = "kpi-latest-heartbeat"
+                }
+            },
+            Sessions = liveSessions
+                .OrderByDescending(x => x.LastHeartbeatUtc)
+                .Select(x => new LiveSessionRowViewModel
+                {
+                    SessionId = x.SessionId.ToString().ToUpperInvariant(),
+                    InstallationId = x.InstallationId.ToString().ToUpperInvariant(),
+                    CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene) ? "-" : x.CurrentScene,
+                    GameState = string.IsNullOrWhiteSpace(x.CurrentGameState) ? "-" : x.CurrentGameState,
+                    CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase) ? "-" : x.CurrentPhase!,
+                    LastHeartbeatLabel = FormatRelativeAge(nowUtc - DateTime.SpecifyKind(x.LastHeartbeatUtc, DateTimeKind.Utc)),
+                    StatusLabel = MapSessionStatus(x.Status)
+                })
+                .ToList()
+        };
+
+        return View(model);
+    }
+
+    private static string MapSessionStatus(int status)
+    {
+        return status switch
+        {
+            1 => "Active",
+            2 => "Ended",
+            3 => "Expired",
+            _ => $"Unknown ({status})"
+        };
     }
 
     private static string FormatDuration(TimeSpan value)

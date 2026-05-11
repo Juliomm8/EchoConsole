@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace EchoConsole.Web.Services.Api;
 
@@ -17,42 +18,66 @@ public sealed class EchoConsoleDashboardApiClient
 
     public async Task<DashboardOverviewApiDto> GetOverviewAsync(CancellationToken cancellationToken = default)
     {
-        using var response = await _httpClient.GetAsync("/api/admin/dashboard/overview", cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogWarning(
-                "EchoConsole API overview request failed. StatusCode: {StatusCode}. Body: {Body}",
-                response.StatusCode,
-                body);
+            using var response = await _httpClient.GetAsync("/api/admin/dashboard/overview", cancellationToken);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogWarning(
+                    "Overview request failed. StatusCode: {StatusCode}. Body: {Body}",
+                    response.StatusCode,
+                    body);
+
+                return new DashboardOverviewApiDto();
+            }
+
+            var data = await response.Content.ReadFromJsonAsync<DashboardOverviewApiDto>(cancellationToken: cancellationToken);
+            return data ?? new DashboardOverviewApiDto();
         }
-
-        var data = await response.Content.ReadFromJsonAsync<DashboardOverviewApiDto>(cancellationToken: cancellationToken);
-
-        return data ?? new DashboardOverviewApiDto();
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON deserialization error while reading dashboard overview.");
+            return new DashboardOverviewApiDto();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while reading dashboard overview.");
+            return new DashboardOverviewApiDto();
+        }
     }
 
     public async Task<IReadOnlyList<LiveSessionApiDto>> GetLiveSessionsAsync(CancellationToken cancellationToken = default)
     {
-        using var response = await _httpClient.GetAsync("/api/admin/dashboard/live-sessions", cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogWarning(
-                "EchoConsole API live-sessions request failed. StatusCode: {StatusCode}. Body: {Body}",
-                response.StatusCode,
-                body);
+            using var response = await _httpClient.GetAsync("/api/admin/dashboard/live-sessions", cancellationToken);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogWarning(
+                    "Live sessions request failed. StatusCode: {StatusCode}. Body: {Body}",
+                    response.StatusCode,
+                    body);
+
+                return new List<LiveSessionApiDto>();
+            }
+
+            var data = await response.Content.ReadFromJsonAsync<List<LiveSessionApiDto>>(cancellationToken: cancellationToken);
+            return data ?? new List<LiveSessionApiDto>();
         }
-
-        var data = await response.Content.ReadFromJsonAsync<List<LiveSessionApiDto>>(cancellationToken: cancellationToken);
-
-        return data ?? new List<LiveSessionApiDto>();
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON deserialization error while reading live sessions.");
+            return new List<LiveSessionApiDto>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while reading live sessions.");
+            return new List<LiveSessionApiDto>();
+        }
     }
 }
 
@@ -83,5 +108,5 @@ public sealed class LiveSessionApiDto
 
     public DateTime LastHeartbeatUtc { get; set; }
 
-    public object Status { get; set; } = string.Empty;
+    public int Status { get; set; }
 }
