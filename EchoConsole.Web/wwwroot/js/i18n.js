@@ -94,7 +94,34 @@
             pagination_page: "Page",
             pagination_of: "of",
             pagination_previous: "Previous",
-            pagination_next: "Next"
+            pagination_next: "Next",
+
+            // --- GAMES AND BUILDS ---
+            builds_page_title: "GAMES AND BUILDS",
+            builds_module_badge: "Module 2",
+            builds_hero_title: "GAME BUILD REGISTRY",
+            builds_hero_subtitle: "Centralized registry of monitored Cosmic Diner builds and release versions.",
+            builds_total_label: "Total Builds",
+
+            builds_search_label: "Search",
+            builds_search_placeholder: "Search by Version Number or Engine Version",
+            builds_search_button: "Search",
+            builds_reset_button: "Reset",
+
+            builds_table_badge: "Build Registry",
+            builds_table_title: "REGISTERED BUILDS",
+            builds_results_label: "Results:",
+
+            builds_col_version_number: "VERSION",
+            builds_col_release_notes: "RELEASE NOTES",
+            builds_col_release_date: "RELEASE DATE",
+            builds_col_is_active: "ACTIVE",
+            builds_col_engine_version: "ENGINE VERSION",
+
+            builds_empty_state: "No builds found.",
+
+            build_status_active: "Active",
+            build_status_inactive: "Inactive"
         },
         es: {
             sidebar_modules: "Módulos",
@@ -188,7 +215,34 @@
             pagination_page: "Página",
             pagination_of: "de",
             pagination_previous: "Anterior",
-            pagination_next: "Siguiente"
+            pagination_next: "Siguiente",
+
+            // --- GAMES AND BUILDS ---
+            builds_page_title: "JUEGOS Y BUILDS",
+            builds_module_badge: "Módulo 2",
+            builds_hero_title: "REGISTRO DE BUILDS DEL JUEGO",
+            builds_hero_subtitle: "Registro centralizado de builds monitoreadas y versiones liberadas de Cosmic Diner.",
+            builds_total_label: "Total de Builds",
+
+            builds_search_label: "Buscar",
+            builds_search_placeholder: "Buscar por Número de Versión o Versión del Motor",
+            builds_search_button: "Buscar",
+            builds_reset_button: "Limpiar",
+
+            builds_table_badge: "Registro de Builds",
+            builds_table_title: "BUILDS REGISTRADAS",
+            builds_results_label: "Resultados:",
+
+            builds_col_version_number: "VERSIÓN",
+            builds_col_release_notes: "NOTAS DE LANZAMIENTO",
+            builds_col_release_date: "FECHA DE LANZAMIENTO",
+            builds_col_is_active: "ACTIVA",
+            builds_col_engine_version: "VERSIÓN DEL MOTOR",
+
+            builds_empty_state: "No se encontraron builds.",
+
+            build_status_active: "Activa",
+            build_status_inactive: "Inactiva"
         }
     };
 

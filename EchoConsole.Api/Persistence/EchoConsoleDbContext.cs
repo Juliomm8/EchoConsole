@@ -13,6 +13,7 @@ public sealed class EchoConsoleDbContext : DbContext
 
     public DbSet<Installation> Installations => Set<Installation>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();
+    public DbSet<GameBuild> GameBuilds => Set<GameBuild>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,5 +55,22 @@ public sealed class EchoConsoleDbContext : DbContext
             .WithMany(x => x.Sessions)
             .HasForeignKey(x => x.InstallationDbId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        var build = modelBuilder.Entity<GameBuild>();
+
+        build.HasKey(x => x.Id);
+        build.HasIndex(x => x.VersionNumber).IsUnique();
+        build.HasIndex(x => x.ReleaseDateUtc);
+
+        build.Property(x => x.VersionNumber)
+            .HasMaxLength(64)
+            .IsRequired();
+
+        build.Property(x => x.ReleaseNotes)
+            .HasMaxLength(256);
+
+        build.Property(x => x.EngineVersion)
+            .HasMaxLength(64)
+            .IsRequired();
     }
 }
