@@ -1,4 +1,5 @@
 ﻿using EchoConsole.Api.Contracts.Admin;
+using EchoConsole.Api.Contracts.Common;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
 using Microsoft.AspNetCore.Mvc;
@@ -10,30 +11,38 @@ namespace EchoConsole.Api.Controllers.Admin;
 [Route("api/admin/builds")]
 public sealed class BuildsAdminController : ControllerBase
 {
-    private readonly EchoConsoleDbContext _db;
+    private readonly EchoConsoleDbContext _dbContext;
+    private readonly ILogger<BuildsAdminController> _logger;
 
-    public BuildsAdminController(EchoConsoleDbContext db)
+    public BuildsAdminController(
+        EchoConsoleDbContext dbContext,
+        ILogger<BuildsAdminController> logger)
     {
-        _db = db;
+        _dbContext = dbContext;
+        _logger = logger;
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedGameBuildsResponse>> GetAll(
-        [FromQuery] GetGameBuildsQuery request,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResponse<GameBuildDto>>> GetAll(
+        [FromQuery] string? searchTerm,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var query = _db.GameBuilds
+        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        pageSize = pageSize < 1 ? 20 : Math.Min(pageSize, 100);
+
+        var query = _dbContext.GameBuilds
             .AsNoTracking()
             .AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(request.Search))
+        if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            var search = request.Search.Trim();
-            var likePattern = $"%{search}%";
+            var search = searchTerm.Trim();
 
             query = query.Where(x =>
-                EF.Functions.Like(x.VersionNumber, likePattern) ||
-                EF.Functions.Like(x.EngineVersion, likePattern));
+                x.VersionNumber.Contains(search) ||
+                x.EngineVersion.Contains(search));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -41,9 +50,9 @@ public sealed class BuildsAdminController : ControllerBase
         var items = await query
             .OrderByDescending(x => x.ReleaseDateUtc)
             .ThenByDescending(x => x.Id)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .Select(x => new GameBuildListItemDto
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new GameBuildDto
             {
                 Id = x.Id,
                 VersionNumber = x.VersionNumber,
@@ -54,37 +63,40 @@ public sealed class BuildsAdminController : ControllerBase
             })
             .ToListAsync(cancellationToken);
 
-        var response = new PagedGameBuildsResponse
+        var response = new PagedResponse<GameBuildDto>
         {
-            Page = request.Page,
-            PageSize = request.PageSize,
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
             TotalCount = totalCount,
-            TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize),
-            Items = items
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
         };
 
         return Ok(response);
     }
 
     [HttpPost]
-    public async Task<ActionResult<GameBuildListItemDto>> Create(
+    public async Task<ActionResult<GameBuildDto>> Create(
         [FromBody] CreateGameBuildRequest request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var normalizedVersion = request.VersionNumber.Trim();
         var normalizedEngineVersion = request.EngineVersion.Trim();
 
-        var alreadyExists = await _db.GameBuilds
+        var existing = await _dbContext.GameBuilds
             .AnyAsync(x => x.VersionNumber == normalizedVersion, cancellationToken);
 
-        if (alreadyExists)
+        if (existing)
         {
-            return Conflict($"A build with version '{normalizedVersion}' already exists.");
+            return Conflict(new
+            {
+                message = $"A build with version '{normalizedVersion}' already exists."
+            });
         }
 
         if (request.IsActive)
         {
-            var activeBuilds = await _db.GameBuilds
+            var activeBuilds = await _dbContext.GameBuilds
                 .Where(x => x.IsActive)
                 .ToListAsync(cancellationToken);
 
@@ -105,10 +117,16 @@ public sealed class BuildsAdminController : ControllerBase
             EngineVersion = normalizedEngineVersion
         };
 
-        _db.GameBuilds.Add(entity);
-        await _db.SaveChangesAsync(cancellationToken);
+        _dbContext.GameBuilds.Add(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new GameBuildListItemDto
+        _logger.LogInformation(
+            "New game build created. Version: {VersionNumber}, EngineVersion: {EngineVersion}, IsActive: {IsActive}",
+            entity.VersionNumber,
+            entity.EngineVersion,
+            entity.IsActive);
+
+        var dto = new GameBuildDto
         {
             Id = entity.Id,
             VersionNumber = entity.VersionNumber,
@@ -118,6 +136,9 @@ public sealed class BuildsAdminController : ControllerBase
             EngineVersion = entity.EngineVersion
         };
 
-        return CreatedAtAction(nameof(GetAll), new { page = 1, pageSize = 20 }, response);
+        return CreatedAtAction(
+            nameof(GetAll),
+            new { searchTerm = entity.VersionNumber, pageNumber = 1, pageSize = 20 },
+            dto);
     }
 }
