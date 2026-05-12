@@ -1,22 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace EchoConsole.Api.Contracts.Admin;
 
-namespace EchoConsole.Api.Contracts.Admin;
-
-public sealed class CreateGameBuildRequest
+public sealed class GameBuildDto
 {
-    [Required]
-    [MaxLength(64)]
+    public int Id { get; set; }
+
     public string VersionNumber { get; set; } = string.Empty;
 
-    [MaxLength(2000)]
     public string? ReleaseNotes { get; set; }
 
-    [Required]
     public DateTimeOffset ReleaseDateUtc { get; set; }
 
     public bool IsActive { get; set; }
 
-    [Required]
-    [MaxLength(64)]
     public string EngineVersion { get; set; } = string.Empty;
 }
