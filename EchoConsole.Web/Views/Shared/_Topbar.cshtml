@@ -1,5 +1,6 @@
 ﻿@{
     var currentTitle = ViewData["Title"]?.ToString() ?? "Dashboard";
+    var titleI18nKey = ViewData["TitleI18nKey"]?.ToString() ?? string.Empty;
 }
 
 <header class="sticky top-0 z-40 border-b border-cyan-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -16,7 +17,8 @@
                     <div class="font-display text-xs uppercase tracking-[0.34em] text-cyan-400" data-i18n="topbar_station">
                         Telemetry Control Station
                     </div>
-                    <div class="mt-1 font-display text-2xl uppercase tracking-[0.14em] text-white">
+                    <div class="mt-1 font-display text-2xl uppercase tracking-[0.14em] text-white"
+                         @(string.IsNullOrWhiteSpace(titleI18nKey) ? "" : $"data-i18n=\"{titleI18nKey}\"")>
                         @currentTitle
                     </div>
                 </div>

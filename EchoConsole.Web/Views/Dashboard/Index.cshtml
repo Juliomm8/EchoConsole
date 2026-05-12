@@ -1,19 +1,24 @@
-﻿@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
 
 @{
-    ViewData["Title"] = "Monitoreo en Vivo";
+    ViewData["Title"] = "LIVE MONITORING";
+    ViewData["TitleI18nKey"] = "dashboard_live_monitoring_title";
+    var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "";
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
     <div class="mx-auto max-w-[1600px] px-6 py-6">
         <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
             <div>
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">EchoConsole Web</p>
-                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">
-                    Cosmic Diner Telemetry Control
+                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400" data-i18n="dashboard_brand">
+                    ECHOCONSOLE WEB
+                </p>
+                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl" data-i18n="dashboard_hero_title">
+                    COSMIC DINER TELEMETRY CONTROL
                 </h1>
-                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base" data-i18n="dash_subtitle">
-                    Monitoreo en vivo de sesiones, instalaciones y telemetría operativa del videojuego.
+                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base" data-i18n="dashboard_hero_subtitle">
+                    Live monitoring of sessions, installations, and operational game telemetry.
                 </p>
             </div>
 
@@ -22,7 +27,9 @@
                     <span class="font-display text-xs uppercase tracking-[0.25em] text-slate-400" data-i18n="dash_stream">Telemetry Stream</span>
                     <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
                         <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                        @(Model.IsLive ? "Live" : "Offline")
+                        <span data-i18n="@(Model.IsLive ? "dashboard_stream_status_live" : "dashboard_stream_status_offline")">
+                            @(Model.IsLive ? "LIVE" : "OFFLINE")
+                        </span>
                     </span>
                 </div>
 
@@ -44,11 +51,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     <script src="~/js/signalr-client.js" asp-append-version="true"></script>
     <script>
-        window.echoConsoleLiveMonitoring.init({
-            hubUrl: "/hubs/telemetry",
+        window.echoConsoleRealtime.init({
+            apiBaseUrl: "@apiBaseUrl",
             tableBodyId: "live-sessions-body",
+            registeredInstallationsValueId: "kpi-registered-installations",
             activeSessionsValueId: "kpi-active-sessions",
-            serverTimeValueId: "server-time-value"
+            averageDurationValueId: "kpi-average-duration",
+            latestHeartbeatValueId: "kpi-latest-heartbeat",
+            serverTimeValueId: "server-time-value",
+            topbarServerTimeValueId: "topbar-server-time-value"
         });
     </script>
 }

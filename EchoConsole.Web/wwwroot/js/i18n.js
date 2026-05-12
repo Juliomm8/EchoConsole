@@ -21,30 +21,50 @@
             topbar_language: "Language",
             topbar_admin_role: "Administrator",
 
-            // Textos del Dashboard
-            dash_subtitle: "Live monitoring of sessions, installations, and operational game telemetry.",
+            dashboard_live_monitoring_title: "LIVE MONITORING",
+            dashboard_brand: "ECHOCONSOLE WEB",
+            dashboard_hero_title: "COSMIC DINER TELEMETRY CONTROL",
+            dashboard_hero_subtitle: "Live monitoring of sessions, installations, and operational game telemetry.",
             dash_stream: "Telemetry Stream",
             dash_server_utc: "Server Time UTC",
+            dashboard_stream_status_live: "LIVE",
+            dashboard_stream_status_offline: "OFFLINE",
+
             dash_mod4: "Module 4",
-            dash_live_monitor: "Live Sessions Monitor",
-            dash_signalr_ready: "SignalR Ready",
+            dash_signalr_ready: "SignalR Active",
+            live_sessions_monitor_title: "LIVE SESSIONS MONITOR",
 
-            table_id: "Installation ID",
-            table_scene: "Current Scene",
-            table_state: "Game State",
-            table_phase: "Current Phase",
-            table_heartbeat: "Last Heartbeat",
-            table_status: "Status",
+            table_installation_id: "INSTALLATION ID",
+            table_current_scene: "CURRENT SCENE",
+            table_game_state: "GAME STATE",
+            table_current_phase: "CURRENT PHASE",
+            table_last_heartbeat: "LAST HEARTBEAT",
+            table_status: "STATUS",
+            table_no_live_sessions: "No live sessions detected.",
 
-            // Textos dinámicos de los KPIs
-            "Registered Installations": "Registered Installations",
-            "Active Sessions": "Active Sessions",
-            "Average Session Duration": "Average Session Duration",
-            "Peak Concurrent Players": "Peak Concurrent Players",
-            "Validated over real internet ingestion": "Validated over real internet ingestion",
-            "Updated through SignalR": "Updated through SignalR",
-            "Dummy data for Sprint 1": "Dummy data for Sprint 1",
-            "Live now": "Live now"
+            kpi_registered_installations_title: "REGISTERED INSTALLATIONS",
+            kpi_active_sessions_title: "ACTIVE SESSIONS",
+            kpi_average_duration_title: "AVERAGE ACTIVE SESSION DURATION",
+            kpi_latest_heartbeat_title: "MOST RECENT HEARTBEAT",
+
+            kpi_registered_installations_subtitle: "Persisted in SQL Server through the API",
+            kpi_active_sessions_subtitle: "Current active sessions reported by the backend",
+            kpi_average_duration_subtitle: "Calculated from current live sessions",
+            kpi_latest_heartbeat_subtitle: "Freshest session heartbeat received",
+
+            kpi_delta_real_data: "Real data",
+            kpi_delta_live_now: "Live now",
+            kpi_delta_unavailable: "Unavailable",
+
+            status_active: "Active",
+            status_ended: "Ended",
+            status_expired: "Expired",
+            status_unknown: "Unknown",
+
+            rel_seconds_ago: "s ago",
+            rel_minutes_ago: "m ago",
+            rel_hours_ago: "h ago",
+            rel_days_ago: "d ago"
         },
         es: {
             sidebar_modules: "Módulos",
@@ -65,30 +85,50 @@
             topbar_language: "Idioma",
             topbar_admin_role: "Administrador",
 
-            // Textos del Dashboard
-            dash_subtitle: "Monitoreo en vivo de sesiones, instalaciones y telemetría operativa del videojuego.",
+            dashboard_live_monitoring_title: "MONITOREO EN VIVO",
+            dashboard_brand: "ECHOCONSOLE WEB",
+            dashboard_hero_title: "CONTROL DE TELEMETRÍA DE COSMIC DINER",
+            dashboard_hero_subtitle: "Monitoreo en vivo de sesiones, instalaciones y telemetría operativa del videojuego.",
             dash_stream: "Flujo de Telemetría",
             dash_server_utc: "Hora del Servidor UTC",
+            dashboard_stream_status_live: "EN VIVO",
+            dashboard_stream_status_offline: "DESCONECTADO",
+
             dash_mod4: "Módulo 4",
-            dash_live_monitor: "Monitor de Sesiones",
             dash_signalr_ready: "SignalR Activo",
+            live_sessions_monitor_title: "MONITOR DE SESIONES",
 
-            table_id: "ID de Instalación",
-            table_scene: "Escena Actual",
-            table_state: "Estado del Juego",
-            table_phase: "Fase Actual",
-            table_heartbeat: "Última Señal",
-            table_status: "Estado",
+            table_installation_id: "ID DE INSTALACIÓN",
+            table_current_scene: "ESCENA ACTUAL",
+            table_game_state: "ESTADO DEL JUEGO",
+            table_current_phase: "FASE ACTUAL",
+            table_last_heartbeat: "ÚLTIMA SEÑAL",
+            table_status: "ESTADO",
+            table_no_live_sessions: "No se detectaron sesiones en vivo.",
 
-            // Textos dinámicos de los KPIs
-            "Registered Installations": "Instalaciones Registradas",
-            "Active Sessions": "Sesiones Activas",
-            "Average Session Duration": "Duración Promedio",
-            "Peak Concurrent Players": "Pico de Jugadores",
-            "Validated over real internet ingestion": "Validado por ingesta real de internet",
-            "Updated through SignalR": "Actualizado mediante SignalR",
-            "Dummy data for Sprint 1": "Datos de prueba (Sprint 1)",
-            "Live now": "En vivo ahora"
+            kpi_registered_installations_title: "INSTALACIONES REGISTRADAS",
+            kpi_active_sessions_title: "SESIONES ACTIVAS",
+            kpi_average_duration_title: "DURACIÓN PROMEDIO DE SESIÓN ACTIVA",
+            kpi_latest_heartbeat_title: "SEÑAL MÁS RECIENTE",
+
+            kpi_registered_installations_subtitle: "Persistidas en SQL Server a través de la API",
+            kpi_active_sessions_subtitle: "Sesiones activas actuales reportadas por el backend",
+            kpi_average_duration_subtitle: "Calculada a partir de las sesiones activas",
+            kpi_latest_heartbeat_subtitle: "Última señal de sesión recibida",
+
+            kpi_delta_real_data: "Dato real",
+            kpi_delta_live_now: "En vivo ahora",
+            kpi_delta_unavailable: "No disponible",
+
+            status_active: "Activa",
+            status_ended: "Finalizada",
+            status_expired: "Expirada",
+            status_unknown: "Desconocido",
+
+            rel_seconds_ago: "s",
+            rel_minutes_ago: "m",
+            rel_hours_ago: "h",
+            rel_days_ago: "d"
         }
     };
 
@@ -106,12 +146,12 @@
 
     function getLanguage() {
         const saved = localStorage.getItem(storageKey);
+        return saved && translations[saved] ? saved : "en";
+    }
 
-        if (saved && translations[saved]) {
-            return saved;
-        }
-
-        return "en";
+    function t(key) {
+        const lang = getLanguage();
+        return translations[lang]?.[key] ?? key;
     }
 
     function setLanguage(lang) {
@@ -123,6 +163,10 @@
         document.documentElement.lang = lang;
         applyTranslations(lang);
         updateToggleState(lang);
+
+        window.dispatchEvent(new CustomEvent("echoConsole:languageChanged", {
+            detail: { lang }
+        }));
     }
 
     function applyTranslations(lang) {
@@ -131,7 +175,6 @@
 
         nodes.forEach(node => {
             const key = node.getAttribute("data-i18n");
-
             if (!key || !dict[key]) {
                 return;
             }
@@ -145,7 +188,6 @@
 
         buttons.forEach(button => {
             const isActive = button.getAttribute("data-lang") === lang;
-
             button.classList.remove(...activeClasses, ...inactiveClasses);
 
             if (isActive) {
@@ -160,7 +202,6 @@
 
     function updateServerTime() {
         const target = document.getElementById("topbar-server-time-value");
-
         if (!target) {
             return;
         }
@@ -197,4 +238,11 @@
         updateServerTime();
         setInterval(updateServerTime, 1000);
     });
+
+    window.echoConsoleI18n = {
+        t,
+        getLanguage,
+        setLanguage,
+        applyTranslations
+    };
 })();
