@@ -1,7 +1,9 @@
-﻿@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
 
 @{
     ViewData["Title"] = "Monitoreo en Vivo";
+    var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "";
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -44,11 +46,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     <script src="~/js/signalr-client.js" asp-append-version="true"></script>
     <script>
-        window.echoConsoleLiveMonitoring.init({
-            hubUrl: "/hubs/telemetry",
+        window.echoConsoleRealtime.init({
+            apiBaseUrl: "@apiBaseUrl",
             tableBodyId: "live-sessions-body",
+            registeredInstallationsValueId: "kpi-registered-installations",
             activeSessionsValueId: "kpi-active-sessions",
-            serverTimeValueId: "server-time-value"
+            averageDurationValueId: "kpi-average-duration",
+            latestHeartbeatValueId: "kpi-latest-heartbeat",
+            serverTimeValueId: "server-time-value",
+            topbarServerTimeValueId: "topbar-server-time-value"
         });
     </script>
 }
