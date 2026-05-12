@@ -24,4 +24,13 @@ public sealed class RegisterInstallationRequest
 
     [Required, MaxLength(128)]
     public string OperatingSystem { get; set; } = null!;
+
+    [MaxLength(128)]
+    public string? Processor { get; set; }
+
+    [MaxLength(128)]
+    public string? Gpu { get; set; }
+
+    [Range(256, 1048576)]
+    public int? RamMb { get; set; }
 }

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Views\Builds\" />
-    <Folder Include="Views\Installations\" />
     <Folder Include="Views\Alerts\" />
     <Folder Include="Views\Users\" />
     <Folder Include="Views\Reports\" />

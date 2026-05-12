@@ -64,7 +64,37 @@
             rel_seconds_ago: "s ago",
             rel_minutes_ago: "m ago",
             rel_hours_ago: "h ago",
-            rel_days_ago: "d ago"
+            rel_days_ago: "d ago",
+
+            installations_page_title: "DEVICES & INSTALLATIONS",
+            installations_module_badge: "Module 3",
+            installations_hero_title: "MASTER HARDWARE INVENTORY",
+            installations_hero_subtitle: "Centralized inventory of registered devices and hardware profiles captured from Cosmic Diner installations.",
+            installations_total_label: "Total Devices",
+
+            installations_search_label: "Search",
+            installations_search_placeholder: "Search by Installation ID or Device Name",
+            installations_search_button: "Search",
+            installations_reset_button: "Reset",
+
+            installations_table_badge: "Device Registry",
+            installations_table_title: "REGISTERED INSTALLATIONS",
+            installations_results_label: "Results:",
+
+            installations_col_installation_id: "INSTALLATION ID",
+            installations_col_device_name: "DEVICE NAME",
+            installations_col_os: "OS",
+            installations_col_processor: "PROCESSOR",
+            installations_col_gpu: "GPU",
+            installations_col_ram: "RAM",
+            installations_col_last_update: "LAST UPDATE",
+
+            installations_empty_state: "No installations found.",
+
+            pagination_page: "Page",
+            pagination_of: "of",
+            pagination_previous: "Previous",
+            pagination_next: "Next"
         },
         es: {
             sidebar_modules: "Módulos",
@@ -128,7 +158,37 @@
             rel_seconds_ago: "s",
             rel_minutes_ago: "m",
             rel_hours_ago: "h",
-            rel_days_ago: "d"
+            rel_days_ago: "d",
+
+            installations_page_title: "DISPOSITIVOS E INSTALACIONES",
+            installations_module_badge: "Módulo 3",
+            installations_hero_title: "INVENTARIO MAESTRO DE HARDWARE",
+            installations_hero_subtitle: "Inventario centralizado de dispositivos registrados y perfiles de hardware capturados desde las instalaciones de Cosmic Diner.",
+            installations_total_label: "Total de Equipos",
+
+            installations_search_label: "Buscar",
+            installations_search_placeholder: "Buscar por ID de Instalación o Nombre del Dispositivo",
+            installations_search_button: "Buscar",
+            installations_reset_button: "Limpiar",
+
+            installations_table_badge: "Registro de Dispositivos",
+            installations_table_title: "INSTALACIONES REGISTRADAS",
+            installations_results_label: "Resultados:",
+
+            installations_col_installation_id: "ID DE INSTALACIÓN",
+            installations_col_device_name: "NOMBRE DEL DISPOSITIVO",
+            installations_col_os: "SISTEMA OPERATIVO",
+            installations_col_processor: "PROCESADOR",
+            installations_col_gpu: "GPU",
+            installations_col_ram: "RAM",
+            installations_col_last_update: "ÚLTIMA ACTUALIZACIÓN",
+
+            installations_empty_state: "No se encontraron instalaciones.",
+
+            pagination_page: "Página",
+            pagination_of: "de",
+            pagination_previous: "Anterior",
+            pagination_next: "Siguiente"
         }
     };
 
@@ -178,8 +238,16 @@
             if (!key || !dict[key]) {
                 return;
             }
-
             node.textContent = dict[key];
+        });
+
+        const placeholderNodes = document.querySelectorAll("[data-i18n-placeholder]");
+        placeholderNodes.forEach(node => {
+            const key = node.getAttribute("data-i18n-placeholder");
+            if (!key || !dict[key]) {
+                return;
+            }
+            node.setAttribute("placeholder", dict[key]);
         });
     }
 

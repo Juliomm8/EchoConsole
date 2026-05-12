@@ -71,7 +71,7 @@ public sealed class SessionsController : ControllerBase
             Status = SessionStatus.Active
         };
 
-        installation.LastSeenUtc = now;
+        installation.LastUpdateUtc = now;
 
         _db.GameSessions.Add(session);
         await _db.SaveChangesAsync(cancellationToken);
@@ -139,7 +139,7 @@ public sealed class SessionsController : ControllerBase
         session.LastHeartbeatUtc = now;
         session.Status = SessionStatus.Active;
 
-        session.Installation.LastSeenUtc = now;
+        session.Installation.LastUpdateUtc = now;
 
         await _db.SaveChangesAsync(cancellationToken);
 
@@ -206,7 +206,7 @@ public sealed class SessionsController : ControllerBase
         session.LastHeartbeatUtc = now;
         session.Status = SessionStatus.Ended;
 
-        session.Installation.LastSeenUtc = now;
+        session.Installation.LastUpdateUtc = now;
 
         await _db.SaveChangesAsync(cancellationToken);
 
