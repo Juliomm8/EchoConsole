@@ -1,0 +1,179 @@
+﻿@model EchoConsole.Web.Models.Installations.InstallationsIndexViewModel
+
+@{
+    ViewData["Title"] = "DEVICES & INSTALLATIONS";
+    ViewData["TitleI18nKey"] = "installations_page_title";
+}
+
+<div class="min-h-screen bg-[#070B12] text-slate-100">
+    <div class="mx-auto max-w-[1600px] px-6 py-6">
+        <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400" data-i18n="installations_module_badge">
+                    Module 3
+                </p>
+                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl" data-i18n="installations_hero_title">
+                    MASTER HARDWARE INVENTORY
+                </h1>
+                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base" data-i18n="installations_hero_subtitle">
+                    Centralized inventory of registered devices and hardware profiles captured from Cosmic Diner installations.
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/80 px-5 py-4">
+                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-500" data-i18n="installations_total_label">
+                    Total Devices
+                </div>
+                <div class="mt-2 font-display text-3xl uppercase tracking-[0.08em] text-cyan-300">
+                    @Model.TotalCount.ToString("N0")
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)] backdrop-blur">
+            <form method="get" asp-controller="Installations" asp-action="Index" class="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+                <div>
+                    <label for="searchTerm" class="mb-2 block font-display text-xs uppercase tracking-[0.25em] text-slate-400" data-i18n="installations_search_label">
+                        Search
+                    </label>
+                    <input id="searchTerm"
+                           name="searchTerm"
+                           value="@Model.SearchTerm"
+                           type="text"
+                           data-i18n-placeholder="installations_search_placeholder"
+                           placeholder="Search by Installation ID or Device Name"
+                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/10" />
+                </div>
+
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+                <div class="flex items-end gap-3">
+                    <button type="submit"
+                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15"
+                            data-i18n="installations_search_button">
+                        Search
+                    </button>
+
+                    <a asp-controller="Installations"
+                       asp-action="Index"
+                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white"
+                       data-i18n="installations_reset_button">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur">
+            <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400" data-i18n="installations_table_badge">
+                        Device Registry
+                    </p>
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white" data-i18n="installations_table_title">
+                        REGISTERED INSTALLATIONS
+                    </h2>
+                </div>
+
+                <div class="text-sm text-slate-400">
+                    <span data-i18n="installations_results_label">Results:</span>
+                    <span class="font-semibold text-cyan-300">@Model.TotalCount.ToString("N0")</span>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-2xl border border-slate-800">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800">
+                        <thead class="bg-slate-900/90">
+                            <tr class="text-left">
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="installations_col_installation_id">INSTALLATION ID</th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="installations_col_device_name">DEVICE NAME</th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="installations_col_os">OS</th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="installations_col_processor">PROCESSOR</th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="installations_col_gpu">GPU</th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="installations_col_ram">RAM</th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="installations_col_last_update">LAST UPDATE</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-900 bg-slate-950/80">
+                            @if (Model.Items != null && Model.Items.Any())
+                            {
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr class="transition-colors duration-150 hover:bg-slate-900/70">
+                                        <td class="px-5 py-4 text-sm text-cyan-300">@item.InstallationId</td>
+                                        <td class="px-5 py-4 text-sm text-slate-200">@item.DeviceName</td>
+                                        <td class="px-5 py-4 text-sm text-slate-300">@item.OSVersion</td>
+                                        <td class="px-5 py-4 text-sm text-slate-300">@item.Processor</td>
+                                        <td class="px-5 py-4 text-sm text-slate-300">@item.Gpu</td>
+                                        <td class="px-5 py-4 text-sm text-slate-300">@item.RamLabel</td>
+                                        <td class="px-5 py-4 text-sm text-slate-400">@item.LastUpdateUtcLabel</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="px-5 py-6 text-center text-sm text-slate-400" data-i18n="installations_empty_state">
+                                        No installations found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-col gap-4 border-t border-slate-800 pt-5 md:flex-row md:items-center md:justify-between">
+                <div class="text-sm text-slate-400">
+                    <span data-i18n="pagination_page">Page</span>
+                    <span class="font-semibold text-cyan-300">@Model.PageNumber</span>
+                    <span data-i18n="pagination_of">of</span>
+                    <span class="font-semibold text-cyan-300">@Math.Max(Model.TotalPages, 1)</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a asp-controller="Installations"
+                           asp-action="Index"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-pageNumber="@(Model.PageNumber - 1)"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white"
+                           data-i18n="pagination_previous">
+                            Previous
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600"
+                              data-i18n="pagination_previous">
+                            Previous
+                        </span>
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <a asp-controller="Installations"
+                           asp-action="Index"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-pageNumber="@(Model.PageNumber + 1)"
+                           asp-route-pageSize="@Model.PageSize"
+                           class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15"
+                           data-i18n="pagination_next">
+                            Next
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600"
+                              data-i18n="pagination_next">
+                            Next
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

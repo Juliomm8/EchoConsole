@@ -15,7 +15,9 @@ builder.Services.AddHttpClient("EchoConsoleApi", (serviceProvider, client) =>
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
+// Clientes API Inyectados
 builder.Services.AddScoped<EchoConsoleDashboardApiClient>();
+builder.Services.AddScoped<EchoConsoleInstallationsApiClient>(); 
 
 var app = builder.Build();
 
@@ -32,6 +34,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Dashboard}/{action=Index}/{id?}"); 
+    pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
 app.Run();
