@@ -1,8 +1,8 @@
 ﻿@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
 
-    Func<string, string> navClass = controller =>
-        string.Equals(currentController, controller, System.StringComparison.OrdinalIgnoreCase)
+    Func<string[], string> navClass = controllers =>
+        controllers.Any(controller => string.Equals(currentController, controller, System.StringComparison.OrdinalIgnoreCase))
             ? "group flex items-center gap-3 rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-cyan-200 shadow-neon transition"
             : "group flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-slate-400 transition hover:border-cyan-400/15 hover:bg-slate-900/70 hover:text-slate-100";
 }
@@ -32,7 +32,7 @@
     </div>
 
     <nav class="mt-6 flex-1 space-y-2">
-        <a asp-controller="Dashboard" asp-action="Index" class="@navClass("Dashboard")">
+        <a asp-controller="Dashboard" asp-action="Index" class="@navClass(new[] { "Dashboard" })">
             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z" />
@@ -41,7 +41,7 @@
             <span class="font-medium" data-i18n="nav_live_monitoring">Live Monitoring</span>
         </a>
 
-        <a asp-controller="Builds" asp-action="Index" class="@navClass("Builds")">
+        <a asp-controller="Builds" asp-action="Index" class="@navClass(new[] { "Builds" })">
             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M8 4h8M8 8h8M4 12h16M7 16h10M9 20h6" />
@@ -50,7 +50,7 @@
             <span class="font-medium" data-i18n="nav_games_builds">Games and Builds</span>
         </a>
 
-        <a asp-controller="Installations" asp-action="Index" class="@navClass("Installations")">
+        <a asp-controller="Installations" asp-action="Index" class="@navClass(new[] { "Installations" })">
             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <rect x="4" y="5" width="16" height="11" rx="2" />
@@ -60,7 +60,7 @@
             <span class="font-medium" data-i18n="nav_devices_installations">Devices and Installations</span>
         </a>
 
-        <a asp-controller="Alerts" asp-action="Index" class="@navClass("Alerts")">
+        <a asp-controller="Alerts" asp-action="Index" class="@navClass(new[] { "Alerts" })">
             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M12 9v4M12 17h.01" />
@@ -70,7 +70,7 @@
             <span class="font-medium" data-i18n="nav_alerts_reports">Alerts and Reports</span>
         </a>
 
-        <a asp-controller="Users" asp-action="Index" class="@navClass("Users")">
+        <a asp-controller="Users" asp-action="Index" class="@navClass(new[] { "Users" })">
             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
