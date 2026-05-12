@@ -1,8 +1,6 @@
 ﻿using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace EchoConsole.Api.Persistence;
 
@@ -22,12 +20,17 @@ public sealed class EchoConsoleDbContext : DbContext
 
         installation.HasKey(x => x.Id);
         installation.HasIndex(x => x.InstallationId).IsUnique();
+        installation.HasIndex(x => x.DeviceName);
+        installation.HasIndex(x => x.LastUpdateUtc);
+
         installation.Property(x => x.GameCode).HasMaxLength(64).IsRequired();
         installation.Property(x => x.BuildVersion).HasMaxLength(32).IsRequired();
         installation.Property(x => x.Platform).HasMaxLength(32).IsRequired();
         installation.Property(x => x.DeviceName).HasMaxLength(128).IsRequired();
         installation.Property(x => x.DeviceModel).HasMaxLength(128).IsRequired();
-        installation.Property(x => x.OperatingSystem).HasMaxLength(128).IsRequired();
+        installation.Property(x => x.OSVersion).HasMaxLength(128).IsRequired();
+        installation.Property(x => x.Processor).HasMaxLength(128);
+        installation.Property(x => x.Gpu).HasMaxLength(128);
         installation.Property(x => x.Status).HasMaxLength(24).IsRequired();
 
         var session = modelBuilder.Entity<GameSession>();

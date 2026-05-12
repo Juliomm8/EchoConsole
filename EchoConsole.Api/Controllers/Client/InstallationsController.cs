@@ -3,9 +3,9 @@ using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace EchoConsole.Api.Controllers.Client;
 
@@ -50,9 +50,12 @@ public sealed class InstallationsController : ControllerBase
                 Platform = request.Platform.Trim(),
                 DeviceName = request.DeviceName.Trim(),
                 DeviceModel = request.DeviceModel.Trim(),
-                OperatingSystem = request.OperatingSystem.Trim(),
+                OSVersion = request.OperatingSystem.Trim(),
+                Processor = string.IsNullOrWhiteSpace(request.Processor) ? null : request.Processor.Trim(),
+                Gpu = string.IsNullOrWhiteSpace(request.Gpu) ? null : request.Gpu.Trim(),
+                RamMb = request.RamMb,
                 FirstSeenUtc = now,
-                LastSeenUtc = now,
+                LastUpdateUtc = now,
                 Status = "Active"
             };
 
@@ -64,8 +67,11 @@ public sealed class InstallationsController : ControllerBase
             installation.Platform = request.Platform.Trim();
             installation.DeviceName = request.DeviceName.Trim();
             installation.DeviceModel = request.DeviceModel.Trim();
-            installation.OperatingSystem = request.OperatingSystem.Trim();
-            installation.LastSeenUtc = now;
+            installation.OSVersion = request.OperatingSystem.Trim();
+            installation.Processor = string.IsNullOrWhiteSpace(request.Processor) ? installation.Processor : request.Processor.Trim();
+            installation.Gpu = string.IsNullOrWhiteSpace(request.Gpu) ? installation.Gpu : request.Gpu.Trim();
+            installation.RamMb = request.RamMb ?? installation.RamMb;
+            installation.LastUpdateUtc = now;
             installation.Status = "Active";
         }
 
@@ -74,8 +80,9 @@ public sealed class InstallationsController : ControllerBase
         await _hub.Clients.All.SendAsync("installationUpdated", new
         {
             installationId = installation.InstallationId,
+            deviceName = installation.DeviceName,
             buildVersion = installation.BuildVersion,
-            lastSeenUtc = installation.LastSeenUtc
+            lastUpdateUtc = installation.LastUpdateUtc
         }, cancellationToken);
 
         var response = new RegisterInstallationResponse
@@ -84,7 +91,7 @@ public sealed class InstallationsController : ControllerBase
             GameCode = installation.GameCode,
             BuildVersion = installation.BuildVersion,
             FirstSeenUtc = installation.FirstSeenUtc,
-            LastSeenUtc = installation.LastSeenUtc,
+            LastSeenUtc = installation.LastUpdateUtc,
             ServerTimeUtc = now
         };
 

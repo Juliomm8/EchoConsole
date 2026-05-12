@@ -24,14 +24,22 @@ public sealed class Installation
     public string DeviceModel { get; set; } = null!;
 
     [MaxLength(128)]
-    public string OperatingSystem { get; set; } = null!;
+    public string OSVersion { get; set; } = null!;
+
+    [MaxLength(128)]
+    public string? Processor { get; set; }
+
+    [MaxLength(128)]
+    public string? Gpu { get; set; }
+
+    public int? RamMb { get; set; }
 
     [MaxLength(24)]
     public string Status { get; set; } = "Active";
 
     public DateTimeOffset FirstSeenUtc { get; set; }
 
-    public DateTimeOffset LastSeenUtc { get; set; }
+    public DateTimeOffset LastUpdateUtc { get; set; }
 
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
 }
