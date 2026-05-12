@@ -1,0 +1,196 @@
+﻿@model EchoConsole.Web.Models.Builds.BuildsIndexViewModel
+
+@{
+    ViewData["Title"] = "GAMES AND BUILDS";
+    ViewData["TitleI18nKey"] = "builds_page_title";
+}
+
+<div class="min-h-screen bg-[#070B12] text-slate-100">
+    <div class="mx-auto max-w-[1600px] px-6 py-6">
+        <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400" data-i18n="builds_module_badge">
+                    Module 2
+                </p>
+                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl" data-i18n="builds_hero_title">
+                    GAME BUILD REGISTRY
+                </h1>
+                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base" data-i18n="builds_hero_subtitle">
+                    Centralized registry of monitored Cosmic Diner builds and release versions.
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/80 px-5 py-4">
+                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-500" data-i18n="builds_total_label">
+                    Total Builds
+                </div>
+                <div class="mt-2 font-display text-3xl uppercase tracking-[0.08em] text-cyan-300">
+                    @Model.TotalCount.ToString("N0")
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)] backdrop-blur">
+            <form method="get" asp-controller="Builds" asp-action="Index" class="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+                <div>
+                    <label for="searchTerm" class="mb-2 block font-display text-xs uppercase tracking-[0.25em] text-slate-400" data-i18n="builds_search_label">
+                        Search
+                    </label>
+                    <input id="searchTerm"
+                           name="searchTerm"
+                           value="@Model.SearchTerm"
+                           type="text"
+                           data-i18n-placeholder="builds_search_placeholder"
+                           placeholder="Search by Version Number or Engine Version"
+                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/10" />
+                </div>
+
+                <div class="flex items-end gap-3">
+                    <button type="submit"
+                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15"
+                            data-i18n="builds_search_button">
+                        Search
+                    </button>
+
+                    <a asp-controller="Builds"
+                       asp-action="Index"
+                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white"
+                       data-i18n="builds_reset_button">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur">
+            <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400" data-i18n="builds_table_badge">
+                        Build Registry
+                    </p>
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white" data-i18n="builds_table_title">
+                        REGISTERED BUILDS
+                    </h2>
+                </div>
+
+                <div class="text-sm text-slate-400">
+                    <span data-i18n="builds_results_label">Results:</span>
+                    <span class="font-semibold text-cyan-300">@Model.TotalCount.ToString("N0")</span>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-2xl border border-slate-800">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800">
+                        <thead class="bg-slate-900/90">
+                            <tr class="text-left">
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="builds_col_version_number">
+                                    VERSION
+                                </th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="builds_col_release_notes">
+                                    RELEASE NOTES
+                                </th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="builds_col_release_date">
+                                    RELEASE DATE
+                                </th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="builds_col_is_active">
+                                    ACTIVE
+                                </th>
+                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="builds_col_engine_version">
+                                    ENGINE VERSION
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-900 bg-slate-950/80">
+                            @if (Model.Items != null && Model.Items.Any())
+                            {
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr class="transition-colors duration-150 hover:bg-slate-900/70">
+                                        <td class="px-5 py-4 text-sm text-cyan-300">@item.VersionNumber</td>
+                                        <td class="px-5 py-4 text-sm text-slate-300">@(string.IsNullOrWhiteSpace(item.ReleaseNotes) ? "-" : item.ReleaseNotes)</td>
+                                        <td class="px-5 py-4 text-sm text-slate-300">@item.ReleaseDateUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'")</td>
+                                        <td class="px-5 py-4">
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
+                                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                                    <span data-i18n="build_status_active">Active</span>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="inline-flex items-center gap-2 rounded-full border border-slate-600/30 bg-slate-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+                                                    <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                                                    <span data-i18n="build_status_inactive">Inactive</span>
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="px-5 py-4 text-sm text-slate-300">@item.EngineVersion</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="px-5 py-6 text-center text-sm text-slate-400" data-i18n="builds_empty_state">
+                                        No builds found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-col gap-4 border-t border-slate-800 pt-5 md:flex-row md:items-center md:justify-between">
+                <div class="text-sm text-slate-400">
+                    <span data-i18n="pagination_page">Page</span>
+                    <span class="font-semibold text-cyan-300">@Model.PageNumber</span>
+                    <span data-i18n="pagination_of">of</span>
+                    <span class="font-semibold text-cyan-300">@Math.Max(Model.TotalPages, 1)</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a asp-controller="Builds"
+                           asp-action="Index"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-pageNumber="@(Model.PageNumber - 1)"
+                           class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white"
+                           data-i18n="pagination_previous">
+                            Previous
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600"
+                              data-i18n="pagination_previous">
+                            Previous
+                        </span>
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <a asp-controller="Builds"
+                           asp-action="Index"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-pageNumber="@(Model.PageNumber + 1)"
+                           class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15"
+                           data-i18n="pagination_next">
+                            Next
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600"
+                              data-i18n="pagination_next">
+                            Next
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
