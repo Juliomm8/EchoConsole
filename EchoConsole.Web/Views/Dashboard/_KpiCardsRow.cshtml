@@ -28,15 +28,53 @@
 <div class="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-4">
     @foreach (var kpi in Model.Kpis)
     {
+        var titleKey = kpi.ValueElementId switch
+        {
+            "kpi-registered-installations" => "kpi_registered_installations_title",
+            "kpi-active-sessions" => "kpi_active_sessions_title",
+            "kpi-average-duration" => "kpi_average_duration_title",
+            "kpi-latest-heartbeat" => "kpi_latest_heartbeat_title",
+            _ => string.Empty
+        };
+
+        var subtitleKey = kpi.ValueElementId switch
+        {
+            "kpi-registered-installations" => "kpi_registered_installations_subtitle",
+            "kpi-active-sessions" => "kpi_active_sessions_subtitle",
+            "kpi-average-duration" => "kpi_average_duration_subtitle",
+            "kpi-latest-heartbeat" => "kpi_latest_heartbeat_subtitle",
+            _ => string.Empty
+        };
+
+        var deltaKey = kpi.DeltaText switch
+        {
+            "Real data" => "kpi_delta_real_data",
+            "Live now" => "kpi_delta_live_now",
+            "Unavailable" => "kpi_delta_unavailable",
+            _ => string.Empty
+        };
+
         <div class="rounded-2xl border @GetAccentClasses(kpi.Accent) p-5">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <p class="font-display text-xs uppercase tracking-[0.25em] text-slate-400" data-i18n="@kpi.Title">@kpi.Title</p>
+                    <p class="font-display text-xs uppercase tracking-[0.25em] text-slate-400"
+                       data-i18n="@titleKey">
+                        @kpi.Title
+                    </p>
+
                     <p id="@kpi.ValueElementId" class="mt-4 font-display text-3xl uppercase tracking-[0.08em] text-white">
                         @kpi.Value
                     </p>
-                    <p class="mt-2 text-sm text-slate-400" data-i18n="@kpi.Subtitle">@kpi.Subtitle</p>
-                    <p class="mt-3 text-sm font-semibold @GetDeltaClass(kpi.IsPositiveDelta)" data-i18n="@kpi.DeltaText">@kpi.DeltaText</p>
+
+                    <p class="mt-2 text-sm text-slate-400"
+                       data-i18n="@subtitleKey">
+                        @kpi.Subtitle
+                    </p>
+
+                    <p class="mt-3 text-sm font-semibold @GetDeltaClass(kpi.IsPositiveDelta)"
+                       data-i18n="@deltaKey">
+                        @kpi.DeltaText
+                    </p>
                 </div>
 
                 <div class="flex h-14 w-14 items-center justify-center rounded-xl border @GetIconAccent(kpi.Accent)">

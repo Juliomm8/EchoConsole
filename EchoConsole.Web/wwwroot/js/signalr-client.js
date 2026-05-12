@@ -27,6 +27,12 @@
             return;
         }
 
+        // Listener para cambios de idioma (i18n)
+        window.addEventListener("echoConsole:languageChanged", () => {
+            renderSessions(currentSessions);
+            applyDerivedKpisFromSessions(currentSessions);
+        });
+
         buildConnection();
         startConnection();
         refreshDashboard();
@@ -212,11 +218,17 @@
 
         if (!Array.isArray(sessions) || sessions.length === 0) {
             const emptyRow = document.createElement("tr");
+            const emptyText =
+                window.echoConsoleI18n?.t?.("table_no_live_sessions") ||
+                document.getElementById("live-sessions-empty-text")?.textContent?.trim() ||
+                "No live sessions detected.";
+
             emptyRow.innerHTML = `
                 <td colspan="6" class="px-5 py-6 text-center text-sm text-slate-400">
-                    No live sessions detected.
+                    ${escapeHtml(emptyText)}
                 </td>
             `;
+
             tableBody.appendChild(emptyRow);
             return;
         }
@@ -241,18 +253,18 @@
             const statusClasses = mapStatusClasses(session.status);
 
             row.innerHTML = `
-                <td class="px-5 py-4 text-sm text-cyan-300">${escapeHtml(session.installationId ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentScene ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentGameState ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-300">${escapeHtml(session.currentPhase ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-400">${escapeHtml(lastHeartbeatLabel)}</td>
-                <td class="px-5 py-4">
-                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusClasses}">
-                        <span class="h-2 w-2 rounded-full ${mapStatusDotClass(session.status)}"></span>
-                        ${escapeHtml(statusLabel)}
-                    </span>
-                </td>
-            `;
+            <td class="px-5 py-4 text-sm text-cyan-300">${escapeHtml(session.installationId ?? "-")}</td>
+            <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentScene ?? "-")}</td>
+            <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentGameState ?? "-")}</td>
+            <td class="px-5 py-4 text-sm text-slate-300">${escapeHtml(session.currentPhase ?? "-")}</td>
+            <td class="px-5 py-4 text-sm text-slate-400">${escapeHtml(lastHeartbeatLabel)}</td>
+            <td class="px-5 py-4">
+                <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusClasses}">
+                    <span class="h-2 w-2 rounded-full ${mapStatusDotClass(session.status)}"></span>
+                    ${escapeHtml(statusLabel)}
+                </span>
+            </td>
+        `;
 
             tableBody.appendChild(row);
         }
@@ -265,21 +277,23 @@
 
         relativeTimer = setInterval(() => {
             applyDerivedKpisFromSessions(currentSessions);
+            renderSessions(currentSessions);
         }, 5000);
     }
 
     function mapStatusLabel(status) {
         const numericStatus = Number(status);
+        const t = window.echoConsoleI18n?.t ?? ((key) => key);
 
         switch (numericStatus) {
             case 1:
-                return "Active";
+                return t("status_active");
             case 2:
-                return "Ended";
+                return t("status_ended");
             case 3:
-                return "Expired";
+                return t("status_expired");
             default:
-                return `Unknown (${status})`;
+                return `${t("status_unknown")} (${status})`;
         }
     }
 
@@ -324,23 +338,24 @@
 
     function formatRelativeAge(milliseconds) {
         const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+        const lang = window.echoConsoleI18n?.getLanguage?.() ?? "en";
 
         if (totalSeconds < 60) {
-            return `${totalSeconds}s ago`;
+            return lang === "es" ? `${totalSeconds}s` : `${totalSeconds}s ago`;
         }
 
         const totalMinutes = Math.floor(totalSeconds / 60);
         if (totalMinutes < 60) {
-            return `${totalMinutes}m ago`;
+            return lang === "es" ? `${totalMinutes}m` : `${totalMinutes}m ago`;
         }
 
         const totalHours = Math.floor(totalMinutes / 60);
         if (totalHours < 24) {
-            return `${totalHours}h ago`;
+            return lang === "es" ? `${totalHours}h` : `${totalHours}h ago`;
         }
 
         const totalDays = Math.floor(totalHours / 24);
-        return `${totalDays}d ago`;
+        return lang === "es" ? `${totalDays}d` : `${totalDays}d ago`;
     }
 
     function formatServerTime(date) {
