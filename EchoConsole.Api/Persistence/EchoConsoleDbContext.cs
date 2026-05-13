@@ -15,6 +15,7 @@ public sealed class EchoConsoleDbContext : DbContext
     public DbSet<GameSession> GameSessions => Set<GameSession>();
     public DbSet<GameBuild> GameBuilds => Set<GameBuild>();
     public DbSet<SystemAlert> SystemAlerts => Set<SystemAlert>();
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,5 +108,38 @@ public sealed class EchoConsoleDbContext : DbContext
             .IsRequired();
 
         alert.Property(x => x.ResolvedAtUtc);
+
+        var user = modelBuilder.Entity<User>();
+
+        user.HasKey(x => x.Id);
+
+        user.HasIndex(x => x.Email).IsUnique();
+        user.HasIndex(x => x.CreatedAtUtc);
+        user.HasIndex(x => x.Status);
+
+        user.Property(x => x.Name)
+            .HasMaxLength(100)
+            .IsRequired();
+
+        user.Property(x => x.Email)
+            .HasMaxLength(256)
+            .IsRequired();
+
+        user.Property(x => x.Role)
+            .HasConversion(
+                v => v.ToString(),
+                v => Enum.Parse<UserRole>(v))
+            .HasMaxLength(24)
+            .IsRequired();
+
+        user.Property(x => x.Status)
+            .HasConversion(
+                v => v.ToString(),
+                v => Enum.Parse<UserStatus>(v))
+            .HasMaxLength(24)
+            .IsRequired();
+
+        user.Property(x => x.CreatedAtUtc)
+            .IsRequired();
     }
 }
