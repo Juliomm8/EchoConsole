@@ -9,8 +9,7 @@ EchoConsole is a centralized, real-time telemetry and administration web platfor
 
 ## 📸 System Previews
 *(Screenshots of the UI will go here)*
-* `[Insert Screenshot of Dashboard]`
-* `[Insert Screenshot of Games and Builds Table]`
+* `[<img width="1264" height="698" alt="image" src="https://github.com/user-attachments/assets/e383af32-e972-45c2-8ec2-99808dfbf2d5" />]`
 
 ---
 
