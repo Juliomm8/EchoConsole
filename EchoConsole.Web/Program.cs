@@ -19,6 +19,7 @@ builder.Services.AddHttpClient("EchoConsoleApi", (serviceProvider, client) =>
 builder.Services.AddScoped<EchoConsoleDashboardApiClient>();
 builder.Services.AddScoped<EchoConsoleInstallationsApiClient>();
 builder.Services.AddScoped<EchoConsoleBuildsApiClient>();
+builder.Services.AddScoped<EchoConsoleAlertsApiClient>(); 
 
 var app = builder.Build();
 
