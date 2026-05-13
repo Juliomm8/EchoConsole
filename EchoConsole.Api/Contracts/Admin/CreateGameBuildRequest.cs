@@ -8,7 +8,7 @@ public sealed class CreateGameBuildRequest
     [MaxLength(64)]
     public string VersionNumber { get; set; } = string.Empty;
 
-    [MaxLength(2000)]
+    [MaxLength(256)]
     public string? ReleaseNotes { get; set; }
 
     [Required]
