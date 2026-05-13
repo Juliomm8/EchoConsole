@@ -9,7 +9,8 @@ EchoConsole is a centralized, real-time telemetry and administration web platfor
 
 ## 📸 System Previews
 *(Screenshots of the UI will go here)*
-* `[<img width="1264" height="698" alt="image" src="https://github.com/user-attachments/assets/e383af32-e972-45c2-8ec2-99808dfbf2d5" />]`
+![Dashboard Preview](https://github.com/user-attachments/assets/13c9f97d-0b7c-4078-8a58-b5bbc03fed05)
+
 
 ---
 
