@@ -14,6 +14,7 @@ public sealed class EchoConsoleDbContext : DbContext
     public DbSet<Installation> Installations => Set<Installation>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();
     public DbSet<GameBuild> GameBuilds => Set<GameBuild>();
+    public DbSet<SystemAlert> SystemAlerts => Set<SystemAlert>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -72,5 +73,39 @@ public sealed class EchoConsoleDbContext : DbContext
         build.Property(x => x.EngineVersion)
             .HasMaxLength(64)
             .IsRequired();
+
+        var alert = modelBuilder.Entity<SystemAlert>();
+
+        alert.HasKey(x => x.Id);
+
+        alert.HasIndex(x => x.CreatedAtUtc);
+        alert.HasIndex(x => x.IsResolved);
+        alert.HasIndex(x => new { x.IsResolved, x.CreatedAtUtc });
+
+        alert.Property(x => x.Severity)
+            .HasConversion(
+                v => v.ToString(),
+                v => Enum.Parse<AlertSeverity>(v))
+            .HasMaxLength(24)
+            .IsRequired();
+
+        alert.Property(x => x.Message)
+            .HasMaxLength(500)
+            .IsRequired();
+
+        alert.Property(x => x.Source)
+            .HasMaxLength(128)
+            .IsRequired();
+
+        alert.Property(x => x.InstallationId)
+            .HasMaxLength(64);
+
+        alert.Property(x => x.CreatedAtUtc)
+            .IsRequired();
+
+        alert.Property(x => x.IsResolved)
+            .IsRequired();
+
+        alert.Property(x => x.ResolvedAtUtc);
     }
 }
