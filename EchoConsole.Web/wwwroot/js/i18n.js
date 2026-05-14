@@ -157,7 +157,38 @@
             alert_severity_info: "Info",
             alert_severity_warning: "Warning",
             alert_severity_critical: "Critical",
-            alert_severity_fatal: "Fatal"
+            alert_severity_fatal: "Fatal",
+
+            // --- USER AND MANAGEMENT ---
+            users_page_title: "USER MANAGEMENT",
+            users_module_badge: "Module 5",
+            users_hero_title: "USER MANAGEMENT",
+            users_hero_subtitle: "Administrative directory of system users, roles, and account states for the EchoConsole platform.",
+            users_total_label: "Total Users",
+
+            users_search_label: "Search",
+            users_search_placeholder: "Search by Name or Email",
+            users_search_button: "Search",
+            users_reset_button: "Reset",
+
+            users_table_badge: "User Registry",
+            users_table_title: "REGISTERED USERS",
+            users_results_label: "Results:",
+
+            users_col_name: "NAME",
+            users_col_email: "EMAIL",
+            users_col_role: "ROLE",
+            users_col_status: "STATUS",
+            users_col_joined_date: "JOINED DATE",
+
+            users_empty_state: "No users found.",
+
+            user_role_admin: "Admin",
+            user_role_moderator: "Moderator",
+            user_role_viewer: "Viewer",
+
+            user_status_active: "Active",
+            user_status_suspended: "Suspended"
         },
         es: {
             sidebar_modules: "Módulos",
@@ -314,7 +345,38 @@
             alert_severity_info: "Info",
             alert_severity_warning: "Advertencia",
             alert_severity_critical: "Crítica",
-            alert_severity_fatal: "Fatal"
+            alert_severity_fatal: "Fatal",
+
+            // --- USER AND MANAGEMENT ---
+            users_page_title: "GESTIÓN DE USUARIOS",
+            users_module_badge: "Módulo 5",
+            users_hero_title: "GESTIÓN DE USUARIOS",
+            users_hero_subtitle: "Directorio administrativo de usuarios del sistema, roles y estados de cuenta para la plataforma EchoConsole.",
+            users_total_label: "Total de Usuarios",
+
+            users_search_label: "Buscar",
+            users_search_placeholder: "Buscar por Nombre o Correo",
+            users_search_button: "Buscar",
+            users_reset_button: "Limpiar",
+
+            users_table_badge: "Registro de Usuarios",
+            users_table_title: "USUARIOS REGISTRADOS",
+            users_results_label: "Resultados:",
+
+            users_col_name: "NOMBRE",
+            users_col_email: "CORREO",
+            users_col_role: "ROL",
+            users_col_status: "ESTADO",
+            users_col_joined_date: "FECHA DE INGRESO",
+
+            users_empty_state: "No se encontraron usuarios.",
+
+            user_role_admin: "Administrador",
+            user_role_moderator: "Moderador",
+            user_role_viewer: "Visualizador",
+
+            user_status_active: "Activo",
+            user_status_suspended: "Suspendido"
         }
     };
 
