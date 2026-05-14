@@ -2,8 +2,10 @@ using EchoConsole.Api.BackgroundServices;
 using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
+using EchoConsole.Api.Seed;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+// --- INYECCIÓN DEL SEEDER DE DATOS (Fake Data) ---
+builder.Services.Configure<DemoSeedOptions>(
+    builder.Configuration.GetSection(DemoSeedOptions.SectionName));
+
+builder.Services.AddScoped<DevelopmentDataSeeder>();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -53,6 +61,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // --- EJECUCIÓN DEL SEEDER DE DATOS ---
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
+    await seeder.SeedAsync();
 }
 
 app.UseHttpsRedirection();
