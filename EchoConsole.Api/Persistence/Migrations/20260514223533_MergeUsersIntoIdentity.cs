@@ -122,6 +122,24 @@ namespace EchoConsole.Api.Persistence.Migrations
                 nullable: false,
                 defaultValue: "");
 
+            migrationBuilder.Sql("""
+                UPDATE Users
+                SET
+                    UserName = Email,
+                    NormalizedUserName = UPPER(Email),
+                    NormalizedEmail = UPPER(Email),
+                    Alias = LEFT(REPLACE(LOWER(Name), ' ', '_') + '_' + CAST(Id AS varchar(12)), 64),
+                    AvatarKey = 'avatar-01',
+                    Theme = 'cyan',
+                    SecurityStamp = CONVERT(nvarchar(36), NEWID()),
+                    ConcurrencyStamp = CONVERT(nvarchar(36), NEWID()),
+                    PhoneNumberConfirmed = 0,
+                    TwoFactorEnabled = 0,
+                    LockoutEnabled = 0,
+                    AccessFailedCount = 0
+                WHERE UserName = '' OR UserName IS NULL OR Alias = '' OR Alias IS NULL
+            """);
+
             migrationBuilder.CreateTable(
                 name: "UserClaims",
                 columns: table => new
@@ -215,90 +233,30 @@ namespace EchoConsole.Api.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "UserClaims");
+            migrationBuilder.DropTable(name: "UserClaims");
+            migrationBuilder.DropTable(name: "UserLogins");
+            migrationBuilder.DropTable(name: "UserTokens");
 
-            migrationBuilder.DropTable(
-                name: "UserLogins");
+            migrationBuilder.DropIndex(name: "EmailIndex", table: "Users");
+            migrationBuilder.DropIndex(name: "IX_Users_Alias", table: "Users");
+            migrationBuilder.DropIndex(name: "UserNameIndex", table: "Users");
 
-            migrationBuilder.DropTable(
-                name: "UserTokens");
-
-            migrationBuilder.DropIndex(
-                name: "EmailIndex",
-                table: "Users");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Users_Alias",
-                table: "Users");
-
-            migrationBuilder.DropIndex(
-                name: "UserNameIndex",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "AccessFailedCount",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "Alias",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "AvatarKey",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "ConcurrencyStamp",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "EmailConfirmed",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "LockoutEnabled",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "LockoutEnd",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "NormalizedEmail",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "NormalizedUserName",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "PasswordHash",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "PhoneNumber",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "PhoneNumberConfirmed",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "SecurityStamp",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "Theme",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "TwoFactorEnabled",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "UserName",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "AccessFailedCount", table: "Users");
+            migrationBuilder.DropColumn(name: "Alias", table: "Users");
+            migrationBuilder.DropColumn(name: "AvatarKey", table: "Users");
+            migrationBuilder.DropColumn(name: "ConcurrencyStamp", table: "Users");
+            migrationBuilder.DropColumn(name: "EmailConfirmed", table: "Users");
+            migrationBuilder.DropColumn(name: "LockoutEnabled", table: "Users");
+            migrationBuilder.DropColumn(name: "LockoutEnd", table: "Users");
+            migrationBuilder.DropColumn(name: "NormalizedEmail", table: "Users");
+            migrationBuilder.DropColumn(name: "NormalizedUserName", table: "Users");
+            migrationBuilder.DropColumn(name: "PasswordHash", table: "Users");
+            migrationBuilder.DropColumn(name: "PhoneNumber", table: "Users");
+            migrationBuilder.DropColumn(name: "PhoneNumberConfirmed", table: "Users");
+            migrationBuilder.DropColumn(name: "SecurityStamp", table: "Users");
+            migrationBuilder.DropColumn(name: "Theme", table: "Users");
+            migrationBuilder.DropColumn(name: "TwoFactorEnabled", table: "Users");
+            migrationBuilder.DropColumn(name: "UserName", table: "Users");
         }
     }
 }
