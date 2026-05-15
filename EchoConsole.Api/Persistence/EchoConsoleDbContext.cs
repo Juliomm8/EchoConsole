@@ -1,10 +1,12 @@
 ﻿using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace EchoConsole.Api.Persistence;
 
-public sealed class EchoConsoleDbContext : DbContext
+public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
 {
     public EchoConsoleDbContext(DbContextOptions<EchoConsoleDbContext> options)
         : base(options)
@@ -15,10 +17,72 @@ public sealed class EchoConsoleDbContext : DbContext
     public DbSet<GameSession> GameSessions => Set<GameSession>();
     public DbSet<GameBuild> GameBuilds => Set<GameBuild>();
     public DbSet<SystemAlert> SystemAlerts => Set<SystemAlert>();
-    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>(user =>
+        {
+            user.ToTable("Users");
+
+            user.HasIndex(x => x.Email).IsUnique();
+            user.HasIndex(x => x.Alias).IsUnique();
+            user.HasIndex(x => x.CreatedAtUtc);
+            user.HasIndex(x => x.Status);
+
+            user.Property(x => x.Name)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            user.Property(x => x.Email)
+                .HasMaxLength(256)
+                .IsRequired();
+
+            user.Property(x => x.UserName)
+                .HasMaxLength(256)
+                .IsRequired();
+
+            user.Property(x => x.NormalizedEmail)
+                .HasMaxLength(256);
+
+            user.Property(x => x.NormalizedUserName)
+                .HasMaxLength(256);
+
+            user.Property(x => x.Alias)
+                .HasMaxLength(64)
+                .IsRequired();
+
+            user.Property(x => x.AvatarKey)
+                .HasMaxLength(128)
+                .IsRequired();
+
+            user.Property(x => x.Theme)
+                .HasMaxLength(32)
+                .IsRequired();
+
+            user.Property(x => x.Role)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<UserRole>(v))
+                .HasMaxLength(24)
+                .IsRequired();
+
+            user.Property(x => x.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<UserStatus>(v))
+                .HasMaxLength(24)
+                .IsRequired();
+
+            user.Property(x => x.CreatedAtUtc)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
+        modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
+        modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+
         var installation = modelBuilder.Entity<Installation>();
 
         installation.HasKey(x => x.Id);
@@ -108,38 +172,5 @@ public sealed class EchoConsoleDbContext : DbContext
             .IsRequired();
 
         alert.Property(x => x.ResolvedAtUtc);
-
-        var user = modelBuilder.Entity<User>();
-
-        user.HasKey(x => x.Id);
-
-        user.HasIndex(x => x.Email).IsUnique();
-        user.HasIndex(x => x.CreatedAtUtc);
-        user.HasIndex(x => x.Status);
-
-        user.Property(x => x.Name)
-            .HasMaxLength(100)
-            .IsRequired();
-
-        user.Property(x => x.Email)
-            .HasMaxLength(256)
-            .IsRequired();
-
-        user.Property(x => x.Role)
-            .HasConversion(
-                v => v.ToString(),
-                v => Enum.Parse<UserRole>(v))
-            .HasMaxLength(24)
-            .IsRequired();
-
-        user.Property(x => x.Status)
-            .HasConversion(
-                v => v.ToString(),
-                v => Enum.Parse<UserStatus>(v))
-            .HasMaxLength(24)
-            .IsRequired();
-
-        user.Property(x => x.CreatedAtUtc)
-            .IsRequired();
     }
 }
