@@ -10,4 +10,12 @@
     <Folder Include="Views\Reports\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EchoConsole.Api\EchoConsole.Api.csproj" />
+  </ItemGroup>
+
 </Project>
