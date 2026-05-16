@@ -187,4 +187,12 @@ public sealed class AuthController : Controller
         await _signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult AccessDenied()
+    {
+        ViewData["Title"] = "Access Denied";
+        return View();
+    }
 }
