@@ -1,9 +1,11 @@
 ﻿using EchoConsole.Web.Models.Installations;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EchoConsole.Web.Controllers;
 
+[Authorize(Roles = "Admin")]
 public sealed class InstallationsController : Controller
 {
     private readonly EchoConsoleInstallationsApiClient _installationsApiClient;
