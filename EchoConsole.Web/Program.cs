@@ -1,5 +1,6 @@
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
+using EchoConsole.Web.Security;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,8 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 })
     .AddEntityFrameworkStores<EchoConsoleDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, EchoConsoleUserClaimsPrincipalFactory>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

@@ -1,9 +1,11 @@
 using EchoConsole.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace EchoConsole.Web.Controllers
 {
+    [AllowAnonymous] 
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -13,8 +15,12 @@ namespace EchoConsole.Web.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
+            ViewData["Title"] = "HOME";
+            ViewData["TitleI18nKey"] = "home_page_title";
+
             return View();
         }
 
