@@ -11,6 +11,7 @@
             <div class="col-lg-5 col-xl-4">
                 <div class="auth-side-panel h-100">
                     <div class="auth-brand fs-1 mb-1">Echo Console</div>
+
                     <div class="auth-subbrand mb-4">. Web</div>
 
                     <hr class="auth-divider my-4" />
@@ -26,10 +27,14 @@
             <div class="col-md-8 col-lg-6 col-xl-5">
                 <div class="auth-card">
                     <div class="card-body p-4 p-md-5">
+
                         <div class="auth-kicker mb-2">Telemetry Control Station</div>
                         <h1 class="auth-title h2 mb-4">Login</h1>
 
                         <form asp-controller="Auth" asp-action="Login" method="post" novalidate>
+
+                            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                             <div class="mb-3">
