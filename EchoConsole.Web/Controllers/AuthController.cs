@@ -26,7 +26,7 @@ public sealed class AuthController : Controller
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult Login()
+    public IActionResult Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -34,15 +34,18 @@ public sealed class AuthController : Controller
         }
 
         ViewData["Title"] = "Login";
+        ViewData["ReturnUrl"] = returnUrl;
+
         return View(new LoginViewModel());
     }
 
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null, CancellationToken cancellationToken = default)
     {
         ViewData["Title"] = "Login";
+        ViewData["ReturnUrl"] = returnUrl;
 
         if (!ModelState.IsValid)
         {
@@ -72,7 +75,18 @@ public sealed class AuthController : Controller
 
         if (result.Succeeded)
         {
-            _logger.LogInformation("User logged in successfully. UserId: {UserId}, Email: {Email}", user.Id, user.Email);
+            _logger.LogInformation("User logged in successfully. UserId: {UserId}, Email: {Email}, Role: {Role}", user.Id, user.Email, user.Role);
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
+            }
+
+            if (user.Role == UserRole.Admin)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             return RedirectToAction("Index", "Home");
         }
 
