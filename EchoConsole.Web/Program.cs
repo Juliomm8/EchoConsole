@@ -61,6 +61,7 @@ builder.Services.AddScoped<EchoConsoleInstallationsApiClient>();
 builder.Services.AddScoped<EchoConsoleBuildsApiClient>();
 builder.Services.AddScoped<EchoConsoleAlertsApiClient>();
 builder.Services.AddScoped<EchoConsoleUsersApiClient>();
+builder.Services.AddScoped<EchoConsoleHomeApiClient>();
 
 var app = builder.Build();
 
