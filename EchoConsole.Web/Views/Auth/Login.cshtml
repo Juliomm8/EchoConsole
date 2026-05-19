@@ -1,0 +1,68 @@
+﻿@model EchoConsole.Web.Models.Auth.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+
+<div class="auth-page d-flex align-items-center justify-content-center px-3 py-5">
+    <div class="container auth-shell">
+        <div class="row justify-content-center align-items-center g-4">
+            <div class="col-lg-5 col-xl-4">
+                <div class="auth-side-panel h-100">
+                    <div class="auth-brand fs-1 mb-1">Echo Console</div>
+
+                    <div class="auth-subbrand mb-4">. Web</div>
+
+                    <hr class="auth-divider my-4" />
+
+                    <div class="auth-kicker mb-2">Access Node</div>
+                    <h2 class="auth-side-title h4 mb-3">Operator Login</h2>
+                    <p class="auth-muted mb-0">
+                        Sign in to access the EchoConsole platform and continue into the product experience.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                <div class="auth-card">
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="auth-kicker mb-2">Telemetry Control Station</div>
+                        <h1 class="auth-title h2 mb-4">Login</h1>
+
+                        <form asp-controller="Auth" asp-action="Login" method="post" novalidate>
+
+                            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" placeholder="operator@echoconsole.local" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Password" class="form-label"></label>
+                                <input asp-for="Password" class="form-control" placeholder="Enter your password" />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-auth-primary">Login</button>
+                            </div>
+                        </form>
+
+                        <hr class="auth-divider my-4" />
+
+                        <p class="text-center mb-0 auth-muted">
+                            Don’t have an account?
+                            <a asp-controller="Auth" asp-action="Register" class="auth-link">Register here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

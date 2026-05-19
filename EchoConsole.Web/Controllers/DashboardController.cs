@@ -1,9 +1,11 @@
 ﻿using EchoConsole.Web.Models.Dashboard;
 using EchoConsole.Web.Services.Api;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EchoConsole.Web.Controllers;
 
+[Authorize(Roles = "Admin")]
 public sealed class DashboardController : Controller
 {
     private readonly EchoConsoleDashboardApiClient _dashboardApiClient;

@@ -1,9 +1,11 @@
 ﻿using EchoConsole.Web.Models.Users;
 using EchoConsole.Web.Services.Api;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EchoConsole.Web.Controllers;
 
+[Authorize(Roles = "Admin")]
 public sealed class UsersController : Controller
 {
     private const int DefaultPageSize = 20;

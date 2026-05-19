@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+
+<div class="auth-page d-flex align-items-center justify-content-center px-3 py-5">
+    <div class="container auth-shell">
+        <div class="row justify-content-center align-items-center g-4">
+            <div class="col-lg-5 col-xl-4">
+                <div class="auth-side-panel h-100">
+                    <div class="auth-brand fs-1 mb-1">Echo Console</div>
+                    <div class="auth-subbrand mb-4">. Web</div>
+
+                    <hr class="auth-divider my-4" />
+
+                    <div class="auth-kicker mb-2">Security Gate</div>
+                    <h2 class="auth-side-title h4 mb-3">Restricted Access</h2>
+                    <p class="auth-muted mb-0">
+                        This section is reserved for higher-privilege operators inside the EchoConsole telemetry platform.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                <div class="auth-card">
+                    <div class="card-body p-4 p-md-5 text-center">
+                        <div class="auth-kicker mb-2">Authorization Barrier</div>
+                        <h1 class="auth-title h2 mb-4">Acceso Restringido</h1>
+
+                        <p class="auth-muted mb-4">
+                            No tienes el nivel de autorización requerido <strong>(Admin)</strong> para ver esta telemetría o acceder a este módulo.
+                        </p>
+
+                        <div class="d-grid gap-3">
+                            <a asp-controller="Home"
+                               asp-action="Index"
+                               class="btn btn-auth-primary">
+                                Volver al Inicio
+                            </a>
+                        </div>
+
+                        <hr class="auth-divider my-4" />
+
+                        <p class="mb-0 auth-muted">
+                            Si crees que esto es un error, inicia sesión con una cuenta con privilegios de administrador.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
