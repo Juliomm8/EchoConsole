@@ -171,14 +171,6 @@ public sealed class AuthController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> Logout()
-    {
-        await _signInManager.SignOutAsync();
-        return RedirectToAction("Index", "Home");
-    }
-
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
