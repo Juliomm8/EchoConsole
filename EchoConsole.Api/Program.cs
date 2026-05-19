@@ -24,6 +24,7 @@ builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddRateLimiter(options =>
 {
