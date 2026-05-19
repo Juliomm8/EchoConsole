@@ -1,38 +1,64 @@
-using EchoConsole.Web.Models;
+using EchoConsole.Web.Models.Home;
+using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
-namespace EchoConsole.Web.Controllers
+namespace EchoConsole.Web.Controllers;
+
+[AllowAnonymous]
+public sealed class HomeController : Controller
 {
-    [AllowAnonymous] 
-    public class HomeController : Controller
+    private readonly EchoConsoleHomeApiClient _homeApiClient;
+    private readonly ILogger<HomeController> _logger;
+
+    public HomeController(
+        EchoConsoleHomeApiClient homeApiClient,
+        ILogger<HomeController> logger)
     {
-        private readonly ILogger<HomeController> _logger;
+        _homeApiClient = homeApiClient;
+        _logger = logger;
+    }
 
-        public HomeController(ILogger<HomeController> logger)
+    [HttpGet]
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
+    {
+        try
         {
-            _logger = logger;
-        }
+            var overview = await _homeApiClient.GetHomeOverviewAsync(cancellationToken);
 
-        [HttpGet]
-        public IActionResult Index()
-        {
+            var model = new HomeIndexViewModel
+            {
+                TotalSessions = overview.TotalSessions,
+                ActivePlayersNow = overview.ActivePlayersNow,
+                MonitoredBuilds = overview.MonitoredBuilds,
+                OpenAlerts = overview.OpenAlerts,
+                FeaturedBuildVersion = string.IsNullOrWhiteSpace(overview.FeaturedBuildVersion)
+                    ? "N/A"
+                    : overview.FeaturedBuildVersion
+            };
+
             ViewData["Title"] = "HOME";
             ViewData["TitleI18nKey"] = "home_page_title";
 
-            return View();
+            return View(model);
         }
-
-        public IActionResult Privacy()
+        catch (Exception ex)
         {
-            return View();
-        }
+            _logger.LogError(ex, "Failed to build Home/Index view model.");
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var fallbackModel = new HomeIndexViewModel
+            {
+                TotalSessions = 0,
+                ActivePlayersNow = 0,
+                MonitoredBuilds = 0,
+                OpenAlerts = 0,
+                FeaturedBuildVersion = "N/A"
+            };
+
+            ViewData["Title"] = "HOME";
+            ViewData["TitleI18nKey"] = "home_page_title";
+
+            return View(fallbackModel);
         }
     }
 }
