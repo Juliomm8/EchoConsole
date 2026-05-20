@@ -3,6 +3,7 @@ using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -12,6 +13,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
+
+// --- INYECCIÓN DE SEGURIDAD: API KEY (Server-to-Server) ---
+builder.Services.AddAuthentication(AdminApiKeyAuthenticationOptions.SchemeName)
+    .AddScheme<AdminApiKeyAuthenticationOptions, AdminApiKeyAuthenticationHandler>(
+        AdminApiKeyAuthenticationOptions.SchemeName,
+        options =>
+        {
+            options.ApiKey = builder.Configuration["AdminApiSecurity:ApiKey"] ?? string.Empty;
+        });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AdminApiKeyAuthenticationOptions.AdminPolicy, policy =>
+    {
+        policy.AddAuthenticationSchemes(AdminApiKeyAuthenticationOptions.SchemeName);
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("api_access", "admin");
+    });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -63,7 +84,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // --- EJECUCIÓN DEL SEEDER DE DATOS ---
     using var scope = app.Services.CreateScope();
     var seeder = scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
     await seeder.SeedAsync();
@@ -72,7 +92,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRateLimiter();
 app.UseCors("EchoConsoleCors");
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapHub<TelemetryHub>("/hubs/telemetry");
 
