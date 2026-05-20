@@ -40,41 +40,34 @@ public sealed class PublicHomeController : ControllerBase
                 cacheEntry.AbsoluteExpirationRelativeToNow = CacheDuration;
                 cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(20);
 
-                var totalSessionsTask = _dbContext.GameSessions.CountAsync(cancellationToken);
+                var totalSessions = await _dbContext.GameSessions.CountAsync(cancellationToken);
 
-                var activePlayersNowTask = _dbContext.GameSessions
+                var activePlayersNow = await _dbContext.GameSessions
                     .Where(x => x.Status == SessionStatus.Active)
                     .CountAsync(cancellationToken);
 
-                var monitoredBuildsTask = _dbContext.GameBuilds.CountAsync(cancellationToken);
+                var monitoredBuilds = await _dbContext.GameBuilds.CountAsync(cancellationToken);
 
-                var openAlertsTask = _dbContext.SystemAlerts
+                var openAlerts = await _dbContext.SystemAlerts
                     .Where(x => !x.IsResolved)
                     .CountAsync(cancellationToken);
 
-                var featuredBuildTask = _dbContext.GameBuilds
+                var featuredBuildVersion = await _dbContext.GameBuilds
                     .AsNoTracking()
                     .OrderByDescending(x => x.IsActive)
                     .ThenByDescending(x => x.ReleaseDateUtc)
                     .Select(x => x.VersionNumber)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                await Task.WhenAll(
-                    totalSessionsTask,
-                    activePlayersNowTask,
-                    monitoredBuildsTask,
-                    openAlertsTask,
-                    featuredBuildTask);
-
                 return new PublicHomeOverviewDto
                 {
-                    TotalSessions = totalSessionsTask.Result,
-                    ActivePlayersNow = activePlayersNowTask.Result,
-                    MonitoredBuilds = monitoredBuildsTask.Result,
-                    OpenAlerts = openAlertsTask.Result,
-                    FeaturedBuildVersion = string.IsNullOrWhiteSpace(featuredBuildTask.Result)
+                    TotalSessions = totalSessions,
+                    ActivePlayersNow = activePlayersNow,
+                    MonitoredBuilds = monitoredBuilds,
+                    OpenAlerts = openAlerts,
+                    FeaturedBuildVersion = string.IsNullOrWhiteSpace(featuredBuildVersion)
                         ? "N/A"
-                        : featuredBuildTask.Result
+                        : featuredBuildVersion
                 };
             });
 

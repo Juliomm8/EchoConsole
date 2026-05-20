@@ -12,7 +12,7 @@ public sealed class EchoConsoleAlertsApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleAlertsApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApi");
+        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
         _logger = logger;
     }
 

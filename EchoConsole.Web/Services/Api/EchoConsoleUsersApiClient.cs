@@ -12,7 +12,7 @@ public sealed class EchoConsoleUsersApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleUsersApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApi");
+        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
         _logger = logger;
     }
 

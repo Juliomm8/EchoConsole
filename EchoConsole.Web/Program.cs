@@ -46,7 +46,19 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-builder.Services.AddHttpClient("EchoConsoleApi", (serviceProvider, client) =>
+builder.Services.AddTransient<AdminApiKeyHandler>();
+
+builder.Services.AddHttpClient("EchoConsoleApiPublic", (serviceProvider, client) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var baseUrl = configuration["ApiSettings:BaseUrl"]
+        ?? throw new InvalidOperationException("ApiSettings:BaseUrl is not configured.");
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
+builder.Services.AddHttpClient("EchoConsoleApiAdmin", (serviceProvider, client) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
     var baseUrl = configuration["ApiSettings:BaseUrl"]
@@ -63,7 +75,6 @@ builder.Services.AddScoped<EchoConsoleBuildsApiClient>();
 builder.Services.AddScoped<EchoConsoleAlertsApiClient>();
 builder.Services.AddScoped<EchoConsoleUsersApiClient>();
 builder.Services.AddScoped<EchoConsoleHomeApiClient>();
-builder.Services.AddTransient<AdminApiKeyHandler>();
 
 var app = builder.Build();
 
