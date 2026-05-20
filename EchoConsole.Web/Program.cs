@@ -54,7 +54,8 @@ builder.Services.AddHttpClient("EchoConsoleApi", (serviceProvider, client) =>
 
     client.BaseAddress = new Uri(baseUrl);
     client.Timeout = TimeSpan.FromSeconds(10);
-});
+})
+.AddHttpMessageHandler<AdminApiKeyHandler>();
 
 builder.Services.AddScoped<EchoConsoleDashboardApiClient>();
 builder.Services.AddScoped<EchoConsoleInstallationsApiClient>();
@@ -62,6 +63,7 @@ builder.Services.AddScoped<EchoConsoleBuildsApiClient>();
 builder.Services.AddScoped<EchoConsoleAlertsApiClient>();
 builder.Services.AddScoped<EchoConsoleUsersApiClient>();
 builder.Services.AddScoped<EchoConsoleHomeApiClient>();
+builder.Services.AddTransient<AdminApiKeyHandler>();
 
 var app = builder.Build();
 
