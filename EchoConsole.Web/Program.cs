@@ -17,6 +17,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 }
 
+// --- CONFIGURACIÓN DE CONTEXTO ---
 builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
     {
@@ -25,6 +26,7 @@ builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
 
 builder.Services.AddSingleton(TimeProvider.System);
 
+// --- CONFIGURACIÓN DE IDENTITY CORE ---
 builder.Services
     .AddIdentityCore<User>(options =>
     {
@@ -43,30 +45,32 @@ builder.Services
     .AddEntityFrameworkStores<EchoConsoleDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.Configure<AuthenticationOptions>(options =>
-{
-    options.DefaultScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
-});
+// --- CONFIGURACIÓN DE AUTENTICACIÓN ---
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
+    })
+    .AddCookie(IdentityConstants.ApplicationScheme, options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.Cookie.Name = "EchoConsole.Auth";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+    });
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, EchoConsoleUserClaimsPrincipalFactory>();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Auth/Login";
-    options.AccessDeniedPath = "/Auth/AccessDenied";
-    options.Cookie.Name = "EchoConsole.Auth";
-    options.ExpireTimeSpan = TimeSpan.FromDays(7);
-    options.SlidingExpiration = true;
-});
-
+// --- SEGURIDAD DE LA API ---
 builder.Services.AddTransient<AdminApiKeyHandler>();
 
+// --- CLIENTES HTTP ---
 builder.Services.AddHttpClient("EchoConsoleApiPublic", (serviceProvider, client) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
