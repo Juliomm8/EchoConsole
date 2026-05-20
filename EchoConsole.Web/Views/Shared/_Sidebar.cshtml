@@ -1,5 +1,7 @@
 ﻿@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var isAdmin = User.IsInRole("Admin");
 
     Func<string[], string> navClass = controllers =>
         controllers.Any(controller => string.Equals(currentController, controller, System.StringComparison.OrdinalIgnoreCase))
@@ -23,10 +25,10 @@
 
         <div class="mt-5">
             <div class="font-display text-xs uppercase tracking-[0.36em] text-slate-500">
-                Modules
+                Navigation
             </div>
             <div class="mt-2 text-sm text-slate-400">
-                Community telemetry platform
+                Product mode access by audience.
             </div>
         </div>
     </div>
@@ -42,7 +44,44 @@
             <span class="font-medium">Home</span>
         </a>
 
-        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+        @if (!isAuthenticated)
+        {
+            <a asp-controller="Auth" asp-action="Login" class="@navClass(new[] { "Auth" })">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                        <path d="M10 17l5-5-5-5" />
+                        <path d="M15 12H3" />
+                    </svg>
+                </span>
+                <span class="font-medium">Login</span>
+            </a>
+
+            <a asp-controller="Auth" asp-action="Register" class="@navClass(new[] { "Auth" })">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-400/20 bg-slate-900/90 text-fuchsia-300">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+                        <circle cx="9.5" cy="7" r="4" />
+                        <path d="M20 8v6M23 11h-6" />
+                    </svg>
+                </span>
+                <span class="font-medium">Register</span>
+            </a>
+        }
+        else if (!isAdmin)
+        {
+            <a asp-controller="Home" asp-action="Index" asp-fragment="my-stats" class="@navClass(new[] { "Home" })">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-400/20 bg-slate-900/90 text-fuchsia-300">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 3v18" />
+                        <path d="M7 8h8" />
+                        <path d="M7 16h8" />
+                    </svg>
+                </span>
+                <span class="font-medium">My Profile</span>
+            </a>
+        }
+        else
         {
             <a asp-controller="Dashboard" asp-action="Index" class="@navClass(new[] { "Dashboard" })">
                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-slate-900/90 text-cyan-300">
@@ -94,4 +133,49 @@
             </a>
         }
     </nav>
+
+    <div class="glass-panel neon-border-magenta rounded-2xl p-5">
+        <div class="font-display text-2xl uppercase tracking-[0.12em] text-fuchsia-300 text-glow-magenta">
+            Cosmic Diner
+        </div>
+
+        @if (!isAuthenticated)
+        {
+            <p class="mt-2 text-sm text-slate-400">
+                Explore the platform and create your account to unlock your operator profile.
+            </p>
+        }
+        else if (!isAdmin)
+        {
+            <p class="mt-2 text-sm text-slate-400">
+                Your personal player block lives in Home. Use it as your entry point into the platform.
+            </p>
+        }
+        else
+        {
+            <p class="mt-2 text-sm text-slate-400">
+                Administrative access enabled. Internal telemetry modules are available.
+            </p>
+        }
+
+        <div class="mt-4 grid grid-cols-2 gap-3">
+            <div class="rounded-xl border border-cyan-400/15 bg-slate-900/80 p-3">
+                <div class="font-display text-xs uppercase tracking-[0.24em] text-slate-500">
+                    Access
+                </div>
+                <div class="mt-1 text-sm font-semibold text-cyan-200">
+                    @(isAdmin ? "Admin" : isAuthenticated ? "User" : "Guest")
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-cyan-400/15 bg-slate-900/80 p-3">
+                <div class="font-display text-xs uppercase tracking-[0.24em] text-slate-500">
+                    Mode
+                </div>
+                <div class="mt-1 text-sm font-semibold text-cyan-200">
+                    Product
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

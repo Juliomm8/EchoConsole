@@ -1,128 +1,76 @@
-﻿@{
-    var pageTitle = ViewData["Title"]?.ToString() ?? "EchoConsole";
-}
-
-<!DOCTYPE html>
-<html lang="en" class="h-full bg-[#070B12]">
+﻿<!DOCTYPE html>
+<html lang="en" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
-    <title>@pageTitle - EchoConsole.Web</title>
+    <title>@ViewData["Title"] - Echo Console</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
-    <script>
-        tailwind = window.tailwind || {};
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cosmic: {
-                            bg: "#070B12",
-                            panel: "#0B1220",
-                            panel2: "#0F172A",
-                            line: "rgba(34, 211, 238, 0.16)",
-                            cyan: "#22D3EE",
-                            cyanSoft: "#67E8F9",
-                            magenta: "#E879F9",
-                            magentaSoft: "#F0ABFC"
-                        }
-                    },
-                    fontFamily: {
-                        sans: ["Inter", "sans-serif"],
-                        display: ["Orbitron", "sans-serif"]
-                    },
-                    boxShadow: {
-                        neon: "0 0 0 1px rgba(34,211,238,0.14), 0 0 28px rgba(34,211,238,0.08)",
-                        neonMagenta: "0 0 0 1px rgba(232,121,249,0.18), 0 0 30px rgba(232,121,249,0.10)"
-                    },
-                    backgroundImage: {
-                        "console-grid": "radial-gradient(circle at top, rgba(34,211,238,0.08), transparent 32%), linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)"
-                    },
-                    backgroundSize: {
-                        "console-grid": "100% 100%, 24px 24px, 24px 24px"
-                    }
-                }
-            }
-        };
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        html {
-            scroll-behavior: smooth;
+        html, body {
+            height: 100%;
         }
 
         body {
-            background:
-                radial-gradient(circle at top left, rgba(34, 211, 238, 0.06), transparent 24%),
-                radial-gradient(circle at top right, rgba(232, 121, 249, 0.06), transparent 20%),
-                #070B12;
+            font-family: 'Inter', sans-serif;
+            background: #070B12;
+            color: #E2E8F0;
+        }
+
+        .font-display {
+            font-family: 'Orbitron', sans-serif;
         }
 
         .glass-panel {
-            background: linear-gradient(180deg, rgba(11,18,32,0.92) 0%, rgba(7,11,18,0.88) 100%);
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.90) 0%, rgba(7, 11, 18, 0.82) 100%);
             backdrop-filter: blur(10px);
         }
 
         .neon-border {
-            border: 1px solid rgba(34, 211, 238, 0.14);
-            box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.06), 0 0 22px rgba(34, 211, 238, 0.05);
+            border: 1px solid rgba(34, 211, 238, 0.18);
+            box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.04), 0 0 24px rgba(34, 211, 238, 0.04);
         }
 
         .neon-border-magenta {
-            border: 1px solid rgba(232, 121, 249, 0.16);
-            box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.07), 0 0 24px rgba(232, 121, 249, 0.06);
+            border: 1px solid rgba(232, 121, 249, 0.14);
+            box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.03), 0 0 24px rgba(232, 121, 249, 0.04);
         }
 
         .text-glow-cyan {
-            text-shadow: 0 0 14px rgba(34, 211, 238, 0.22);
+            text-shadow: 0 0 14px rgba(34, 211, 238, 0.18);
         }
 
         .text-glow-magenta {
-            text-shadow: 0 0 14px rgba(232, 121, 249, 0.20);
+            text-shadow: 0 0 14px rgba(232, 121, 249, 0.18);
         }
 
-        .scrollbar-cosmic::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-
-        .scrollbar-cosmic::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.7);
-        }
-
-        .scrollbar-cosmic::-webkit-scrollbar-thumb {
-            background: rgba(34, 211, 238, 0.18);
-            border-radius: 9999px;
-        }
-
-        .scrollbar-cosmic::-webkit-scrollbar-thumb:hover {
-            background: rgba(34, 211, 238, 0.28);
+        .shadow-neon {
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.05);
         }
     </style>
 </head>
-<body class="h-full font-sans text-slate-100 antialiased">
-    <div class="min-h-screen bg-console-grid bg-console-grid">
-        <div class="flex min-h-screen">
-            <aside class="hidden w-80 shrink-0 border-r border-cyan-500/10 bg-slate-950/85 xl:block">
+<body class="h-full">
+    <div class="min-h-screen bg-[#070B12]">
+        <div class="grid min-h-screen grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]">
+            <aside class="border-b border-cyan-500/10 bg-slate-950/80 xl:border-b-0 xl:border-r">
                 @await Html.PartialAsync("_Sidebar")
             </aside>
 
-            <div class="flex min-w-0 flex-1 flex-col">
+            <div class="flex min-h-screen flex-col">
                 @await Html.PartialAsync("_Topbar")
 
-                <main class="flex-1 px-4 pb-6 pt-4 sm:px-6 xl:px-8">
+                <main class="flex-1">
                     @RenderBody()
                 </main>
             </div>
         </div>
     </div>
 
-    <script src="~/js/i18n.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
