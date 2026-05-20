@@ -12,7 +12,8 @@ public sealed class EchoConsoleHomeApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleHomeApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApi");
+        // Usa el cliente público configurado en Program.cs
+        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiPublic");
         _logger = logger;
     }
 
