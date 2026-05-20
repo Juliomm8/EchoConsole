@@ -16,6 +16,8 @@ public sealed class EchoConsoleUserClaimsPrincipalFactory : UserClaimsPrincipalF
 
     protected override async Task<ClaimsIdentity> GenerateClaimsAsync(User user)
     {
+        ArgumentNullException.ThrowIfNull(user);
+
         var identity = await base.GenerateClaimsAsync(user);
 
         identity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));

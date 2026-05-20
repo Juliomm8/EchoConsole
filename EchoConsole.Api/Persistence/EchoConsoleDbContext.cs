@@ -24,6 +24,8 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
 
         modelBuilder.Entity<User>(user =>
         {
+            user.HasBaseType((Type?)null);
+
             user.ToTable("Users");
 
             user.HasIndex(x => x.Email).IsUnique();
@@ -52,7 +54,7 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
                 .IsRequired();
 
             user.Property(x => x.CreatedAtUtc).IsRequired();
-        });
+        }); 
 
         modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
         modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
