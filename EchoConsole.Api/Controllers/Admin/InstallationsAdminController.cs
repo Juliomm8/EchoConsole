@@ -2,9 +2,12 @@
 using EchoConsole.Api.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using EchoConsole.Api.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EchoConsole.Api.Controllers.Admin;
 
+[Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
 [ApiController]
 [Route("api/admin/installations")]
 public sealed class InstallationsAdminController : ControllerBase
