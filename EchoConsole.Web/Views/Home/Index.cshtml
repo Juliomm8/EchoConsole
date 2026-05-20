@@ -1,12 +1,8 @@
 ﻿@model EchoConsole.Web.Models.Home.HomeIndexViewModel
-@using System.Security.Claims
 
 @{
     ViewData["Title"] = "HOME";
     ViewData["TitleI18nKey"] = "home_page_title";
-
-    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-    var alias = User.FindFirst("alias")?.Value ?? User.Identity?.Name ?? "Player";
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -26,7 +22,7 @@
             </p>
 
             <div class="mt-6 flex flex-wrap gap-3">
-                @if (!isAuthenticated)
+                @if (!Model.IsAuthenticated)
                 {
                     <a asp-controller="Auth"
                        asp-action="Register"
@@ -42,7 +38,7 @@
                 }
                 else
                 {
-                    <a href="#your-stats"
+                    <a href="#my-stats"
                        class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
                         View My Stats
                     </a>
@@ -50,7 +46,7 @@
             </div>
         </div>
 
-        <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-5">
             <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)]">
                 <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
                     Community Sessions
@@ -77,26 +73,49 @@
 
             <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)]">
                 <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
-                    Most Stable Build
+                    Monitored Builds
+                </div>
+                <div class="mt-3 font-display text-3xl text-cyan-300">
+                    @Model.MonitoredBuilds.ToString("N0")
+                </div>
+                <div class="mt-2 text-sm text-slate-400">
+                    Total registered game builds tracked by the platform.
+                </div>
+            </div>
+            /*
+            <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)]">
+                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
+                    Open Alerts
+                </div>
+                <div class="mt-3 font-display text-3xl text-rose-400">
+                    @Model.OpenAlerts.ToString("N0")
+                </div>
+                <div class="mt-2 text-sm text-slate-400">
+                    Current unresolved anomalies detected by the telemetry platform.
+                </div>
+            </div>
+            <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)]">
+                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
+                    Featured Build
                 </div>
                 <div class="mt-3 font-display text-3xl text-fuchsia-300">
                     @Model.FeaturedBuildVersion
                 </div>
                 <div class="mt-2 text-sm text-slate-400">
-                    Current featured version with strongest uptime.
+                    Current highlighted release tracked by Echo Console.
                 </div>
             </div>
         </div>
 
-        @if (isAuthenticated)
+        @if (Model.IsAuthenticated)
         {
-            <div id="your-stats" class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
+            <div id="my-stats" class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
                 <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
-                    Personal Profile
+                    My Operator Profile
                 </p>
 
                 <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                    Welcome back, @alias
+                    Welcome back, @Model.UserAlias
                 </h2>
 
                 <p class="mt-3 text-sm text-slate-400">
@@ -104,19 +123,31 @@
                 </p>
 
                 <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Your Sessions</div>
-                        <div class="mt-2 font-display text-2xl text-cyan-300">--</div>
+                    <div class="rounded-xl border border-fuchsia-400/15 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Your Sessions
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.UserTotalSessions.ToString("N0")
+                        </div>
                     </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Favorite Build</div>
-                        <div class="mt-2 font-display text-2xl text-cyan-300">--</div>
+                    <div class="rounded-xl border border-fuchsia-400/15 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Favorite Build
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.UserFavoriteBuild
+                        </div>
                     </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">Last Activity</div>
-                        <div class="mt-2 font-display text-2xl text-cyan-300">--</div>
+                    <div class="rounded-xl border border-fuchsia-400/15 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Last Activity
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.UserLastActivity
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,11 +167,17 @@
                     Register to access your future player card, personal telemetry insights, and account customization.
                 </p>
 
-                <div class="mt-5">
+                <div class="mt-5 flex flex-wrap gap-3">
                     <a asp-controller="Auth"
                        asp-action="Register"
                        class="inline-flex rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-200 transition hover:bg-fuchsia-500/15">
                         Register Now
+                    </a>
+
+                    <a asp-controller="Auth"
+                       asp-action="Login"
+                       class="inline-flex rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
+                        Login
                     </a>
                 </div>
             </div>
