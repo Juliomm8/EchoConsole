@@ -17,7 +17,7 @@ public sealed class UserDashboardService : IUserDashboardService
         _logger = logger;
     }
 
-    public async Task<UserDashboardResult> GetDashboardAsync(
+    public async Task<UserDashboardResult> GetProfileAsync(
         int userId,
         CancellationToken cancellationToken = default)
     {
@@ -29,7 +29,11 @@ public sealed class UserDashboardService : IUserDashboardService
                 x.Id,
                 x.Alias,
                 x.Name,
-                x.Email
+                x.Email,
+                x.AvatarKey,
+                x.Theme,
+                x.Role,
+                x.Status
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -38,39 +42,42 @@ public sealed class UserDashboardService : IUserDashboardService
             return UserDashboardResult.UserNotFound();
         }
 
-        var alias = user.Alias ?? user.Name ?? user.Email ?? "Player";
-
-        var totalInstallations = await _dbContext.Installations
+        var linkedInstallations = await _dbContext.Installations
             .AsNoTracking()
-            .CountAsync(x => x.OwnerUserId == userId, cancellationToken);
+            .Where(x => x.OwnerUserId == userId)
+            .OrderByDescending(x => x.LastUpdateUtc)
+            .Select(x => new LinkedInstallationDto
+            {
+                InstallationId = x.InstallationId,
+                DeviceName = x.DeviceName,
+                DeviceModel = x.DeviceModel,
+                Platform = x.Platform,
+                BuildVersion = x.BuildVersion,
+                Status = x.Status,
+                FirstSeenUtc = x.FirstSeenUtc,
+                LastUpdateUtc = x.LastUpdateUtc
+            })
+            .ToListAsync(cancellationToken);
 
-        var sessionsQuery = _dbContext.GameSessions
+        var sessions = await _dbContext.GameSessions
             .AsNoTracking()
-            .Where(x => x.Installation.OwnerUserId == userId);
-
-        var totalSessions = await sessionsQuery.CountAsync(cancellationToken);
-
-        var favoriteBuild = await sessionsQuery
-            .Where(x => !string.IsNullOrWhiteSpace(x.BuildVersion))
-            .GroupBy(x => x.BuildVersion)
-            .OrderByDescending(g => g.Count())
-            .ThenBy(g => g.Key)
-            .Select(g => g.Key)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        var sessionTimes = await sessionsQuery
+            .Where(x => x.Installation.OwnerUserId == userId)
             .Select(x => new
             {
+                x.BuildVersion,
                 x.StartedAtUtc,
                 x.EndedAtUtc,
                 x.LastHeartbeatUtc
             })
             .ToListAsync(cancellationToken);
 
+        var totalInstallations = linkedInstallations.Count;
+        var totalSessions = sessions.Count;
+
         var totalPlayTimeMinutes = 0;
         DateTimeOffset? lastActivityUtc = null;
 
-        foreach (var session in sessionTimes)
+        foreach (var session in sessions)
         {
             var endUtc = session.EndedAtUtc ?? session.LastHeartbeatUtc;
             var duration = endUtc - session.StartedAtUtc;
@@ -86,22 +93,38 @@ public sealed class UserDashboardService : IUserDashboardService
             }
         }
 
-        var dto = new UserDashboardDto
+        var favoriteBuild = sessions
+            .Where(x => !string.IsNullOrWhiteSpace(x.BuildVersion))
+            .GroupBy(x => x.BuildVersion)
+            .OrderByDescending(g => g.Count())
+            .ThenBy(g => g.Key)
+            .Select(g => g.Key)
+            .FirstOrDefault();
+
+        var profile = new UserProfileDto
         {
-            Alias = alias,
+            UserId = user.Id,
+            Alias = user.Alias ?? user.Name ?? user.Email ?? "Player",
+            Name = user.Name ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            AvatarKey = string.IsNullOrWhiteSpace(user.AvatarKey) ? "avatar-01" : user.AvatarKey,
+            Theme = string.IsNullOrWhiteSpace(user.Theme) ? "cyan" : user.Theme,
+            Role = user.Role.ToString(),
+            Status = user.Status.ToString(),
             TotalInstallations = totalInstallations,
             TotalSessions = totalSessions,
             TotalPlayTimeMinutes = totalPlayTimeMinutes,
             LastActivityUtc = lastActivityUtc,
-            FavoriteBuild = string.IsNullOrWhiteSpace(favoriteBuild) ? "N/A" : favoriteBuild
+            FavoriteBuild = string.IsNullOrWhiteSpace(favoriteBuild) ? "N/A" : favoriteBuild,
+            Installations = linkedInstallations
         };
 
         _logger.LogInformation(
-            "Built personal dashboard for user {UserId}. Installations={Installations}, Sessions={Sessions}.",
+            "Built premium profile for user {UserId}. Installations={Installations}, Sessions={Sessions}.",
             userId,
             totalInstallations,
             totalSessions);
 
-        return UserDashboardResult.Success(dto);
+        return UserDashboardResult.Success(profile);
     }
 }

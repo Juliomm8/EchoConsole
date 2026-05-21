@@ -2,7 +2,7 @@
 
 public interface IUserDashboardService
 {
-    Task<UserDashboardResult> GetDashboardAsync(
+    Task<UserDashboardResult> GetProfileAsync(
         int userId,
         CancellationToken cancellationToken = default);
 }

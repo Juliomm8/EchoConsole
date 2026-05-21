@@ -6,13 +6,13 @@ public sealed class UserDashboardResult
 {
     public UserDashboardStatus Status { get; init; }
 
-    public UserDashboardDto? Dashboard { get; init; }
+    public UserProfileDto? Profile { get; init; }
 
-    public static UserDashboardResult Success(UserDashboardDto dashboard)
+    public static UserDashboardResult Success(UserProfileDto profile)
         => new()
         {
             Status = UserDashboardStatus.Success,
-            Dashboard = dashboard
+            Profile = profile
         };
 
     public static UserDashboardResult UserNotFound()

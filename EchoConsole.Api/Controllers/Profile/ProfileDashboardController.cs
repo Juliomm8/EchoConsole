@@ -18,15 +18,15 @@ public sealed class ProfileDashboardController : ControllerBase
     }
 
     [HttpGet("{userId:int}")]
-    public async Task<IActionResult> GetDashboard(
+    public async Task<IActionResult> GetProfile(
         int userId,
         CancellationToken cancellationToken)
     {
-        var result = await _userDashboardService.GetDashboardAsync(userId, cancellationToken);
+        var result = await _userDashboardService.GetProfileAsync(userId, cancellationToken);
 
         return result.Status switch
         {
-            UserDashboardStatus.Success => Ok(result.Dashboard),
+            UserDashboardStatus.Success => Ok(result.Profile),
             UserDashboardStatus.UserNotFound => NotFound(new { message = "User was not found." }),
             _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Unexpected error." })
         };
