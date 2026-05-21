@@ -1,7 +1,7 @@
 ﻿using EchoConsole.Web.Models.Installations;
 using EchoConsole.Web.Services.Api;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EchoConsole.Web.Controllers;
 
@@ -81,6 +81,37 @@ public sealed class InstallationsController : Controller
             ViewData["TitleI18nKey"] = "installations_page_title";
 
             return View(fallbackModel);
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ListData(
+        string? searchTerm,
+        int pageNumber = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        pageSize = pageSize < 1 ? 20 : Math.Min(pageSize, 100);
+
+        try
+        {
+            var response = await _installationsApiClient.GetInstallationsAsync(
+                searchTerm,
+                pageNumber,
+                pageSize,
+                cancellationToken);
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to proxy installations data from API.");
+
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+            {
+                message = "Installations data is temporarily unavailable."
+            });
         }
     }
 }
