@@ -16,19 +16,19 @@ public sealed class EchoConsoleProfileApiClient
         _logger = logger;
     }
 
-    public async Task<UserDashboardApiModel?> GetDashboardAsync(
+    public async Task<UserProfileApiModel?> GetProfileAsync(
         int userId,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<UserDashboardApiModel>(
+            return await _httpClient.GetFromJsonAsync<UserProfileApiModel>(
                 $"/api/profile/dashboard/{userId}",
                 cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve personal dashboard for user {UserId}.", userId);
+            _logger.LogError(ex, "Failed to retrieve premium profile for user {UserId}.", userId);
             return null;
         }
     }

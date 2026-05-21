@@ -1,8 +1,6 @@
-﻿using System.Net;
-using System.Net.Http.Json;
-using System.Security.Claims;
-using EchoConsole.Web.Models.Api.Profile;
+﻿using System.Security.Claims;
 using EchoConsole.Web.Models.Profile;
+using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,98 +9,125 @@ namespace EchoConsole.Web.Controllers;
 [Authorize]
 public sealed class ProfileController : Controller
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly EchoConsoleProfileApiClient _profileApiClient;
     private readonly ILogger<ProfileController> _logger;
 
     public ProfileController(
-        IHttpClientFactory httpClientFactory,
+        EchoConsoleProfileApiClient profileApiClient,
         ILogger<ProfileController> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _profileApiClient = profileApiClient;
         _logger = logger;
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        return View(new ClaimInstallationViewModel());
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ClaimInstallation(
-        ClaimInstallationViewModel model,
-        CancellationToken cancellationToken)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View("Index", model);
-        }
-
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (!int.TryParse(userIdClaim, out var userId))
         {
-            _logger.LogWarning("Authenticated user is missing a valid NameIdentifier claim.");
-            model.IsSuccess = false;
-            model.StatusMessage = "Your session does not contain a valid user identifier.";
-            return View("Index", model);
+            return Challenge();
         }
 
-        if (!Guid.TryParse(model.InstallationId, out var installationId))
+        var profile = await _profileApiClient.GetProfileAsync(userId, cancellationToken);
+
+        if (profile is null)
         {
-            ModelState.AddModelError(nameof(model.InstallationId), "Installation ID format is invalid.");
-            return View("Index", model);
+            var fallbackModel = new ProfileIndexViewModel
+            {
+                Alias = User.FindFirst("alias")?.Value ?? User.Identity?.Name ?? "Player",
+                Role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Viewer",
+                Status = User.FindFirst("app_status")?.Value ?? "Active"
+            };
+
+            ViewData["Title"] = "PROFILE";
+            return View(fallbackModel);
         }
 
-        var request = new ClaimInstallationRequestModel
+        var model = new ProfileIndexViewModel
         {
-            InstallationId = installationId,
-            UserId = userId
+            Alias = profile.Alias,
+            Name = profile.Name,
+            Email = profile.Email,
+            AvatarKey = profile.AvatarKey,
+            Theme = profile.Theme,
+            Role = profile.Role,
+            Status = profile.Status,
+            TotalInstallations = profile.TotalInstallations,
+            TotalSessions = profile.TotalSessions,
+            TotalPlayTimeMinutes = profile.TotalPlayTimeMinutes,
+            TotalPlayTimeLabel = FormatMinutes(profile.TotalPlayTimeMinutes),
+            LastActivityLabel = profile.LastActivityUtc.HasValue
+                ? FormatRelativeDate(profile.LastActivityUtc.Value)
+                : "N/A",
+            FavoriteBuild = string.IsNullOrWhiteSpace(profile.FavoriteBuild) ? "N/A" : profile.FavoriteBuild,
+            Installations = profile.Installations
+                .Select(x => new LinkedInstallationViewModel
+                {
+                    InstallationId = x.InstallationId,
+                    DeviceName = x.DeviceName,
+                    DeviceModel = x.DeviceModel,
+                    Platform = x.Platform,
+                    BuildVersion = x.BuildVersion,
+                    Status = x.Status,
+                    FirstSeenLabel = x.FirstSeenUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"),
+                    LastUpdateLabel = x.LastUpdateUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                })
+                .ToList()
         };
 
-        try
+        ViewData["Title"] = "PROFILE";
+        return View(model);
+    }
+
+    private static string FormatMinutes(int totalMinutes)
+    {
+        if (totalMinutes <= 0)
         {
-            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
-
-            var response = await client.PostAsJsonAsync(
-                "/api/profile/installations/claim",
-                request,
-                cancellationToken);
-
-            var payload = await response.Content.ReadFromJsonAsync<ClaimInstallationResponseModel>(cancellationToken: cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                model.IsSuccess = true;
-                model.StatusMessage = payload?.Message ?? "Installation successfully linked.";
-                return View("Index", model);
-            }
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                model.IsSuccess = false;
-                model.StatusMessage = payload?.Message ?? "Installation or user not found.";
-                return View("Index", model);
-            }
-
-            if (response.StatusCode == HttpStatusCode.Conflict)
-            {
-                model.IsSuccess = false;
-                model.StatusMessage = payload?.Message ?? "This installation is already linked to another account.";
-                return View("Index", model);
-            }
-
-            model.IsSuccess = false;
-            model.StatusMessage = "An unexpected error occurred while claiming the installation.";
-            return View("Index", model);
+            return "0m";
         }
-        catch (Exception ex)
+
+        var hours = totalMinutes / 60;
+        var minutes = totalMinutes % 60;
+
+        if (hours <= 0)
         {
-            _logger.LogError(ex, "Failed to claim installation {InstallationId} for user {UserId}.", installationId, userId);
-            model.IsSuccess = false;
-            model.StatusMessage = "The platform could not process your request right now.";
-            return View("Index", model);
+            return $"{minutes}m";
         }
+
+        if (minutes <= 0)
+        {
+            return $"{hours}h";
+        }
+
+        return $"{hours}h {minutes}m";
+    }
+
+    private static string FormatRelativeDate(DateTimeOffset utcDate)
+    {
+        var diff = DateTimeOffset.UtcNow - utcDate;
+
+        if (diff.TotalMinutes < 1)
+        {
+            return "Just now";
+        }
+
+        if (diff.TotalMinutes < 60)
+        {
+            return $"{(int)diff.TotalMinutes}m ago";
+        }
+
+        if (diff.TotalHours < 24)
+        {
+            return $"{(int)diff.TotalHours}h ago";
+        }
+
+        if (diff.TotalDays < 7)
+        {
+            return $"{(int)diff.TotalDays}d ago";
+        }
+
+        return utcDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
     }
 }
