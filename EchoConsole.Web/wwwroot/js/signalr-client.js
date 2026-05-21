@@ -7,7 +7,7 @@
 
     function init(config) {
         options = {
-            apiBaseUrl: normalizeBaseUrl(config.apiBaseUrl),
+            webBaseUrl: normalizeBaseUrl(config?.webBaseUrl || window.location.origin),
             tableBodyId: config.tableBodyId,
             registeredInstallationsValueId: config.registeredInstallationsValueId,
             activeSessionsValueId: config.activeSessionsValueId,
@@ -17,17 +17,11 @@
             topbarServerTimeValueId: config.topbarServerTimeValueId
         };
 
-        if (!options.apiBaseUrl) {
-            console.error("EchoConsole realtime: apiBaseUrl is missing.");
-            return;
-        }
-
         if (!window.signalR) {
             console.error("EchoConsole realtime: SignalR library not found.");
             return;
         }
 
-        // Listener para cambios de idioma (i18n)
         window.addEventListener("echoConsole:languageChanged", () => {
             renderSessions(currentSessions);
             applyDerivedKpisFromSessions(currentSessions);
@@ -40,7 +34,7 @@
     }
 
     function buildConnection() {
-        const hubUrl = buildApiUrl("/hubs/telemetry");
+        const hubUrl = buildWebUrl("/hubs/admin-telemetry");
 
         connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {
@@ -51,11 +45,6 @@
             .build();
 
         connection.on("ReceiveTelemetryUpdate", onTelemetryEvent);
-        connection.on("sessionStarted", onTelemetryEvent);
-        connection.on("sessionHeartbeat", onTelemetryEvent);
-        connection.on("sessionEnded", onTelemetryEvent);
-        connection.on("sessionExpired", onTelemetryEvent);
-        connection.on("installationUpdated", onTelemetryEvent);
 
         connection.onreconnecting(() => {
             console.warn("SignalR reconnecting...");
@@ -123,9 +112,10 @@
     }
 
     async function fetchOverview() {
-        const url = buildApiUrl("/api/admin/dashboard/overview");
+        const url = buildWebUrl("/Dashboard/Overview");
         const response = await fetch(url, {
             method: "GET",
+            credentials: "same-origin",
             headers: {
                 "Accept": "application/json"
             }
@@ -139,9 +129,10 @@
     }
 
     async function fetchLiveSessions() {
-        const url = buildApiUrl("/api/admin/dashboard/live-sessions");
+        const url = buildWebUrl("/Dashboard/LiveSessions");
         const response = await fetch(url, {
             method: "GET",
+            credentials: "same-origin",
             headers: {
                 "Accept": "application/json"
             }
@@ -400,8 +391,8 @@
         }
     }
 
-    function buildApiUrl(path) {
-        return `${options.apiBaseUrl}${path}`;
+    function buildWebUrl(path) {
+        return `${options.webBaseUrl}${path}`;
     }
 
     function normalizeBaseUrl(baseUrl) {

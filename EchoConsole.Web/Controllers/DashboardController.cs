@@ -135,6 +135,42 @@ public sealed class DashboardController : Controller
         return View(model);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Overview(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var overview = await _dashboardApiClient.GetOverviewAsync(cancellationToken);
+            return Ok(overview);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to proxy dashboard overview from API.");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+            {
+                message = "Dashboard overview is temporarily unavailable."
+            });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> LiveSessions(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var sessions = await _dashboardApiClient.GetLiveSessionsAsync(cancellationToken);
+            return Ok(sessions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to proxy live sessions from API.");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+            {
+                message = "Live sessions are temporarily unavailable."
+            });
+        }
+    }
+
     private static string MapSessionStatus(int status)
     {
         return status switch
