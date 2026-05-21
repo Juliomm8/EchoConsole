@@ -3,6 +3,7 @@ using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
+using EchoConsole.Api.Services.Ownership;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
