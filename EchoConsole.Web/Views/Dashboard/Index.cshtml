@@ -52,14 +52,14 @@
     <script src="~/js/signalr-client.js" asp-append-version="true"></script>
     <script>
         window.echoConsoleRealtime.init({
-            apiBaseUrl: "@apiBaseUrl",
-            tableBodyId: "live-sessions-body",
+            webBaseUrl: window.location.origin,
+            tableBodyId: "live-sessions-table-body",
             registeredInstallationsValueId: "kpi-registered-installations",
             activeSessionsValueId: "kpi-active-sessions",
             averageDurationValueId: "kpi-average-duration",
             latestHeartbeatValueId: "kpi-latest-heartbeat",
-            serverTimeValueId: "server-time-value",
-            topbarServerTimeValueId: "topbar-server-time-value"
+            serverTimeValueId: "dashboard-server-time",
+            topbarServerTimeValueId: "topbar-server-time"
         });
     </script>
 }

@@ -4,11 +4,12 @@ using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
 using EchoConsole.Api.Services.Ownership;
+using EchoConsole.Api.Services.Profile;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using EchoConsole.Api.Services.Profile;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +46,6 @@ builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
-builder.Services.AddSignalR();
 builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
 builder.Services.AddMemoryCache();
@@ -71,6 +71,14 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowCredentials();
     });
+});
+
+builder.Services.AddSingleton<IRealtimeApiKeyValidator, RealtimeApiKeyValidator>();
+builder.Services.AddSingleton<TelemetryHubApiKeyFilter>();
+
+builder.Services.AddSignalR(options =>
+{
+    options.AddFilter<TelemetryHubApiKeyFilter>();
 });
 
 // --- INYECCIÓN DEL SEEDER DE DATOS (Fake Data) ---

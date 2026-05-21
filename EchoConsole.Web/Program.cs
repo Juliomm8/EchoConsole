@@ -1,5 +1,7 @@
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
+using EchoConsole.Web.BackgroundServices;
+using EchoConsole.Web.Hubs;
 using EchoConsole.Web.Security;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authentication;
@@ -25,6 +27,8 @@ builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
     }));
 
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<TelemetryRelayService>();
 
 // --- CONFIGURACIÓN DE IDENTITY CORE ---
 builder.Services
@@ -114,6 +118,8 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<AdminTelemetryHub>("/hubs/admin-telemetry");
 
 app.MapControllerRoute(
     name: "default",
