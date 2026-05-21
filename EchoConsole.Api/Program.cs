@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using EchoConsole.Api.Services.Profile;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,7 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 
 builder.Services.AddRateLimiter(options =>
 {
