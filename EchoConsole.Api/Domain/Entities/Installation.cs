@@ -42,4 +42,9 @@ public sealed class Installation
     public DateTimeOffset LastUpdateUtc { get; set; }
 
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
+
+    public int? OwnerUserId { get; set; }
+
+    public User? OwnerUser { get; set; }
+
 }
