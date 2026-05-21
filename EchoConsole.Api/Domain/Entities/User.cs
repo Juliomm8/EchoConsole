@@ -23,4 +23,6 @@ public sealed class User : IdentityUser<int>
     public UserStatus Status { get; set; } = UserStatus.Active;
 
     public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public ICollection<Installation> Installations { get; set; } = new List<Installation>();
 }

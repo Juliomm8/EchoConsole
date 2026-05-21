@@ -1,0 +1,201 @@
+﻿@model EchoConsole.Web.Models.Profile.ProfileIndexViewModel
+
+@{
+    ViewData["Title"] = "PROFILE";
+}
+
+<div class="min-h-screen bg-[#070B12] text-slate-100">
+    <div class="mx-auto max-w-[1600px] px-6 py-8">
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
+                <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
+                    Operator Identity
+                </p>
+
+                <h1 class="mt-3 font-display text-4xl uppercase tracking-[0.16em] text-white">
+                    @Model.Alias
+                </h1>
+
+                <p class="mt-3 max-w-2xl text-sm text-slate-400">
+                    Premium player profile for Cosmic Diner telemetry ownership and personal gameplay visibility.
+                </p>
+
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <span class="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                        Theme: @Model.Theme
+                    </span>
+
+                    <span class="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-200">
+                        Role: @Model.Role
+                    </span>
+
+                    <span class="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
+                        Status: @Model.Status
+                    </span>
+                </div>
+
+                <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Installations
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.TotalInstallations.ToString("N0")
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Sessions
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.TotalSessions.ToString("N0")
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Play Time
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.TotalPlayTimeLabel
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Favorite Build
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.FavoriteBuild
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                            Last Activity
+                        </div>
+                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
+                            @Model.LastActivityLabel
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
+                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
+                    Player Card
+                </p>
+
+                <div class="mt-6 rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-[0_0_24px_rgba(0,255,255,0.04)]">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 font-display text-2xl uppercase tracking-[0.18em] text-cyan-200">
+                            @(Model.Alias.Length >= 2 ? Model.Alias.Substring(0, 2).ToUpperInvariant() : Model.Alias.ToUpperInvariant())
+                        </div>
+
+                        <div>
+                            <div class="font-display text-2xl uppercase tracking-[0.12em] text-white">
+                                @Model.Alias
+                            </div>
+                            <div class="mt-1 text-sm text-slate-400">
+                                @Model.Email
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-2 gap-3">
+                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                                Avatar
+                            </div>
+                            <div class="mt-1 text-sm font-semibold text-cyan-200">
+                                @Model.AvatarKey
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                                Theme
+                            </div>
+                            <div class="mt-1 text-sm font-semibold text-cyan-200">
+                                @Model.Theme
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                                Name
+                            </div>
+                            <div class="mt-1 text-sm font-semibold text-cyan-200">
+                                @Model.Name
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                                Access
+                            </div>
+                            <div class="mt-1 text-sm font-semibold text-cyan-200">
+                                @Model.Role
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
+                        Linked Installations
+                    </p>
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
+                        Owned Devices
+                    </h2>
+                </div>
+            </div>
+
+            @if (Model.Installations.Count == 0)
+            {
+                <div class="mt-6 rounded-xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-400">
+                    No installations have been linked to your account yet.
+                </div>
+            }
+            else
+            {
+                <div class="mt-6 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800">
+                        <thead>
+                            <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
+                                <th class="px-4 py-3">Device</th>
+                                <th class="px-4 py-3">Platform</th>
+                                <th class="px-4 py-3">Build</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">First Seen</th>
+                                <th class="px-4 py-3">Last Update</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-900">
+                            @foreach (var installation in Model.Installations)
+                            {
+                                <tr class="text-sm text-slate-300">
+                                    <td class="px-4 py-4">
+                                        <div class="font-medium text-white">@installation.DeviceName</div>
+                                        <div class="text-xs text-slate-500">@installation.DeviceModel</div>
+                                        <div class="mt-1 text-[11px] text-slate-600">@installation.InstallationId</div>
+                                    </td>
+                                    <td class="px-4 py-4">@installation.Platform</td>
+                                    <td class="px-4 py-4">@installation.BuildVersion</td>
+                                    <td class="px-4 py-4">@installation.Status</td>
+                                    <td class="px-4 py-4">@installation.FirstSeenLabel</td>
+                                    <td class="px-4 py-4">@installation.LastUpdateLabel</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+</div>

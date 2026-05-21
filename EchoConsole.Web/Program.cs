@@ -1,7 +1,10 @@
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
+using EchoConsole.Web.BackgroundServices;
+using EchoConsole.Web.Hubs;
 using EchoConsole.Web.Security;
 using EchoConsole.Web.Services.Api;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,38 +19,62 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 }
 
+// --- CONFIGURACIÓN DE CONTEXTO ---
 builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure();
+    }));
 
-builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
-{
-    options.User.RequireUniqueEmail = true;
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<TelemetryRelayService>();
 
-    options.Password.RequireDigit = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
+// --- CONFIGURACIÓN DE IDENTITY CORE ---
+builder.Services
+    .AddIdentityCore<User>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
 
-    options.SignIn.RequireConfirmedAccount = false;
-    options.SignIn.RequireConfirmedEmail = false;
-})
+        options.Password.RequireDigit = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 6;
+
+        options.SignIn.RequireConfirmedAccount = false;
+        options.SignIn.RequireConfirmedEmail = false;
+    })
+    .AddSignInManager<SignInManager<User>>()
     .AddEntityFrameworkStores<EchoConsoleDbContext>()
     .AddDefaultTokenProviders();
 
+// --- CONFIGURACIÓN DE AUTENTICACIÓN ---
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
+    })
+    .AddCookie(IdentityConstants.ApplicationScheme, options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.Cookie.Name = "EchoConsole.Auth";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, EchoConsoleUserClaimsPrincipalFactory>();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Auth/Login";
-    options.AccessDeniedPath = "/Auth/AccessDenied";
-    options.Cookie.Name = "EchoConsole.Auth";
-    options.ExpireTimeSpan = TimeSpan.FromDays(7);
-    options.SlidingExpiration = true;
-});
-
+// --- SEGURIDAD DE LA API ---
 builder.Services.AddTransient<AdminApiKeyHandler>();
 
+// --- CLIENTES HTTP ---
 builder.Services.AddHttpClient("EchoConsoleApiPublic", (serviceProvider, client) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
@@ -69,12 +96,14 @@ builder.Services.AddHttpClient("EchoConsoleApiAdmin", (serviceProvider, client) 
 })
 .AddHttpMessageHandler<AdminApiKeyHandler>();
 
+// --- SERVICIOS DE TELEMETRÍA ---
 builder.Services.AddScoped<EchoConsoleDashboardApiClient>();
 builder.Services.AddScoped<EchoConsoleInstallationsApiClient>();
 builder.Services.AddScoped<EchoConsoleBuildsApiClient>();
 builder.Services.AddScoped<EchoConsoleAlertsApiClient>();
 builder.Services.AddScoped<EchoConsoleUsersApiClient>();
 builder.Services.AddScoped<EchoConsoleHomeApiClient>();
+builder.Services.AddScoped<EchoConsoleProfileApiClient>();
 
 var app = builder.Build();
 
@@ -89,6 +118,8 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<AdminTelemetryHub>("/hubs/admin-telemetry");
 
 app.MapControllerRoute(
     name: "default",

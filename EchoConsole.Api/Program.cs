@@ -3,8 +3,11 @@ using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
+using EchoConsole.Api.Services.Ownership;
+using EchoConsole.Api.Services.Profile;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -42,10 +45,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddSignalR();
+builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
 builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -67,6 +71,14 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowCredentials();
     });
+});
+
+builder.Services.AddSingleton<IRealtimeApiKeyValidator, RealtimeApiKeyValidator>();
+builder.Services.AddSingleton<TelemetryHubApiKeyFilter>();
+
+builder.Services.AddSignalR(options =>
+{
+    options.AddFilter<TelemetryHubApiKeyFilter>();
 });
 
 // --- INYECCIÓN DEL SEEDER DE DATOS (Fake Data) ---

@@ -173,14 +173,14 @@
     <script src="~/js/installations-realtime.js" asp-append-version="true"></script>
     <script>
         window.echoConsoleInstallationsRealtime.init({
-            apiBaseUrl: "@apiBaseUrl",
+            webBaseUrl: window.location.origin,
             tableBodyId: "installations-table-body",
-            totalCountValueId: "installations-total-count-value",
+            totalCountValueId: "installations-total-count",
             pageNumberValueId: "installations-page-number",
             totalPagesValueId: "installations-total-pages",
-            prevPageLinkId: "installations-prev-page",
-            nextPageLinkId: "installations-next-page",
-            searchInputId: "searchTerm",
+            prevPageLinkId: "installations-prev-link",
+            nextPageLinkId: "installations-next-link",
+            searchInputId: "installations-search-term",
             pageSizeInputId: "installations-page-size",
             emptyTextElementId: "installations-empty-text"
         });

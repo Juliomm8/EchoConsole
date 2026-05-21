@@ -4,6 +4,7 @@ using EchoConsole.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EchoConsole.Api.Persistence.Migrations
 {
     [DbContext(typeof(EchoConsoleDbContext))]
-    partial class EchoConsoleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260520230328_FixUserRootMapping")]
+    partial class FixUserRootMapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -170,9 +173,6 @@ namespace EchoConsole.Api.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<int?>("OwnerUserId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Platform")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -198,8 +198,6 @@ namespace EchoConsole.Api.Persistence.Migrations
                         .IsUnique();
 
                     b.HasIndex("LastUpdateUtc");
-
-                    b.HasIndex("OwnerUserId");
 
                     b.ToTable("Installations");
                 });
@@ -439,16 +437,6 @@ namespace EchoConsole.Api.Persistence.Migrations
                     b.Navigation("Installation");
                 });
 
-            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.Installation", b =>
-                {
-                    b.HasOne("EchoConsole.Api.Domain.Entities.User", "OwnerUser")
-                        .WithMany("Installations")
-                        .HasForeignKey("OwnerUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("OwnerUser");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.HasOne("EchoConsole.Api.Domain.Entities.User", null)
@@ -479,11 +467,6 @@ namespace EchoConsole.Api.Persistence.Migrations
             modelBuilder.Entity("EchoConsole.Api.Domain.Entities.Installation", b =>
                 {
                     b.Navigation("Sessions");
-                });
-
-            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.User", b =>
-                {
-                    b.Navigation("Installations");
                 });
 #pragma warning restore 612, 618
         }

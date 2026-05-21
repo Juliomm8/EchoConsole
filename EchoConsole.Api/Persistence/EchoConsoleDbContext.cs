@@ -24,6 +24,8 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
 
         modelBuilder.Entity<User>(user =>
         {
+            user.HasBaseType((Type?)null);
+
             user.ToTable("Users");
 
             user.HasIndex(x => x.Email).IsUnique();
@@ -52,6 +54,11 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
                 .IsRequired();
 
             user.Property(x => x.CreatedAtUtc).IsRequired();
+
+            user.HasMany(x => x.Installations)
+                .WithOne(x => x.OwnerUser)
+                .HasForeignKey(x => x.OwnerUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
@@ -65,6 +72,7 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             installation.HasIndex(x => x.InstallationId).IsUnique();
             installation.HasIndex(x => x.DeviceName);
             installation.HasIndex(x => x.LastUpdateUtc);
+            installation.HasIndex(x => x.OwnerUserId);
 
             installation.Property(x => x.GameCode).HasMaxLength(64).IsRequired();
             installation.Property(x => x.BuildVersion).HasMaxLength(32).IsRequired();
@@ -75,6 +83,11 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             installation.Property(x => x.Processor).HasMaxLength(128);
             installation.Property(x => x.Gpu).HasMaxLength(128);
             installation.Property(x => x.Status).HasMaxLength(24).IsRequired();
+
+            installation.HasOne(x => x.OwnerUser)
+                .WithMany(x => x.Installations)
+                .HasForeignKey(x => x.OwnerUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // --- GameSession ---

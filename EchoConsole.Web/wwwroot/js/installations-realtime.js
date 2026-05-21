@@ -6,7 +6,7 @@
 
     function init(config) {
         options = {
-            apiBaseUrl: normalizeBaseUrl(config.apiBaseUrl),
+            webBaseUrl: normalizeBaseUrl(config?.webBaseUrl || window.location.origin),
             tableBodyId: config.tableBodyId,
             totalCountValueId: config.totalCountValueId,
             pageNumberValueId: config.pageNumberValueId,
@@ -17,11 +17,6 @@
             pageSizeInputId: config.pageSizeInputId,
             emptyTextElementId: config.emptyTextElementId
         };
-
-        if (!options.apiBaseUrl) {
-            console.error("Installations realtime: apiBaseUrl is missing.");
-            return;
-        }
 
         if (!window.signalR) {
             console.error("Installations realtime: SignalR library not found.");
@@ -36,10 +31,11 @@
 
         buildConnection();
         startConnection();
+        refreshInstallations();
     }
 
     function buildConnection() {
-        const hubUrl = buildApiUrl("/hubs/telemetry");
+        const hubUrl = buildWebUrl("/hubs/admin-telemetry");
 
         connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, { withCredentials: true })
@@ -47,8 +43,6 @@
             .configureLogging(signalR.LogLevel.Warning)
             .build();
 
-        connection.on("installationUpdated", onInstallationChanged);
-        connection.on("newInstallation", onInstallationChanged);
         connection.on("ReceiveTelemetryUpdate", onGenericTelemetryEvent);
 
         connection.onreconnecting(() => {
@@ -74,21 +68,14 @@
         try {
             await connection.start();
             console.info("Installations SignalR connected.");
+            scheduleRefresh(true);
         } catch (error) {
             console.error("Installations SignalR connection failed.", error);
             setTimeout(startConnection, 5000);
         }
     }
 
-    function onInstallationChanged() {
-        scheduleRefresh(false);
-    }
-
-    function onGenericTelemetryEvent(payload) {
-        if (!payload) {
-            return;
-        }
-
+    function onGenericTelemetryEvent() {
         scheduleRefresh(false);
     }
 
@@ -129,17 +116,18 @@
 
     async function fetchInstallationsPage(pageNumber, pageSize, searchTerm) {
         const params = new URLSearchParams();
-        params.set("page", String(pageNumber));
+        params.set("pageNumber", String(pageNumber));
         params.set("pageSize", String(pageSize));
 
         if (searchTerm) {
-            params.set("search", searchTerm);
+            params.set("searchTerm", searchTerm);
         }
 
-        const url = buildApiUrl(`/api/admin/installations?${params.toString()}`);
+        const url = buildWebUrl(`/Installations/ListData?${params.toString()}`);
 
         const response = await fetch(url, {
             method: "GET",
+            credentials: "same-origin",
             headers: {
                 "Accept": "application/json"
             }
@@ -257,8 +245,8 @@
         return Number.isNaN(value) || value < 1 ? 1 : value;
     }
 
-    function buildApiUrl(path) {
-        return `${options.apiBaseUrl}${path}`;
+    function buildWebUrl(path) {
+        return `${options.webBaseUrl}${path}`;
     }
 
     function normalizeBaseUrl(baseUrl) {
