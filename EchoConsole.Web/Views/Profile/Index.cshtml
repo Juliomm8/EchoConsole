@@ -211,13 +211,26 @@
                     <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
                         Owned Devices
                     </h2>
+                    <p class="mt-3 max-w-2xl text-sm text-slate-400">
+                        These devices are currently linked to your Echo Console account through the ownership system.
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-cyan-400/15 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
+                    @Model.Installations.Count device(s)
                 </div>
             </div>
 
             @if (Model.Installations.Count == 0)
             {
-                <div class="mt-6 rounded-xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-400">
-                    No installations have been linked to your account yet.
+                <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-8 text-center">
+                    <p class="font-display text-sm uppercase tracking-[0.24em] text-slate-400">
+                        No linked devices
+                    </p>
+
+                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                        Paste the Installation ID from Cosmic Diner in the ownership panel above to link your first device.
+                    </p>
                 </div>
             }
             else
@@ -227,6 +240,7 @@
                         <thead>
                             <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
                                 <th class="px-4 py-3">Device</th>
+                                <th class="px-4 py-3">Installation ID</th>
                                 <th class="px-4 py-3">Platform</th>
                                 <th class="px-4 py-3">Build</th>
                                 <th class="px-4 py-3">Status</th>
@@ -234,20 +248,35 @@
                                 <th class="px-4 py-3">Last Update</th>
                             </tr>
                         </thead>
+
                         <tbody class="divide-y divide-slate-900">
                             @foreach (var installation in Model.Installations)
                             {
-                                <tr class="text-sm text-slate-300">
+                                <tr class="text-sm text-slate-300 transition hover:bg-slate-900/70">
                                     <td class="px-4 py-4">
                                         <div class="font-medium text-white">@installation.DeviceName</div>
                                         <div class="text-xs text-slate-500">@installation.DeviceModel</div>
-                                        <div class="mt-1 text-[11px] text-slate-600">@installation.InstallationId</div>
                                     </td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="max-w-[260px] truncate text-xs text-cyan-300" title="@installation.InstallationId">
+                                            @installation.InstallationId
+                                        </div>
+                                    </td>
+
                                     <td class="px-4 py-4">@installation.Platform</td>
+
                                     <td class="px-4 py-4">@installation.BuildVersion</td>
-                                    <td class="px-4 py-4">@installation.Status</td>
-                                    <td class="px-4 py-4">@installation.FirstSeenLabel</td>
-                                    <td class="px-4 py-4">@installation.LastUpdateLabel</td>
+
+                                    <td class="px-4 py-4">
+                                        <span class="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                                            @installation.Status
+                                        </span>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-slate-400">@installation.FirstSeenLabel</td>
+
+                                    <td class="px-4 py-4 text-slate-400">@installation.LastUpdateLabel</td>
                                 </tr>
                             }
                         </tbody>

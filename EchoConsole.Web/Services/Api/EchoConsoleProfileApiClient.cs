@@ -28,7 +28,7 @@ public sealed class EchoConsoleProfileApiClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve premium profile for user {UserId}.", userId);
+            _logger.LogError(ex, "Failed to retrieve profile for user {UserId}.", userId);
             return null;
         }
     }

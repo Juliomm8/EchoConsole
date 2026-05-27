@@ -49,11 +49,11 @@ public sealed class UserDashboardService : IUserDashboardService
             .Select(x => new LinkedInstallationDto
             {
                 InstallationId = x.InstallationId,
-                DeviceName = x.DeviceName,
-                DeviceModel = x.DeviceModel,
-                Platform = x.Platform,
-                BuildVersion = x.BuildVersion,
-                Status = x.Status,
+                DeviceName = string.IsNullOrWhiteSpace(x.DeviceName) ? "-" : x.DeviceName,
+                DeviceModel = string.IsNullOrWhiteSpace(x.DeviceModel) ? "-" : x.DeviceModel,
+                Platform = string.IsNullOrWhiteSpace(x.Platform) ? "-" : x.Platform,
+                BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion) ? "-" : x.BuildVersion,
+                Status = string.IsNullOrWhiteSpace(x.Status) ? "-" : x.Status,
                 FirstSeenUtc = x.FirstSeenUtc,
                 LastUpdateUtc = x.LastUpdateUtc
             })
@@ -70,9 +70,6 @@ public sealed class UserDashboardService : IUserDashboardService
                 x.LastHeartbeatUtc
             })
             .ToListAsync(cancellationToken);
-
-        var totalInstallations = linkedInstallations.Count;
-        var totalSessions = sessions.Count;
 
         var totalPlayTimeMinutes = 0;
         DateTimeOffset? lastActivityUtc = null;
@@ -96,9 +93,9 @@ public sealed class UserDashboardService : IUserDashboardService
         var favoriteBuild = sessions
             .Where(x => !string.IsNullOrWhiteSpace(x.BuildVersion))
             .GroupBy(x => x.BuildVersion)
-            .OrderByDescending(g => g.Count())
-            .ThenBy(g => g.Key)
-            .Select(g => g.Key)
+            .OrderByDescending(x => x.Count())
+            .ThenBy(x => x.Key)
+            .Select(x => x.Key)
             .FirstOrDefault();
 
         var profile = new UserProfileDto
@@ -111,8 +108,8 @@ public sealed class UserDashboardService : IUserDashboardService
             Theme = string.IsNullOrWhiteSpace(user.Theme) ? "cyan" : user.Theme,
             Role = user.Role.ToString(),
             Status = user.Status.ToString(),
-            TotalInstallations = totalInstallations,
-            TotalSessions = totalSessions,
+            TotalInstallations = linkedInstallations.Count,
+            TotalSessions = sessions.Count,
             TotalPlayTimeMinutes = totalPlayTimeMinutes,
             LastActivityUtc = lastActivityUtc,
             FavoriteBuild = string.IsNullOrWhiteSpace(favoriteBuild) ? "N/A" : favoriteBuild,
@@ -120,10 +117,10 @@ public sealed class UserDashboardService : IUserDashboardService
         };
 
         _logger.LogInformation(
-            "Built premium profile for user {UserId}. Installations={Installations}, Sessions={Sessions}.",
+            "Built profile for user {UserId}. LinkedInstallations={LinkedInstallations}, Sessions={Sessions}.",
             userId,
-            totalInstallations,
-            totalSessions);
+            linkedInstallations.Count,
+            sessions.Count);
 
         return UserDashboardResult.Success(profile);
     }

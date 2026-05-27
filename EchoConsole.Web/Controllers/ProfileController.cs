@@ -29,14 +29,14 @@ public sealed class ProfileController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetCurrentUserId();
 
-        if (!int.TryParse(userIdClaim, out var userId))
+        if (userId is null)
         {
             return Challenge();
         }
 
-        var profile = await _profileApiClient.GetProfileAsync(userId, cancellationToken);
+        var profile = await _profileApiClient.GetProfileAsync(userId.Value, cancellationToken);
 
         if (profile is null)
         {
@@ -44,7 +44,8 @@ public sealed class ProfileController : Controller
             {
                 Alias = User.FindFirst("alias")?.Value ?? User.Identity?.Name ?? "Player",
                 Role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Viewer",
-                Status = User.FindFirst("app_status")?.Value ?? "Active"
+                Status = User.FindFirst("app_status")?.Value ?? "Active",
+                Installations = Array.Empty<LinkedInstallationViewModel>()
             };
 
             ViewData["Title"] = "PROFILE";
@@ -53,37 +54,7 @@ public sealed class ProfileController : Controller
             return View(fallbackModel);
         }
 
-        var model = new ProfileIndexViewModel
-        {
-            Alias = profile.Alias,
-            Name = profile.Name,
-            Email = profile.Email,
-            AvatarKey = profile.AvatarKey,
-            Theme = profile.Theme,
-            Role = profile.Role,
-            Status = profile.Status,
-            TotalInstallations = profile.TotalInstallations,
-            TotalSessions = profile.TotalSessions,
-            TotalPlayTimeMinutes = profile.TotalPlayTimeMinutes,
-            TotalPlayTimeLabel = FormatMinutes(profile.TotalPlayTimeMinutes),
-            LastActivityLabel = profile.LastActivityUtc.HasValue
-                ? FormatRelativeDate(profile.LastActivityUtc.Value)
-                : "N/A",
-            FavoriteBuild = string.IsNullOrWhiteSpace(profile.FavoriteBuild) ? "N/A" : profile.FavoriteBuild,
-            Installations = profile.Installations
-                .Select(x => new LinkedInstallationViewModel
-                {
-                    InstallationId = x.InstallationId,
-                    DeviceName = x.DeviceName,
-                    DeviceModel = x.DeviceModel,
-                    Platform = x.Platform,
-                    BuildVersion = x.BuildVersion,
-                    Status = x.Status,
-                    FirstSeenLabel = x.FirstSeenUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"),
-                    LastUpdateLabel = x.LastUpdateUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
-                })
-                .ToList()
-        };
+        var model = MapProfileToViewModel(profile);
 
         ViewData["Title"] = "PROFILE";
         ViewData["TitleI18nKey"] = "profile_page_title";
@@ -97,9 +68,9 @@ public sealed class ProfileController : Controller
         string installationId,
         CancellationToken cancellationToken = default)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetCurrentUserId();
 
-        if (!int.TryParse(userIdClaim, out var userId))
+        if (userId is null)
         {
             return Challenge();
         }
@@ -121,7 +92,7 @@ public sealed class ProfileController : Controller
         var request = new ClaimInstallationRequestModel
         {
             InstallationId = parsedInstallationId,
-            UserId = userId
+            UserId = userId.Value
         };
 
         try
@@ -161,7 +132,7 @@ public sealed class ProfileController : Controller
                 "Claim installation failed with status {StatusCode}. InstallationId={InstallationId}, UserId={UserId}.",
                 response.StatusCode,
                 parsedInstallationId,
-                userId);
+                userId.Value);
 
             TempData["ClaimStatusType"] = "error";
             TempData["ClaimStatusMessage"] = "The platform could not link this installation right now.";
@@ -174,13 +145,57 @@ public sealed class ProfileController : Controller
                 ex,
                 "Failed to claim installation {InstallationId} for user {UserId}.",
                 parsedInstallationId,
-                userId);
+                userId.Value);
 
             TempData["ClaimStatusType"] = "error";
             TempData["ClaimStatusMessage"] = "The platform could not process your request right now.";
 
             return RedirectToAction(nameof(Index));
         }
+    }
+
+    private int? GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        return int.TryParse(userIdClaim, out var userId)
+            ? userId
+            : null;
+    }
+
+    private static ProfileIndexViewModel MapProfileToViewModel(UserProfileApiModel profile)
+    {
+        return new ProfileIndexViewModel
+        {
+            Alias = profile.Alias,
+            Name = profile.Name,
+            Email = profile.Email,
+            AvatarKey = profile.AvatarKey,
+            Theme = profile.Theme,
+            Role = profile.Role,
+            Status = profile.Status,
+            TotalInstallations = profile.TotalInstallations,
+            TotalSessions = profile.TotalSessions,
+            TotalPlayTimeMinutes = profile.TotalPlayTimeMinutes,
+            TotalPlayTimeLabel = FormatMinutes(profile.TotalPlayTimeMinutes),
+            LastActivityLabel = profile.LastActivityUtc.HasValue
+                ? FormatRelativeDate(profile.LastActivityUtc.Value)
+                : "N/A",
+            FavoriteBuild = string.IsNullOrWhiteSpace(profile.FavoriteBuild) ? "N/A" : profile.FavoriteBuild,
+            Installations = profile.Installations
+                .Select(x => new LinkedInstallationViewModel
+                {
+                    InstallationId = x.InstallationId,
+                    DeviceName = string.IsNullOrWhiteSpace(x.DeviceName) ? "-" : x.DeviceName,
+                    DeviceModel = string.IsNullOrWhiteSpace(x.DeviceModel) ? "-" : x.DeviceModel,
+                    Platform = string.IsNullOrWhiteSpace(x.Platform) ? "-" : x.Platform,
+                    BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion) ? "-" : x.BuildVersion,
+                    Status = string.IsNullOrWhiteSpace(x.Status) ? "-" : x.Status,
+                    FirstSeenLabel = x.FirstSeenUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"),
+                    LastUpdateLabel = x.LastUpdateUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                })
+                .ToList()
+        };
     }
 
     private static string FormatMinutes(int totalMinutes)
