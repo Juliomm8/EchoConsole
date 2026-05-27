@@ -45,7 +45,9 @@ public sealed class InstallationOwnershipService : IInstallationOwnershipService
 
         if (installation.OwnerUserId.HasValue && installation.OwnerUserId.Value != userId)
         {
-            return ClaimInstallationResult.AlreadyOwnedByAnotherUser(installationId, installation.OwnerUserId);
+            return ClaimInstallationResult.AlreadyOwnedByAnotherUser(
+                installationId,
+                installation.OwnerUserId);
         }
 
         installation.OwnerUserId = userId;
@@ -58,5 +60,53 @@ public sealed class InstallationOwnershipService : IInstallationOwnershipService
             userId);
 
         return ClaimInstallationResult.Success(installationId, userId);
+    }
+
+    public async Task<UnlinkInstallationResult> UnlinkInstallationAsync(
+        Guid installationId,
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        var installation = await _dbContext.Installations
+            .FirstOrDefaultAsync(x => x.InstallationId == installationId, cancellationToken);
+
+        if (installation is null)
+        {
+            return UnlinkInstallationResult.InstallationNotFound(installationId);
+        }
+
+        var userExists = await _dbContext.Users
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == userId, cancellationToken);
+
+        if (!userExists)
+        {
+            return UnlinkInstallationResult.UserNotFound(installationId);
+        }
+
+        if (!installation.OwnerUserId.HasValue)
+        {
+            return UnlinkInstallationResult.AlreadyUnlinked(installationId);
+        }
+
+        if (installation.OwnerUserId.Value != userId)
+        {
+            return UnlinkInstallationResult.NotOwner(
+                installationId,
+                installation.OwnerUserId);
+        }
+
+        var previousOwnerUserId = installation.OwnerUserId.Value;
+
+        installation.OwnerUserId = null;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "User {UserId} unlinked Installation {InstallationId}. Historical sessions were preserved.",
+            userId,
+            installationId);
+
+        return UnlinkInstallationResult.Success(installationId, previousOwnerUserId);
     }
 }

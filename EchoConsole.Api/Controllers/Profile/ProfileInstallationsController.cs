@@ -47,4 +47,34 @@ public sealed class ProfileInstallationsController : ControllerBase
             _ => StatusCode(StatusCodes.Status500InternalServerError, response)
         };
     }
+
+    [HttpPost("unlink")]
+    public async Task<IActionResult> UnlinkInstallation(
+        [FromBody] UnlinkInstallationRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _installationOwnershipService.UnlinkInstallationAsync(
+            request.InstallationId,
+            request.UserId,
+            cancellationToken);
+
+        var response = new UnlinkInstallationResponseDto
+        {
+            Success = result.Status is UnlinkInstallationStatus.Success
+                or UnlinkInstallationStatus.AlreadyUnlinked,
+            Message = result.Message,
+            InstallationId = result.InstallationId,
+            PreviousOwnerUserId = result.PreviousOwnerUserId
+        };
+
+        return result.Status switch
+        {
+            UnlinkInstallationStatus.Success => Ok(response),
+            UnlinkInstallationStatus.AlreadyUnlinked => Ok(response),
+            UnlinkInstallationStatus.InstallationNotFound => NotFound(response),
+            UnlinkInstallationStatus.UserNotFound => NotFound(response),
+            UnlinkInstallationStatus.NotOwner => Forbid(),
+            _ => StatusCode(StatusCodes.Status500InternalServerError, response)
+        };
+    }
 }

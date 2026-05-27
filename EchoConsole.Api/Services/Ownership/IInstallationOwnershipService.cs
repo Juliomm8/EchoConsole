@@ -6,4 +6,9 @@ public interface IInstallationOwnershipService
         Guid installationId,
         int userId,
         CancellationToken cancellationToken = default);
+
+    Task<UnlinkInstallationResult> UnlinkInstallationAsync(
+        Guid installationId,
+        int userId,
+        CancellationToken cancellationToken = default);
 }
