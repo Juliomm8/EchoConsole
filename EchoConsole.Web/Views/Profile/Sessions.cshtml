@@ -64,6 +64,7 @@
                                 <th class="px-4 py-3">Build</th>
                                 <th class="px-4 py-3">Device</th>
                                 <th class="px-4 py-3">Last Signal</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
 
@@ -112,6 +113,14 @@
 
                                     <td class="px-4 py-4 text-slate-400">
                                         @session.LastHeartbeatLabel
+                                    </td>
+                                    <td class="px-4 py-4 text-right">
+                                        <a asp-controller="Profile"
+                                           asp-action="SessionDetail"
+                                           asp-route-id="@session.SessionId"
+                                           class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200 transition hover:bg-cyan-500/15">
+                                            Open
+                                        </a>
                                     </td>
                                 </tr>
                             }

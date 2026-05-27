@@ -141,11 +141,11 @@ public sealed class ProfileController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    [HttpGet]
+    [HttpGet("Profile/Sessions")]
     public async Task<IActionResult> Sessions(
-    int page = 1,
-    int pageSize = 10,
-    CancellationToken cancellationToken = default)
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
         var userId = GetCurrentUserId();
 
@@ -202,6 +202,53 @@ public sealed class ProfileController : Controller
         ViewData["TitleI18nKey"] = "profile_sessions_page_title";
 
         return View(model);
+    }
+
+    [HttpGet("Profile/Sessions/{id:guid}")]
+    public async Task<IActionResult> SessionDetail(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        var detail = await _profileApiClient.GetSessionDetailAsync(
+            userId.Value,
+            id,
+            cancellationToken);
+
+        if (detail is null)
+        {
+            return NotFound();
+        }
+
+        var model = new ProfileSessionDetailViewModel
+        {
+            SessionId = detail.SessionId,
+            InstallationId = detail.InstallationId,
+            DeviceName = string.IsNullOrWhiteSpace(detail.DeviceName) ? "-" : detail.DeviceName,
+            DeviceModel = string.IsNullOrWhiteSpace(detail.DeviceModel) ? "-" : detail.DeviceModel,
+            Platform = string.IsNullOrWhiteSpace(detail.Platform) ? "-" : detail.Platform,
+            BuildVersion = string.IsNullOrWhiteSpace(detail.BuildVersion) ? "-" : detail.BuildVersion,
+            CurrentScene = string.IsNullOrWhiteSpace(detail.CurrentScene) ? "-" : detail.CurrentScene,
+            CurrentGameState = string.IsNullOrWhiteSpace(detail.CurrentGameState) ? "-" : detail.CurrentGameState,
+            CurrentPhase = string.IsNullOrWhiteSpace(detail.CurrentPhase) ? "-" : detail.CurrentPhase,
+            StatusLabel = string.IsNullOrWhiteSpace(detail.StatusLabel) ? "-" : detail.StatusLabel,
+            IsLive = detail.IsLive,
+            StartedAtLabel = FormatDateTime(detail.StartedAtUtc),
+            EndedAtLabel = detail.EndedAtUtc.HasValue ? FormatDateTime(detail.EndedAtUtc.Value) : "Not ended",
+            LastHeartbeatLabel = FormatDateTime(detail.LastHeartbeatUtc),
+            DurationLabel = FormatMinutes(detail.DurationMinutes)
+        };
+
+        ViewData["Title"] = "SESSION DETAIL";
+        ViewData["TitleI18nKey"] = "profile_session_detail_page_title";
+
+        return View("SessionDetail", model);
     }
 
     private int? GetCurrentUserId()

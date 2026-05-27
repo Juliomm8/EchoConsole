@@ -13,4 +13,9 @@ public interface IUserDashboardService
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+
+    Task<UserSessionDetailDto?> GetSessionDetailAsync(
+        int userId,
+        Guid sessionId,
+        CancellationToken cancellationToken = default);
 }
