@@ -34,6 +34,34 @@ public sealed class EchoConsoleProfileApiClient
         }
     }
 
+    public async Task<UserSessionHistoryPageApiModel?> GetSessionHistoryAsync(
+        int userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 10 : Math.Min(pageSize, 50);
+
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<UserSessionHistoryPageApiModel>(
+                $"/api/profile/sessions/{userId}?page={page}&pageSize={pageSize}",
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to retrieve session history for user {UserId}. Page={Page}, PageSize={PageSize}.",
+                userId,
+                page,
+                pageSize);
+
+            return null;
+        }
+    }
+
     public async Task<ClaimInstallationResponseModel?> ClaimInstallationAsync(
         ClaimInstallationRequestModel request,
         CancellationToken cancellationToken = default)
