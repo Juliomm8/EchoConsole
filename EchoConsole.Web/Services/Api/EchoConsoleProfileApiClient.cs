@@ -62,6 +62,63 @@ public sealed class EchoConsoleProfileApiClient
         }
     }
 
+    public async Task<UserSessionDetailApiModel?> GetSessionDetailAsync(
+        int userId,
+        Guid sessionId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync(
+                $"/api/profile/sessions/{userId}/{sessionId}",
+                cancellationToken);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.LogWarning(
+                    "Session detail was not found or not owned by user. UserId={UserId}, SessionId={SessionId}.",
+                    userId,
+                    sessionId);
+
+                return null;
+            }
+
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                _logger.LogWarning(
+                    "Session detail request was forbidden. UserId={UserId}, SessionId={SessionId}.",
+                    userId,
+                    sessionId);
+
+                return null;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning(
+                    "Session detail request failed. UserId={UserId}, SessionId={SessionId}, StatusCode={StatusCode}.",
+                    userId,
+                    sessionId,
+                    response.StatusCode);
+
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<UserSessionDetailApiModel>(
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to retrieve session detail for user {UserId}. SessionId={SessionId}.",
+                userId,
+                sessionId);
+
+            return null;
+        }
+    }
+
     public async Task<ClaimInstallationResponseModel?> ClaimInstallationAsync(
         ClaimInstallationRequestModel request,
         CancellationToken cancellationToken = default)

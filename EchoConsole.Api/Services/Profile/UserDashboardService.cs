@@ -218,6 +218,74 @@ public sealed class UserDashboardService : IUserDashboardService
         };
     }
 
+    public async Task<UserSessionDetailDto?> GetSessionDetailAsync(
+    int userId,
+    Guid sessionId,
+    CancellationToken cancellationToken = default)
+    {
+        var userExists = await _dbContext.Users
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == userId, cancellationToken);
+
+        if (!userExists)
+        {
+            return null;
+        }
+
+        var rawSession = await _dbContext.GameSessions
+            .AsNoTracking()
+            .Where(x => x.SessionId == sessionId && x.Installation.OwnerUserId == userId)
+            .Select(x => new
+            {
+                x.SessionId,
+                InstallationId = x.Installation.InstallationId,
+                DeviceName = x.Installation.DeviceName,
+                DeviceModel = x.Installation.DeviceModel,
+                Platform = x.Installation.Platform,
+                x.BuildVersion,
+                x.CurrentScene,
+                x.CurrentGameState,
+                x.CurrentPhase,
+                Status = (int)x.Status,
+                x.StartedAtUtc,
+                x.EndedAtUtc,
+                x.LastHeartbeatUtc
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (rawSession is null)
+        {
+            return null;
+        }
+
+        var endUtc = rawSession.EndedAtUtc ?? rawSession.LastHeartbeatUtc;
+        var duration = endUtc - rawSession.StartedAtUtc;
+
+        var durationMinutes = duration > TimeSpan.Zero
+            ? (int)Math.Floor(duration.TotalMinutes)
+            : 0;
+
+        return new UserSessionDetailDto
+        {
+            SessionId = rawSession.SessionId,
+            InstallationId = rawSession.InstallationId,
+            DeviceName = string.IsNullOrWhiteSpace(rawSession.DeviceName) ? "-" : rawSession.DeviceName,
+            DeviceModel = string.IsNullOrWhiteSpace(rawSession.DeviceModel) ? "-" : rawSession.DeviceModel,
+            Platform = string.IsNullOrWhiteSpace(rawSession.Platform) ? "-" : rawSession.Platform,
+            BuildVersion = string.IsNullOrWhiteSpace(rawSession.BuildVersion) ? "-" : rawSession.BuildVersion,
+            CurrentScene = string.IsNullOrWhiteSpace(rawSession.CurrentScene) ? "-" : rawSession.CurrentScene,
+            CurrentGameState = string.IsNullOrWhiteSpace(rawSession.CurrentGameState) ? "-" : rawSession.CurrentGameState,
+            CurrentPhase = string.IsNullOrWhiteSpace(rawSession.CurrentPhase) ? "-" : rawSession.CurrentPhase,
+            Status = rawSession.Status,
+            StatusLabel = MapSessionStatusLabel(rawSession.Status),
+            StartedAtUtc = rawSession.StartedAtUtc,
+            EndedAtUtc = rawSession.EndedAtUtc,
+            LastHeartbeatUtc = rawSession.LastHeartbeatUtc,
+            DurationMinutes = durationMinutes,
+            IsLive = rawSession.Status == 1 && rawSession.EndedAtUtc is null
+        };
+    }
+
     private static string MapSessionStatusLabel(int status)
     {
         return status switch

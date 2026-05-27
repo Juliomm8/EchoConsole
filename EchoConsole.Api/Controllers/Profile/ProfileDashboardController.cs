@@ -55,4 +55,23 @@ public sealed class ProfileDashboardController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpGet("sessions/{userId:int}/{sessionId:guid}")]
+    public async Task<IActionResult> GetSessionDetail(
+        int userId,
+        Guid sessionId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _userDashboardService.GetSessionDetailAsync(
+            userId,
+            sessionId,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound(new { message = "Session was not found for this user." });
+        }
+
+        return Ok(result);
+    }
 }
