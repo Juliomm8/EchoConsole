@@ -1,6 +1,4 @@
-﻿using System.Net;
-using System.Net.Http.Json;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using EchoConsole.Web.Models.Api.Profile;
 using EchoConsole.Web.Models.Profile;
 using EchoConsole.Web.Services.Api;
@@ -13,16 +11,13 @@ namespace EchoConsole.Web.Controllers;
 public sealed class ProfileController : Controller
 {
     private readonly EchoConsoleProfileApiClient _profileApiClient;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ProfileController> _logger;
 
     public ProfileController(
         EchoConsoleProfileApiClient profileApiClient,
-        IHttpClientFactory httpClientFactory,
         ILogger<ProfileController> logger)
     {
         _profileApiClient = profileApiClient;
-        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -75,14 +70,7 @@ public sealed class ProfileController : Controller
             return Challenge();
         }
 
-        if (string.IsNullOrWhiteSpace(installationId))
-        {
-            TempData["ClaimStatusType"] = "error";
-            TempData["ClaimStatusMessage"] = "Installation ID is required.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        if (!Guid.TryParse(installationId.Trim(), out var parsedInstallationId))
+        if (!TryParseInstallationId(installationId, out var parsedInstallationId))
         {
             TempData["ClaimStatusType"] = "error";
             TempData["ClaimStatusMessage"] = "Installation ID format is invalid.";
@@ -95,63 +83,62 @@ public sealed class ProfileController : Controller
             UserId = userId.Value
         };
 
-        try
+        var result = await _profileApiClient.ClaimInstallationAsync(request, cancellationToken);
+
+        if (result?.Success == true)
         {
-            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
-
-            var response = await client.PostAsJsonAsync(
-                "/api/profile/installations/claim",
-                request,
-                cancellationToken);
-
-            var payload = await response.Content.ReadFromJsonAsync<ClaimInstallationResponseModel>(
-                cancellationToken: cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                TempData["ClaimStatusType"] = "success";
-                TempData["ClaimStatusMessage"] = payload?.Message ?? "Installation successfully linked.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (response.StatusCode == HttpStatusCode.NotFound)
-            {
-                TempData["ClaimStatusType"] = "error";
-                TempData["ClaimStatusMessage"] = payload?.Message ?? "Installation or user was not found.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (response.StatusCode == HttpStatusCode.Conflict)
-            {
-                TempData["ClaimStatusType"] = "error";
-                TempData["ClaimStatusMessage"] = payload?.Message ?? "This installation is already linked to another account.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            _logger.LogWarning(
-                "Claim installation failed with status {StatusCode}. InstallationId={InstallationId}, UserId={UserId}.",
-                response.StatusCode,
-                parsedInstallationId,
-                userId.Value);
-
+            TempData["ClaimStatusType"] = "success";
+            TempData["ClaimStatusMessage"] = result.Message;
+        }
+        else
+        {
             TempData["ClaimStatusType"] = "error";
-            TempData["ClaimStatusMessage"] = "The platform could not link this installation right now.";
+            TempData["ClaimStatusMessage"] = result?.Message ?? "The platform could not link this installation right now.";
+        }
 
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UnlinkInstallation(
+        string installationId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        if (!TryParseInstallationId(installationId, out var parsedInstallationId))
+        {
+            TempData["ClaimStatusType"] = "error";
+            TempData["ClaimStatusMessage"] = "Installation ID format is invalid.";
             return RedirectToAction(nameof(Index));
         }
-        catch (Exception ex)
+
+        var request = new UnlinkInstallationRequestModel
         {
-            _logger.LogError(
-                ex,
-                "Failed to claim installation {InstallationId} for user {UserId}.",
-                parsedInstallationId,
-                userId.Value);
+            InstallationId = parsedInstallationId,
+            UserId = userId.Value
+        };
 
-            TempData["ClaimStatusType"] = "error";
-            TempData["ClaimStatusMessage"] = "The platform could not process your request right now.";
+        var result = await _profileApiClient.UnlinkInstallationAsync(request, cancellationToken);
 
-            return RedirectToAction(nameof(Index));
+        if (result?.Success == true)
+        {
+            TempData["ClaimStatusType"] = "success";
+            TempData["ClaimStatusMessage"] = result.Message;
         }
+        else
+        {
+            TempData["ClaimStatusType"] = "error";
+            TempData["ClaimStatusMessage"] = result?.Message ?? "The platform could not unlink this installation right now.";
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     private int? GetCurrentUserId()
@@ -161,6 +148,14 @@ public sealed class ProfileController : Controller
         return int.TryParse(userIdClaim, out var userId)
             ? userId
             : null;
+    }
+
+    private static bool TryParseInstallationId(string? installationId, out Guid parsedInstallationId)
+    {
+        parsedInstallationId = Guid.Empty;
+
+        return !string.IsNullOrWhiteSpace(installationId)
+            && Guid.TryParse(installationId.Trim(), out parsedInstallationId);
     }
 
     private static ProfileIndexViewModel MapProfileToViewModel(UserProfileApiModel profile)
