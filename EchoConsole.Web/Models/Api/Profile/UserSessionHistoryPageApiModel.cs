@@ -1,0 +1,18 @@
+﻿namespace EchoConsole.Web.Models.Api.Profile;
+
+public sealed class UserSessionHistoryPageApiModel
+{
+    public int Page { get; set; }
+
+    public int PageSize { get; set; }
+
+    public int TotalCount { get; set; }
+
+    public int TotalPages { get; set; }
+
+    public bool HasPreviousPage { get; set; }
+
+    public bool HasNextPage { get; set; }
+
+    public IReadOnlyList<UserSessionHistoryItemApiModel> Items { get; set; } = Array.Empty<UserSessionHistoryItemApiModel>();
+}

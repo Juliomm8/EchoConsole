@@ -124,4 +124,108 @@ public sealed class UserDashboardService : IUserDashboardService
 
         return UserDashboardResult.Success(profile);
     }
+
+    public async Task<UserSessionHistoryPageDto?> GetSessionHistoryAsync(
+        int userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 10 : Math.Min(pageSize, 50);
+
+        var userExists = await _dbContext.Users
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == userId, cancellationToken);
+
+        if (!userExists)
+        {
+            return null;
+        }
+
+        var query = _dbContext.GameSessions
+            .AsNoTracking()
+            .Where(x => x.Installation.OwnerUserId == userId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var totalPages = totalCount == 0
+            ? 1
+            : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        if (page > totalPages)
+        {
+            page = totalPages;
+        }
+
+        var rawItems = await query
+            .OrderByDescending(x => x.StartedAtUtc)
+            .ThenByDescending(x => x.LastHeartbeatUtc)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new
+            {
+                x.SessionId,
+                InstallationId = x.Installation.InstallationId,
+                DeviceName = x.Installation.DeviceName,
+                x.BuildVersion,
+                x.CurrentScene,
+                x.CurrentPhase,
+                Status = (int)x.Status,
+                x.StartedAtUtc,
+                x.EndedAtUtc,
+                x.LastHeartbeatUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        var items = rawItems
+            .Select(x =>
+            {
+                var endUtc = x.EndedAtUtc ?? x.LastHeartbeatUtc;
+                var duration = endUtc - x.StartedAtUtc;
+                var durationMinutes = duration > TimeSpan.Zero
+                    ? (int)Math.Floor(duration.TotalMinutes)
+                    : 0;
+
+                return new UserSessionHistoryItemDto
+                {
+                    SessionId = x.SessionId,
+                    InstallationId = x.InstallationId,
+                    DeviceName = string.IsNullOrWhiteSpace(x.DeviceName) ? "-" : x.DeviceName,
+                    BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion) ? "-" : x.BuildVersion,
+                    CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene) ? "-" : x.CurrentScene,
+                    CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase) ? "-" : x.CurrentPhase,
+                    Status = x.Status,
+                    StatusLabel = MapSessionStatusLabel(x.Status),
+                    StartedAtUtc = x.StartedAtUtc,
+                    EndedAtUtc = x.EndedAtUtc,
+                    LastHeartbeatUtc = x.LastHeartbeatUtc,
+                    DurationMinutes = durationMinutes,
+                    IsLive = x.Status == 1 && x.EndedAtUtc is null
+                };
+            })
+            .ToList();
+
+        return new UserSessionHistoryPageDto
+        {
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            HasPreviousPage = page > 1,
+            HasNextPage = page < totalPages,
+            Items = items
+        };
+    }
+
+    private static string MapSessionStatusLabel(int status)
+    {
+        return status switch
+        {
+            1 => "Live",
+            2 => "Completed",
+            3 => "Expired",
+            _ => $"Unknown ({status})"
+        };
+    }
 }

@@ -141,6 +141,69 @@ public sealed class ProfileController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Sessions(
+    int page = 1,
+    int pageSize = 10,
+    CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 10 : Math.Min(pageSize, 50);
+
+        var result = await _profileApiClient.GetSessionHistoryAsync(
+            userId.Value,
+            page,
+            pageSize,
+            cancellationToken);
+
+        var model = result is null
+            ? new ProfileSessionHistoryViewModel
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = 0,
+                TotalPages = 1,
+                HasPreviousPage = false,
+                HasNextPage = false,
+                Items = Array.Empty<ProfileSessionHistoryRowViewModel>()
+            }
+            : new ProfileSessionHistoryViewModel
+            {
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount,
+                TotalPages = result.TotalPages,
+                HasPreviousPage = result.HasPreviousPage,
+                HasNextPage = result.HasNextPage,
+                Items = result.Items.Select(x => new ProfileSessionHistoryRowViewModel
+                {
+                    SessionId = x.SessionId,
+                    InstallationId = x.InstallationId,
+                    DeviceName = string.IsNullOrWhiteSpace(x.DeviceName) ? "-" : x.DeviceName,
+                    BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion) ? "-" : x.BuildVersion,
+                    CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene) ? "-" : x.CurrentScene,
+                    CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase) ? "-" : x.CurrentPhase,
+                    StatusLabel = string.IsNullOrWhiteSpace(x.StatusLabel) ? "-" : x.StatusLabel,
+                    IsLive = x.IsLive,
+                    StartedAtLabel = FormatDateTime(x.StartedAtUtc),
+                    DurationLabel = FormatMinutes(x.DurationMinutes),
+                    LastHeartbeatLabel = FormatRelativeDate(x.LastHeartbeatUtc)
+                }).ToList()
+            };
+
+        ViewData["Title"] = "SESSION HISTORY";
+        ViewData["TitleI18nKey"] = "profile_sessions_page_title";
+
+        return View(model);
+    }
+
     private int? GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -240,6 +303,11 @@ public sealed class ProfileController : Controller
             return $"{(int)diff.TotalDays}d ago";
         }
 
+        return utcDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+    }
+
+    private static string FormatDateTime(DateTimeOffset utcDate)
+    {
         return utcDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
     }
 }
