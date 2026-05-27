@@ -22,15 +22,15 @@ public sealed class HomeController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+        var userAlias =
+            User.FindFirst("alias")?.Value
+            ?? User.Identity?.Name
+            ?? "Player";
+
         try
         {
             var overview = await _homeApiClient.GetHomeOverviewAsync(cancellationToken);
-
-            var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-            var userAlias =
-                User.FindFirst("alias")?.Value
-                ?? User.Identity?.Name
-                ?? "Player";
 
             var model = new HomeIndexViewModel
             {
@@ -43,10 +43,7 @@ public sealed class HomeController : Controller
                     : overview.FeaturedBuildVersion,
 
                 IsAuthenticated = isAuthenticated,
-                UserAlias = isAuthenticated ? userAlias : "Player",
-                UserTotalSessions = isAuthenticated ? 0 : 0,
-                UserLastActivity = isAuthenticated ? "N/A" : "N/A",
-                UserFavoriteBuild = isAuthenticated ? "N/A" : "N/A"
+                UserAlias = isAuthenticated ? userAlias : "Player"
             };
 
             ViewData["Title"] = "HOME";
@@ -58,12 +55,6 @@ public sealed class HomeController : Controller
         {
             _logger.LogError(ex, "Failed to build Home/Index view model.");
 
-            var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-            var userAlias =
-                User.FindFirst("alias")?.Value
-                ?? User.Identity?.Name
-                ?? "Player";
-
             var fallbackModel = new HomeIndexViewModel
             {
                 TotalSessions = 0,
@@ -73,10 +64,7 @@ public sealed class HomeController : Controller
                 FeaturedBuildVersion = "N/A",
 
                 IsAuthenticated = isAuthenticated,
-                UserAlias = isAuthenticated ? userAlias : "Player",
-                UserTotalSessions = 0,
-                UserLastActivity = "N/A",
-                UserFavoriteBuild = "N/A"
+                UserAlias = isAuthenticated ? userAlias : "Player"
             };
 
             ViewData["Title"] = "HOME";
