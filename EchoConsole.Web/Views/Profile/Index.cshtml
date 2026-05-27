@@ -2,6 +2,11 @@
 
 @{
     ViewData["Title"] = "PROFILE";
+    ViewData["TitleI18nKey"] = "profile_page_title";
+
+    var claimStatusType = TempData["ClaimStatusType"]?.ToString();
+    var claimStatusMessage = TempData["ClaimStatusMessage"]?.ToString();
+    var isClaimSuccess = string.Equals(claimStatusType, "success", StringComparison.OrdinalIgnoreCase);
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -143,6 +148,59 @@
                 </div>
             </aside>
         </div>
+
+        <section class="mt-6 rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
+            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
+                        Device Ownership
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
+                        Link Cosmic Diner Installation
+                    </h2>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-400">
+                        Paste the Installation ID shown by the game client to link that device to your Echo Console profile.
+                        The user identifier is read from your secure session and is never submitted by the browser.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+                    @if (!string.IsNullOrWhiteSpace(claimStatusMessage))
+                    {
+                        <div class="mb-4 rounded-xl border @(isClaimSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200") px-4 py-3 text-sm">
+                            @claimStatusMessage
+                        </div>
+                    }
+
+                    <form asp-controller="Profile"
+                          asp-action="ClaimInstallation"
+                          method="post"
+                          class="space-y-4">
+                        @Html.AntiForgeryToken()
+
+                        <div>
+                            <label for="installationId" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Installation ID
+                            </label>
+
+                            <input id="installationId"
+                                   name="installationId"
+                                   type="text"
+                                   autocomplete="off"
+                                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                                   class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-400/40" />
+                        </div>
+
+                        <button type="submit"
+                                class="inline-flex rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
+                            Link Device
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
 
         <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
             <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">

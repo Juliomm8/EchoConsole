@@ -1,4 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System.Net;
+using System.Net.Http.Json;
+using System.Security.Claims;
+using EchoConsole.Web.Models.Api.Profile;
 using EchoConsole.Web.Models.Profile;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
@@ -10,13 +13,16 @@ namespace EchoConsole.Web.Controllers;
 public sealed class ProfileController : Controller
 {
     private readonly EchoConsoleProfileApiClient _profileApiClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ProfileController> _logger;
 
     public ProfileController(
         EchoConsoleProfileApiClient profileApiClient,
+        IHttpClientFactory httpClientFactory,
         ILogger<ProfileController> logger)
     {
         _profileApiClient = profileApiClient;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
@@ -42,6 +48,8 @@ public sealed class ProfileController : Controller
             };
 
             ViewData["Title"] = "PROFILE";
+            ViewData["TitleI18nKey"] = "profile_page_title";
+
             return View(fallbackModel);
         }
 
@@ -78,7 +86,101 @@ public sealed class ProfileController : Controller
         };
 
         ViewData["Title"] = "PROFILE";
+        ViewData["TitleI18nKey"] = "profile_page_title";
+
         return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ClaimInstallation(
+        string installationId,
+        CancellationToken cancellationToken = default)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return Challenge();
+        }
+
+        if (string.IsNullOrWhiteSpace(installationId))
+        {
+            TempData["ClaimStatusType"] = "error";
+            TempData["ClaimStatusMessage"] = "Installation ID is required.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!Guid.TryParse(installationId.Trim(), out var parsedInstallationId))
+        {
+            TempData["ClaimStatusType"] = "error";
+            TempData["ClaimStatusMessage"] = "Installation ID format is invalid.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var request = new ClaimInstallationRequestModel
+        {
+            InstallationId = parsedInstallationId,
+            UserId = userId
+        };
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+
+            var response = await client.PostAsJsonAsync(
+                "/api/profile/installations/claim",
+                request,
+                cancellationToken);
+
+            var payload = await response.Content.ReadFromJsonAsync<ClaimInstallationResponseModel>(
+                cancellationToken: cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["ClaimStatusType"] = "success";
+                TempData["ClaimStatusMessage"] = payload?.Message ?? "Installation successfully linked.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                TempData["ClaimStatusType"] = "error";
+                TempData["ClaimStatusMessage"] = payload?.Message ?? "Installation or user was not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                TempData["ClaimStatusType"] = "error";
+                TempData["ClaimStatusMessage"] = payload?.Message ?? "This installation is already linked to another account.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _logger.LogWarning(
+                "Claim installation failed with status {StatusCode}. InstallationId={InstallationId}, UserId={UserId}.",
+                response.StatusCode,
+                parsedInstallationId,
+                userId);
+
+            TempData["ClaimStatusType"] = "error";
+            TempData["ClaimStatusMessage"] = "The platform could not link this installation right now.";
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to claim installation {InstallationId} for user {UserId}.",
+                parsedInstallationId,
+                userId);
+
+            TempData["ClaimStatusType"] = "error";
+            TempData["ClaimStatusMessage"] = "The platform could not process your request right now.";
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     private static string FormatMinutes(int totalMinutes)
