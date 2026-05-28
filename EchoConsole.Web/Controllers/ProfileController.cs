@@ -1,8 +1,11 @@
 ﻿using System.Security.Claims;
+using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Web.Models.Api.Profile;
 using EchoConsole.Web.Models.Profile;
 using EchoConsole.Web.Services.Api;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EchoConsole.Web.Controllers;
@@ -11,13 +14,19 @@ namespace EchoConsole.Web.Controllers;
 public sealed class ProfileController : Controller
 {
     private readonly EchoConsoleProfileApiClient _profileApiClient;
+    private readonly UserManager<User> _userManager;
+    private readonly SignInManager<User> _signInManager;
     private readonly ILogger<ProfileController> _logger;
 
     public ProfileController(
         EchoConsoleProfileApiClient profileApiClient,
+        UserManager<User> userManager,
+        SignInManager<User> signInManager,
         ILogger<ProfileController> logger)
     {
         _profileApiClient = profileApiClient;
+        _userManager = userManager;
+        _signInManager = signInManager;
         _logger = logger;
     }
 
@@ -137,6 +146,66 @@ public sealed class ProfileController : Controller
             TempData["ClaimStatusType"] = "error";
             TempData["ClaimStatusMessage"] = result?.Message ?? "The platform could not unlink this installation right now.";
         }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile(
+        UpdateProfileFormModel form,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = GetCurrentUserId();
+
+        if (userId is null)
+        {
+            return Challenge();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ProfileStatusType"] = "error";
+            TempData["ProfileStatusMessage"] = "Check the profile fields and try again.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var request = new UpdateProfileRequestModel
+        {
+            Alias = form.Alias.Trim(),
+            AvatarKey = form.AvatarKey.Trim(),
+            Theme = form.Theme.Trim()
+        };
+
+        var result = await _profileApiClient.UpdateProfileAsync(
+            userId.Value,
+            request,
+            cancellationToken);
+
+        if (result?.Success != true)
+        {
+            TempData["ProfileStatusType"] = "error";
+            TempData["ProfileStatusMessage"] = result?.Message ?? "The platform could not update your profile.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var refreshedUser = await _userManager.FindByIdAsync(userId.Value.ToString());
+
+        if (refreshedUser is null)
+        {
+            TempData["ProfileStatusType"] = "error";
+            TempData["ProfileStatusMessage"] = "Profile updated, but the current session could not be refreshed.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var principal = await _signInManager.CreateUserPrincipalAsync(refreshedUser);
+
+        await HttpContext.SignInAsync(
+            IdentityConstants.ApplicationScheme,
+            principal);
+
+        TempData["ProfileStatusType"] = "success";
+        TempData["ProfileStatusMessage"] = result.Message;
 
         return RedirectToAction(nameof(Index));
     }

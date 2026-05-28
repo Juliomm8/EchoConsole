@@ -221,4 +221,47 @@ public sealed class EchoConsoleProfileApiClient
 
         return payload;
     }
+
+    public async Task<UpdateProfileResponseModel?> UpdateProfileAsync(
+    int userId,
+    UpdateProfileRequestModel request,
+    CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync(
+                $"/api/profile/settings/{userId}",
+                request,
+                cancellationToken);
+
+            var payload = await response.Content.ReadFromJsonAsync<UpdateProfileResponseModel>(
+                cancellationToken: cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return payload;
+            }
+
+            _logger.LogWarning(
+                "Profile update failed for user {UserId}. StatusCode={StatusCode}.",
+                userId,
+                response.StatusCode);
+
+            return payload ?? new UpdateProfileResponseModel
+            {
+                Success = false,
+                Message = "The platform could not update your profile."
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update profile for user {UserId}.", userId);
+
+            return new UpdateProfileResponseModel
+            {
+                Success = false,
+                Message = "The platform could not process the profile update request."
+            };
+        }
+    }
 }

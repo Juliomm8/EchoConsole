@@ -51,6 +51,7 @@ builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
+builder.Services.AddScoped<IUserProfileSettingsService, UserProfileSettingsService>();
 
 builder.Services.AddRateLimiter(options =>
 {
