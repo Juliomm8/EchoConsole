@@ -1,6 +1,7 @@
 ﻿using EchoConsole.Api.Contracts.Profile;
 using EchoConsole.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EchoConsole.Api.Services.Profile;
 
@@ -158,10 +159,12 @@ public sealed class UserDashboardService : IUserDashboardService
             page = totalPages;
         }
 
+        var skip = (page - 1) * pageSize;
+
         var rawItems = await query
             .OrderByDescending(x => x.StartedAtUtc)
             .ThenByDescending(x => x.LastHeartbeatUtc)
-            .Skip((page - 1) * pageSize)
+            .Skip(skip)
             .Take(pageSize)
             .Select(x => new
             {
@@ -171,7 +174,7 @@ public sealed class UserDashboardService : IUserDashboardService
                 x.BuildVersion,
                 x.CurrentScene,
                 x.CurrentPhase,
-                Status = (int)x.Status,
+                x.Status,
                 x.StartedAtUtc,
                 x.EndedAtUtc,
                 x.LastHeartbeatUtc
@@ -181,8 +184,10 @@ public sealed class UserDashboardService : IUserDashboardService
         var items = rawItems
             .Select(x =>
             {
+                var status = (int)x.Status;
                 var endUtc = x.EndedAtUtc ?? x.LastHeartbeatUtc;
                 var duration = endUtc - x.StartedAtUtc;
+
                 var durationMinutes = duration > TimeSpan.Zero
                     ? (int)Math.Floor(duration.TotalMinutes)
                     : 0;
@@ -195,13 +200,13 @@ public sealed class UserDashboardService : IUserDashboardService
                     BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion) ? "-" : x.BuildVersion,
                     CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene) ? "-" : x.CurrentScene,
                     CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase) ? "-" : x.CurrentPhase,
-                    Status = x.Status,
-                    StatusLabel = MapSessionStatusLabel(x.Status),
+                    Status = status,
+                    StatusLabel = MapSessionStatusLabel(status),
                     StartedAtUtc = x.StartedAtUtc,
                     EndedAtUtc = x.EndedAtUtc,
                     LastHeartbeatUtc = x.LastHeartbeatUtc,
                     DurationMinutes = durationMinutes,
-                    IsLive = x.Status == 1 && x.EndedAtUtc is null
+                    IsLive = status == 1 && x.EndedAtUtc is null
                 };
             })
             .ToList();
@@ -219,9 +224,9 @@ public sealed class UserDashboardService : IUserDashboardService
     }
 
     public async Task<UserSessionDetailDto?> GetSessionDetailAsync(
-    int userId,
-    Guid sessionId,
-    CancellationToken cancellationToken = default)
+        int userId,
+        Guid sessionId,
+        CancellationToken cancellationToken = default)
     {
         var userExists = await _dbContext.Users
             .AsNoTracking()
@@ -246,7 +251,7 @@ public sealed class UserDashboardService : IUserDashboardService
                 x.CurrentScene,
                 x.CurrentGameState,
                 x.CurrentPhase,
-                Status = (int)x.Status,
+                x.Status,
                 x.StartedAtUtc,
                 x.EndedAtUtc,
                 x.LastHeartbeatUtc
@@ -258,6 +263,7 @@ public sealed class UserDashboardService : IUserDashboardService
             return null;
         }
 
+        var status = (int)rawSession.Status;
         var endUtc = rawSession.EndedAtUtc ?? rawSession.LastHeartbeatUtc;
         var duration = endUtc - rawSession.StartedAtUtc;
 
@@ -276,13 +282,13 @@ public sealed class UserDashboardService : IUserDashboardService
             CurrentScene = string.IsNullOrWhiteSpace(rawSession.CurrentScene) ? "-" : rawSession.CurrentScene,
             CurrentGameState = string.IsNullOrWhiteSpace(rawSession.CurrentGameState) ? "-" : rawSession.CurrentGameState,
             CurrentPhase = string.IsNullOrWhiteSpace(rawSession.CurrentPhase) ? "-" : rawSession.CurrentPhase,
-            Status = rawSession.Status,
-            StatusLabel = MapSessionStatusLabel(rawSession.Status),
+            Status = status,
+            StatusLabel = MapSessionStatusLabel(status),
             StartedAtUtc = rawSession.StartedAtUtc,
             EndedAtUtc = rawSession.EndedAtUtc,
             LastHeartbeatUtc = rawSession.LastHeartbeatUtc,
             DurationMinutes = durationMinutes,
-            IsLive = rawSession.Status == 1 && rawSession.EndedAtUtc is null
+            IsLive = status == 1 && rawSession.EndedAtUtc is null
         };
     }
 
