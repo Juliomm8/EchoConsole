@@ -3,6 +3,7 @@ using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
+using EchoConsole.Api.Services;
 using EchoConsole.Api.Services.Ownership;
 using EchoConsole.Api.Services.Profile;
 using Microsoft.AspNetCore.Authentication;
@@ -50,6 +51,7 @@ builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
+builder.Services.AddScoped<IUserProfileSettingsService, UserProfileSettingsService>();
 
 builder.Services.AddRateLimiter(options =>
 {

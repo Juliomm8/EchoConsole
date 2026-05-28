@@ -1,0 +1,175 @@
+﻿@model EchoConsole.Web.Models.Profile.ProfileSessionHistoryViewModel
+
+@{
+    ViewData["Title"] = "SESSION HISTORY";
+    ViewData["TitleI18nKey"] = "profile_sessions_page_title";
+
+    var previousPage = Math.Max(1, Model.Page - 1);
+    var nextPage = Math.Min(Model.TotalPages, Model.Page + 1);
+}
+
+<div class="min-h-screen bg-[#070B12] text-slate-100">
+    <div class="mx-auto max-w-[1600px] px-6 py-8">
+        <section class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
+                        Cosmic Diner Telemetry
+                    </p>
+
+                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white">
+                        Personal Session History
+                    </h1>
+
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                        Review gameplay sessions linked exclusively to your owned Cosmic Diner installations.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <a asp-controller="Profile"
+                       asp-action="Index"
+                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
+                        Back to Profile
+                    </a>
+
+                    <div class="rounded-xl border border-cyan-400/15 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-200">
+                        @Model.TotalCount.ToString("N0") session(s)
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Items.Count == 0)
+            {
+                <div class="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-10 text-center">
+                    <p class="font-display text-sm uppercase tracking-[0.28em] text-slate-400">
+                        No sessions found
+                    </p>
+
+                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                        Once your linked Cosmic Diner installations start sending telemetry, your personal session history will appear here.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="mt-8 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800">
+                        <thead>
+                            <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
+                                <th class="px-4 py-3">Started At</th>
+                                <th class="px-4 py-3">Duration</th>
+                                <th class="px-4 py-3">Scene / Phase</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Build</th>
+                                <th class="px-4 py-3">Device</th>
+                                <th class="px-4 py-3">Last Signal</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-900">
+                            @foreach (var session in Model.Items)
+                            {
+                                <tr class="text-sm text-slate-300 transition hover:bg-slate-900/70">
+                                    <td class="px-4 py-4 text-slate-300">
+                                        @session.StartedAtLabel
+                                    </td>
+
+                                    <td class="px-4 py-4 text-cyan-300">
+                                        @session.DurationLabel
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="font-medium text-white">@session.CurrentScene</div>
+                                        <div class="text-xs text-slate-500">@session.CurrentPhase</div>
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        @if (session.IsLive)
+                                        {
+                                            <span class="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                                                @session.StatusLabel
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-fuchsia-300">
+                                                @session.StatusLabel
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="px-4 py-4 text-slate-300">
+                                        @session.BuildVersion
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="font-medium text-white">@session.DeviceName</div>
+                                        <div class="max-w-[240px] truncate text-xs text-slate-600" title="@session.InstallationId">
+                                            @session.InstallationId
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-slate-400">
+                                        @session.LastHeartbeatLabel
+                                    </td>
+                                    <td class="px-4 py-4 text-right">
+                                        <a asp-controller="Profile"
+                                           asp-action="SessionDetail"
+                                           asp-route-id="@session.SessionId"
+                                           class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200 transition hover:bg-cyan-500/15">
+                                            Open
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8 flex flex-col gap-4 border-t border-slate-800 pt-6 md:flex-row md:items-center md:justify-between">
+                    <div class="text-sm text-slate-400">
+                        Page <span class="text-cyan-300">@Model.Page</span> of <span class="text-cyan-300">@Model.TotalPages</span>
+                    </div>
+
+                    <div class="flex gap-3">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a asp-controller="Profile"
+                               asp-action="Sessions"
+                               asp-route-page="@previousPage"
+                               asp-route-pageSize="@Model.PageSize"
+                               class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
+                                Previous
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
+                                Previous
+                            </span>
+                        }
+
+                        @if (Model.HasNextPage)
+                        {
+                            <a asp-controller="Profile"
+                               asp-action="Sessions"
+                               asp-route-page="@nextPage"
+                               asp-route-pageSize="@Model.PageSize"
+                               class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
+                                Next
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
+                                Next
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+</div>

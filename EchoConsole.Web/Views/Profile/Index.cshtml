@@ -1,7 +1,18 @@
 ﻿@model EchoConsole.Web.Models.Profile.ProfileIndexViewModel
 
 @{
-    ViewData["Title"] = "PROFILE";
+    // Variables para las alertas de vinculación de dispositivos
+    var claimStatusType = TempData["ClaimStatusType"]?.ToString();
+    var claimStatusMessage = TempData["ClaimStatusMessage"]?.ToString();
+    var isClaimSuccess = string.Equals(claimStatusType, "success", StringComparison.OrdinalIgnoreCase);
+
+    // Variables para las alertas de actualización de perfil
+    var profileStatusType = TempData["ProfileStatusType"]?.ToString();
+    var profileStatusMessage = TempData["ProfileStatusMessage"]?.ToString();
+    var isProfileSuccess = string.Equals(profileStatusType, "success", StringComparison.OrdinalIgnoreCase);
+
+    var availableThemes = new[] { "cyan", "fuchsia", "amber" };
+    var availableAvatars = new[] { "avatar-01", "avatar-02", "avatar-03", "avatar-04", "avatar-05" };
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -145,6 +156,155 @@
         </div>
 
         <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
+            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
+                        Profile Settings
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
+                        Customize Operator Identity
+                    </h2>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-400">
+                        Update your public operator identity. Role and account status are protected system fields and cannot be modified here.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+                    @if (!string.IsNullOrWhiteSpace(profileStatusMessage))
+                    {
+                        <div class="mb-4 rounded-xl border @(isProfileSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200") px-4 py-3 text-sm">
+                            @profileStatusMessage
+                        </div>
+                    }
+
+                    <form asp-controller="Profile"
+                          asp-action="UpdateProfile"
+                          method="post"
+                          class="space-y-4">
+                        @Html.AntiForgeryToken()
+
+                        <div>
+                            <label for="alias" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Alias
+                            </label>
+
+                            <input id="alias"
+                                   name="Alias"
+                                   type="text"
+                                   value="@Model.Alias"
+                                   minlength="3"
+                                   maxlength="32"
+                                   autocomplete="off"
+                                   class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-400/40" />
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <label for="avatarKey" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                    Avatar
+                                </label>
+
+                                <select id="avatarKey"
+                                        name="AvatarKey"
+                                        class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400/40">
+                                    @foreach (var avatar in availableAvatars)
+                                    {
+                                        <option value="@avatar" selected="@(string.Equals(Model.AvatarKey, avatar, StringComparison.OrdinalIgnoreCase))">
+                                            @avatar
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="theme" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                    Theme
+                                </label>
+
+                                <select id="theme"
+                                        name="Theme"
+                                        class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400/40">
+                                    @foreach (var theme in availableThemes)
+                                    {
+                                        <option value="@theme" selected="@(string.Equals(Model.Theme, theme, StringComparison.OrdinalIgnoreCase))">
+                                            @theme
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button type="submit"
+                                    class="inline-flex rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
+                                Save Profile
+                            </button>
+
+                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 px-5 py-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                                Role and status are locked
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-6 rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
+            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
+                        Device Ownership
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
+                        Link Cosmic Diner Installation
+                    </h2>
+
+                    <p class="mt-3 text-sm leading-6 text-slate-400">
+                        Paste the Installation ID shown by the game client to link that device to your Echo Console profile.
+                        The user identifier is read from your secure session and is never submitted by the browser.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+                    @if (!string.IsNullOrWhiteSpace(claimStatusMessage))
+                    {
+                        <div class="mb-4 rounded-xl border @(isClaimSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200") px-4 py-3 text-sm">
+                            @claimStatusMessage
+                        </div>
+                    }
+
+                    <form asp-controller="Profile"
+                          asp-action="ClaimInstallation"
+                          method="post"
+                          class="space-y-4">
+                        @Html.AntiForgeryToken()
+
+                        <div>
+                            <label for="installationId" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Installation ID
+                            </label>
+
+                            <input id="installationId"
+                                   name="installationId"
+                                   type="text"
+                                   autocomplete="off"
+                                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                                   class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-400/40" />
+                        </div>
+
+                        <button type="submit"
+                                class="inline-flex rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
+                            Link Device
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
             <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                     <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
@@ -153,13 +313,31 @@
                     <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
                         Owned Devices
                     </h2>
+                    <p class="mt-3 max-w-2xl text-sm text-slate-400">
+                        These devices are currently linked to your Echo Console account through the ownership system.
+                    </p>
+                    <a asp-controller="Profile"
+                       asp-action="Sessions"
+                       class="inline-flex rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-200 transition hover:bg-fuchsia-500/15">
+                        View Session History
+                    </a>
+                </div>
+
+                <div class="rounded-xl border border-cyan-400/15 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
+                    @Model.Installations.Count device(s)
                 </div>
             </div>
 
             @if (Model.Installations.Count == 0)
             {
-                <div class="mt-6 rounded-xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-400">
-                    No installations have been linked to your account yet.
+                <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-8 text-center">
+                    <p class="font-display text-sm uppercase tracking-[0.24em] text-slate-400">
+                        No linked devices
+                    </p>
+
+                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                        Paste the Installation ID from Cosmic Diner in the ownership panel above to link your first device.
+                    </p>
                 </div>
             }
             else
@@ -174,8 +352,10 @@
                                 <th class="px-4 py-3">Status</th>
                                 <th class="px-4 py-3">First Seen</th>
                                 <th class="px-4 py-3">Last Update</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
+
                         <tbody class="divide-y divide-slate-900">
                             @foreach (var installation in Model.Installations)
                             {
@@ -185,11 +365,39 @@
                                         <div class="text-xs text-slate-500">@installation.DeviceModel</div>
                                         <div class="mt-1 text-[11px] text-slate-600">@installation.InstallationId</div>
                                     </td>
+
                                     <td class="px-4 py-4">@installation.Platform</td>
+
                                     <td class="px-4 py-4">@installation.BuildVersion</td>
-                                    <td class="px-4 py-4">@installation.Status</td>
+
+                                    <td class="px-4 py-4">
+                                        <span class="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                                            @installation.Status
+                                        </span>
+                                    </td>
+
                                     <td class="px-4 py-4">@installation.FirstSeenLabel</td>
+
                                     <td class="px-4 py-4">@installation.LastUpdateLabel</td>
+
+                                    <td class="px-4 py-4 text-right">
+                                        <form asp-controller="Profile"
+                                              asp-action="UnlinkInstallation"
+                                              method="post"
+                                              class="inline-flex"
+                                              onsubmit="return confirm('This will unlink the device from your account. Historical sessions will be preserved. Continue?');">
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="installationId"
+                                                   value="@installation.InstallationId" />
+
+                                            <button type="submit"
+                                                    class="rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-rose-200 transition hover:bg-rose-500/15">
+                                                Unlink
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
