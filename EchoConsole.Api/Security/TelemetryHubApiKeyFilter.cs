@@ -5,7 +5,6 @@ namespace EchoConsole.Api.Security;
 public sealed class TelemetryHubApiKeyFilter : IHubFilter
 {
     private const string HeaderName = "X-Admin-Api-Key";
-    private const string QueryName = "x-admin-api-key";
 
     private readonly IRealtimeApiKeyValidator _apiKeyValidator;
     private readonly ILogger<TelemetryHubApiKeyFilter> _logger;
@@ -37,14 +36,12 @@ public sealed class TelemetryHubApiKeyFilter : IHubFilter
             throw new HubException("Unauthorized relay connection.");
         }
 
-        var providedApiKey =
-            httpContext.Request.Headers[HeaderName].FirstOrDefault()
-            ?? httpContext.Request.Query[QueryName].FirstOrDefault();
+        var providedApiKey = httpContext.Request.Headers[HeaderName].FirstOrDefault();
 
         if (!_apiKeyValidator.IsValid(providedApiKey))
         {
             _logger.LogWarning(
-                "TelemetryHub connection rejected from {RemoteIp}. Invalid or missing API key.",
+                "TelemetryHub connection rejected from {RemoteIp}. Missing or invalid server-to-server header.",
                 httpContext.Connection.RemoteIpAddress?.ToString());
 
             context.Context.Abort();

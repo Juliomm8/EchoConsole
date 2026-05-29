@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace EchoConsole.Web.Controllers
+namespace EchoConsole.Web.Controllers;
+
+[Authorize(Roles = "Admin")]
+public sealed class ReportsController : Controller
 {
-    public class ReportsController : Controller
+    [HttpGet]
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return RedirectToAction("Index", "Alerts");
     }
 }

@@ -9,6 +9,7 @@
             webBaseUrl: normalizeBaseUrl(config?.webBaseUrl || window.location.origin),
             tableBodyId: config.tableBodyId,
             totalCountValueId: config.totalCountValueId,
+            resultsCountValueId: config.resultsCountValueId,
             pageNumberValueId: config.pageNumberValueId,
             totalPagesValueId: config.totalPagesValueId,
             prevPageLinkId: config.prevPageLinkId,
@@ -154,6 +155,7 @@
         const totalPages = Math.max(1, Number(response.totalPages ?? 1));
 
         setText(options.totalCountValueId, formatNumber(totalCount));
+        setText(options.resultsCountValueId, formatNumber(totalCount));
         setText(options.pageNumberValueId, String(page));
         setText(options.totalPagesValueId, String(totalPages));
 
@@ -258,6 +260,10 @@
     }
 
     function setText(id, value) {
+        if (!id) {
+            return;
+        }
+
         const element = document.getElementById(id);
         if (element) {
             element.textContent = value;
