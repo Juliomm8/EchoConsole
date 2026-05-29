@@ -6,6 +6,8 @@ namespace EchoConsole.Web.BackgroundServices;
 
 public sealed class TelemetryRelayService : BackgroundService
 {
+    private const string AdminApiKeyHeaderName = "X-Admin-Api-Key";
+
     private readonly IConfiguration _configuration;
     private readonly IHubContext<AdminTelemetryHub> _hubContext;
     private readonly ILogger<TelemetryRelayService> _logger;
@@ -37,12 +39,12 @@ public sealed class TelemetryRelayService : BackgroundService
             throw new InvalidOperationException("AdminApiSecurity:ApiKey is not configured in EchoConsole.Web.");
         }
 
-        var hubUrl = $"{apiBaseUrl.TrimEnd('/')}/hubs/telemetry?x-admin-api-key={Uri.EscapeDataString(apiKey)}";
+        var hubUrl = $"{apiBaseUrl.TrimEnd('/')}/hubs/telemetry";
 
         _connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
             {
-                options.Headers.Add("X-Admin-Api-Key", apiKey);
+                options.Headers[AdminApiKeyHeaderName] = apiKey;
             })
             .WithAutomaticReconnect()
             .Build();
@@ -52,7 +54,14 @@ public sealed class TelemetryRelayService : BackgroundService
         _connection.Closed += async ex =>
         {
             _logger.LogWarning(ex, "Telemetry relay connection closed. Retrying soon.");
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+            }
         };
 
         _connection.Reconnecting += ex =>
@@ -73,8 +82,10 @@ public sealed class TelemetryRelayService : BackgroundService
             {
                 if (_connection.State == HubConnectionState.Disconnected)
                 {
-                    _logger.LogInformation("Connecting telemetry relay to API hub: {HubUrl}", hubUrl);
+                    _logger.LogInformation("Connecting telemetry relay to API hub using server-to-server header authentication.");
+
                     await _connection.StartAsync(stoppingToken);
+
                     _logger.LogInformation("Telemetry relay connected successfully.");
                 }
 
@@ -109,6 +120,42 @@ public sealed class TelemetryRelayService : BackgroundService
             await BroadcastAsync("ReceiveTelemetryUpdate", payload);
         });
 
+        connection.On<object>("sessionStarted", async payload =>
+        {
+            await BroadcastAsync("ReceiveTelemetryUpdate", new
+            {
+                eventType = "sessionStarted",
+                payload
+            });
+        });
+
+        connection.On<object>("sessionHeartbeat", async payload =>
+        {
+            await BroadcastAsync("ReceiveTelemetryUpdate", new
+            {
+                eventType = "sessionHeartbeat",
+                payload
+            });
+        });
+
+        connection.On<object>("sessionEnded", async payload =>
+        {
+            await BroadcastAsync("ReceiveTelemetryUpdate", new
+            {
+                eventType = "sessionEnded",
+                payload
+            });
+        });
+
+        connection.On<object>("sessionExpired", async payload =>
+        {
+            await BroadcastAsync("ReceiveTelemetryUpdate", new
+            {
+                eventType = "sessionExpired",
+                payload
+            });
+        });
+
         connection.On<object>("installationUpdated", async payload =>
         {
             await BroadcastAsync("ReceiveTelemetryUpdate", new
@@ -123,6 +170,15 @@ public sealed class TelemetryRelayService : BackgroundService
             await BroadcastAsync("ReceiveTelemetryUpdate", new
             {
                 eventType = "newInstallation",
+                payload
+            });
+        });
+
+        connection.On<object>("alertCreated", async payload =>
+        {
+            await BroadcastAsync("ReceiveTelemetryUpdate", new
+            {
+                eventType = "alertCreated",
                 payload
             });
         });

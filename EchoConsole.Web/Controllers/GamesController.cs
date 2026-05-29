@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace EchoConsole.Web.Controllers
+namespace EchoConsole.Web.Controllers;
+
+[Authorize(Roles = "Admin")]
+public sealed class GamesController : Controller
 {
-    public class GamesController : Controller
+    [HttpGet]
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return RedirectToAction("Index", "Builds");
     }
 }

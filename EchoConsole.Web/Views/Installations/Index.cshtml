@@ -1,10 +1,8 @@
-﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
-@model EchoConsole.Web.Models.Installations.InstallationsIndexViewModel
+﻿@model EchoConsole.Web.Models.Installations.InstallationsIndexViewModel
 
 @{
     ViewData["Title"] = "DEVICES & INSTALLATIONS";
     ViewData["TitleI18nKey"] = "installations_page_title";
-    var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "";
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -26,7 +24,7 @@
                 <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-500" data-i18n="installations_total_label">
                     Total Devices
                 </div>
-                <div id="installations-total-count-value" class="mt-2 font-display text-3xl uppercase tracking-[0.08em] text-cyan-300">
+                <div id="installations-total-count" class="mt-2 font-display text-3xl uppercase tracking-[0.08em] text-cyan-300">
                     @Model.TotalCount.ToString("N0")
                 </div>
             </div>
@@ -35,10 +33,10 @@
         <div class="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)] backdrop-blur">
             <form method="get" asp-controller="Installations" asp-action="Index" class="grid gap-4 md:grid-cols-[1fr_auto_auto]">
                 <div>
-                    <label for="searchTerm" class="mb-2 block font-display text-xs uppercase tracking-[0.25em] text-slate-400" data-i18n="installations_search_label">
+                    <label for="installations-search-term" class="mb-2 block font-display text-xs uppercase tracking-[0.25em] text-slate-400" data-i18n="installations_search_label">
                         Search
                     </label>
-                    <input id="searchTerm"
+                    <input id="installations-search-term"
                            name="searchTerm"
                            value="@Model.SearchTerm"
                            type="text"
@@ -79,7 +77,7 @@
 
                 <div class="text-sm text-slate-400">
                     <span data-i18n="installations_results_label">Results:</span>
-                    <span class="font-semibold text-cyan-300">@Model.TotalCount.ToString("N0")</span>
+                    <span id="installations-results-count" class="font-semibold text-cyan-300">@Model.TotalCount.ToString("N0")</span>
                 </div>
             </div>
 
@@ -139,7 +137,7 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a id="installations-prev-page"
+                    <a id="installations-prev-link"
                        asp-controller="Installations"
                        asp-action="Index"
                        asp-route-searchTerm="@Model.SearchTerm"
@@ -151,7 +149,7 @@
                         Previous
                     </a>
 
-                    <a id="installations-next-page"
+                    <a id="installations-next-link"
                        asp-controller="Installations"
                        asp-action="Index"
                        asp-route-searchTerm="@Model.SearchTerm"
@@ -176,6 +174,7 @@
             webBaseUrl: window.location.origin,
             tableBodyId: "installations-table-body",
             totalCountValueId: "installations-total-count",
+            resultsCountValueId: "installations-results-count",
             pageNumberValueId: "installations-page-number",
             totalPagesValueId: "installations-total-pages",
             prevPageLinkId: "installations-prev-link",
