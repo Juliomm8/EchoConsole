@@ -35,4 +35,6 @@ public sealed class GameSession
     public DateTimeOffset? EndedAtUtc { get; set; }
 
     public SessionStatus Status { get; set; } = SessionStatus.Active;
+
+    public ICollection<GameSessionEvent> Events { get; set; } = new List<GameSessionEvent>();
 }
