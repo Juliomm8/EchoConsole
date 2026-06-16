@@ -1,10 +1,8 @@
-﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
-@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
+﻿@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
 
 @{
     ViewData["Title"] = "LIVE MONITORING";
     ViewData["TitleI18nKey"] = "dashboard_live_monitoring_title";
-    var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "";
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -35,7 +33,7 @@
 
                 <div class="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3">
                     <span class="font-display text-xs uppercase tracking-[0.25em] text-slate-400" data-i18n="dash_server_utc">Server Time UTC</span>
-                    <span id="server-time-value" class="font-display text-sm uppercase tracking-[0.12em] text-cyan-300">
+                    <span id="dashboard-server-time" class="font-display text-sm uppercase tracking-[0.12em] text-cyan-300">
                         @Model.ServerTimeUtc.ToString("MMM dd, yyyy HH:mm:ss")
                     </span>
                 </div>

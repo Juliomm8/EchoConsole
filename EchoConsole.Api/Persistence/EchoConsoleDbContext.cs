@@ -74,6 +74,10 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             installation.HasIndex(x => x.LastUpdateUtc);
             installation.HasIndex(x => x.OwnerUserId);
 
+            installation.HasIndex(x => new { x.OwnerUserId, x.LastUpdateUtc })
+                .IsDescending(false, true)
+                .HasDatabaseName("IX_Installations_OwnerUserId_LastUpdateUtc");
+
             installation.Property(x => x.GameCode).HasMaxLength(64).IsRequired();
             installation.Property(x => x.BuildVersion).HasMaxLength(32).IsRequired();
             installation.Property(x => x.Platform).HasMaxLength(32).IsRequired();
@@ -96,6 +100,18 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             session.HasKey(x => x.Id);
             session.HasIndex(x => x.SessionId).IsUnique();
             session.HasIndex(x => x.LastHeartbeatUtc);
+
+            session.HasIndex(x => new { x.InstallationDbId, x.StartedAtUtc })
+                .IsDescending(false, true)
+                .HasDatabaseName("IX_GameSessions_InstallationDbId_StartedAtUtc");
+
+            session.HasIndex(x => new { x.InstallationDbId, x.LastHeartbeatUtc })
+                .IsDescending(false, true)
+                .HasDatabaseName("IX_GameSessions_InstallationDbId_LastHeartbeatUtc");
+
+            session.HasIndex(x => new { x.Status, x.EndedAtUtc, x.LastHeartbeatUtc })
+                .IsDescending(false, false, true)
+                .HasDatabaseName("IX_GameSessions_Status_EndedAtUtc_LastHeartbeatUtc");
 
             session.Property(x => x.SessionTokenHash).HasMaxLength(128).IsRequired();
             session.Property(x => x.BuildVersion).HasMaxLength(32).IsRequired();
