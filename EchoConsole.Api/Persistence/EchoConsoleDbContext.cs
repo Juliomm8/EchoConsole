@@ -15,6 +15,7 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
 
     public DbSet<Installation> Installations => Set<Installation>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();
+    public DbSet<GameSessionEvent> GameSessionEvents => Set<GameSessionEvent>();
     public DbSet<GameBuild> GameBuilds => Set<GameBuild>();
     public DbSet<SystemAlert> SystemAlerts => Set<SystemAlert>();
 
@@ -128,6 +129,49 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
                 .WithMany(x => x.Sessions)
                 .HasForeignKey(x => x.InstallationDbId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // --- GameSessionEvent ---
+        modelBuilder.Entity<GameSessionEvent>(sessionEvent =>
+        {
+            sessionEvent.ToTable("GameSessionEvents");
+
+            sessionEvent.HasKey(x => x.Id);
+
+            sessionEvent.HasIndex(x => new
+            {
+                x.GameSessionId,
+                x.CreatedAtUtc
+            })
+                .IsDescending(false, true)
+                .HasDatabaseName("IX_GameSessionEvents_GameSessionId_CreatedAtUtc");
+
+            sessionEvent.HasIndex(x => x.EventType)
+                .HasDatabaseName("IX_GameSessionEvents_EventType");
+
+            sessionEvent.Property(x => x.EventType)
+                .HasMaxLength(64)
+                .IsRequired();
+
+            sessionEvent.Property(x => x.Scene)
+                .HasMaxLength(128);
+
+            sessionEvent.Property(x => x.GameState)
+                .HasMaxLength(64);
+
+            sessionEvent.Property(x => x.Phase)
+                .HasMaxLength(64);
+
+            sessionEvent.Property(x => x.PayloadJson)
+                .HasMaxLength(4000);
+
+            sessionEvent.Property(x => x.CreatedAtUtc)
+                .IsRequired();
+
+            sessionEvent.HasOne(x => x.GameSession)
+                .WithMany(x => x.Events)
+                .HasForeignKey(x => x.GameSessionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // --- GameBuild ---
