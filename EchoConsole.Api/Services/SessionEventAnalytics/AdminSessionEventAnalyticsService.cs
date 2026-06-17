@@ -8,6 +8,9 @@ namespace EchoConsole.Api.Services.SessionEventAnalytics;
 public sealed class AdminSessionEventAnalyticsService
     : IAdminSessionEventAnalyticsService
 {
+    private static readonly DateTimeOffset TrendAnchorUtc =
+        new(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
     private readonly EchoConsoleDbContext _dbContext;
     private readonly ILogger<AdminSessionEventAnalyticsService> _logger;
 
@@ -23,9 +26,11 @@ public sealed class AdminSessionEventAnalyticsService
         string? buildVersion,
         DateTimeOffset? fromUtc,
         DateTimeOffset? toUtcExclusive,
+        string? trendGranularity,
         CancellationToken cancellationToken = default)
     {
         buildVersion = NormalizeFilter(buildVersion);
+        trendGranularity = NormalizeGranularity(trendGranularity);
 
         IQueryable<GameSessionEvent> query = _dbContext.GameSessionEvents
             .AsNoTracking();
@@ -92,6 +97,10 @@ public sealed class AdminSessionEventAnalyticsService
             .ThenBy(x => x.Key)
             .ToListAsync(cancellationToken);
 
+        var timeSeries = trendGranularity == "hour"
+            ? await LoadHourlyTimeSeriesAsync(query, cancellationToken)
+            : await LoadDailyTimeSeriesAsync(query, cancellationToken);
+
         var availableBuildVersions = await _dbContext.GameSessionEvents
             .AsNoTracking()
             .Where(x =>
@@ -103,10 +112,11 @@ public sealed class AdminSessionEventAnalyticsService
             .ToListAsync(cancellationToken);
 
         _logger.LogInformation(
-            "Loaded event analytics. BuildVersion={BuildVersion}, FromUtc={FromUtc}, ToUtcExclusive={ToUtcExclusive}, TotalEvents={TotalEvents}.",
+            "Loaded event analytics. BuildVersion={BuildVersion}, FromUtc={FromUtc}, ToUtcExclusive={ToUtcExclusive}, Granularity={Granularity}, TotalEvents={TotalEvents}.",
             buildVersion,
             fromUtc,
             toUtcExclusive,
+            trendGranularity,
             totalEvents);
 
         return new AdminSessionEventAnalyticsDto
@@ -115,6 +125,7 @@ public sealed class AdminSessionEventAnalyticsService
             AppliedBuildVersion = buildVersion ?? string.Empty,
             AppliedFromUtc = fromUtc,
             AppliedToUtcExclusive = toUtcExclusive,
+            TrendGranularity = trendGranularity,
             AvailableBuildVersions = availableBuildVersions,
 
             EventTypes = eventTypeRows
@@ -139,8 +150,64 @@ public sealed class AdminSessionEventAnalyticsService
                     Key = x.Key,
                     Count = x.Count
                 })
-                .ToList()
+                .ToList(),
+
+            TimeSeries = timeSeries
         };
+    }
+
+    private static async Task<IReadOnlyList<AdminSessionEventTimePointDto>>
+        LoadHourlyTimeSeriesAsync(
+            IQueryable<GameSessionEvent> query,
+            CancellationToken cancellationToken)
+    {
+        var rows = await query
+            .GroupBy(x =>
+                EF.Functions.DateDiffHour(
+                    TrendAnchorUtc,
+                    x.CreatedAtUtc))
+            .Select(group => new
+            {
+                Offset = group.Key,
+                Count = group.Count()
+            })
+            .OrderBy(x => x.Offset)
+            .ToListAsync(cancellationToken);
+
+        return rows
+            .Select(x => new AdminSessionEventTimePointDto
+            {
+                BucketStartUtc = TrendAnchorUtc.AddHours(x.Offset),
+                Count = x.Count
+            })
+            .ToList();
+    }
+
+    private static async Task<IReadOnlyList<AdminSessionEventTimePointDto>>
+        LoadDailyTimeSeriesAsync(
+            IQueryable<GameSessionEvent> query,
+            CancellationToken cancellationToken)
+    {
+        var rows = await query
+            .GroupBy(x =>
+                EF.Functions.DateDiffDay(
+                    TrendAnchorUtc,
+                    x.CreatedAtUtc))
+            .Select(group => new
+            {
+                Offset = group.Key,
+                Count = group.Count()
+            })
+            .OrderBy(x => x.Offset)
+            .ToListAsync(cancellationToken);
+
+        return rows
+            .Select(x => new AdminSessionEventTimePointDto
+            {
+                BucketStartUtc = TrendAnchorUtc.AddDays(x.Offset),
+                Count = x.Count
+            })
+            .ToList();
     }
 
     private static string? NormalizeFilter(string? value)
@@ -148,5 +215,15 @@ public sealed class AdminSessionEventAnalyticsService
         return string.IsNullOrWhiteSpace(value)
             ? null
             : value.Trim();
+    }
+
+    private static string NormalizeGranularity(string? value)
+    {
+        return string.Equals(
+            value,
+            "hour",
+            StringComparison.OrdinalIgnoreCase)
+            ? "hour"
+            : "day";
     }
 }
