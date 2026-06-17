@@ -6,6 +6,7 @@ using EchoConsole.Api.Seed;
 using EchoConsole.Api.Services;
 using EchoConsole.Api.Services.Ownership;
 using EchoConsole.Api.Services.Profile;
+using EchoConsole.Api.Services.SessionEventAnalytics;
 using EchoConsole.Api.Services.SessionEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddScoped<IUserSessionTimelineService, UserSessionTimelineService>();
 builder.Services.AddScoped<IUserProfileSettingsService, UserProfileSettingsService>();
 builder.Services.AddScoped<IAdminSessionEventsService, AdminSessionEventsService>();
+builder.Services.AddScoped<IAdminSessionEventAnalyticsService, AdminSessionEventAnalyticsService>();
 
 builder.Services.AddRateLimiter(options =>
 {
