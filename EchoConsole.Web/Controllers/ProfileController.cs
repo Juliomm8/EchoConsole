@@ -275,8 +275,8 @@ public sealed class ProfileController : Controller
 
     [HttpGet("Profile/Sessions/{id:guid}")]
     public async Task<IActionResult> SessionDetail(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    Guid id,
+    CancellationToken cancellationToken = default)
     {
         var userId = GetCurrentUserId();
 
@@ -311,7 +311,19 @@ public sealed class ProfileController : Controller
             StartedAtLabel = FormatDateTime(detail.StartedAtUtc),
             EndedAtLabel = detail.EndedAtUtc.HasValue ? FormatDateTime(detail.EndedAtUtc.Value) : "Not ended",
             LastHeartbeatLabel = FormatDateTime(detail.LastHeartbeatUtc),
-            DurationLabel = FormatMinutes(detail.DurationMinutes)
+            DurationLabel = FormatMinutes(detail.DurationMinutes),
+            Events = detail.Events.Select(x => new ProfileSessionEventTimelineItemViewModel
+            {
+                Id = x.Id,
+                EventType = string.IsNullOrWhiteSpace(x.EventType) ? "-" : x.EventType,
+                Scene = string.IsNullOrWhiteSpace(x.Scene) ? "-" : x.Scene,
+                GameState = string.IsNullOrWhiteSpace(x.GameState) ? "-" : x.GameState,
+                Phase = string.IsNullOrWhiteSpace(x.Phase) ? "-" : x.Phase,
+                PayloadJson = string.IsNullOrWhiteSpace(x.PayloadJson) ? string.Empty : x.PayloadJson,
+                HasPayload = !string.IsNullOrWhiteSpace(x.PayloadJson),
+                ClientTimeLabel = x.ClientTimeUtc.HasValue ? FormatDateTime(x.ClientTimeUtc.Value) : "Not provided",
+                CreatedAtLabel = FormatDateTime(x.CreatedAtUtc)
+            }).ToList()
         };
 
         ViewData["Title"] = "SESSION DETAIL";

@@ -33,4 +33,6 @@ public sealed class UserSessionDetailDto
     public int DurationMinutes { get; set; }
 
     public bool IsLive { get; set; }
+
+    public IReadOnlyList<UserSessionEventDto> Events { get; set; } = Array.Empty<UserSessionEventDto>();
 }

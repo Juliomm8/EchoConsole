@@ -245,6 +245,7 @@ public sealed class UserDashboardService : IUserDashboardService
             .Where(x => x.SessionId == sessionId && x.Installation.OwnerUserId == userId)
             .Select(x => new
             {
+                GameSessionDbId = x.Id,
                 x.SessionId,
                 InstallationId = x.Installation.InstallationId,
                 DeviceName = x.Installation.DeviceName,
@@ -265,6 +266,38 @@ public sealed class UserDashboardService : IUserDashboardService
         {
             return null;
         }
+
+        var rawEvents = await _dbContext.GameSessionEvents
+            .AsNoTracking()
+            .Where(x => x.GameSessionId == rawSession.GameSessionDbId)
+            .OrderBy(x => x.CreatedAtUtc)
+            .ThenBy(x => x.Id)
+            .Select(x => new
+            {
+                x.Id,
+                x.EventType,
+                x.Scene,
+                x.GameState,
+                x.Phase,
+                x.PayloadJson,
+                x.ClientTimeUtc,
+                x.CreatedAtUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        var events = rawEvents
+            .Select(x => new UserSessionEventDto
+            {
+                Id = x.Id,
+                EventType = string.IsNullOrWhiteSpace(x.EventType) ? "-" : x.EventType,
+                Scene = string.IsNullOrWhiteSpace(x.Scene) ? "-" : x.Scene,
+                GameState = string.IsNullOrWhiteSpace(x.GameState) ? "-" : x.GameState,
+                Phase = string.IsNullOrWhiteSpace(x.Phase) ? "-" : x.Phase,
+                PayloadJson = string.IsNullOrWhiteSpace(x.PayloadJson) ? string.Empty : x.PayloadJson,
+                ClientTimeUtc = x.ClientTimeUtc,
+                CreatedAtUtc = x.CreatedAtUtc
+            })
+            .ToList();
 
         var status = (int)rawSession.Status;
         var endUtc = rawSession.EndedAtUtc ?? rawSession.LastHeartbeatUtc;
@@ -291,7 +324,8 @@ public sealed class UserDashboardService : IUserDashboardService
             EndedAtUtc = rawSession.EndedAtUtc,
             LastHeartbeatUtc = rawSession.LastHeartbeatUtc,
             DurationMinutes = durationMinutes,
-            IsLive = status == 1 && rawSession.EndedAtUtc is null
+            IsLive = status == 1 && rawSession.EndedAtUtc is null,
+            Events = events
         };
     }
 
