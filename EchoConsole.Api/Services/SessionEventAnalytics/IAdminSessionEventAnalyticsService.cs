@@ -8,5 +8,6 @@ public interface IAdminSessionEventAnalyticsService
         string? buildVersion,
         DateTimeOffset? fromUtc,
         DateTimeOffset? toUtcExclusive,
+        string? trendGranularity,
         CancellationToken cancellationToken = default);
 }

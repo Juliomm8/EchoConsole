@@ -10,6 +10,8 @@ public sealed class AdminSessionEventAnalyticsDto
 
     public DateTimeOffset? AppliedToUtcExclusive { get; set; }
 
+    public string TrendGranularity { get; set; } = "day";
+
     public IReadOnlyList<string> AvailableBuildVersions { get; set; } =
         Array.Empty<string>();
 
@@ -21,4 +23,7 @@ public sealed class AdminSessionEventAnalyticsDto
 
     public IReadOnlyList<AdminSessionEventAnalyticsBucketDto> BuildVersions { get; set; } =
         Array.Empty<AdminSessionEventAnalyticsBucketDto>();
+
+    public IReadOnlyList<AdminSessionEventTimePointDto> TimeSeries { get; set; } =
+        Array.Empty<AdminSessionEventTimePointDto>();
 }
