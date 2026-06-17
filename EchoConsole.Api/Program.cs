@@ -1,4 +1,5 @@
 using EchoConsole.Api.BackgroundServices;
+using EchoConsole.Api.Configuration;
 using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
@@ -6,11 +7,15 @@ using EchoConsole.Api.Seed;
 using EchoConsole.Api.Services;
 using EchoConsole.Api.Services.Ownership;
 using EchoConsole.Api.Services.Profile;
+using EchoConsole.Api.Services.SessionEventAnalytics;
+using EchoConsole.Api.Services.SessionEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Globalization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,16 +56,99 @@ builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
+builder.Services.AddScoped<IUserSessionTimelineService, UserSessionTimelineService>();
 builder.Services.AddScoped<IUserProfileSettingsService, UserProfileSettingsService>();
+builder.Services.AddScoped<IAdminSessionEventsService, AdminSessionEventsService>();
+builder.Services.AddScoped<IAdminSessionEventAnalyticsService, AdminSessionEventAnalyticsService>();
+
+var sessionEventIngestionOptions = builder.Configuration
+    .GetSection(SessionEventIngestionOptions.SectionName)
+    .Get<SessionEventIngestionOptions>()
+    ?? new SessionEventIngestionOptions();
+
+sessionEventIngestionOptions.Validate();
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("client-ingest", limiterOptions =>
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.OnRejected = async (context, cancellationToken) =>
     {
-        limiterOptions.PermitLimit = 300;
-        limiterOptions.Window = TimeSpan.FromMinutes(1);
-        limiterOptions.QueueLimit = 0;
-    });
+        int? retryAfterSeconds = null;
+
+        if (context.Lease.TryGetMetadata(
+                MetadataName.RetryAfter,
+                out var retryAfter))
+        {
+            retryAfterSeconds = Math.Max(
+                1,
+                (int)Math.Ceiling(retryAfter.TotalSeconds));
+
+            context.HttpContext.Response.Headers["Retry-After"] =
+                retryAfterSeconds.Value.ToString(
+                    CultureInfo.InvariantCulture);
+        }
+
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new
+            {
+                code = "rate_limit_exceeded",
+                message = "The request rate limit has been exceeded.",
+                retryAfterSeconds
+            },
+            cancellationToken);
+    };
+
+    options.AddFixedWindowLimiter(
+        "client-ingest",
+        limiterOptions =>
+        {
+            limiterOptions.PermitLimit = 300;
+            limiterOptions.Window = TimeSpan.FromMinutes(1);
+            limiterOptions.QueueLimit = 0;
+            limiterOptions.QueueProcessingOrder =
+                QueueProcessingOrder.OldestFirst;
+            limiterOptions.AutoReplenishment = true;
+        });
+
+    options.AddPolicy(
+        "session-events",
+        httpContext =>
+        {
+            var routeSessionId =
+                httpContext.Request.RouteValues["sessionId"]?.ToString();
+
+            var remoteAddress =
+                httpContext.Connection.RemoteIpAddress?.ToString()
+                ?? "unknown";
+
+            var partitionKey = Guid.TryParse(
+                routeSessionId,
+                out var parsedSessionId)
+                ? $"session:{parsedSessionId:N}"
+                : $"invalid-session:{remoteAddress}";
+
+            return RateLimitPartition.GetSlidingWindowLimiter(
+                partitionKey,
+                _ => new SlidingWindowRateLimiterOptions
+                {
+                    PermitLimit =
+                        sessionEventIngestionOptions.PermitLimit,
+
+                    Window = TimeSpan.FromSeconds(
+                        sessionEventIngestionOptions.WindowSeconds),
+
+                    SegmentsPerWindow =
+                        sessionEventIngestionOptions.SegmentsPerWindow,
+
+                    QueueLimit = 0,
+
+                    QueueProcessingOrder =
+                        QueueProcessingOrder.OldestFirst,
+
+                    AutoReplenishment = true
+                });
+        });
 });
 
 builder.Services.AddCors(options =>

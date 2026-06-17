@@ -33,4 +33,6 @@ public sealed class UserSessionDetailApiModel
     public int DurationMinutes { get; set; }
 
     public bool IsLive { get; set; }
+
+    public IReadOnlyList<UserSessionEventApiModel> Events { get; set; } = Array.Empty<UserSessionEventApiModel>();
 }

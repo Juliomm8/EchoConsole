@@ -104,6 +104,8 @@ builder.Services.AddScoped<EchoConsoleAlertsApiClient>();
 builder.Services.AddScoped<EchoConsoleUsersApiClient>();
 builder.Services.AddScoped<EchoConsoleHomeApiClient>();
 builder.Services.AddScoped<EchoConsoleProfileApiClient>();
+builder.Services.AddScoped<EchoConsoleSessionEventsApiClient>();
+builder.Services.AddScoped<EchoConsoleSessionEventAnalyticsApiClient>();
 
 var app = builder.Build();
 
