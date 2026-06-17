@@ -10,6 +10,8 @@ public sealed class AdminSessionEventAnalyticsApiModel
 
     public DateTimeOffset? AppliedToUtcExclusive { get; set; }
 
+    public string TrendGranularity { get; set; } = "day";
+
     public IReadOnlyList<string> AvailableBuildVersions { get; set; } =
         Array.Empty<string>();
 
@@ -21,4 +23,7 @@ public sealed class AdminSessionEventAnalyticsApiModel
 
     public IReadOnlyList<AdminSessionEventAnalyticsBucketApiModel> BuildVersions { get; set; } =
         Array.Empty<AdminSessionEventAnalyticsBucketApiModel>();
+
+    public IReadOnlyList<AdminSessionEventTimePointApiModel> TimeSeries { get; set; } =
+        Array.Empty<AdminSessionEventTimePointApiModel>();
 }
