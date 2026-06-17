@@ -26,8 +26,16 @@ public sealed class SessionEventAnalyticsController : Controller
         string? buildVersion,
         DateTime? fromDate,
         DateTime? toDate,
+        string trendGranularity = "day",
         CancellationToken cancellationToken = default)
     {
+        trendGranularity = string.Equals(
+            trendGranularity,
+            "hour",
+            StringComparison.OrdinalIgnoreCase)
+                ? "hour"
+                : "day";
+
         if (fromDate.HasValue &&
             toDate.HasValue &&
             fromDate.Value.Date > toDate.Value.Date)
@@ -55,6 +63,7 @@ public sealed class SessionEventAnalyticsController : Controller
             buildVersion,
             fromUtc,
             toUtcExclusive,
+            trendGranularity,
             cancellationToken);
 
         if (response is null)
@@ -83,6 +92,20 @@ public sealed class SessionEventAnalyticsController : Controller
             SceneCount = response.Scenes.Count,
             BuildCount = response.BuildVersions.Count,
             AvailableBuildVersions = response.AvailableBuildVersions,
+            TrendGranularity = response.TrendGranularity,
+            TimeSeries = response.TimeSeries
+                .Select(x => new SessionEventAnalyticsTimePointViewModel
+                {
+                    IsoUtc = x.BucketStartUtc.ToUniversalTime().ToString("O"),
+                    Label = x.BucketStartUtc
+                        .ToUniversalTime()
+                        .ToString(
+                            response.TrendGranularity == "hour"
+                                ? "MMM dd HH:mm"
+                                : "MMM dd"),
+                    Count = x.Count
+                })
+                .ToList(),
 
             EventTypes = MapBuckets(
                 response.EventTypes,

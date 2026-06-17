@@ -1,8 +1,40 @@
 ﻿@using System.Globalization
+@using System.Text.Json
 @model EchoConsole.Web.Models.SessionEventAnalytics.SessionEventAnalyticsIndexViewModel
 
 @{
     ViewData["Title"] = "EVENT ANALYTICS";
+
+    var chartPayload = new
+    {
+        timeSeries = new
+        {
+            labels = Model.TimeSeries?.Select(x => x.Label) ?? Array.Empty<string>(),
+            values = Model.TimeSeries?.Select(x => x.Count) ?? Array.Empty<int>()
+        },
+        eventTypes = new
+        {
+            labels = Model.EventTypes?.Select(x => x.Label) ?? Array.Empty<string>(),
+            values = Model.EventTypes?.Select(x => x.Count) ?? Array.Empty<int>()
+        },
+        scenes = new
+        {
+            labels = Model.Scenes?.Take(12).Select(x => x.Label) ?? Array.Empty<string>(),
+            values = Model.Scenes?.Take(12).Select(x => x.Count) ?? Array.Empty<int>()
+        },
+        buildVersions = new
+        {
+            labels = Model.BuildVersions?.Select(x => x.Label) ?? Array.Empty<string>(),
+            values = Model.BuildVersions?.Select(x => x.Count) ?? Array.Empty<int>()
+        }
+    };
+
+    var chartJson = JsonSerializer.Serialize(
+        chartPayload,
+        new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -35,7 +67,7 @@
             <form method="get"
                   asp-controller="SessionEventAnalytics"
                   asp-action="Index"
-                  class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+                  class="grid grid-cols-1 gap-4 lg:grid-cols-5">
                 <div>
                     <label for="buildVersion"
                            class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
@@ -47,18 +79,21 @@
                             class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
                         <option value="">All builds</option>
 
-                        @foreach (var option in Model.AvailableBuildVersions)
+                        @if (Model.AvailableBuildVersions != null)
                         {
-                            if (string.Equals(
-                            Model.BuildVersion,
-                            option,
-                            StringComparison.OrdinalIgnoreCase))
+                            foreach (var option in Model.AvailableBuildVersions)
                             {
-                                <option value="@option" selected>@option</option>
-                            }
-                            else
-                            {
-                                <option value="@option">@option</option>
+                                if (string.Equals(
+                                Model.BuildVersion,
+                                option,
+                                StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <option value="@option" selected>@option</option>
+                                }
+                                else
+                                {
+                                    <option value="@option">@option</option>
+                                }
                             }
                         }
                     </select>
@@ -90,6 +125,26 @@
                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40" />
                 </div>
 
+                <div>
+                    <label for="trendGranularity"
+                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                        Trend Resolution
+                    </label>
+
+                    <select id="trendGranularity"
+                            name="trendGranularity"
+                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
+                        <option value="day"
+                                selected="@(Model.TrendGranularity == "day")">
+                            Daily
+                        </option>
+                        <option value="hour"
+                                selected="@(Model.TrendGranularity == "hour")">
+                            Hourly
+                        </option>
+                    </select>
+                </div>
+
                 <div class="flex items-end gap-3">
                     <button type="submit"
                             class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
@@ -117,8 +172,9 @@
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
                     Total Events
                 </div>
-                <div class="mt-3 font-display text-4xl text-cyan-300">
-                    @Model.TotalEvents.ToString("N0")
+                <div class="mt-3 font-display text-4xl text-cyan-300"
+                     data-analytics-counter="@Model.TotalEvents">
+                    0
                 </div>
             </div>
 
@@ -126,8 +182,9 @@
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
                     Event Types
                 </div>
-                <div class="mt-3 font-display text-4xl text-fuchsia-300">
-                    @Model.EventTypeCount.ToString("N0")
+                <div class="mt-3 font-display text-4xl text-fuchsia-300"
+                     data-analytics-counter="@Model.EventTypeCount">
+                    0
                 </div>
             </div>
 
@@ -135,8 +192,9 @@
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
                     Scenes
                 </div>
-                <div class="mt-3 font-display text-4xl text-amber-300">
-                    @Model.SceneCount.ToString("N0")
+                <div class="mt-3 font-display text-4xl text-amber-300"
+                     data-analytics-counter="@Model.SceneCount">
+                    0
                 </div>
             </div>
 
@@ -144,8 +202,9 @@
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
                     Builds
                 </div>
-                <div class="mt-3 font-display text-4xl text-emerald-300">
-                    @Model.BuildCount.ToString("N0")
+                <div class="mt-3 font-display text-4xl text-emerald-300"
+                     data-analytics-counter="@Model.BuildCount">
+                    0
                 </div>
             </div>
         </section>
@@ -164,124 +223,88 @@
         }
         else
         {
-            <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
-                <section class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
-                    <div>
-                        <p class="font-display text-xs uppercase tracking-[0.30em] text-cyan-300">
-                            Event Distribution
-                        </p>
+            <script id="session-event-analytics-chart-data"
+                    type="application/json">
+                @Html.Raw(chartJson)
+            </script>
 
-                        <h2 class="mt-2 text-xl font-semibold text-white">
-                            By Event Type
-                        </h2>
-                    </div>
+            <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(34,211,238,0.05)]">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.30em] text-cyan-300">
+                        Activity Trend
+                    </p>
 
-                    <div class="mt-6 max-h-[620px] space-y-5 overflow-y-auto pr-2">
-                        @foreach (var item in Model.EventTypes)
-                        {
-                            <div>
-                                <div class="flex items-center justify-between gap-4 text-sm">
-                                    <span class="truncate font-medium text-slate-200"
-                                          title="@item.Label">
-                                        @item.Label
-                                    </span>
+                    <h2 class="mt-2 text-xl font-semibold text-white">
+                        Events Over Time
+                    </h2>
+                </div>
 
-                                    <span class="shrink-0 text-cyan-300">
-                                        @item.Count.ToString("N0")
-                                        <span class="text-slate-600">
-                                            (@item.Percentage.ToString("0.##")%)
-                                        </span>
-                                    </span>
-                                </div>
+                <div class="relative mt-6 h-[380px]">
+                    <canvas id="event-trend-chart"></canvas>
+                </div>
+            </section>
 
-                                <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-900">
-                                    <div class="h-full rounded-full bg-cyan-400/70"
-                                         style="width: @(item.BarWidthPercentage.ToString("0.##", CultureInfo.InvariantCulture))%">
-                                    </div>
-                                </div>
-                            </div>
-                        }
+            <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+                <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
+                    <p class="font-display text-xs uppercase tracking-[0.30em] text-fuchsia-300">
+                        Distribution
+                    </p>
+
+                    <h2 class="mt-2 text-xl font-semibold text-white">
+                        Events by Type
+                    </h2>
+
+                    <div class="relative mt-6 h-[380px]">
+                        <canvas id="event-type-chart"></canvas>
                     </div>
                 </section>
 
                 <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
-                    <div>
-                        <p class="font-display text-xs uppercase tracking-[0.30em] text-fuchsia-300">
-                            Scene Distribution
-                        </p>
+                    <p class="font-display text-xs uppercase tracking-[0.30em] text-fuchsia-300">
+                        Hot Zones
+                    </p>
 
-                        <h2 class="mt-2 text-xl font-semibold text-white">
-                            By Scene
-                        </h2>
-                    </div>
+                    <h2 class="mt-2 text-xl font-semibold text-white">
+                        Events by Scene
+                    </h2>
 
-                    <div class="mt-6 max-h-[620px] space-y-5 overflow-y-auto pr-2">
-                        @foreach (var item in Model.Scenes)
-                        {
-                            <div>
-                                <div class="flex items-center justify-between gap-4 text-sm">
-                                    <span class="truncate font-medium text-slate-200"
-                                          title="@item.Label">
-                                        @item.Label
-                                    </span>
-
-                                    <span class="shrink-0 text-fuchsia-300">
-                                        @item.Count.ToString("N0")
-                                        <span class="text-slate-600">
-                                            (@item.Percentage.ToString("0.##")%)
-                                        </span>
-                                    </span>
-                                </div>
-
-                                <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-900">
-                                    <div class="h-full rounded-full bg-fuchsia-400/70"
-                                         style="width: @(item.BarWidthPercentage.ToString("0.##", CultureInfo.InvariantCulture))%">
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </section>
-
-                <section class="rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
-                    <div>
-                        <p class="font-display text-xs uppercase tracking-[0.30em] text-amber-300">
-                            Build Distribution
-                        </p>
-
-                        <h2 class="mt-2 text-xl font-semibold text-white">
-                            By Build Version
-                        </h2>
-                    </div>
-
-                    <div class="mt-6 max-h-[620px] space-y-5 overflow-y-auto pr-2">
-                        @foreach (var item in Model.BuildVersions)
-                        {
-                            <div>
-                                <div class="flex items-center justify-between gap-4 text-sm">
-                                    <span class="truncate font-medium text-slate-200"
-                                          title="@item.Label">
-                                        @item.Label
-                                    </span>
-
-                                    <span class="shrink-0 text-amber-300">
-                                        @item.Count.ToString("N0")
-                                        <span class="text-slate-600">
-                                            (@item.Percentage.ToString("0.##")%)
-                                        </span>
-                                    </span>
-                                </div>
-
-                                <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-900">
-                                    <div class="h-full rounded-full bg-amber-400/70"
-                                         style="width: @(item.BarWidthPercentage.ToString("0.##", CultureInfo.InvariantCulture))%">
-                                    </div>
-                                </div>
-                            </div>
-                        }
+                    <div class="relative mt-6 h-[380px]">
+                        <canvas id="scene-chart"></canvas>
                     </div>
                 </section>
             </div>
+
+            <section class="mt-6 rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
+                <p class="font-display text-xs uppercase tracking-[0.30em] text-amber-300">
+                    Release Comparison
+                </p>
+
+                <h2 class="mt-2 text-xl font-semibold text-white">
+                    Events by Build Version
+                </h2>
+
+                <div class="relative mt-6 h-[360px]">
+                    <canvas id="build-chart"></canvas>
+                </div>
+            </section>
         }
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/lib/chart.js/chart.umd.min.js"
+            asp-append-version="true"></script>
+
+    <script src="~/js/session-event-analytics-charts.js"
+            asp-append-version="true"></script>
+
+    <script>
+        window.echoConsoleAnalyticsCharts.init({
+            dataElementId: "session-event-analytics-chart-data",
+            trendCanvasId: "event-trend-chart",
+            eventTypeCanvasId: "event-type-chart",
+            sceneCanvasId: "scene-chart",
+            buildCanvasId: "build-chart"
+        });
+    </script>
+}
