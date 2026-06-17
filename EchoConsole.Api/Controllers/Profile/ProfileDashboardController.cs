@@ -11,10 +11,14 @@ namespace EchoConsole.Api.Controllers.Profile;
 public sealed class ProfileDashboardController : ControllerBase
 {
     private readonly IUserDashboardService _userDashboardService;
+    private readonly IUserSessionTimelineService _userSessionTimelineService;
 
-    public ProfileDashboardController(IUserDashboardService userDashboardService)
+    public ProfileDashboardController(
+        IUserDashboardService userDashboardService,
+        IUserSessionTimelineService userSessionTimelineService)
     {
         _userDashboardService = userDashboardService;
+        _userSessionTimelineService = userSessionTimelineService;
     }
 
     [HttpGet("dashboard/{userId:int}")]
@@ -22,13 +26,23 @@ public sealed class ProfileDashboardController : ControllerBase
         int userId,
         CancellationToken cancellationToken)
     {
-        var result = await _userDashboardService.GetProfileAsync(userId, cancellationToken);
+        var result = await _userDashboardService.GetProfileAsync(
+            userId,
+            cancellationToken);
 
         return result.Status switch
         {
             UserDashboardStatus.Success => Ok(result.Profile),
-            UserDashboardStatus.UserNotFound => NotFound(new { message = "User was not found." }),
-            _ => StatusCode(StatusCodes.Status500InternalServerError, new { message = "Unexpected error." })
+            UserDashboardStatus.UserNotFound => NotFound(new
+            {
+                message = "User was not found."
+            }),
+            _ => StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new
+                {
+                    message = "Unexpected error."
+                })
         };
     }
 
@@ -39,9 +53,6 @@ public sealed class ProfileDashboardController : ControllerBase
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        page = page < 1 ? 1 : page;
-        pageSize = pageSize < 1 ? 10 : Math.Min(pageSize, 50);
-
         var result = await _userDashboardService.GetSessionHistoryAsync(
             userId,
             page,
@@ -50,7 +61,10 @@ public sealed class ProfileDashboardController : ControllerBase
 
         if (result is null)
         {
-            return NotFound(new { message = "User was not found." });
+            return NotFound(new
+            {
+                message = "User was not found."
+            });
         }
 
         return Ok(result);
@@ -69,7 +83,36 @@ public sealed class ProfileDashboardController : ControllerBase
 
         if (result is null)
         {
-            return NotFound(new { message = "Session was not found for this user." });
+            return NotFound(new
+            {
+                message = "Session was not found for this user."
+            });
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("sessions/{userId:int}/{sessionId:guid}/events")]
+    public async Task<IActionResult> GetSessionEvents(
+        int userId,
+        Guid sessionId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _userSessionTimelineService.GetSessionEventsAsync(
+            userId,
+            sessionId,
+            page,
+            pageSize,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound(new
+            {
+                message = "Session was not found for this user."
+            });
         }
 
         return Ok(result);
