@@ -5,19 +5,21 @@ namespace EchoConsole.Api.Contracts.Client;
 public sealed class CreateSessionEventRequest
 {
     [Required]
-    [MaxLength(64)]
-    public string EventType { get; set; } = null!;
+    [StringLength(
+        SessionEventContract.MaxEventTypeCharacters,
+        MinimumLength = 1)]
+    public string EventType { get; set; } = string.Empty;
 
-    [MaxLength(128)]
+    [StringLength(SessionEventContract.MaxSceneCharacters)]
     public string? Scene { get; set; }
 
-    [MaxLength(64)]
+    [StringLength(SessionEventContract.MaxGameStateCharacters)]
     public string? GameState { get; set; }
 
-    [MaxLength(64)]
+    [StringLength(SessionEventContract.MaxPhaseCharacters)]
     public string? Phase { get; set; }
 
-    [MaxLength(4000)]
+    [StringLength(SessionEventContract.MaxPayloadCharacters)]
     public string? PayloadJson { get; set; }
 
     public DateTimeOffset? ClientTimeUtc { get; set; }
