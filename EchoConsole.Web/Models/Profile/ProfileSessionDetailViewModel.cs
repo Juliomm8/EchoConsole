@@ -31,4 +31,7 @@ public sealed class ProfileSessionDetailViewModel
     public string LastHeartbeatLabel { get; set; } = string.Empty;
 
     public string DurationLabel { get; set; } = string.Empty;
+
+    public IReadOnlyList<ProfileSessionEventTimelineItemViewModel> Events { get; set; } =
+        Array.Empty<ProfileSessionEventTimelineItemViewModel>();
 }
