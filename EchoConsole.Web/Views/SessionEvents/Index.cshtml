@@ -1,0 +1,294 @@
+﻿@model EchoConsole.Web.Models.SessionEvents.AdminSessionEventsIndexViewModel
+
+@{
+    ViewData["Title"] = "RECENT SESSION EVENTS";
+
+    var previousPage = Math.Max(1, Model.Page - 1);
+    var nextPage = Math.Min(Math.Max(1, Model.TotalPages), Model.Page + 1);
+}
+
+<div class="min-h-screen bg-[#070B12] text-slate-100">
+    <div class="mx-auto max-w-[1700px] px-6 py-8">
+        <section class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
+                        Global Telemetry Feed
+                    </p>
+
+                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white">
+                        Recent Session Events
+                    </h1>
+
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                        Administrative view of gameplay telemetry events received from every Cosmic Diner installation.
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-5 py-3">
+                    <div class="text-xs uppercase tracking-[0.20em] text-fuchsia-300">
+                        Matching Events
+                    </div>
+                    <div class="mt-1 font-display text-2xl text-white">
+                        @Model.TotalCount.ToString("N0")
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
+            <form method="get"
+                  asp-controller="SessionEvents"
+                  asp-action="Index"
+                  class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                <div>
+                    <label for="eventType"
+                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                        Event Type
+                    </label>
+
+                    <select id="eventType"
+                            name="eventType"
+                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
+                        <option value="">All event types</option>
+
+                        @foreach (var option in Model.AvailableEventTypes)
+                        {
+                            <option value="@option"
+                                    selected="@(string.Equals(Model.EventType, option, StringComparison.OrdinalIgnoreCase))">
+                                @option
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label for="buildVersion"
+                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                        Build
+                    </label>
+
+                    <select id="buildVersion"
+                            name="buildVersion"
+                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
+                        <option value="">All builds</option>
+
+                        @foreach (var option in Model.AvailableBuildVersions)
+                        {
+                            <option value="@option"
+                                    selected="@(string.Equals(Model.BuildVersion, option, StringComparison.OrdinalIgnoreCase))">
+                                @option
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label for="fromDate"
+                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                        From Date UTC
+                    </label>
+
+                    <input id="fromDate"
+                           name="fromDate"
+                           type="date"
+                           value="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40" />
+                </div>
+
+                <div>
+                    <label for="toDate"
+                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                        To Date UTC
+                    </label>
+
+                    <input id="toDate"
+                           name="toDate"
+                           type="date"
+                           value="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40" />
+                </div>
+
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+                <div class="flex items-end gap-3">
+                    <button type="submit"
+                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
+                        Apply
+                    </button>
+
+                    <a asp-controller="SessionEvents"
+                       asp-action="Index"
+                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:text-white">
+                        Reset
+                    </a>
+                </div>
+            </form>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="mt-5 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                    @Model.ErrorMessage
+                </div>
+            }
+        </section>
+
+        <section class="mt-6 rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
+            @if (Model.Items.Count == 0)
+            {
+                <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-12 text-center">
+                    <p class="font-display text-sm uppercase tracking-[0.28em] text-slate-400">
+                        No events found
+                    </p>
+
+                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                        No session events match the current administrative filters.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="overflow-x-auto rounded-2xl border border-slate-800">
+                    <table class="min-w-[1500px] w-full divide-y divide-slate-800">
+                        <thead class="bg-slate-900/90">
+                            <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
+                                <th class="px-4 py-4">Time</th>
+                                <th class="px-4 py-4">Event</th>
+                                <th class="px-4 py-4">Scene / State</th>
+                                <th class="px-4 py-4">Build</th>
+                                <th class="px-4 py-4">Device</th>
+                                <th class="px-4 py-4">Owner</th>
+                                <th class="px-4 py-4">Session</th>
+                                <th class="px-4 py-4">Payload</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-900 bg-slate-950/80">
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr class="align-top text-sm text-slate-300 transition hover:bg-slate-900/70">
+                                    <td class="px-4 py-4">
+                                        <div class="font-medium text-cyan-300">
+                                            @item.CreatedAtLabel
+                                        </div>
+                                        <div class="mt-1 text-xs text-slate-600">
+                                            Client: @item.ClientTimeLabel
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <span class="inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-fuchsia-200">
+                                            @item.EventType
+                                        </span>
+
+                                        <div class="mt-2 text-xs text-slate-600">
+                                            Event #@item.Id
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="font-medium text-white">@item.Scene</div>
+                                        <div class="mt-1 text-xs text-slate-500">
+                                            @item.GameState / @item.Phase
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-slate-300">
+                                        @item.BuildVersion
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="font-medium text-white">@item.DeviceName</div>
+                                        <div class="mt-1 max-w-[220px] truncate text-xs text-slate-600"
+                                             title="@item.InstallationId">
+                                            @item.InstallationId
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        @item.OwnerUserLabel
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="max-w-[230px] truncate text-xs text-slate-400"
+                                             title="@item.SessionId">
+                                            @item.SessionId
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        @if (item.HasPayload)
+                                        {
+                                            <details class="max-w-[360px]">
+                                                <summary class="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">
+                                                    View JSON
+                                                </summary>
+
+                                                <pre class="mt-3 max-h-[220px] overflow-auto whitespace-pre-wrap break-words rounded-xl border border-slate-800 bg-slate-950/90 p-3 text-xs leading-5 text-slate-300">@item.PayloadJson</pre>
+                                            </details>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-xs text-slate-600">No payload</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-4 border-t border-slate-800 pt-6 md:flex-row md:items-center md:justify-between">
+                    <div class="text-sm text-slate-400">
+                        Page <span class="text-cyan-300">@Model.Page</span>
+                        of <span class="text-cyan-300">@Model.TotalPages</span>
+                    </div>
+
+                    <div class="flex gap-3">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <a asp-controller="SessionEvents"
+                               asp-action="Index"
+                               asp-route-eventType="@Model.EventType"
+                               asp-route-buildVersion="@Model.BuildVersion"
+                               asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-page="@previousPage"
+                               asp-route-pageSize="@Model.PageSize"
+                               class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                                Previous
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
+                                Previous
+                            </span>
+                        }
+
+                        @if (Model.HasNextPage)
+                        {
+                            <a asp-controller="SessionEvents"
+                               asp-action="Index"
+                               asp-route-eventType="@Model.EventType"
+                               asp-route-buildVersion="@Model.BuildVersion"
+                               asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-page="@nextPage"
+                               asp-route-pageSize="@Model.PageSize"
+                               class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                                Next
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
+                                Next
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+</div>
