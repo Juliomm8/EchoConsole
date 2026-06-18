@@ -1,31 +1,48 @@
-﻿window.echoConsoleRealtime = (() => {
+window.echoConsoleRealtime = (() => {
     let connection = null;
     let options = null;
     let refreshTimer = null;
     let relativeTimer = null;
     let currentSessions = [];
+    let relativeTimeFormatter = null;
+    let numberFormatter = null;
 
     function init(config) {
         options = {
-            webBaseUrl: normalizeBaseUrl(config?.webBaseUrl || window.location.origin),
+            webBaseUrl: normalizeBaseUrl(
+                config?.webBaseUrl || window.location.origin),
+            culture: config?.culture || "en",
+            labels: config?.labels || {},
             tableBodyId: config.tableBodyId,
-            registeredInstallationsValueId: config.registeredInstallationsValueId,
-            activeSessionsValueId: config.activeSessionsValueId,
-            averageDurationValueId: config.averageDurationValueId,
-            latestHeartbeatValueId: config.latestHeartbeatValueId,
-            serverTimeValueId: config.serverTimeValueId,
-            topbarServerTimeValueId: config.topbarServerTimeValueId
+            registeredInstallationsValueId:
+                config.registeredInstallationsValueId,
+            activeSessionsValueId:
+                config.activeSessionsValueId,
+            averageDurationValueId:
+                config.averageDurationValueId,
+            latestHeartbeatValueId:
+                config.latestHeartbeatValueId,
+            serverTimeValueId:
+                config.serverTimeValueId,
+            topbarServerTimeValueId:
+                config.topbarServerTimeValueId
         };
 
+        relativeTimeFormatter = new Intl.RelativeTimeFormat(
+            options.culture,
+            {
+                numeric: "always",
+                style: "narrow"
+            });
+
+        numberFormatter = new Intl.NumberFormat(
+            options.culture);
+
         if (!window.signalR) {
-            console.error("EchoConsole realtime: SignalR library not found.");
+            console.error(
+                "EchoConsole realtime: SignalR library not found.");
             return;
         }
-
-        window.addEventListener("echoConsole:languageChanged", () => {
-            renderSessions(currentSessions);
-            applyDerivedKpisFromSessions(currentSessions);
-        });
 
         buildConnection();
         startConnection();
@@ -34,30 +51,45 @@
     }
 
     function buildConnection() {
-        const hubUrl = buildWebUrl("/hubs/admin-telemetry");
+        const hubUrl = buildWebUrl(
+            "/hubs/admin-telemetry");
 
         connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {
                 withCredentials: true
             })
-            .withAutomaticReconnect([0, 2000, 5000, 10000, 15000])
-            .configureLogging(signalR.LogLevel.Warning)
+            .withAutomaticReconnect([
+                0,
+                2000,
+                5000,
+                10000,
+                15000
+            ])
+            .configureLogging(
+                signalR.LogLevel.Warning)
             .build();
 
-        connection.on("ReceiveTelemetryUpdate", onTelemetryEvent);
+        connection.on(
+            "ReceiveTelemetryUpdate",
+            onTelemetryEvent);
 
         connection.onreconnecting(() => {
-            console.warn("SignalR reconnecting...");
+            console.warn(
+                "SignalR reconnecting...");
         });
 
         connection.onreconnected(() => {
-            console.info("SignalR reconnected.");
+            console.info(
+                "SignalR reconnected.");
             scheduleRefresh(true);
         });
 
         connection.onclose(() => {
-            console.warn("SignalR connection closed. Retrying...");
-            setTimeout(startConnection, 5000);
+            console.warn(
+                "SignalR connection closed. Retrying...");
+            setTimeout(
+                startConnection,
+                5000);
         });
     }
 
@@ -68,11 +100,16 @@
 
         try {
             await connection.start();
-            console.info("SignalR connected.");
+            console.info(
+                "SignalR connected.");
             scheduleRefresh(true);
         } catch (error) {
-            console.error("SignalR connection failed.", error);
-            setTimeout(startConnection, 5000);
+            console.error(
+                "SignalR connection failed.",
+                error);
+            setTimeout(
+                startConnection,
+                5000);
         }
     }
 
@@ -85,9 +122,9 @@
             clearTimeout(refreshTimer);
         }
 
-        refreshTimer = setTimeout(() => {
-            refreshDashboard();
-        }, immediate ? 0 : 250);
+        refreshTimer = setTimeout(
+            refreshDashboard,
+            immediate ? 0 : 250);
     }
 
     async function refreshDashboard() {
@@ -107,99 +144,148 @@
                 applyDerivedKpisFromSessions(sessions);
             }
         } catch (error) {
-            console.error("Dashboard refresh failed.", error);
+            console.error(
+                "Dashboard refresh failed.",
+                error);
         }
     }
 
     async function fetchOverview() {
-        const url = buildWebUrl("/Dashboard/Overview");
-        const response = await fetch(url, {
-            method: "GET",
-            credentials: "same-origin",
-            headers: {
-                "Accept": "application/json"
-            }
-        });
+        const response = await fetch(
+            buildWebUrl("/Dashboard/Overview"),
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
         if (!response.ok) {
-            throw new Error(`Overview request failed with status ${response.status}`);
+            throw new Error(
+                `Overview request failed with status ${response.status}`);
         }
 
         return await response.json();
     }
 
     async function fetchLiveSessions() {
-        const url = buildWebUrl("/Dashboard/LiveSessions");
-        const response = await fetch(url, {
-            method: "GET",
-            credentials: "same-origin",
-            headers: {
-                "Accept": "application/json"
-            }
-        });
+        const response = await fetch(
+            buildWebUrl("/Dashboard/LiveSessions"),
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
 
         if (!response.ok) {
-            throw new Error(`Live sessions request failed with status ${response.status}`);
+            throw new Error(
+                `Live sessions request failed with status ${response.status}`);
         }
 
         return await response.json();
     }
 
     function applyOverview(overview) {
-        setText(options.registeredInstallationsValueId, formatNumber(overview.registeredInstallations));
-        setText(options.activeSessionsValueId, formatNumber(overview.activeSessions));
+        setText(
+            options.registeredInstallationsValueId,
+            formatNumber(overview.registeredInstallations));
+
+        setText(
+            options.activeSessionsValueId,
+            formatNumber(overview.activeSessions));
 
         if (overview.serverTimeUtc) {
-            const serverTime = new Date(overview.serverTimeUtc);
-            const formatted = formatServerTime(serverTime);
-            setText(options.serverTimeValueId, formatted);
-            setText(options.topbarServerTimeValueId, formatted);
+            const serverTime = new Date(
+                overview.serverTimeUtc);
+
+            const formatted = formatServerTime(
+                serverTime);
+
+            setText(
+                options.serverTimeValueId,
+                formatted);
+
+            setText(
+                options.topbarServerTimeValueId,
+                formatted);
         }
     }
 
     function applyDerivedKpisFromSessions(sessions) {
         const now = new Date();
 
-        if (!Array.isArray(sessions) || sessions.length === 0) {
-            setText(options.averageDurationValueId, "00:00:00");
-            setText(options.latestHeartbeatValueId, "--");
+        if (!Array.isArray(sessions) ||
+            sessions.length === 0) {
+            setText(
+                options.averageDurationValueId,
+                "00:00:00");
+
+            setText(
+                options.latestHeartbeatValueId,
+                "--");
             return;
         }
 
         const validDurations = sessions
-            .map(x => {
-                const startedAt = parseDate(x.startedAtUtc);
+            .map(session => {
+                const startedAt = parseDate(
+                    session.startedAtUtc);
+
                 if (!startedAt) {
                     return null;
                 }
 
-                const durationMs = now.getTime() - startedAt.getTime();
-                return durationMs >= 0 ? durationMs : null;
+                const durationMilliseconds =
+                    now.getTime() - startedAt.getTime();
+
+                return durationMilliseconds >= 0
+                    ? durationMilliseconds
+                    : null;
             })
-            .filter(x => x !== null);
+            .filter(value => value !== null);
 
         if (validDurations.length > 0) {
-            const avgMs = validDurations.reduce((sum, value) => sum + value, 0) / validDurations.length;
-            setText(options.averageDurationValueId, formatDurationFromMilliseconds(avgMs));
+            const averageMilliseconds =
+                validDurations.reduce(
+                    (sum, value) => sum + value,
+                    0) / validDurations.length;
+
+            setText(
+                options.averageDurationValueId,
+                formatDurationFromMilliseconds(
+                    averageMilliseconds));
         } else {
-            setText(options.averageDurationValueId, "00:00:00");
+            setText(
+                options.averageDurationValueId,
+                "00:00:00");
         }
 
         const latestHeartbeat = sessions
-            .map(x => parseDate(x.lastHeartbeatUtc))
-            .filter(x => x !== null)
-            .sort((a, b) => b.getTime() - a.getTime())[0];
+            .map(session => parseDate(
+                session.lastHeartbeatUtc))
+            .filter(value => value !== null)
+            .sort((left, right) =>
+                right.getTime() - left.getTime())[0];
 
         if (latestHeartbeat) {
-            const ageMs = now.getTime() - latestHeartbeat.getTime();
-            setText(options.latestHeartbeatValueId, formatRelativeAge(ageMs));
+            setText(
+                options.latestHeartbeatValueId,
+                formatRelativeAge(
+                    now.getTime() -
+                    latestHeartbeat.getTime()));
         } else {
-            setText(options.latestHeartbeatValueId, "--");
+            setText(
+                options.latestHeartbeatValueId,
+                "--");
         }
     }
 
     function renderSessions(sessions) {
-        const tableBody = document.getElementById(options.tableBodyId);
+        const tableBody = document.getElementById(
+            options.tableBodyId);
 
         if (!tableBody) {
             return;
@@ -207,16 +293,13 @@
 
         tableBody.innerHTML = "";
 
-        if (!Array.isArray(sessions) || sessions.length === 0) {
+        if (!Array.isArray(sessions) ||
+            sessions.length === 0) {
             const emptyRow = document.createElement("tr");
-            const emptyText =
-                window.echoConsoleI18n?.t?.("table_no_live_sessions") ||
-                document.getElementById("live-sessions-empty-text")?.textContent?.trim() ||
-                "No live sessions detected.";
 
             emptyRow.innerHTML = `
                 <td colspan="6" class="px-5 py-6 text-center text-sm text-slate-400">
-                    ${escapeHtml(emptyText)}
+                    ${escapeHtml(getLabel("noLiveSessions", "No live sessions detected."))}
                 </td>
             `;
 
@@ -224,38 +307,54 @@
             return;
         }
 
-        const sorted = [...sessions].sort((a, b) => {
-            const left = parseDate(a.lastHeartbeatUtc)?.getTime() ?? 0;
-            const right = parseDate(b.lastHeartbeatUtc)?.getTime() ?? 0;
-            return right - left;
-        });
+        const sorted = [...sessions].sort(
+            (left, right) => {
+                const leftTime = parseDate(
+                    left.lastHeartbeatUtc)?.getTime() ?? 0;
+
+                const rightTime = parseDate(
+                    right.lastHeartbeatUtc)?.getTime() ?? 0;
+
+                return rightTime - leftTime;
+            });
 
         for (const session of sorted) {
             const row = document.createElement("tr");
-            row.setAttribute("data-session-id", session.sessionId ?? "");
-            row.className = "transition-colors duration-150 hover:bg-slate-900/70";
 
-            const lastHeartbeatDate = parseDate(session.lastHeartbeatUtc);
+            row.setAttribute(
+                "data-session-id",
+                session.sessionId ?? "");
+
+            row.className =
+                "transition-colors duration-150 hover:bg-slate-900/70";
+
+            const lastHeartbeatDate = parseDate(
+                session.lastHeartbeatUtc);
+
             const lastHeartbeatLabel = lastHeartbeatDate
-                ? formatRelativeAge(Date.now() - lastHeartbeatDate.getTime())
+                ? formatRelativeAge(
+                    Date.now() - lastHeartbeatDate.getTime())
                 : "--";
 
-            const statusLabel = mapStatusLabel(session.status);
-            const statusClasses = mapStatusClasses(session.status);
+            const statusLabel = mapStatusLabel(
+                session.status);
+
+            const statusClasses = mapStatusClasses(
+                session.status);
 
             row.innerHTML = `
-            <td class="px-5 py-4 text-sm text-cyan-300">${escapeHtml(session.installationId ?? "-")}</td>
-            <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentScene ?? "-")}</td>
-            <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentGameState ?? "-")}</td>
-            <td class="px-5 py-4 text-sm text-slate-300">${escapeHtml(session.currentPhase ?? "-")}</td>
-            <td class="px-5 py-4 text-sm text-slate-400">${escapeHtml(lastHeartbeatLabel)}</td>
-            <td class="px-5 py-4">
-                <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusClasses}">
-                    <span class="h-2 w-2 rounded-full ${mapStatusDotClass(session.status)}"></span>
-                    ${escapeHtml(statusLabel)}
-                </span>
-            </td>
-        `;
+                <td class="px-5 py-4 text-sm text-cyan-300">${escapeHtml(session.installationId ?? "-")}</td>
+                <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentScene ?? "-")}</td>
+                <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentGameState ?? "-")}</td>
+                <td class="px-5 py-4 text-sm text-slate-300">${escapeHtml(session.currentPhase ?? "-")}</td>
+                <td class="px-5 py-4 text-sm text-slate-400">${escapeHtml(lastHeartbeatLabel)}</td>
+                <td class="px-5 py-4">
+                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusClasses}">
+                        <span class="h-2 w-2 rounded-full ${mapStatusDotClass(session.status)}"></span>
+                        ${escapeHtml(statusLabel)}
+                    </span>
+                </td>
+            `;
 
             tableBody.appendChild(row);
         }
@@ -267,31 +366,35 @@
         }
 
         relativeTimer = setInterval(() => {
-            applyDerivedKpisFromSessions(currentSessions);
-            renderSessions(currentSessions);
+            applyDerivedKpisFromSessions(
+                currentSessions);
+
+            renderSessions(
+                currentSessions);
         }, 5000);
     }
 
     function mapStatusLabel(status) {
-        const numericStatus = Number(status);
-        const t = window.echoConsoleI18n?.t ?? ((key) => key);
-
-        switch (numericStatus) {
+        switch (Number(status)) {
             case 1:
-                return t("status_active");
+                return getLabel(
+                    "statusActive",
+                    "Active");
             case 2:
-                return t("status_ended");
+                return getLabel(
+                    "statusEnded",
+                    "Ended");
             case 3:
-                return t("status_expired");
+                return getLabel(
+                    "statusExpired",
+                    "Expired");
             default:
-                return `${t("status_unknown")} (${status})`;
+                return `${getLabel("statusUnknown", "Unknown")} (${status})`;
         }
     }
 
     function mapStatusClasses(status) {
-        const numericStatus = Number(status);
-
-        switch (numericStatus) {
+        switch (Number(status)) {
             case 1:
                 return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
             case 2:
@@ -304,9 +407,7 @@
     }
 
     function mapStatusDotClass(status) {
-        const numericStatus = Number(status);
-
-        switch (numericStatus) {
+        switch (Number(status)) {
             case 1:
                 return "bg-emerald-400";
             case 2:
@@ -319,56 +420,89 @@
     }
 
     function formatDurationFromMilliseconds(milliseconds) {
-        const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const totalSeconds = Math.max(
+            0,
+            Math.floor(milliseconds / 1000));
+
+        const hours = Math.floor(
+            totalSeconds / 3600);
+
+        const minutes = Math.floor(
+            (totalSeconds % 3600) / 60);
+
         const seconds = totalSeconds % 60;
 
         return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     }
 
     function formatRelativeAge(milliseconds) {
-        const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
-        const lang = window.echoConsoleI18n?.getLanguage?.() ?? "en";
+        const totalSeconds = Math.max(
+            0,
+            Math.floor(milliseconds / 1000));
 
         if (totalSeconds < 60) {
-            return lang === "es" ? `${totalSeconds}s` : `${totalSeconds}s ago`;
+            return relativeTimeFormatter.format(
+                -totalSeconds,
+                "second");
         }
 
-        const totalMinutes = Math.floor(totalSeconds / 60);
+        const totalMinutes = Math.floor(
+            totalSeconds / 60);
+
         if (totalMinutes < 60) {
-            return lang === "es" ? `${totalMinutes}m` : `${totalMinutes}m ago`;
+            return relativeTimeFormatter.format(
+                -totalMinutes,
+                "minute");
         }
 
-        const totalHours = Math.floor(totalMinutes / 60);
+        const totalHours = Math.floor(
+            totalMinutes / 60);
+
         if (totalHours < 24) {
-            return lang === "es" ? `${totalHours}h` : `${totalHours}h ago`;
+            return relativeTimeFormatter.format(
+                -totalHours,
+                "hour");
         }
 
-        const totalDays = Math.floor(totalHours / 24);
-        return lang === "es" ? `${totalDays}d` : `${totalDays}d ago`;
+        const totalDays = Math.floor(
+            totalHours / 24);
+
+        return relativeTimeFormatter.format(
+            -totalDays,
+            "day");
     }
 
     function formatServerTime(date) {
-        return date.toLocaleString("en-GB", {
-            year: "numeric",
-            month: "short",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-            timeZone: "UTC"
-        }) + " UTC";
+        return date.toLocaleString(
+            options.culture,
+            {
+                year: "numeric",
+                month: "short",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false,
+                timeZone: "UTC"
+            }) + " UTC";
     }
 
     function formatNumber(value) {
         const numeric = Number(value);
+
         if (Number.isNaN(numeric)) {
             return "0";
         }
 
-        return numeric.toLocaleString("en-US");
+        return numberFormatter.format(numeric);
+    }
+
+    function getLabel(key, fallback) {
+        const value = options.labels?.[key];
+
+        return typeof value === "string" && value.length > 0
+            ? value
+            : fallback;
     }
 
     function parseDate(value) {
@@ -377,7 +511,10 @@
         }
 
         const date = new Date(value);
-        return Number.isNaN(date.getTime()) ? null : date;
+
+        return Number.isNaN(date.getTime())
+            ? null
+            : date;
     }
 
     function setText(elementId, value) {
@@ -386,6 +523,7 @@
         }
 
         const element = document.getElementById(elementId);
+
         if (element) {
             element.textContent = value;
         }
@@ -400,7 +538,9 @@
             return "";
         }
 
-        return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+        return baseUrl.endsWith("/")
+            ? baseUrl.slice(0, -1)
+            : baseUrl;
     }
 
     function pad(value) {

@@ -1,7 +1,19 @@
-﻿@using System.Globalization
 @using System.Security.Claims
 
 @{
+    var legacyTitleKeyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["home_page_title"] = "Home_PageTitle",
+        ["dashboard_live_monitoring_title"] = "Dashboard_PageTitle",
+        ["builds_page_title"] = "Builds_PageTitle",
+        ["installations_page_title"] = "Installations_PageTitle",
+        ["alerts_page_title"] = "Alerts_PageTitle",
+        ["users_page_title"] = "Users_PageTitle",
+        ["profile_page_title"] = "Profile_PageTitle",
+        ["profile_sessions_page_title"] = "Profile_SessionsPageTitle",
+        ["profile_session_detail_page_title"] = "Profile_SessionDetailPageTitle"
+    };
+
     var fallbackTitle =
         ViewData["Title"]?.ToString()
         ?? SharedLocalizer["Home_PageTitle"].Value;
@@ -9,12 +21,22 @@
     var titleResourceKey =
         ViewData["TitleResourceKey"]?.ToString();
 
+    if (string.IsNullOrWhiteSpace(titleResourceKey))
+    {
+        var legacyKey = ViewData["TitleI18nKey"]?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(legacyKey) &&
+            legacyTitleKeyMap.TryGetValue(legacyKey, out var mappedKey))
+        {
+            titleResourceKey = mappedKey;
+        }
+    }
+
     var currentTitle = fallbackTitle;
 
     if (!string.IsNullOrWhiteSpace(titleResourceKey))
     {
-        var localizedTitle =
-            SharedLocalizer[titleResourceKey];
+        var localizedTitle = SharedLocalizer[titleResourceKey];
 
         if (!localizedTitle.IsResourceNotFound)
         {
@@ -28,18 +50,19 @@
     var alias =
         User.FindFirst("alias")?.Value
         ?? User.Identity?.Name
-        ?? "User";
+        ?? SharedLocalizer["Common_User"].Value;
 
     var role =
         User.FindFirst(ClaimTypes.Role)?.Value
         ?? "User";
 
-    var currentCulture =
-        CultureInfo.CurrentUICulture
-            .TwoLetterISOLanguageName;
-
-    var returnUrl =
-        $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    var roleLabel = role switch
+    {
+        "Admin" => SharedLocalizer["Role_Admin"].Value,
+        "Moderator" => SharedLocalizer["Role_Moderator"].Value,
+        "Viewer" => SharedLocalizer["Role_Viewer"].Value,
+        _ => SharedLocalizer["Role_User"].Value
+    };
 }
 
 <header class="sticky top-0 z-40 border-b border-cyan-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -58,56 +81,6 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
-                <form asp-controller="Culture"
-                      asp-action="Set"
-                      method="post"
-                      class="m-0">
-                    @Html.AntiForgeryToken()
-
-                    <input type="hidden"
-                           name="returnUrl"
-                           value="@returnUrl" />
-
-                    <div class="flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-slate-900/80 px-3 py-2">
-                        <label for="culture-selector"
-                               class="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:block">
-                            @SharedLocalizer["Topbar_Language"]
-                        </label>
-
-                        <select id="culture-selector"
-                                name="culture"
-                                onchange="this.form.submit()"
-                                aria-label="@SharedLocalizer["Topbar_Language"]"
-                                class="cursor-pointer rounded-xl border border-cyan-400/20 bg-slate-950 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200 outline-none transition focus:border-cyan-400/50">
-                            @if (currentCulture == "en")
-                            {
-                                <option value="en" selected>
-                                    EN
-                                </option>
-                            }
-                            else
-                            {
-                                <option value="en">
-                                    EN
-                                </option>
-                            }
-
-                            @if (currentCulture == "es")
-                            {
-                                <option value="es" selected>
-                                    ES
-                                </option>
-                            }
-                            else
-                            {
-                                <option value="es">
-                                    ES
-                                </option>
-                            }
-                        </select>
-                    </div>
-                </form>
-
                 <div class="inline-flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
 
@@ -142,9 +115,9 @@
                     <div class="inline-flex items-center gap-3 rounded-2xl border border-fuchsia-400/15 bg-slate-900/80 px-4 py-3">
                         <div class="flex h-11 w-11 items-center justify-center rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 font-display text-sm uppercase tracking-[0.2em] text-fuchsia-200">
                             @(alias.Length >= 2
-                                                    ? alias[..2].ToUpperInvariant()
-                                                    : alias.ToUpperInvariant())
-                    </div>
+                                ? alias[..2].ToUpperInvariant()
+                                : alias.ToUpperInvariant())
+                        </div>
 
                         <div>
                             <div class="font-display text-xs uppercase tracking-[0.24em] text-white">
@@ -152,7 +125,7 @@
                             </div>
 
                             <div class="text-xs text-slate-400">
-                                @role
+                                @roleLabel
                             </div>
                         </div>
                     </div>
@@ -168,7 +141,7 @@
                             @SharedLocalizer["Common_Logout"]
                         </button>
                     </form>
-                                }
+                }
             </div>
         </div>
     </div>

@@ -1,7 +1,10 @@
-﻿@model EchoConsole.Web.Models.LiveOperations.LiveOperationsIndexViewModel
+@using System.Globalization
+@using System.Text.Json
+@model EchoConsole.Web.Models.LiveOperations.LiveOperationsIndexViewModel
 
 @{
-    ViewData["Title"] = "LIVE OPERATIONS";
+    ViewData["Title"] = SharedLocalizer["LiveOps_PageTitle"].Value;
+    ViewData["TitleResourceKey"] = "LiveOps_PageTitle";
 
     string StateBorder(string state) => state switch
     {
@@ -30,6 +33,45 @@
         "Degraded" => "bg-amber-400",
         _ => "bg-slate-500"
     };
+
+    string StateLabel(string state) => state switch
+    {
+        "Active" => SharedLocalizer["LiveOps_StateActive"].Value,
+        "Degraded" => SharedLocalizer["LiveOps_StateDegraded"].Value,
+        _ => SharedLocalizer["LiveOps_StateInactive"].Value
+    };
+
+    string SpikeLabel(string state) => state switch
+    {
+        "Spike" => SharedLocalizer["LiveOps_SpikeStateSpike"].Value,
+        "Elevated" => SharedLocalizer["LiveOps_SpikeStateElevated"].Value,
+        "Normal" => SharedLocalizer["LiveOps_SpikeStateNormal"].Value,
+        _ => SharedLocalizer["LiveOps_SpikeStateQuiet"].Value
+    };
+
+    var clientLabels = new
+    {
+        connectionUnavailable = SharedLocalizer["LiveOps_ConnectionUnavailable"].Value,
+        connectionReconnecting = SharedLocalizer["LiveOps_ConnectionReconnecting"].Value,
+        connectionConnected = SharedLocalizer["LiveOps_ConnectionConnected"].Value,
+        connectionDisconnected = SharedLocalizer["LiveOps_ConnectionDisconnected"].Value,
+        connectionConnecting = SharedLocalizer["LiveOps_ConnectionConnecting"].Value,
+        stateActive = SharedLocalizer["LiveOps_StateActive"].Value,
+        stateDegraded = SharedLocalizer["LiveOps_StateDegraded"].Value,
+        stateInactive = SharedLocalizer["LiveOps_StateInactive"].Value,
+        spikeQuiet = SharedLocalizer["LiveOps_SpikeStateQuiet"].Value,
+        spikeNormal = SharedLocalizer["LiveOps_SpikeStateNormal"].Value,
+        spikeElevated = SharedLocalizer["LiveOps_SpikeStateElevated"].Value,
+        spikeSpike = SharedLocalizer["LiveOps_SpikeStateSpike"].Value,
+        scene = SharedLocalizer["LiveOps_Scene"].Value,
+        gameState = SharedLocalizer["LiveOps_GameState"].Value,
+        update = SharedLocalizer["LiveOps_Update"].Value,
+        noHeartbeat = SharedLocalizer["LiveOps_NoHeartbeat"].Value,
+        current = SharedLocalizer["LiveOps_CurrentWindow"].Value,
+        previous = SharedLocalizer["LiveOps_PreviousWindow"].Value
+    };
+
+    var clientLabelsJson = JsonSerializer.Serialize(clientLabels);
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -41,15 +83,15 @@
             <div class="relative flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                 <div>
                     <p class="font-display text-xs uppercase tracking-[0.38em] text-cyan-300">
-                        Echo Console Command Center
+                        @SharedLocalizer["LiveOps_Badge"]
                     </p>
 
                     <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white md:text-4xl">
-                        Live Operations
+                        @SharedLocalizer["LiveOps_HeroTitle"]
                     </h1>
 
                     <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-                        Real-time fleet status, active sessions, event volume and operational alerts.
+                        @SharedLocalizer["LiveOps_HeroSubtitle"]
                     </p>
                 </div>
 
@@ -61,19 +103,19 @@
 
                         <div>
                             <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                                Realtime Link
+                                @SharedLocalizer["LiveOps_RealtimeLink"]
                             </div>
 
                             <div id="live-ops-connection-text"
                                  class="mt-1 text-sm font-semibold text-slate-300">
-                                Connecting
+                                @SharedLocalizer["LiveOps_ConnectionConnecting"]
                             </div>
                         </div>
                     </div>
 
                     <div class="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3">
                         <div class="text-xs uppercase tracking-[0.22em] text-cyan-400">
-                            Server UTC
+                            @SharedLocalizer["LiveOps_ServerUtc"]
                         </div>
 
                         <div id="live-ops-server-time"
@@ -88,7 +130,7 @@
         <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <article class="rounded-2xl border border-emerald-500/20 bg-slate-950/70 p-6 shadow-[0_0_24px_rgba(52,211,153,0.04)]">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Active Installations
+                    @SharedLocalizer["LiveOps_ActiveInstallations"]
                 </div>
 
                 <div id="live-ops-active-installations"
@@ -97,13 +139,13 @@
                 </div>
 
                 <div class="mt-2 text-xs text-slate-500">
-                    Receiving telemetry now
+                    @SharedLocalizer["LiveOps_ActiveInstallationsDescription"]
                 </div>
             </article>
 
             <article class="rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Degraded Installations
+                    @SharedLocalizer["LiveOps_DegradedInstallations"]
                 </div>
 
                 <div id="live-ops-degraded-installations"
@@ -112,13 +154,13 @@
                 </div>
 
                 <div class="mt-2 text-xs text-slate-500">
-                    Recent but delayed telemetry
+                    @SharedLocalizer["LiveOps_DegradedInstallationsDescription"]
                 </div>
             </article>
 
             <article class="rounded-2xl border border-slate-700 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Inactive Installations
+                    @SharedLocalizer["LiveOps_InactiveInstallations"]
                 </div>
 
                 <div id="live-ops-inactive-installations"
@@ -127,13 +169,13 @@
                 </div>
 
                 <div class="mt-2 text-xs text-slate-500">
-                    No telemetry for 15 minutes
+                    @SharedLocalizer["LiveOps_InactiveInstallationsDescription"]
                 </div>
             </article>
 
             <article class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Active Sessions
+                    @SharedLocalizer["LiveOps_ActiveSessions"]
                 </div>
 
                 <div id="live-ops-active-sessions"
@@ -142,13 +184,13 @@
                 </div>
 
                 <div class="mt-2 text-xs text-slate-500">
-                    Live Cosmic Diner runs
+                    @SharedLocalizer["LiveOps_ActiveSessionsDescription"]
                 </div>
             </article>
 
             <article class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Events Last 5 Minutes
+                    @SharedLocalizer["LiveOps_EventsLast5Minutes"]
                 </div>
 
                 <div id="live-ops-events-5"
@@ -157,13 +199,13 @@
                 </div>
 
                 <div class="mt-2 text-xs text-slate-500">
-                    Immediate telemetry volume
+                    @SharedLocalizer["LiveOps_EventsLast5MinutesDescription"]
                 </div>
             </article>
 
             <article class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Events Last 15 Minutes
+                    @SharedLocalizer["LiveOps_EventsLast15Minutes"]
                 </div>
 
                 <div id="live-ops-events-15"
@@ -172,23 +214,23 @@
                 </div>
 
                 <div class="mt-2 text-xs text-slate-500">
-                    Short-term operational load
+                    @SharedLocalizer["LiveOps_EventsLast15MinutesDescription"]
                 </div>
             </article>
 
             <article class="rounded-2xl border border-rose-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Alert Rate
+                    @SharedLocalizer["LiveOps_AlertRate"]
                 </div>
 
                 <div class="mt-3 flex items-end gap-2">
                     <span id="live-ops-alert-rate"
                           class="font-display text-4xl text-rose-300">
-                        @Model.Snapshot.AlertRatePerMinute.ToString("0.00")
+                        @Model.Snapshot.AlertRatePerMinute.ToString("0.00", CultureInfo.CurrentCulture)
                     </span>
 
                     <span class="pb-1 text-xs uppercase tracking-[0.16em] text-slate-600">
-                        per min
+                        @SharedLocalizer["LiveOps_PerMinute"]
                     </span>
                 </div>
 
@@ -196,24 +238,24 @@
                     <span id="live-ops-unresolved-alerts">
                         @Model.Snapshot.UnresolvedAlerts
                     </span>
-                    unresolved alerts
+                    @SharedLocalizer["LiveOps_UnresolvedAlerts"]
                 </div>
             </article>
 
             <article id="live-ops-spike-card"
                      class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Event Peak Indicator
+                    @SharedLocalizer["LiveOps_EventPeakIndicator"]
                 </div>
 
                 <div id="live-ops-event-spike"
                      class="mt-3 font-display text-3xl uppercase text-cyan-300">
-                    @Model.Snapshot.EventSpikeState
+                    @SpikeLabel(Model.Snapshot.EventSpikeState)
                 </div>
 
                 <div id="live-ops-event-spike-detail"
                      class="mt-2 text-xs text-slate-500">
-                    Current 5m compared with previous 5m
+                    @SharedLocalizer["LiveOps_EventPeakDescription"]
                 </div>
             </article>
         </section>
@@ -222,21 +264,21 @@
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                     <p class="font-display text-xs uppercase tracking-[0.34em] text-cyan-300">
-                        Fleet Matrix
+                        @SharedLocalizer["LiveOps_FleetMatrix"]
                     </p>
 
                     <h2 class="mt-2 text-2xl font-semibold text-white">
-                        Installation Status Grid
+                        @SharedLocalizer["LiveOps_InstallationStatusGrid"]
                     </h2>
                 </div>
 
                 <div class="text-sm text-slate-500">
-                    Showing
+                    @SharedLocalizer["LiveOps_Showing"]
                     <span id="live-ops-visible-installations"
                           class="font-semibold text-cyan-300">
                         @Model.Snapshot.Installations.Count
                     </span>
-                    of
+                    @SharedLocalizer["Common_Of"]
                     <span id="live-ops-total-installations"
                           class="font-semibold text-cyan-300">
                         @Model.Snapshot.TotalInstallations
@@ -247,11 +289,11 @@
             <div id="live-ops-empty-state"
                  class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-10 text-center @(Model.Snapshot.Installations.Count > 0 ? "hidden" : "")">
                 <p class="font-display text-sm uppercase tracking-[0.26em] text-slate-400">
-                    No installations registered
+                    @SharedLocalizer["LiveOps_NoInstallations"]
                 </p>
 
                 <p class="mt-3 text-sm text-slate-500">
-                    Installation cards will appear when Unity clients connect.
+                    @SharedLocalizer["LiveOps_NoInstallationsDescription"]
                 </p>
             </div>
 
@@ -273,14 +315,14 @@
 
                             <span class="inline-flex shrink-0 items-center gap-2 rounded-full border border-current/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] @StateText(installation.OperationalState)">
                                 <span class="h-2 w-2 rounded-full @StateDot(installation.OperationalState)"></span>
-                                @installation.OperationalState
+                                @StateLabel(installation.OperationalState)
                             </span>
                         </div>
 
                         <div class="mt-5 grid grid-cols-2 gap-3">
                             <div class="rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
                                 <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
-                                    Scene
+                                    @SharedLocalizer["LiveOps_Scene"]
                                 </div>
 
                                 <div class="mt-1 truncate text-sm text-slate-200">
@@ -290,7 +332,7 @@
 
                             <div class="rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
                                 <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
-                                    Game State
+                                    @SharedLocalizer["LiveOps_GameState"]
                                 </div>
 
                                 <div class="mt-1 truncate text-sm text-slate-200">
@@ -308,7 +350,7 @@
             </div>
 
             <div class="mt-5 text-right text-xs text-slate-600">
-                Last refreshed:
+                @SharedLocalizer["LiveOps_LastRefreshed"]
                 <span id="live-ops-last-refresh">
                     @Model.Snapshot.ServerTimeUtc.ToString("HH:mm:ss 'UTC'")
                 </span>
@@ -328,7 +370,9 @@
         window.echoConsoleLiveOperations.init({
             hubUrl: "/hubs/admin-telemetry",
             snapshotUrl: "/Admin/LiveOperations/Snapshot",
-            refreshIntervalMilliseconds: 15000
+            refreshIntervalMilliseconds: 15000,
+            culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
+            labels: @Html.Raw(clientLabelsJson)
         });
     </script>
 }

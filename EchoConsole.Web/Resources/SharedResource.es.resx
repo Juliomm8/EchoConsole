@@ -1,131 +1,434 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
-
   <resheader name="version">
     <value>2.0</value>
   </resheader>
-
   <resheader name="reader">
     <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
   </resheader>
-
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
   </resheader>
-
   <data name="Topbar_Station" xml:space="preserve">
     <value>Estación de Control de Telemetría</value>
   </data>
-
   <data name="Topbar_Live" xml:space="preserve">
     <value>En vivo</value>
   </data>
-
   <data name="Topbar_PlatformOnline" xml:space="preserve">
     <value>Plataforma en línea</value>
   </data>
-
   <data name="Topbar_Language" xml:space="preserve">
     <value>Idioma</value>
   </data>
-
   <data name="Common_Login" xml:space="preserve">
     <value>Iniciar sesión</value>
   </data>
-
   <data name="Common_Register" xml:space="preserve">
     <value>Registrarse</value>
   </data>
-
   <data name="Common_Logout" xml:space="preserve">
     <value>Cerrar sesión</value>
   </data>
-
   <data name="Culture_English" xml:space="preserve">
     <value>Inglés</value>
   </data>
-
   <data name="Culture_Spanish" xml:space="preserve">
     <value>Español</value>
   </data>
-
   <data name="Home_PageTitle" xml:space="preserve">
     <value>Inicio</value>
   </data>
-
   <data name="Home_Badge" xml:space="preserve">
     <value>Cosmic Diner</value>
   </data>
-
   <data name="Home_HeroTitle" xml:space="preserve">
     <value>Echo Console</value>
   </data>
-
   <data name="Home_HeroSubtitle" xml:space="preserve">
     <value>Plataforma oficial de telemetría para Cosmic Diner. Explora la actividad de la comunidad en vivo, estadísticas globales de rendimiento y tu perfil personal de jugador.</value>
   </data>
-
   <data name="Home_CreateAccount" xml:space="preserve">
     <value>Crear cuenta</value>
   </data>
-
   <data name="Home_OpenProfile" xml:space="preserve">
     <value>Abrir mi perfil</value>
   </data>
-
   <data name="Home_CommunitySessions" xml:space="preserve">
     <value>Sesiones de la comunidad</value>
   </data>
-
   <data name="Home_CommunitySessionsDescription" xml:space="preserve">
     <value>Total de partidas y sesiones de telemetría registradas.</value>
+  </data>
+  <data name="Common_Of" xml:space="preserve">
+    <value>de</value>
+  </data>
+  <data name="Common_User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+  <data name="Role_Admin" xml:space="preserve">
+    <value>Administrador</value>
+  </data>
+  <data name="Role_Moderator" xml:space="preserve">
+    <value>Moderador</value>
+  </data>
+  <data name="Role_Viewer" xml:space="preserve">
+    <value>Visualizador</value>
+  </data>
+  <data name="Role_User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+  <data name="Sidebar_Navigation" xml:space="preserve">
+    <value>Navegación</value>
+  </data>
+  <data name="Sidebar_Description" xml:space="preserve">
+    <value>Acceso a los módulos según el tipo de usuario.</value>
+  </data>
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="Sidebar_Profile" xml:space="preserve">
+    <value>Mi perfil</value>
+  </data>
+  <data name="Sidebar_LiveMonitoring" xml:space="preserve">
+    <value>Monitoreo en vivo</value>
+  </data>
+  <data name="Sidebar_GamesBuilds" xml:space="preserve">
+    <value>Juegos y builds</value>
+  </data>
+  <data name="Sidebar_DevicesInstallations" xml:space="preserve">
+    <value>Dispositivos e instalaciones</value>
+  </data>
+  <data name="Sidebar_AlertsReports" xml:space="preserve">
+    <value>Alertas y reportes</value>
+  </data>
+  <data name="Sidebar_UserManagement" xml:space="preserve">
+    <value>Gestión de usuarios</value>
+  </data>
+  <data name="Sidebar_RecentEvents" xml:space="preserve">
+    <value>Eventos recientes</value>
+  </data>
+  <data name="Sidebar_EventAnalytics" xml:space="preserve">
+    <value>Analíticas de eventos</value>
+  </data>
+  <data name="Sidebar_LiveOperations" xml:space="preserve">
+    <value>Operaciones en vivo</value>
+  </data>
+  <data name="Sidebar_GuestDescription" xml:space="preserve">
+    <value>Explora la plataforma y crea tu cuenta para desbloquear tu perfil de operador.</value>
+  </data>
+  <data name="Sidebar_UserDescription" xml:space="preserve">
+    <value>Tu bloque personal de jugador está en Inicio. Úsalo como punto de entrada a la plataforma.</value>
+  </data>
+  <data name="Sidebar_AdminDescription" xml:space="preserve">
+    <value>Acceso administrativo habilitado. Los módulos internos de telemetría están disponibles.</value>
+  </data>
+  <data name="Sidebar_Access" xml:space="preserve">
+    <value>Acceso</value>
+  </data>
+  <data name="Sidebar_Mode" xml:space="preserve">
+    <value>Modo</value>
+  </data>
+  <data name="Sidebar_Product" xml:space="preserve">
+    <value>Producto</value>
+  </data>
+  <data name="Sidebar_RoleAdmin" xml:space="preserve">
+    <value>Administrador</value>
+  </data>
+  <data name="Sidebar_RoleUser" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+  <data name="Sidebar_RoleGuest" xml:space="preserve">
+    <value>Invitado</value>
+  </data>
+  <data name="Sidebar_SelectLanguage" xml:space="preserve">
+    <value>Seleccionar idioma</value>
+  </data>
+  <data name="Dashboard_PageTitle" xml:space="preserve">
+    <value>Monitoreo en vivo</value>
+  </data>
+  <data name="Dashboard_Brand" xml:space="preserve">
+    <value>ECHOCONSOLE WEB</value>
+  </data>
+  <data name="Dashboard_HeroTitle" xml:space="preserve">
+    <value>CONTROL DE TELEMETRÍA DE COSMIC DINER</value>
+  </data>
+  <data name="Dashboard_HeroSubtitle" xml:space="preserve">
+    <value>Monitoreo en vivo de sesiones, instalaciones y telemetría operativa del videojuego.</value>
+  </data>
+  <data name="Dashboard_TelemetryStream" xml:space="preserve">
+    <value>Flujo de telemetría</value>
+  </data>
+  <data name="Dashboard_StreamLive" xml:space="preserve">
+    <value>EN VIVO</value>
+  </data>
+  <data name="Dashboard_StreamOffline" xml:space="preserve">
+    <value>DESCONECTADO</value>
+  </data>
+  <data name="Dashboard_ServerTimeUtc" xml:space="preserve">
+    <value>Hora del servidor UTC</value>
+  </data>
+  <data name="Dashboard_Module4" xml:space="preserve">
+    <value>Módulo 4</value>
+  </data>
+  <data name="Dashboard_LiveSessionsMonitor" xml:space="preserve">
+    <value>MONITOR DE SESIONES EN VIVO</value>
+  </data>
+  <data name="Dashboard_SignalRActive" xml:space="preserve">
+    <value>SignalR activo</value>
+  </data>
+  <data name="Dashboard_NoLiveSessions" xml:space="preserve">
+    <value>No se detectaron sesiones en vivo.</value>
+  </data>
+  <data name="Dashboard_TableInstallationId" xml:space="preserve">
+    <value>ID DE INSTALACIÓN</value>
+  </data>
+  <data name="Dashboard_TableCurrentScene" xml:space="preserve">
+    <value>ESCENA ACTUAL</value>
+  </data>
+  <data name="Dashboard_TableGameState" xml:space="preserve">
+    <value>ESTADO DEL JUEGO</value>
+  </data>
+  <data name="Dashboard_TableCurrentPhase" xml:space="preserve">
+    <value>FASE ACTUAL</value>
+  </data>
+  <data name="Dashboard_TableLastHeartbeat" xml:space="preserve">
+    <value>ÚLTIMA SEÑAL</value>
+  </data>
+  <data name="Dashboard_TableStatus" xml:space="preserve">
+    <value>ESTADO</value>
+  </data>
+  <data name="Dashboard_KpiRegisteredInstallationsTitle" xml:space="preserve">
+    <value>INSTALACIONES REGISTRADAS</value>
+  </data>
+  <data name="Dashboard_KpiActiveSessionsTitle" xml:space="preserve">
+    <value>SESIONES ACTIVAS</value>
+  </data>
+  <data name="Dashboard_KpiAverageDurationTitle" xml:space="preserve">
+    <value>DURACIÓN PROMEDIO DE SESIÓN ACTIVA</value>
+  </data>
+  <data name="Dashboard_KpiLatestHeartbeatTitle" xml:space="preserve">
+    <value>SEÑAL MÁS RECIENTE</value>
+  </data>
+  <data name="Dashboard_KpiRegisteredInstallationsSubtitle" xml:space="preserve">
+    <value>Persistidas en SQL Server a través de la API</value>
+  </data>
+  <data name="Dashboard_KpiActiveSessionsSubtitle" xml:space="preserve">
+    <value>Sesiones activas actuales reportadas por el backend</value>
+  </data>
+  <data name="Dashboard_KpiAverageDurationSubtitle" xml:space="preserve">
+    <value>Calculada a partir de las sesiones activas</value>
+  </data>
+  <data name="Dashboard_KpiLatestHeartbeatSubtitle" xml:space="preserve">
+    <value>Última señal de sesión recibida</value>
+  </data>
+  <data name="Dashboard_KpiDeltaRealData" xml:space="preserve">
+    <value>Dato real</value>
+  </data>
+  <data name="Dashboard_KpiDeltaLiveNow" xml:space="preserve">
+    <value>En vivo ahora</value>
+  </data>
+  <data name="Dashboard_KpiDeltaUnavailable" xml:space="preserve">
+    <value>No disponible</value>
+  </data>
+  <data name="Status_Active" xml:space="preserve">
+    <value>Activa</value>
+  </data>
+  <data name="Status_Ended" xml:space="preserve">
+    <value>Finalizada</value>
+  </data>
+  <data name="Status_Expired" xml:space="preserve">
+    <value>Expirada</value>
+  </data>
+  <data name="Status_Unknown" xml:space="preserve">
+    <value>Desconocido</value>
+  </data>
+  <data name="LiveOps_PageTitle" xml:space="preserve">
+    <value>Operaciones en vivo</value>
+  </data>
+  <data name="LiveOps_Badge" xml:space="preserve">
+    <value>Centro de mando de Echo Console</value>
+  </data>
+  <data name="LiveOps_HeroTitle" xml:space="preserve">
+    <value>Operaciones en vivo</value>
+  </data>
+  <data name="LiveOps_HeroSubtitle" xml:space="preserve">
+    <value>Estado de la flota, sesiones activas, volumen de eventos y alertas operativas en tiempo real.</value>
+  </data>
+  <data name="LiveOps_RealtimeLink" xml:space="preserve">
+    <value>Enlace en tiempo real</value>
+  </data>
+  <data name="LiveOps_ServerUtc" xml:space="preserve">
+    <value>Servidor UTC</value>
+  </data>
+  <data name="LiveOps_ActiveInstallations" xml:space="preserve">
+    <value>Instalaciones activas</value>
+  </data>
+  <data name="LiveOps_ActiveInstallationsDescription" xml:space="preserve">
+    <value>Recibiendo telemetría ahora</value>
+  </data>
+  <data name="LiveOps_DegradedInstallations" xml:space="preserve">
+    <value>Instalaciones degradadas</value>
+  </data>
+  <data name="LiveOps_DegradedInstallationsDescription" xml:space="preserve">
+    <value>Telemetría reciente, pero retrasada</value>
+  </data>
+  <data name="LiveOps_InactiveInstallations" xml:space="preserve">
+    <value>Instalaciones inactivas</value>
+  </data>
+  <data name="LiveOps_InactiveInstallationsDescription" xml:space="preserve">
+    <value>Sin telemetría durante 15 minutos</value>
+  </data>
+  <data name="LiveOps_ActiveSessions" xml:space="preserve">
+    <value>Sesiones activas</value>
+  </data>
+  <data name="LiveOps_ActiveSessionsDescription" xml:space="preserve">
+    <value>Partidas activas de Cosmic Diner</value>
+  </data>
+  <data name="LiveOps_EventsLast5Minutes" xml:space="preserve">
+    <value>Eventos en los últimos 5 minutos</value>
+  </data>
+  <data name="LiveOps_EventsLast5MinutesDescription" xml:space="preserve">
+    <value>Volumen inmediato de telemetría</value>
+  </data>
+  <data name="LiveOps_EventsLast15Minutes" xml:space="preserve">
+    <value>Eventos en los últimos 15 minutos</value>
+  </data>
+  <data name="LiveOps_EventsLast15MinutesDescription" xml:space="preserve">
+    <value>Carga operativa a corto plazo</value>
+  </data>
+  <data name="LiveOps_AlertRate" xml:space="preserve">
+    <value>Tasa de alertas</value>
+  </data>
+  <data name="LiveOps_PerMinute" xml:space="preserve">
+    <value>por min</value>
+  </data>
+  <data name="LiveOps_UnresolvedAlerts" xml:space="preserve">
+    <value>alertas sin resolver</value>
+  </data>
+  <data name="LiveOps_EventPeakIndicator" xml:space="preserve">
+    <value>Indicador de pico de eventos</value>
+  </data>
+  <data name="LiveOps_EventPeakDescription" xml:space="preserve">
+    <value>Ventana actual de 5 min comparada con la anterior</value>
+  </data>
+  <data name="LiveOps_FleetMatrix" xml:space="preserve">
+    <value>Matriz de flota</value>
+  </data>
+  <data name="LiveOps_InstallationStatusGrid" xml:space="preserve">
+    <value>Panel de estado de instalaciones</value>
+  </data>
+  <data name="LiveOps_Showing" xml:space="preserve">
+    <value>Mostrando</value>
+  </data>
+  <data name="LiveOps_NoInstallations" xml:space="preserve">
+    <value>No hay instalaciones registradas</value>
+  </data>
+  <data name="LiveOps_NoInstallationsDescription" xml:space="preserve">
+    <value>Las tarjetas aparecerán cuando se conecten clientes de Unity.</value>
+  </data>
+  <data name="LiveOps_LastRefreshed" xml:space="preserve">
+    <value>Última actualización:</value>
+  </data>
+  <data name="LiveOps_Scene" xml:space="preserve">
+    <value>Escena</value>
+  </data>
+  <data name="LiveOps_GameState" xml:space="preserve">
+    <value>Estado del juego</value>
+  </data>
+  <data name="LiveOps_Update" xml:space="preserve">
+    <value>Actualización</value>
+  </data>
+  <data name="LiveOps_NoHeartbeat" xml:space="preserve">
+    <value>Sin señal</value>
+  </data>
+  <data name="LiveOps_CurrentWindow" xml:space="preserve">
+    <value>actuales</value>
+  </data>
+  <data name="LiveOps_PreviousWindow" xml:space="preserve">
+    <value>anteriores</value>
+  </data>
+  <data name="LiveOps_StateActive" xml:space="preserve">
+    <value>Activa</value>
+  </data>
+  <data name="LiveOps_StateDegraded" xml:space="preserve">
+    <value>Degradada</value>
+  </data>
+  <data name="LiveOps_StateInactive" xml:space="preserve">
+    <value>Inactiva</value>
+  </data>
+  <data name="LiveOps_SpikeStateQuiet" xml:space="preserve">
+    <value>En calma</value>
+  </data>
+  <data name="LiveOps_SpikeStateNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="LiveOps_SpikeStateElevated" xml:space="preserve">
+    <value>Elevado</value>
+  </data>
+  <data name="LiveOps_SpikeStateSpike" xml:space="preserve">
+    <value>Pico</value>
+  </data>
+  <data name="LiveOps_ConnectionUnavailable" xml:space="preserve">
+    <value>No disponible</value>
+  </data>
+  <data name="LiveOps_ConnectionReconnecting" xml:space="preserve">
+    <value>Reconectando</value>
+  </data>
+  <data name="LiveOps_ConnectionConnected" xml:space="preserve">
+    <value>Conectado</value>
+  </data>
+  <data name="LiveOps_ConnectionDisconnected" xml:space="preserve">
+    <value>Desconectado</value>
+  </data>
+  <data name="LiveOps_ConnectionConnecting" xml:space="preserve">
+    <value>Conectando</value>
   </data>
 </root>

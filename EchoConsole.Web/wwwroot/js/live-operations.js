@@ -1,4 +1,4 @@
-﻿window.echoConsoleLiveOperations = (() => {
+window.echoConsoleLiveOperations = (() => {
     let connection = null;
     let options = null;
     let refreshTimer = null;
@@ -6,18 +6,33 @@
     let refreshInProgress = false;
     let serverTimeUtc = null;
     let localSyncTime = null;
+    let relativeTimeFormatter = null;
+    let numberFormatter = null;
 
     function init(config) {
         options = {
             hubUrl: config.hubUrl,
             snapshotUrl: config.snapshotUrl,
             refreshIntervalMilliseconds:
-                config.refreshIntervalMilliseconds || 15000
+                config.refreshIntervalMilliseconds || 15000,
+            culture: config.culture || "en",
+            labels: config.labels || {}
         };
+
+        relativeTimeFormatter = new Intl.RelativeTimeFormat(
+            options.culture,
+            {
+                numeric: "always",
+                style: "narrow"
+            });
+
+        numberFormatter = new Intl.NumberFormat(
+            options.culture);
 
         if (!window.signalR) {
             setConnectionState("Unavailable");
             startPolling();
+            startServerClock();
             refreshSnapshot();
             return;
         }
@@ -72,7 +87,7 @@
     async function startConnection() {
         if (!connection ||
             connection.state !==
-            signalR.HubConnectionState.Disconnected) {
+                signalR.HubConnectionState.Disconnected) {
             return;
         }
 
@@ -203,7 +218,12 @@
             "live-ops-alert-rate",
             Number(
                 snapshot.alertRatePerMinute || 0)
-                .toFixed(2));
+                .toLocaleString(
+                    options.culture,
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }));
 
         setText(
             "live-ops-total-installations",
@@ -238,7 +258,7 @@
             "live-ops-event-spike-detail");
 
         if (value) {
-            value.textContent = state;
+            value.textContent = localizeSpikeState(state);
         }
 
         const current =
@@ -252,7 +272,7 @@
 
         if (detail) {
             detail.textContent =
-                `${current} current vs ${previous} previous · x${multiplier.toFixed(2)}`;
+                `${formatNumber(current)} ${getLabel("current", "current")} · ${formatNumber(previous)} ${getLabel("previous", "previous")} · x${multiplier.toFixed(2)}`;
         }
 
         if (!card || !value) {
@@ -321,25 +341,23 @@
         empty.classList.add("hidden");
 
         for (const installation of installations) {
-            const state =
-                normalizeState(
-                    installation.operationalState);
+            const state = normalizeState(
+                installation.operationalState);
 
-            const classes =
-                getStateClasses(state);
+            const classes = getStateClasses(state);
 
-            const lastUpdate =
-                formatRelativeAge(
-                    installation.lastUpdateUtc);
+            const lastUpdate = formatRelativeAge(
+                installation.lastUpdateUtc);
 
             const lastHeartbeat =
                 installation.lastHeartbeatUtc
                     ? formatRelativeAge(
                         installation.lastHeartbeatUtc)
-                    : "No heartbeat";
+                    : getLabel(
+                        "noHeartbeat",
+                        "No heartbeat");
 
-            const article =
-                document.createElement("article");
+            const article = document.createElement("article");
 
             article.className =
                 `rounded-2xl border ${classes.border} ${classes.background} p-5 transition duration-300 hover:-translate-y-1`;
@@ -358,14 +376,14 @@
 
                     <span class="inline-flex shrink-0 items-center gap-2 rounded-full border border-current/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${classes.text}">
                         <span class="h-2 w-2 rounded-full ${classes.dot} ${state === "Active" ? "animate-pulse" : ""}"></span>
-                        ${escapeHtml(state)}
+                        ${escapeHtml(localizeOperationalState(state))}
                     </span>
                 </div>
 
                 <div class="mt-5 grid grid-cols-2 gap-3">
                     <div class="rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
                         <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
-                            Scene
+                            ${escapeHtml(getLabel("scene", "Scene"))}
                         </div>
 
                         <div class="mt-1 truncate text-sm text-slate-200">
@@ -375,7 +393,7 @@
 
                     <div class="rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
                         <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
-                            Game State
+                            ${escapeHtml(getLabel("gameState", "Game State"))}
                         </div>
 
                         <div class="mt-1 truncate text-sm text-slate-200">
@@ -385,7 +403,7 @@
                 </div>
 
                 <div class="mt-4 flex items-center justify-between gap-4 text-xs text-slate-600">
-                    <span>Update: ${escapeHtml(lastUpdate)}</span>
+                    <span>${escapeHtml(getLabel("update", "Update"))}: ${escapeHtml(lastUpdate)}</span>
                     <span>${escapeHtml(lastHeartbeat)}</span>
                 </div>
 
@@ -410,10 +428,10 @@
             "live-ops-connection-text");
 
         if (text) {
-            text.textContent = state;
+            text.textContent = localizeConnectionState(state);
         }
 
-        if (!badge || !dot) {
+        if (!badge || !dot || !text) {
             return;
         }
 
@@ -476,15 +494,13 @@
             return;
         }
 
-        const startValue =
-            Number(
-                element.textContent
-                    .replaceAll(",", "")
-                    .trim()) || 0;
+        const startValue = Number(
+            element.textContent
+                .replaceAll(",", "")
+                .replaceAll(".", "")
+                .trim()) || 0;
 
-        const target =
-            Number(targetValue || 0);
-
+        const target = Number(targetValue || 0);
         const startedAt = performance.now();
         const duration = 450;
 
@@ -496,13 +512,11 @@
             const eased =
                 1 - Math.pow(1 - progress, 3);
 
-            const value =
-                Math.round(
-                    startValue +
-                    (target - startValue) * eased);
+            const value = Math.round(
+                startValue +
+                (target - startValue) * eased);
 
-            element.textContent =
-                formatNumber(value);
+            element.textContent = formatNumber(value);
 
             if (progress < 1) {
                 requestAnimationFrame(update);
@@ -548,6 +562,54 @@
         return "Inactive";
     }
 
+    function localizeOperationalState(state) {
+        if (state === "Active") {
+            return getLabel("stateActive", "Active");
+        }
+
+        if (state === "Degraded") {
+            return getLabel("stateDegraded", "Degraded");
+        }
+
+        return getLabel("stateInactive", "Inactive");
+    }
+
+    function localizeSpikeState(state) {
+        if (state === "Spike") {
+            return getLabel("spikeSpike", "Spike");
+        }
+
+        if (state === "Elevated") {
+            return getLabel("spikeElevated", "Elevated");
+        }
+
+        if (state === "Normal") {
+            return getLabel("spikeNormal", "Normal");
+        }
+
+        return getLabel("spikeQuiet", "Quiet");
+    }
+
+    function localizeConnectionState(state) {
+        if (state === "Connected") {
+            return getLabel("connectionConnected", "Connected");
+        }
+
+        if (state === "Reconnecting") {
+            return getLabel("connectionReconnecting", "Reconnecting");
+        }
+
+        if (state === "Connecting") {
+            return getLabel("connectionConnecting", "Connecting");
+        }
+
+        if (state === "Unavailable") {
+            return getLabel("connectionUnavailable", "Unavailable");
+        }
+
+        return getLabel("connectionDisconnected", "Disconnected");
+    }
+
     function formatRelativeAge(value) {
         const date = new Date(value);
 
@@ -561,20 +623,24 @@
                 (Date.now() - date.getTime()) / 1000));
 
         if (seconds < 60) {
-            return `${seconds}s ago`;
+            return relativeTimeFormatter.format(
+                -seconds,
+                "second");
         }
 
-        const minutes =
-            Math.floor(seconds / 60);
+        const minutes = Math.floor(seconds / 60);
 
         if (minutes < 60) {
-            return `${minutes}m ago`;
+            return relativeTimeFormatter.format(
+                -minutes,
+                "minute");
         }
 
-        const hours =
-            Math.floor(minutes / 60);
+        const hours = Math.floor(minutes / 60);
 
-        return `${hours}h ago`;
+        return relativeTimeFormatter.format(
+            -hours,
+            "hour");
     }
 
     function formatUtcDateTime(value) {
@@ -591,8 +657,16 @@
     }
 
     function formatNumber(value) {
-        return Number(value || 0)
-            .toLocaleString("en-US");
+        return numberFormatter.format(
+            Number(value || 0));
+    }
+
+    function getLabel(key, fallback) {
+        const value = options.labels?.[key];
+
+        return typeof value === "string" && value.length > 0
+            ? value
+            : fallback;
     }
 
     function setText(id, value) {
@@ -608,7 +682,7 @@
             .replaceAll("&", "&amp;")
             .replaceAll("<", "&lt;")
             .replaceAll(">", "&gt;")
-            .replaceAll("\"", "&quot;")
+            .replaceAll('"', "&quot;")
             .replaceAll("'", "&#39;");
     }
 
