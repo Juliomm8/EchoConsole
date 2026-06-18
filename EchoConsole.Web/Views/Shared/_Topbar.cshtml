@@ -1,12 +1,45 @@
-﻿@using System.Security.Claims
+﻿@using System.Globalization
+@using System.Security.Claims
 
 @{
-    var currentTitle = ViewData["Title"]?.ToString() ?? "Home";
-    var titleI18nKey = ViewData["TitleI18nKey"]?.ToString() ?? string.Empty;
+    var fallbackTitle =
+        ViewData["Title"]?.ToString()
+        ?? SharedLocalizer["Home_PageTitle"].Value;
 
-    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-    var alias = User.FindFirst("alias")?.Value ?? User.Identity?.Name ?? "User";
-    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "User";
+    var titleResourceKey =
+        ViewData["TitleResourceKey"]?.ToString();
+
+    var currentTitle = fallbackTitle;
+
+    if (!string.IsNullOrWhiteSpace(titleResourceKey))
+    {
+        var localizedTitle =
+            SharedLocalizer[titleResourceKey];
+
+        if (!localizedTitle.IsResourceNotFound)
+        {
+            currentTitle = localizedTitle.Value;
+        }
+    }
+
+    var isAuthenticated =
+        User.Identity?.IsAuthenticated ?? false;
+
+    var alias =
+        User.FindFirst("alias")?.Value
+        ?? User.Identity?.Name
+        ?? "User";
+
+    var role =
+        User.FindFirst(ClaimTypes.Role)?.Value
+        ?? "User";
+
+    var currentCulture =
+        CultureInfo.CurrentUICulture
+            .TwoLetterISOLanguageName;
+
+    var returnUrl =
+        $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 }
 
 <header class="sticky top-0 z-40 border-b border-cyan-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -15,22 +48,78 @@
             <div class="flex items-center gap-4">
                 <div>
                     <div class="font-display text-xs uppercase tracking-[0.34em] text-cyan-400">
-                        Telemetry Control Station
+                        @SharedLocalizer["Topbar_Station"]
                     </div>
 
-                    <div class="mt-1 font-display text-2xl uppercase tracking-[0.14em] text-white"
-                         @(string.IsNullOrWhiteSpace(titleI18nKey) ? "" : $"data-i18n=\"{titleI18nKey}\"")>
+                    <div class="mt-1 font-display text-2xl uppercase tracking-[0.14em] text-white">
                         @currentTitle
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
+                <form asp-controller="Culture"
+                      asp-action="Set"
+                      method="post"
+                      class="m-0">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="returnUrl"
+                           value="@returnUrl" />
+
+                    <div class="flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-slate-900/80 px-3 py-2">
+                        <label for="culture-selector"
+                               class="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 sm:block">
+                            @SharedLocalizer["Topbar_Language"]
+                        </label>
+
+                        <select id="culture-selector"
+                                name="culture"
+                                onchange="this.form.submit()"
+                                aria-label="@SharedLocalizer["Topbar_Language"]"
+                                class="cursor-pointer rounded-xl border border-cyan-400/20 bg-slate-950 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200 outline-none transition focus:border-cyan-400/50">
+                            @if (currentCulture == "en")
+                            {
+                                <option value="en" selected>
+                                    EN
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="en">
+                                    EN
+                                </option>
+                            }
+
+                            @if (currentCulture == "es")
+                            {
+                                <option value="es" selected>
+                                    ES
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="es">
+                                    ES
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </form>
+
                 <div class="inline-flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+
                     <div>
-                        <div class="font-display text-xs uppercase tracking-[0.28em] text-emerald-300">Live</div>
-                        <div id="topbar-server-time" class="text-xs text-slate-400">Platform online</div>
+                        <div class="font-display text-xs uppercase tracking-[0.28em] text-emerald-300">
+                            @SharedLocalizer["Topbar_Live"]
+                        </div>
+
+                        <div id="topbar-server-time"
+                             class="text-xs text-slate-400">
+                            @SharedLocalizer["Topbar_PlatformOnline"]
+                        </div>
                     </div>
                 </div>
 
@@ -39,35 +128,47 @@
                     <a asp-controller="Auth"
                        asp-action="Login"
                        class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                        Login
+                        @SharedLocalizer["Common_Login"]
                     </a>
 
                     <a asp-controller="Auth"
                        asp-action="Register"
                        class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
-                        Register
+                        @SharedLocalizer["Common_Register"]
                     </a>
                 }
                 else
                 {
                     <div class="inline-flex items-center gap-3 rounded-2xl border border-fuchsia-400/15 bg-slate-900/80 px-4 py-3">
                         <div class="flex h-11 w-11 items-center justify-center rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 font-display text-sm uppercase tracking-[0.2em] text-fuchsia-200">
-                            @(alias.Length >= 2 ? alias.Substring(0, 2).ToUpperInvariant() : alias.ToUpperInvariant())
-                        </div>
+                            @(alias.Length >= 2
+                                                    ? alias[..2].ToUpperInvariant()
+                                                    : alias.ToUpperInvariant())
+                    </div>
+
                         <div>
-                            <div class="font-display text-xs uppercase tracking-[0.24em] text-white">@alias</div>
-                            <div class="text-xs text-slate-400">@role</div>
+                            <div class="font-display text-xs uppercase tracking-[0.24em] text-white">
+                                @alias
+                            </div>
+
+                            <div class="text-xs text-slate-400">
+                                @role
+                            </div>
                         </div>
                     </div>
 
-                    <form asp-controller="Auth" asp-action="LogoutPost" method="post" class="m-0">
+                    <form asp-controller="Auth"
+                          asp-action="LogoutPost"
+                          method="post"
+                          class="m-0">
                         @Html.AntiForgeryToken()
+
                         <button type="submit"
                                 class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
-                            Logout
+                            @SharedLocalizer["Common_Logout"]
                         </button>
                     </form>
-                }
+                                }
             </div>
         </div>
     </div>

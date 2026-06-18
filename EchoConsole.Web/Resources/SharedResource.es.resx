@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+
+  <data name="Topbar_Station" xml:space="preserve">
+    <value>Estación de Control de Telemetría</value>
+  </data>
+
+  <data name="Topbar_Live" xml:space="preserve">
+    <value>En vivo</value>
+  </data>
+
+  <data name="Topbar_PlatformOnline" xml:space="preserve">
+    <value>Plataforma en línea</value>
+  </data>
+
+  <data name="Topbar_Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+
+  <data name="Common_Login" xml:space="preserve">
+    <value>Iniciar sesión</value>
+  </data>
+
+  <data name="Common_Register" xml:space="preserve">
+    <value>Registrarse</value>
+  </data>
+
+  <data name="Common_Logout" xml:space="preserve">
+    <value>Cerrar sesión</value>
+  </data>
+
+  <data name="Culture_English" xml:space="preserve">
+    <value>Inglés</value>
+  </data>
+
+  <data name="Culture_Spanish" xml:space="preserve">
+    <value>Español</value>
+  </data>
+
+  <data name="Home_PageTitle" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+
+  <data name="Home_Badge" xml:space="preserve">
+    <value>Cosmic Diner</value>
+  </data>
+
+  <data name="Home_HeroTitle" xml:space="preserve">
+    <value>Echo Console</value>
+  </data>
+
+  <data name="Home_HeroSubtitle" xml:space="preserve">
+    <value>Plataforma oficial de telemetría para Cosmic Diner. Explora la actividad de la comunidad en vivo, estadísticas globales de rendimiento y tu perfil personal de jugador.</value>
+  </data>
+
+  <data name="Home_CreateAccount" xml:space="preserve">
+    <value>Crear cuenta</value>
+  </data>
+
+  <data name="Home_OpenProfile" xml:space="preserve">
+    <value>Abrir mi perfil</value>
+  </data>
+
+  <data name="Home_CommunitySessions" xml:space="preserve">
+    <value>Sesiones de la comunidad</value>
+  </data>
+
+  <data name="Home_CommunitySessionsDescription" xml:space="preserve">
+    <value>Total de partidas y sesiones de telemetría registradas.</value>
+  </data>
+</root>
