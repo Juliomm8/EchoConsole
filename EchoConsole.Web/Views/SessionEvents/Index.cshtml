@@ -214,6 +214,13 @@
                                              title="@item.SessionId">
                                             @item.SessionId
                                         </div>
+
+                                        <a asp-controller="SessionEvents"
+                                           asp-action="Details"
+                                           asp-route-sessionId="@item.SessionId"
+                                           class="mt-3 inline-flex rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200 transition hover:bg-cyan-500/15">
+                                            Open Timeline
+                                        </a>
                                     </td>
 
                                     <td class="px-4 py-4">
