@@ -2,6 +2,7 @@
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace EchoConsole.Web.Controllers;
 
@@ -127,6 +128,134 @@ public sealed class SessionEventsController : Controller
         ViewData["Title"] = "RECENT SESSION EVENTS";
 
         return View(model);
+    }
+
+    [HttpGet("Details/{sessionId:guid}")]
+    public async Task<IActionResult> Details(
+    Guid sessionId,
+    CancellationToken cancellationToken = default)
+    {
+        var response = await _apiClient.GetSessionTimelineAsync(
+            sessionId,
+            cancellationToken);
+
+        if (response is null)
+        {
+            return NotFound();
+        }
+
+        var model = new AdminSessionTimelineDetailViewModel
+        {
+            SessionId = response.SessionId,
+            InstallationId = response.InstallationId,
+
+            OwnerLabel = response.OwnerUserId.HasValue
+                ? $"{NormalizeDisplayValue(response.OwnerAlias)} · User #{response.OwnerUserId.Value}"
+                : "Unclaimed installation",
+
+            DeviceName = NormalizeDisplayValue(response.DeviceName),
+            DeviceModel = NormalizeDisplayValue(response.DeviceModel),
+            Platform = NormalizeDisplayValue(response.Platform),
+            OperatingSystem = NormalizeDisplayValue(response.OperatingSystem),
+            BuildVersion = NormalizeDisplayValue(response.BuildVersion),
+            CurrentScene = NormalizeDisplayValue(response.CurrentScene),
+            CurrentGameState = NormalizeDisplayValue(response.CurrentGameState),
+            CurrentPhase = NormalizeDisplayValue(response.CurrentPhase),
+            StatusLabel = NormalizeDisplayValue(response.StatusLabel),
+            IsLive = response.Status == 1 && !response.EndedAtUtc.HasValue,
+            StartedAtLabel = FormatUtc(response.StartedAtUtc),
+            LastHeartbeatLabel = FormatUtc(response.LastHeartbeatUtc),
+            EndedAtLabel = response.EndedAtUtc.HasValue
+                ? FormatUtc(response.EndedAtUtc.Value)
+                : "Not ended",
+            DurationLabel = FormatDuration(response.DurationSeconds),
+            EventCount = response.EventCount,
+
+            Events = response.Events
+                .Select((timelineEvent, index) =>
+                {
+                    var primaryTime = timelineEvent.ClientTimeUtc
+                        ?? timelineEvent.CreatedAtUtc;
+
+                    return new AdminSessionTimelineEventViewModel
+                    {
+                        SequenceNumber = index + 1,
+                        Id = timelineEvent.Id,
+                        EventType = NormalizeDisplayValue(
+                            timelineEvent.EventType),
+                        Scene = NormalizeDisplayValue(
+                            timelineEvent.Scene),
+                        GameState = NormalizeDisplayValue(
+                            timelineEvent.GameState),
+                        Phase = NormalizeDisplayValue(
+                            timelineEvent.Phase),
+                        PayloadJson = FormatPayloadJson(
+                            timelineEvent.PayloadJson),
+                        HasPayload = !string.IsNullOrWhiteSpace(
+                            timelineEvent.PayloadJson),
+                        PrimaryTimeLabel = FormatUtc(primaryTime),
+                        PrimaryTimeSource = timelineEvent.ClientTimeUtc.HasValue
+                            ? "Client UTC"
+                            : "Server UTC",
+                        ServerTimeLabel = FormatUtc(
+                            timelineEvent.CreatedAtUtc),
+                        ClientTimeLabel = timelineEvent.ClientTimeUtc.HasValue
+                            ? FormatUtc(timelineEvent.ClientTimeUtc.Value)
+                            : "Not provided"
+                    };
+                })
+                .ToList()
+        };
+
+        ViewData["Title"] = "SESSION TIMELINE";
+
+        return View("Details", model);
+    }
+
+    private static string FormatDuration(long totalSeconds)
+    {
+        if (totalSeconds <= 0)
+        {
+            return "0 seconds";
+        }
+
+        var duration = TimeSpan.FromSeconds(totalSeconds);
+
+        if (duration.TotalHours >= 1)
+        {
+            return $"{(int)duration.TotalHours}h {duration.Minutes}m {duration.Seconds}s";
+        }
+
+        if (duration.TotalMinutes >= 1)
+        {
+            return $"{duration.Minutes}m {duration.Seconds}s";
+        }
+
+        return $"{duration.Seconds}s";
+    }
+
+    private static string FormatPayloadJson(string? payloadJson)
+    {
+        if (string.IsNullOrWhiteSpace(payloadJson))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(payloadJson);
+
+            return JsonSerializer.Serialize(
+                document.RootElement,
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+        }
+        catch (JsonException)
+        {
+            return payloadJson;
+        }
     }
 
     private static DateTimeOffset ToUtcStartOfDay(DateTime date)

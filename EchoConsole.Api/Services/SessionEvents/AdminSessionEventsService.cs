@@ -156,6 +156,119 @@ public sealed class AdminSessionEventsService : IAdminSessionEventsService
         };
     }
 
+    public async Task<AdminSessionTimelineDetailDto?> GetSessionTimelineAsync(
+    Guid sessionId,
+    CancellationToken cancellationToken = default)
+    {
+        var rawSession = await _dbContext.GameSessions
+            .AsNoTracking()
+            .Where(x => x.SessionId == sessionId)
+            .Select(x => new
+            {
+                GameSessionDbId = x.Id,
+                x.SessionId,
+                InstallationId = x.Installation.InstallationId,
+                OwnerUserId = x.Installation.OwnerUserId,
+                OwnerAlias = x.Installation.OwnerUser != null
+                    ? x.Installation.OwnerUser.Alias
+                    : null,
+                DeviceName = x.Installation.DeviceName,
+                DeviceModel = x.Installation.DeviceModel,
+                Platform = x.Installation.Platform,
+                OperatingSystem = x.Installation.OSVersion,
+                x.BuildVersion,
+                x.CurrentScene,
+                x.CurrentGameState,
+                x.CurrentPhase,
+                x.Status,
+                x.StartedAtUtc,
+                x.LastHeartbeatUtc,
+                x.EndedAtUtc
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (rawSession is null)
+        {
+            _logger.LogWarning(
+                "Admin session timeline was not found. SessionId={SessionId}.",
+                sessionId);
+
+            return null;
+        }
+
+        var rawEvents = await _dbContext.GameSessionEvents
+            .AsNoTracking()
+            .Where(x => x.GameSessionId == rawSession.GameSessionDbId)
+            .OrderBy(x => x.CreatedAtUtc)
+            .ThenBy(x => x.Id)
+            .Select(x => new
+            {
+                x.Id,
+                x.EventType,
+                x.Scene,
+                x.GameState,
+                x.Phase,
+                x.PayloadJson,
+                x.ClientTimeUtc,
+                x.CreatedAtUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        var endUtc = rawSession.EndedAtUtc ?? rawSession.LastHeartbeatUtc;
+        var duration = endUtc - rawSession.StartedAtUtc;
+
+        var durationSeconds = duration > TimeSpan.Zero
+            ? (long)Math.Floor(duration.TotalSeconds)
+            : 0L;
+
+        var status = (int)rawSession.Status;
+
+        var events = rawEvents
+            .Select(x => new AdminSessionTimelineEventDto
+            {
+                Id = x.Id,
+                EventType = NormalizeDisplayValue(x.EventType),
+                Scene = NormalizeDisplayValue(x.Scene),
+                GameState = NormalizeDisplayValue(x.GameState),
+                Phase = NormalizeDisplayValue(x.Phase),
+                PayloadJson = string.IsNullOrWhiteSpace(x.PayloadJson)
+                    ? string.Empty
+                    : x.PayloadJson,
+                ClientTimeUtc = x.ClientTimeUtc,
+                CreatedAtUtc = x.CreatedAtUtc
+            })
+            .ToList();
+
+        _logger.LogInformation(
+            "Loaded admin session timeline. SessionId={SessionId}, EventCount={EventCount}.",
+            rawSession.SessionId,
+            events.Count);
+
+        return new AdminSessionTimelineDetailDto
+        {
+            SessionId = rawSession.SessionId,
+            InstallationId = rawSession.InstallationId,
+            OwnerUserId = rawSession.OwnerUserId,
+            OwnerAlias = NormalizeDisplayValue(rawSession.OwnerAlias),
+            DeviceName = NormalizeDisplayValue(rawSession.DeviceName),
+            DeviceModel = NormalizeDisplayValue(rawSession.DeviceModel),
+            Platform = NormalizeDisplayValue(rawSession.Platform),
+            OperatingSystem = NormalizeDisplayValue(rawSession.OperatingSystem),
+            BuildVersion = NormalizeDisplayValue(rawSession.BuildVersion),
+            CurrentScene = NormalizeDisplayValue(rawSession.CurrentScene),
+            CurrentGameState = NormalizeDisplayValue(rawSession.CurrentGameState),
+            CurrentPhase = NormalizeDisplayValue(rawSession.CurrentPhase),
+            Status = status,
+            StatusLabel = MapSessionStatusLabel(status),
+            StartedAtUtc = rawSession.StartedAtUtc,
+            LastHeartbeatUtc = rawSession.LastHeartbeatUtc,
+            EndedAtUtc = rawSession.EndedAtUtc,
+            DurationSeconds = durationSeconds,
+            EventCount = events.Count,
+            Events = events
+        };
+    }
+
     private static string? NormalizeFilter(string? value)
     {
         return string.IsNullOrWhiteSpace(value)
@@ -168,5 +281,16 @@ public sealed class AdminSessionEventsService : IAdminSessionEventsService
         return string.IsNullOrWhiteSpace(value)
             ? "-"
             : value;
+    }
+
+    private static string MapSessionStatusLabel(int status)
+    {
+        return status switch
+        {
+            1 => "Live",
+            2 => "Completed",
+            3 => "Expired",
+            _ => $"Unknown ({status})"
+        };
     }
 }

@@ -1,7 +1,8 @@
-﻿using System.Globalization;
-using System.Net.Http.Json;
-using EchoConsole.Web.Models.Api.SessionEvents;
+﻿using EchoConsole.Web.Models.Api.SessionEvents;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Globalization;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace EchoConsole.Web.Services.Api;
 
@@ -76,5 +77,56 @@ public sealed class EchoConsoleSessionEventsApiClient
         return string.IsNullOrWhiteSpace(value)
             ? null
             : value.Trim();
+    }
+
+    public async Task<AdminSessionTimelineDetailApiModel?> GetSessionTimelineAsync(
+    Guid sessionId,
+    CancellationToken cancellationToken = default)
+    {
+        var requestUri =
+            $"/api/admin/session-events/sessions/{sessionId}/timeline";
+
+        try
+        {
+            using var response = await _httpClient.GetAsync(
+                requestUri,
+                cancellationToken);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.LogInformation(
+                    "Admin session timeline was not found. SessionId={SessionId}.",
+                    sessionId);
+
+                return null;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(
+                    cancellationToken);
+
+                _logger.LogWarning(
+                    "Admin session timeline request failed. SessionId={SessionId}, StatusCode={StatusCode}, Body={Body}.",
+                    sessionId,
+                    response.StatusCode,
+                    body);
+
+                return null;
+            }
+
+            return await response.Content
+                .ReadFromJsonAsync<AdminSessionTimelineDetailApiModel>(
+                    cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to retrieve admin session timeline. SessionId={SessionId}.",
+                sessionId);
+
+            return null;
+        }
     }
 }

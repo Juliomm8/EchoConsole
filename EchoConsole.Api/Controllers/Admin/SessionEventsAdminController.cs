@@ -49,4 +49,24 @@ public sealed class SessionEventsAdminController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpGet("sessions/{sessionId:guid}/timeline")]
+    public async Task<IActionResult> GetSessionTimeline(
+    Guid sessionId,
+    CancellationToken cancellationToken = default)
+    {
+        var result = await _sessionEventsService.GetSessionTimelineAsync(
+            sessionId,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound(new
+            {
+                message = "Session was not found."
+            });
+        }
+
+        return Ok(result);
+    }
 }
