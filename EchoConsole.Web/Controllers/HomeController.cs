@@ -47,7 +47,7 @@ public sealed class HomeController : Controller
             };
 
             ViewData["Title"] = "HOME";
-            ViewData["TitleI18nKey"] = "home_page_title";
+            ViewData["TitleResourceKey"] = "Home_PageTitle";
 
             return View(model);
         }
@@ -68,7 +68,7 @@ public sealed class HomeController : Controller
             };
 
             ViewData["Title"] = "HOME";
-            ViewData["TitleI18nKey"] = "home_page_title";
+            ViewData["TitleResourceKey"] = "Home_PageTitle";
 
             return View(fallbackModel);
         }

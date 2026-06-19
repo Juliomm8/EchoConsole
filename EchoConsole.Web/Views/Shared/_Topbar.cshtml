@@ -1,36 +1,12 @@
 @using System.Security.Claims
 
 @{
-    var legacyTitleKeyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-    {
-        ["home_page_title"] = "Home_PageTitle",
-        ["dashboard_live_monitoring_title"] = "Dashboard_PageTitle",
-        ["builds_page_title"] = "Builds_PageTitle",
-        ["installations_page_title"] = "Installations_PageTitle",
-        ["alerts_page_title"] = "Alerts_PageTitle",
-        ["users_page_title"] = "Users_PageTitle",
-        ["profile_page_title"] = "Profile_PageTitle",
-        ["profile_sessions_page_title"] = "Profile_SessionsPageTitle",
-        ["profile_session_detail_page_title"] = "Profile_SessionDetailPageTitle"
-    };
-
     var fallbackTitle =
         ViewData["Title"]?.ToString()
         ?? SharedLocalizer["Home_PageTitle"].Value;
 
     var titleResourceKey =
         ViewData["TitleResourceKey"]?.ToString();
-
-    if (string.IsNullOrWhiteSpace(titleResourceKey))
-    {
-        var legacyKey = ViewData["TitleI18nKey"]?.ToString();
-
-        if (!string.IsNullOrWhiteSpace(legacyKey) &&
-            legacyTitleKeyMap.TryGetValue(legacyKey, out var mappedKey))
-        {
-            titleResourceKey = mappedKey;
-        }
-    }
 
     var currentTitle = fallbackTitle;
 
@@ -65,22 +41,23 @@
     };
 }
 
-<header class="sticky top-0 z-40 border-b border-cyan-500/10 bg-slate-950/80 backdrop-blur-xl">
+<header data-presentation-topbar
+        class="sticky top-0 z-40 border-b border-cyan-500/10 bg-slate-950/85 backdrop-blur-xl">
     <div class="px-4 py-4 sm:px-6 xl:px-8">
         <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="flex items-center gap-4">
-                <div>
-                    <div class="font-display text-xs uppercase tracking-[0.34em] text-cyan-400">
-                        @SharedLocalizer["Topbar_Station"]
-                    </div>
+            <div class="min-w-0">
+                <div class="font-display text-xs uppercase tracking-[0.34em] text-cyan-400">
+                    @SharedLocalizer["Topbar_Station"]
+                </div>
 
-                    <div class="mt-1 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                        @currentTitle
-                    </div>
+                <div class="mt-1 truncate font-display text-2xl uppercase tracking-[0.14em] text-white">
+                    @currentTitle
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
+                @await Html.PartialAsync("_PresentationControls")
+
                 <div class="inline-flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
 
@@ -112,7 +89,8 @@
                 }
                 else
                 {
-                    <div class="inline-flex items-center gap-3 rounded-2xl border border-fuchsia-400/15 bg-slate-900/80 px-4 py-3">
+                    <div data-presentation-secondary
+                         class="inline-flex items-center gap-3 rounded-2xl border border-fuchsia-400/15 bg-slate-900/80 px-4 py-3">
                         <div class="flex h-11 w-11 items-center justify-center rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 font-display text-sm uppercase tracking-[0.2em] text-fuchsia-200">
                             @(alias.Length >= 2
                                 ? alias[..2].ToUpperInvariant()
@@ -133,7 +111,8 @@
                     <form asp-controller="Auth"
                           asp-action="LogoutPost"
                           method="post"
-                          class="m-0">
+                          class="m-0"
+                          data-presentation-secondary>
                         @Html.AntiForgeryToken()
 
                         <button type="submit"

@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Models.Builds;
+using EchoConsole.Web.Models.Builds;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +48,7 @@ public sealed class BuildsController : Controller
             };
 
             ViewData["Title"] = "GAMES AND BUILDS";
-            ViewData["TitleI18nKey"] = "builds_page_title";
+            ViewData["TitleResourceKey"] = "Builds_PageTitle";
 
             return View(model);
         }
@@ -67,7 +67,7 @@ public sealed class BuildsController : Controller
             };
 
             ViewData["Title"] = "GAMES AND BUILDS";
-            ViewData["TitleI18nKey"] = "builds_page_title";
+            ViewData["TitleResourceKey"] = "Builds_PageTitle";
 
             return View(fallbackModel);
         }
