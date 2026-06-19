@@ -1,9 +1,10 @@
-﻿@using System.Globalization
+@using System.Globalization
 @using System.Text.Json
 @model EchoConsole.Web.Models.SessionEventAnalytics.SessionEventAnalyticsIndexViewModel
 
 @{
-    ViewData["Title"] = "EVENT ANALYTICS";
+    ViewData["Title"] = SharedLocalizer["Analytics_PageTitle"].Value;
+    ViewData["TitleResourceKey"] = "Analytics_PageTitle";
 
     var chartPayload = new
     {
@@ -35,6 +36,14 @@
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
+
+    var chartLabels = new
+    {
+        events = SharedLocalizer["Analytics_ChartEvents"].Value,
+        eventTypes = SharedLocalizer["Analytics_ChartEventTypes"].Value
+    };
+
+    var chartLabelsJson = JsonSerializer.Serialize(chartLabels);
 }
 
 <div class="min-h-screen bg-[#070B12] text-slate-100">
@@ -43,22 +52,22 @@
             <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div>
                     <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        Telemetry Intelligence
+                        @SharedLocalizer["Analytics_Badge"]
                     </p>
 
                     <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white">
-                        Event Type Analytics
+                        @SharedLocalizer["Analytics_HeroTitle"]
                     </h1>
 
                     <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-                        Aggregated gameplay telemetry metrics calculated directly in SQL Server.
+                        @SharedLocalizer["Analytics_HeroSubtitle"]
                     </p>
                 </div>
 
                 <a asp-controller="SessionEvents"
                    asp-action="Index"
                    class="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-200 transition hover:bg-fuchsia-500/15">
-                    Open Recent Events
+                    @SharedLocalizer["Analytics_OpenRecentEvents"]
                 </a>
             </div>
         </section>
@@ -71,13 +80,13 @@
                 <div>
                     <label for="buildVersion"
                            class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
-                        Build
+                        @SharedLocalizer["Common_Build"]
                     </label>
 
                     <select id="buildVersion"
                             name="buildVersion"
                             class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
-                        <option value="">All builds</option>
+                        <option value="">@SharedLocalizer["Common_AllBuilds"]</option>
 
                         @if (Model.AvailableBuildVersions != null)
                         {
@@ -102,7 +111,7 @@
                 <div>
                     <label for="fromDate"
                            class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
-                        From Date UTC
+                        @SharedLocalizer["Common_FromDateUtc"]
                     </label>
 
                     <input id="fromDate"
@@ -115,7 +124,7 @@
                 <div>
                     <label for="toDate"
                            class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
-                        To Date UTC
+                        @SharedLocalizer["Common_ToDateUtc"]
                     </label>
 
                     <input id="toDate"
@@ -128,7 +137,7 @@
                 <div>
                     <label for="trendGranularity"
                            class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
-                        Trend Resolution
+                        @SharedLocalizer["Analytics_TrendResolution"]
                     </label>
 
                     <select id="trendGranularity"
@@ -136,11 +145,11 @@
                             class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
                         <option value="day"
                                 selected="@(Model.TrendGranularity == "day")">
-                            Daily
+                            @SharedLocalizer["Analytics_Daily"]
                         </option>
                         <option value="hour"
                                 selected="@(Model.TrendGranularity == "hour")">
-                            Hourly
+                            @SharedLocalizer["Analytics_Hourly"]
                         </option>
                     </select>
                 </div>
@@ -148,13 +157,13 @@
                 <div class="flex items-end gap-3">
                     <button type="submit"
                             class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                        Apply
+                        @SharedLocalizer["Common_Apply"]
                     </button>
 
                     <a asp-controller="SessionEventAnalytics"
                        asp-action="Index"
                        class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:text-white">
-                        Reset
+                        @SharedLocalizer["Common_Reset"]
                     </a>
                 </div>
             </form>
@@ -170,7 +179,7 @@
         <section class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Total Events
+                    @SharedLocalizer["Analytics_TotalEvents"]
                 </div>
                 <div class="mt-3 font-display text-4xl text-cyan-300"
                      data-analytics-counter="@Model.TotalEvents">
@@ -180,7 +189,7 @@
 
             <div class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Event Types
+                    @SharedLocalizer["Analytics_EventTypes"]
                 </div>
                 <div class="mt-3 font-display text-4xl text-fuchsia-300"
                      data-analytics-counter="@Model.EventTypeCount">
@@ -190,7 +199,7 @@
 
             <div class="rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Scenes
+                    @SharedLocalizer["Analytics_Scenes"]
                 </div>
                 <div class="mt-3 font-display text-4xl text-amber-300"
                      data-analytics-counter="@Model.SceneCount">
@@ -200,7 +209,7 @@
 
             <div class="rounded-2xl border border-emerald-500/20 bg-slate-950/70 p-6">
                 <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    Builds
+                    @SharedLocalizer["Analytics_Builds"]
                 </div>
                 <div class="mt-3 font-display text-4xl text-emerald-300"
                      data-analytics-counter="@Model.BuildCount">
@@ -213,11 +222,11 @@
         {
             <section class="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-12 text-center">
                 <p class="font-display text-sm uppercase tracking-[0.28em] text-slate-400">
-                    No analytics data found
+                    @SharedLocalizer["Analytics_NoData"]
                 </p>
 
                 <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                    No session events match the selected build and date range.
+                    @SharedLocalizer["Analytics_NoDataDescription"]
                 </p>
             </section>
         }
@@ -231,11 +240,11 @@
             <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(34,211,238,0.05)]">
                 <div>
                     <p class="font-display text-xs uppercase tracking-[0.30em] text-cyan-300">
-                        Activity Trend
+                        @SharedLocalizer["Analytics_ActivityTrend"]
                     </p>
 
                     <h2 class="mt-2 text-xl font-semibold text-white">
-                        Events Over Time
+                        @SharedLocalizer["Analytics_EventsOverTime"]
                     </h2>
                 </div>
 
@@ -247,11 +256,11 @@
             <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
                 <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
                     <p class="font-display text-xs uppercase tracking-[0.30em] text-fuchsia-300">
-                        Distribution
+                        @SharedLocalizer["Analytics_Distribution"]
                     </p>
 
                     <h2 class="mt-2 text-xl font-semibold text-white">
-                        Events by Type
+                        @SharedLocalizer["Analytics_EventsByType"]
                     </h2>
 
                     <div class="relative mt-6 h-[380px]">
@@ -261,11 +270,11 @@
 
                 <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
                     <p class="font-display text-xs uppercase tracking-[0.30em] text-fuchsia-300">
-                        Hot Zones
+                        @SharedLocalizer["Analytics_HotZones"]
                     </p>
 
                     <h2 class="mt-2 text-xl font-semibold text-white">
-                        Events by Scene
+                        @SharedLocalizer["Analytics_EventsByScene"]
                     </h2>
 
                     <div class="relative mt-6 h-[380px]">
@@ -276,11 +285,11 @@
 
             <section class="mt-6 rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
                 <p class="font-display text-xs uppercase tracking-[0.30em] text-amber-300">
-                    Release Comparison
+                    @SharedLocalizer["Analytics_ReleaseComparison"]
                 </p>
 
                 <h2 class="mt-2 text-xl font-semibold text-white">
-                    Events by Build Version
+                    @SharedLocalizer["Analytics_EventsByBuild"]
                 </h2>
 
                 <div class="relative mt-6 h-[360px]">
@@ -304,7 +313,9 @@
             trendCanvasId: "event-trend-chart",
             eventTypeCanvasId: "event-type-chart",
             sceneCanvasId: "scene-chart",
-            buildCanvasId: "build-chart"
+            buildCanvasId: "build-chart",
+            culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
+            labels: @Html.Raw(chartLabelsJson)
         });
     </script>
 }

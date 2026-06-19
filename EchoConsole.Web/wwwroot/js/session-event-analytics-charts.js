@@ -1,5 +1,12 @@
 ﻿window.echoConsoleAnalyticsCharts = (() => {
     const chartInstances = [];
+    let runtimeOptions = {
+        culture: "en",
+        labels: {
+            events: "Events",
+            eventTypes: "Event Types"
+        }
+    };
 
     const palette = [
         "#22d3ee",
@@ -13,6 +20,14 @@
     ];
 
     function init(options) {
+        runtimeOptions = {
+            culture: options.culture || document.documentElement.lang || "en",
+            labels: {
+                events: options.labels?.events || "Events",
+                eventTypes: options.labels?.eventTypes || "Event Types"
+            }
+        };
+
         if (!window.Chart) {
             console.error("Chart.js is not available.");
             return;
@@ -66,7 +81,7 @@
             data: {
                 labels: data.labels || [],
                 datasets: [{
-                    label: "Events",
+                    label: runtimeOptions.labels.events,
                     data: data.values || [],
                     borderColor: "#22d3ee",
                     backgroundColor: "rgba(34, 211, 238, 0.15)",
@@ -106,7 +121,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: "64%",
-                plugins: createPluginOptions("Event Types")
+                plugins: createPluginOptions(runtimeOptions.labels.eventTypes)
             }
         }));
     }
@@ -123,7 +138,7 @@
             data: {
                 labels: data.labels || [],
                 datasets: [{
-                    label: "Events",
+                    label: runtimeOptions.labels.events,
                     data: data.values || [],
                     backgroundColor: "rgba(232, 121, 249, 0.65)",
                     borderColor: "#e879f9",
@@ -147,7 +162,7 @@
             data: {
                 labels: data.labels || [],
                 datasets: [{
-                    label: "Events",
+                    label: runtimeOptions.labels.events,
                     data: data.values || [],
                     backgroundColor: "rgba(251, 191, 36, 0.65)",
                     borderColor: "#fbbf24",
@@ -238,7 +253,7 @@
                     target * easeOut(progress));
 
                 counter.textContent =
-                    value.toLocaleString("en-US");
+                    new Intl.NumberFormat(runtimeOptions.culture).format(value);
 
                 if (progress < 1) {
                     requestAnimationFrame(update);
