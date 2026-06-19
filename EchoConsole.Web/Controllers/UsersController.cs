@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Models.Users;
+using EchoConsole.Web.Models.Users;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +48,7 @@ public sealed class UsersController : Controller
             };
 
             ViewData["Title"] = "USER MANAGEMENT";
-            ViewData["TitleI18nKey"] = "users_page_title";
+            ViewData["TitleResourceKey"] = "Users_PageTitle";
 
             return View(model);
         }
@@ -67,7 +67,7 @@ public sealed class UsersController : Controller
             };
 
             ViewData["Title"] = "USER MANAGEMENT";
-            ViewData["TitleI18nKey"] = "users_page_title";
+            ViewData["TitleResourceKey"] = "Users_PageTitle";
 
             return View(fallbackModel);
         }

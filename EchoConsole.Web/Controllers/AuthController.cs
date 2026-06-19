@@ -1,10 +1,11 @@
-﻿using EchoConsole.Api.Domain.Entities;
+using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
 using EchoConsole.Web.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace EchoConsole.Web.Controllers;
 
@@ -13,15 +14,18 @@ public sealed class AuthController : Controller
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ILogger<AuthController> _logger;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
     public AuthController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger,
+        IStringLocalizer<SharedResource> localizer)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _localizer = localizer;
     }
 
     [HttpGet]
@@ -33,7 +37,7 @@ public sealed class AuthController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        ViewData["Title"] = "Login";
+        SetAuthTitle("Auth_LoginPageTitle");
         ViewData["ReturnUrl"] = returnUrl;
 
         return View(new LoginViewModel());
@@ -42,9 +46,12 @@ public sealed class AuthController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Login(
+        LoginViewModel model,
+        string? returnUrl = null,
+        CancellationToken cancellationToken = default)
     {
-        ViewData["Title"] = "Login";
+        SetAuthTitle("Auth_LoginPageTitle");
         ViewData["ReturnUrl"] = returnUrl;
 
         if (!ModelState.IsValid)
@@ -57,13 +64,13 @@ public sealed class AuthController : Controller
 
         if (user is null)
         {
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            ModelState.AddModelError(string.Empty, _localizer["Auth_InvalidLogin"]);
             return View(model);
         }
 
         if (user.Status == UserStatus.Suspended)
         {
-            ModelState.AddModelError(string.Empty, "This account is suspended.");
+            ModelState.AddModelError(string.Empty, _localizer["Auth_AccountSuspended"]);
             return View(model);
         }
 
@@ -75,22 +82,24 @@ public sealed class AuthController : Controller
 
         if (result.Succeeded)
         {
-            _logger.LogInformation("User logged in successfully. UserId: {UserId}, Email: {Email}, Role: {Role}", user.Id, user.Email, user.Role);
+            _logger.LogInformation(
+                "User logged in successfully. UserId: {UserId}, Email: {Email}, Role: {Role}",
+                user.Id,
+                user.Email,
+                user.Role);
 
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            if (!string.IsNullOrWhiteSpace(returnUrl) &&
+                Url.IsLocalUrl(returnUrl))
             {
                 return LocalRedirect(returnUrl);
             }
 
-            if (user.Role == UserRole.Admin)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
-
-            return RedirectToAction("Index", "Home");
+            return user.Role == UserRole.Admin
+                ? RedirectToAction("Index", "Dashboard")
+                : RedirectToAction("Index", "Home");
         }
 
-        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        ModelState.AddModelError(string.Empty, _localizer["Auth_InvalidLogin"]);
         return View(model);
     }
 
@@ -103,16 +112,18 @@ public sealed class AuthController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        ViewData["Title"] = "Register";
+        SetAuthTitle("Auth_RegisterPageTitle");
         return View(new RegisterViewModel());
     }
 
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register(
+        RegisterViewModel model,
+        CancellationToken cancellationToken)
     {
-        ViewData["Title"] = "Register";
+        SetAuthTitle("Auth_RegisterPageTitle");
 
         if (!ModelState.IsValid)
         {
@@ -126,7 +137,7 @@ public sealed class AuthController : Controller
         var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser is not null)
         {
-            ModelState.AddModelError(nameof(model.Email), "This email is already registered.");
+            ModelState.AddModelError(nameof(model.Email), _localizer["Auth_EmailAlreadyRegistered"]);
             return View(model);
         }
 
@@ -135,7 +146,7 @@ public sealed class AuthController : Controller
 
         if (aliasAlreadyExists)
         {
-            ModelState.AddModelError(nameof(model.Alias), "This alias is already in use.");
+            ModelState.AddModelError(nameof(model.Alias), _localizer["Auth_AliasAlreadyUsed"]);
             return View(model);
         }
 
@@ -158,7 +169,7 @@ public sealed class AuthController : Controller
         {
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(string.Empty, LocalizeIdentityError(error));
             }
 
             return View(model);
@@ -166,7 +177,11 @@ public sealed class AuthController : Controller
 
         await _signInManager.SignInAsync(user, isPersistent: false);
 
-        _logger.LogInformation("User registered successfully. UserId: {UserId}, Email: {Email}, Alias: {Alias}", user.Id, user.Email, user.Alias);
+        _logger.LogInformation(
+            "User registered successfully. UserId: {UserId}, Email: {Email}, Alias: {Alias}",
+            user.Id,
+            user.Email,
+            user.Alias);
 
         return RedirectToAction("Index", "Home");
     }
@@ -184,7 +199,28 @@ public sealed class AuthController : Controller
     [AllowAnonymous]
     public IActionResult AccessDenied()
     {
-        ViewData["Title"] = "Access Denied";
+        SetAuthTitle("Auth_AccessDeniedPageTitle");
         return View();
+    }
+
+    private void SetAuthTitle(string resourceKey)
+    {
+        ViewData["Title"] = _localizer[resourceKey].Value;
+        ViewData["TitleResourceKey"] = resourceKey;
+    }
+
+    private string LocalizeIdentityError(IdentityError error)
+    {
+        return error.Code switch
+        {
+            "PasswordTooShort" => _localizer["Auth_PasswordTooShort"],
+            "PasswordRequiresDigit" => _localizer["Auth_PasswordRequiresDigit"],
+            "PasswordRequiresLower" => _localizer["Auth_PasswordRequiresLower"],
+            "PasswordRequiresUpper" => _localizer["Auth_PasswordRequiresUpper"],
+            "PasswordRequiresNonAlphanumeric" => _localizer["Auth_PasswordRequiresSymbol"],
+            "DuplicateEmail" => _localizer["Auth_EmailAlreadyRegistered"],
+            "DuplicateUserName" => _localizer["Auth_EmailAlreadyRegistered"],
+            _ => _localizer["Auth_RegistrationFailed"]
+        };
     }
 }

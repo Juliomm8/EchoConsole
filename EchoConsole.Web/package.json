@@ -1,0 +1,12 @@
+{
+  "name": "echoconsole-web-assets",
+  "private": true,
+  "version": "0.7.5",
+  "scripts": {
+    "build:css": "tailwindcss -i ./wwwroot/css/tailwind.input.css -o ./wwwroot/css/tailwind.output.css --minify",
+    "watch:css": "tailwindcss -i ./wwwroot/css/tailwind.input.css -o ./wwwroot/css/tailwind.output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

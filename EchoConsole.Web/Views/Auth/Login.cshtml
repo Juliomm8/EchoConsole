@@ -1,68 +1,95 @@
-﻿@model EchoConsole.Web.Models.Auth.LoginViewModel
+@model EchoConsole.Web.Models.Auth.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = SharedLocalizer["Auth_LoginPageTitle"].Value;
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
 }
 
-<div class="auth-page d-flex align-items-center justify-content-center px-3 py-5">
-    <div class="container auth-shell">
-        <div class="row justify-content-center align-items-center g-4">
-            <div class="col-lg-5 col-xl-4">
-                <div class="auth-side-panel h-100">
-                    <div class="auth-brand fs-1 mb-1">Echo Console</div>
-
-                    <div class="auth-subbrand mb-4">. Web</div>
-
-                    <hr class="auth-divider my-4" />
-
-                    <div class="auth-kicker mb-2">Access Node</div>
-                    <h2 class="auth-side-title h4 mb-3">Operator Login</h2>
-                    <p class="auth-muted mb-0">
-                        Sign in to access the EchoConsole platform and continue into the product experience.
-                    </p>
-                </div>
+<div class="flex min-h-screen items-center justify-center px-4 py-20 sm:px-6">
+    <div class="grid w-full max-w-6xl gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <aside class="rounded-3xl border border-fuchsia-400/15 bg-slate-950/55 p-8 backdrop-blur-xl lg:p-10">
+            <div class="font-display text-4xl uppercase tracking-[0.16em] text-cyan-300 text-glow-cyan">
+                Echo Console
+            </div>
+            <div class="mt-2 font-display text-sm uppercase tracking-[0.42em] text-fuchsia-300">
+                .Web
             </div>
 
-            <div class="col-md-8 col-lg-6 col-xl-5">
-                <div class="auth-card">
-                    <div class="card-body p-4 p-md-5">
+            <div class="my-8 h-px bg-gradient-to-r from-cyan-400/35 via-fuchsia-400/25 to-transparent"></div>
 
-                        <div class="auth-kicker mb-2">Telemetry Control Station</div>
-                        <h1 class="auth-title h2 mb-4">Login</h1>
+            <p class="font-display text-xs uppercase tracking-[0.3em] text-cyan-300">
+                @SharedLocalizer["Auth_AccessNode"]
+            </p>
+            <h2 class="mt-3 font-display text-2xl uppercase tracking-[0.12em] text-fuchsia-200">
+                @SharedLocalizer["Auth_OperatorLogin"]
+            </h2>
+            <p class="mt-4 max-w-md text-sm leading-7 text-slate-400">
+                @SharedLocalizer["Auth_LoginDescription"]
+            </p>
+        </aside>
 
-                        <form asp-controller="Auth" asp-action="Login" method="post" novalidate>
+        <section class="rounded-3xl border border-cyan-400/20 bg-slate-950/85 p-8 shadow-[0_0_45px_rgba(34,211,238,0.07)] backdrop-blur-xl sm:p-10 lg:p-12">
+            <p class="font-display text-xs uppercase tracking-[0.3em] text-cyan-300">
+                @SharedLocalizer["Topbar_Station"]
+            </p>
+            <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.14em] text-white">
+                @SharedLocalizer["Common_Login"]
+            </h1>
 
-                            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+            <form asp-controller="Auth"
+                  asp-action="Login"
+                  method="post"
+                  novalidate
+                  class="mt-8 space-y-6">
+                <input type="hidden"
+                       name="returnUrl"
+                       value="@ViewData["ReturnUrl"]" />
 
-                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div asp-validation-summary="ModelOnly"
+                     class="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm"></div>
 
-                            <div class="mb-3">
-                                <label asp-for="Email" class="form-label"></label>
-                                <input asp-for="Email" class="form-control" placeholder="operator@echoconsole.local" />
-                                <span asp-validation-for="Email" class="text-danger small"></span>
-                            </div>
-
-                            <div class="mb-4">
-                                <label asp-for="Password" class="form-label"></label>
-                                <input asp-for="Password" class="form-control" placeholder="Enter your password" />
-                                <span asp-validation-for="Password" class="text-danger small"></span>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-auth-primary">Login</button>
-                            </div>
-                        </form>
-
-                        <hr class="auth-divider my-4" />
-
-                        <p class="text-center mb-0 auth-muted">
-                            Don’t have an account?
-                            <a asp-controller="Auth" asp-action="Register" class="auth-link">Register here</a>
-                        </p>
-                    </div>
+                <div>
+                    <label asp-for="Email"
+                           class="mb-2 block text-sm font-semibold text-slate-200">
+                        @SharedLocalizer["Auth_EmailLabel"]
+                    </label>
+                    <input asp-for="Email"
+                           autocomplete="email"
+                           class="auth-field"
+                           placeholder="operator@echoconsole.local" />
+                    <span asp-validation-for="Email"
+                          class="mt-2 block text-sm"></span>
                 </div>
-            </div>
-        </div>
+
+                <div>
+                    <label asp-for="Password"
+                           class="mb-2 block text-sm font-semibold text-slate-200">
+                        @SharedLocalizer["Auth_PasswordLabel"]
+                    </label>
+                    <input asp-for="Password"
+                           autocomplete="current-password"
+                           class="auth-field"
+                           placeholder="@SharedLocalizer["Auth_PasswordPlaceholder"]" />
+                    <span asp-validation-for="Password"
+                          class="mt-2 block text-sm"></span>
+                </div>
+
+                <button type="submit"
+                        class="w-full rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-5 py-4 text-sm font-bold uppercase tracking-[0.18em] text-cyan-100 transition hover:bg-cyan-500/25">
+                    @SharedLocalizer["Common_Login"]
+                </button>
+            </form>
+
+            <div class="my-8 h-px bg-gradient-to-r from-cyan-400/25 via-fuchsia-400/20 to-transparent"></div>
+
+            <p class="text-center text-sm text-slate-400">
+                @SharedLocalizer["Auth_NoAccount"]
+                <a asp-controller="Auth"
+                   asp-action="Register"
+                   class="font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline">
+                    @SharedLocalizer["Auth_RegisterHere"]
+                </a>
+            </p>
+        </section>
     </div>
 </div>

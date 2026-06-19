@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Models.Installations;
+using EchoConsole.Web.Models.Installations;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -59,7 +59,7 @@ public sealed class InstallationsController : Controller
             };
 
             ViewData["Title"] = "DEVICES & INSTALLATIONS";
-            ViewData["TitleI18nKey"] = "installations_page_title";
+            ViewData["TitleResourceKey"] = "Installations_PageTitle";
 
             return View(model);
         }
@@ -78,7 +78,7 @@ public sealed class InstallationsController : Controller
             };
 
             ViewData["Title"] = "DEVICES & INSTALLATIONS";
-            ViewData["TitleI18nKey"] = "installations_page_title";
+            ViewData["TitleResourceKey"] = "Installations_PageTitle";
 
             return View(fallbackModel);
         }
