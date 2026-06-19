@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Cosmic Diner showcase placeholder three</title>
+  <desc id="desc">Placeholder for an enemy encounter gameplay screenshot.</desc>
+  <rect width="1280" height="720" fill="#020302"/>
+  <g stroke="#39ff14" stroke-opacity=".09">
+    <path d="M0 80h1280M0 160h1280M0 240h1280M0 320h1280M0 400h1280M0 480h1280M0 560h1280M0 640h1280"/>
+    <path d="M80 0v720M160 0v720M240 0v720M320 0v720M400 0v720M480 0v720M560 0v720M640 0v720M720 0v720M800 0v720M880 0v720M960 0v720M1040 0v720M1120 0v720M1200 0v720"/>
+  </g>
+  <g fill="none" stroke="#ef4444" stroke-width="5" opacity=".64">
+    <circle cx="640" cy="245" r="78"/>
+    <path d="M545 610 590 330h100l45 280M585 430 470 555M695 430 810 555"/>
+    <path d="M610 230h60M620 265h40"/>
+  </g>
+  <path d="M170 610h940" stroke="#39ff14" stroke-width="4" opacity=".38"/>
+  <text x="640" y="100" text-anchor="middle" fill="#ef4444" font-family="monospace" font-size="26" letter-spacing="7">SCREENSHOT SLOT 03</text>
+  <text x="640" y="660" text-anchor="middle" fill="#7f5f5f" font-family="monospace" font-size="18" letter-spacing="4">CONTACT / ASTRONAUT ENCOUNTER</text>
+</svg>

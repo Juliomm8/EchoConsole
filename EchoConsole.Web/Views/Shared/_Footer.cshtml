@@ -1,0 +1,75 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+@{
+    var socialLinks = new[]
+    {
+        new
+        {
+            Name = "Instagram",
+            Code = "IG",
+            Url = Configuration["https://www.instagram.com/dark.sky.studios.dev?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="]
+        },
+        new
+        {
+            Name = "TikTok",
+            Code = "TT",
+            Url = Configuration["https://www.tiktok.com/@team_darksky_dev?is_from_webapp=1&sender_device=pc"]
+        },
+        new
+        {
+            Name = "YouTube",
+            Code = "YT",
+            Url = Configuration["https://youtube.com/@darkskystudios-x5k?si=0oiN4atoGiwFtC-r"]
+        },
+        new
+        {
+            Name = "X",
+            Code = "X",
+            Url = Configuration["https://x.com/teamdarkskydev?s=20"]
+        }
+    };
+}
+
+<footer class="border-t border-green-500/15 bg-black/95 px-5 py-6 sm:px-8">
+    <div class="mx-auto flex max-w-[1700px] flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <div class="font-display text-xs uppercase tracking-[0.28em] text-green-400">
+                @SharedLocalizer["Footer_Transmission"]
+            </div>
+            <p class="mt-2 max-w-2xl text-xs leading-6 text-slate-500">
+                @SharedLocalizer["Footer_Description"]
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-3 lg:items-end">
+            <div class="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-600">
+                @SharedLocalizer["Footer_Follow"]
+            </div>
+
+            <nav class="flex flex-wrap gap-x-5 gap-y-3"
+                 aria-label="@SharedLocalizer["Footer_Follow"]">
+                @foreach (var social in socialLinks)
+                {
+                    var isConfigured = !string.IsNullOrWhiteSpace(social.Url);
+
+                    <a href="@(isConfigured ? social.Url : "#")"
+                       target="@(isConfigured ? "_blank" : null)"
+                       rel="@(isConfigured ? "noopener noreferrer" : null)"
+                       aria-disabled="@(!isConfigured)"
+                       title="@(isConfigured ? social.Name : SharedLocalizer["Footer_LinkPending"].Value)"
+                       class="footer-link @(!isConfigured ? "cursor-not-allowed opacity-45" : string.Empty)">
+                        <span class="inline-flex h-7 min-w-7 items-center justify-center rounded border border-green-500/25 bg-green-500/5 px-1 text-[10px] text-green-300">
+                            @social.Code
+                        </span>
+                        <span>@social.Name</span>
+                    </a>
+                }
+            </nav>
+        </div>
+    </div>
+
+    <div class="mx-auto mt-5 flex max-w-[1700px] flex-col gap-2 border-t border-green-500/10 pt-4 text-[10px] uppercase tracking-[0.16em] text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+        <span>@SharedLocalizer["Footer_Rights", DateTime.UtcNow.Year]</span>
+        <span>ECHOCONSOLE // COSMIC DINER // SIGNAL LOCKED</span>
+    </div>
+</footer>

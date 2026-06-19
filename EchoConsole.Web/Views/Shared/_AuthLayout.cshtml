@@ -12,7 +12,8 @@
 
 <!DOCTYPE html>
 <html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName"
-      class="h-full">
+      data-theme="retro-terminal"
+      class="h-full bg-black">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport"
@@ -24,11 +25,12 @@
           href="~/css/tailwind.output.css"
           asp-append-version="true" />
 </head>
-<body class="min-h-full bg-[#070B12] text-slate-100 antialiased">
-    <div class="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.09),transparent_28%),radial-gradient(circle_at_top_right,rgba(232,121,249,0.08),transparent_24%),linear-gradient(180deg,#070B12_0%,#04070D_100%)]">
-        <div class="auth-grid-background pointer-events-none absolute inset-0"></div>
+<body class="flex min-h-full flex-col bg-black font-mono text-green-100 antialiased">
+    <div class="relative flex min-h-screen flex-1 flex-col overflow-hidden bg-black">
+        <div class="auth-grid-background pointer-events-none absolute inset-0 opacity-70"></div>
+        <div class="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(57,255,20,0.10),transparent_68%)]"></div>
 
-        <div class="absolute right-4 top-4 z-30 flex items-center gap-2 rounded-2xl border border-cyan-500/15 bg-slate-950/85 p-2 backdrop-blur-xl sm:right-6 sm:top-6">
+        <div class="absolute right-4 top-4 z-30 flex items-center gap-1 rounded-lg border border-green-500/25 bg-black/90 p-1.5 shadow-phosphor sm:right-6 sm:top-6">
             <form asp-controller="Culture"
                   asp-action="Set"
                   method="post"
@@ -38,7 +40,7 @@
                 <input type="hidden" name="returnUrl" value="@returnUrl" />
 
                 <button type="submit"
-                        class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition @(currentCulture == "en" ? "bg-cyan-500/15 text-cyan-200" : "text-slate-500 hover:bg-slate-900 hover:text-slate-200")">
+                        class="rounded-md px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] transition @(currentCulture == "en" ? "bg-green-500/20 text-green-200 shadow-phosphor" : "text-slate-500 hover:bg-green-500/10 hover:text-green-200")">
                     EN
                 </button>
             </form>
@@ -52,15 +54,19 @@
                 <input type="hidden" name="returnUrl" value="@returnUrl" />
 
                 <button type="submit"
-                        class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition @(currentCulture == "es" ? "bg-fuchsia-500/15 text-fuchsia-200" : "text-slate-500 hover:bg-slate-900 hover:text-slate-200")">
+                        class="rounded-md px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] transition @(currentCulture == "es" ? "bg-amber-500/20 text-amber-200 shadow-amber" : "text-slate-500 hover:bg-amber-500/10 hover:text-amber-200")">
                     ES
                 </button>
             </form>
         </div>
 
-        <main class="relative z-10 min-h-screen">
+        <main class="relative z-10 flex-1">
             @RenderBody()
         </main>
+
+        <div class="relative z-10">
+            @await Html.PartialAsync("_Footer")
+        </div>
     </div>
 
     <partial name="_ValidationScriptsPartial" />
