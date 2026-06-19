@@ -23,6 +23,7 @@ public sealed class SessionEventAnalyticsAdminController : ControllerBase
         [FromQuery] string? buildVersion,
         [FromQuery] DateTimeOffset? fromUtc,
         [FromQuery] DateTimeOffset? toUtcExclusive,
+        [FromQuery] string trendGranularity = "day",
         CancellationToken cancellationToken = default)
     {
         if (fromUtc.HasValue &&
@@ -35,10 +36,26 @@ public sealed class SessionEventAnalyticsAdminController : ControllerBase
             });
         }
 
+        if (!string.Equals(
+                trendGranularity,
+                "hour",
+                StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(
+                trendGranularity,
+                "day",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new
+            {
+                message = "trendGranularity must be hour or day."
+            });
+        }
+
         var result = await _analyticsService.GetAnalyticsAsync(
             buildVersion,
             fromUtc,
             toUtcExclusive,
+            trendGranularity,
             cancellationToken);
 
         return Ok(result);

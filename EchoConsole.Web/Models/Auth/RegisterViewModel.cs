@@ -1,28 +1,28 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace EchoConsole.Web.Models.Auth;
 
 public sealed class RegisterViewModel
 {
-    [Required]
-    [StringLength(100)]
-    [Display(Name = "Name")]
+    [Required(ErrorMessage = "Validation_Required")]
+    [StringLength(100, ErrorMessage = "Validation_MaxLength")]
+    [Display(Name = "Auth_NameLabel")]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
-    [StringLength(64)]
-    [Display(Name = "Alias")]
+    [Required(ErrorMessage = "Validation_Required")]
+    [StringLength(64, ErrorMessage = "Validation_MaxLength")]
+    [Display(Name = "Auth_AliasLabel")]
     public string Alias { get; set; } = string.Empty;
 
-    [Required]
-    [EmailAddress]
-    [StringLength(256)]
-    [Display(Name = "Email")]
+    [Required(ErrorMessage = "Validation_Required")]
+    [EmailAddress(ErrorMessage = "Validation_Email")]
+    [StringLength(256, ErrorMessage = "Validation_MaxLength")]
+    [Display(Name = "Auth_EmailLabel")]
     public string Email { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "Validation_Required")]
     [DataType(DataType.Password)]
-    [StringLength(100, MinimumLength = 6)]
-    [Display(Name = "Password")]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "Validation_StringLength")]
+    [Display(Name = "Auth_PasswordLabel")]
     public string Password { get; set; } = string.Empty;
 }

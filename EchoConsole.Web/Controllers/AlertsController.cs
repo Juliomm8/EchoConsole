@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Models.Alerts;
+using EchoConsole.Web.Models.Alerts;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +51,7 @@ public sealed class AlertsController : Controller
             };
 
             ViewData["Title"] = "ALERTS AND REPORTS";
-            ViewData["TitleI18nKey"] = "alerts_page_title";
+            ViewData["TitleResourceKey"] = "Alerts_PageTitle";
 
             return View(model);
         }
@@ -71,7 +71,7 @@ public sealed class AlertsController : Controller
             };
 
             ViewData["Title"] = "ALERTS AND REPORTS";
-            ViewData["TitleI18nKey"] = "alerts_page_title";
+            ViewData["TitleResourceKey"] = "Alerts_PageTitle";
 
             return View(fallbackModel);
         }

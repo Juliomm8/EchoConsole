@@ -1,16 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace EchoConsole.Web.Models.Auth;
 
 public sealed class LoginViewModel
 {
-    [Required]
-    [EmailAddress]
-    [Display(Name = "Email")]
+    [Required(ErrorMessage = "Validation_Required")]
+    [EmailAddress(ErrorMessage = "Validation_Email")]
+    [Display(Name = "Auth_EmailLabel")]
     public string Email { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "Validation_Required")]
     [DataType(DataType.Password)]
-    [Display(Name = "Password")]
+    [Display(Name = "Auth_PasswordLabel")]
     public string Password { get; set; } = string.Empty;
 }

@@ -4,6 +4,8 @@ public sealed class SessionEventAnalyticsIndexViewModel
 {
     public string BuildVersion { get; set; } = string.Empty;
 
+    public string TrendGranularity { get; set; } = "day";
+
     public DateTime? FromDate { get; set; }
 
     public DateTime? ToDate { get; set; }
@@ -29,4 +31,7 @@ public sealed class SessionEventAnalyticsIndexViewModel
 
     public IReadOnlyList<SessionEventAnalyticsBucketViewModel> BuildVersions { get; set; } =
         Array.Empty<SessionEventAnalyticsBucketViewModel>();
+
+    public IReadOnlyList<SessionEventAnalyticsTimePointViewModel> TimeSeries { get; set; } =
+        Array.Empty<SessionEventAnalyticsTimePointViewModel>();
 }

@@ -12,4 +12,8 @@ public interface IAdminSessionEventsService
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+
+    Task<AdminSessionTimelineDetailDto?> GetSessionTimelineAsync(
+        Guid sessionId,
+        CancellationToken cancellationToken = default);
 }

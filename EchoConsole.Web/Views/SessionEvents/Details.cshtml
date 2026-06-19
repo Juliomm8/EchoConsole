@@ -1,0 +1,429 @@
+@model EchoConsole.Web.Models.SessionEvents.AdminSessionTimelineDetailViewModel
+
+@{
+    ViewData["Title"] = SharedLocalizer["SessionTimeline_PageTitle"].Value;
+    ViewData["TitleResourceKey"] = "SessionTimeline_PageTitle";
+
+    string EventBorder(string eventType) => eventType switch
+    {
+        "SceneChanged" => "border-cyan-400/30",
+        "PhaseChanged" => "border-fuchsia-400/30",
+        "GameStateChanged" => "border-indigo-400/30",
+        "ObjectiveUpdated" => "border-amber-400/30",
+        "ItemCollected" => "border-emerald-400/30",
+        "EnemyEncountered" => "border-rose-400/30",
+        "PlayerDamaged" => "border-orange-400/30",
+        "PlayerDied" => "border-red-400/40",
+        _ => "border-slate-700"
+    };
+
+    string EventBackground(string eventType) => eventType switch
+    {
+        "SceneChanged" => "bg-cyan-500/10",
+        "PhaseChanged" => "bg-fuchsia-500/10",
+        "GameStateChanged" => "bg-indigo-500/10",
+        "ObjectiveUpdated" => "bg-amber-500/10",
+        "ItemCollected" => "bg-emerald-500/10",
+        "EnemyEncountered" => "bg-rose-500/10",
+        "PlayerDamaged" => "bg-orange-500/10",
+        "PlayerDied" => "bg-red-500/10",
+        _ => "bg-slate-900/70"
+    };
+
+    string EventText(string eventType) => eventType switch
+    {
+        "SceneChanged" => "text-cyan-300",
+        "PhaseChanged" => "text-fuchsia-300",
+        "GameStateChanged" => "text-indigo-300",
+        "ObjectiveUpdated" => "text-amber-300",
+        "ItemCollected" => "text-emerald-300",
+        "EnemyEncountered" => "text-rose-300",
+        "PlayerDamaged" => "text-orange-300",
+        "PlayerDied" => "text-red-300",
+        _ => "text-slate-300"
+    };
+
+    string EventDot(string eventType) => eventType switch
+    {
+        "SceneChanged" => "bg-cyan-400 shadow-[0_0_24px_rgba(34,211,238,0.75)]",
+        "PhaseChanged" => "bg-fuchsia-400 shadow-[0_0_24px_rgba(232,121,249,0.75)]",
+        "GameStateChanged" => "bg-indigo-400 shadow-[0_0_24px_rgba(129,140,248,0.75)]",
+        "ObjectiveUpdated" => "bg-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.75)]",
+        "ItemCollected" => "bg-emerald-400 shadow-[0_0_24px_rgba(52,211,153,0.75)]",
+        "EnemyEncountered" => "bg-rose-400 shadow-[0_0_24px_rgba(251,113,133,0.75)]",
+        "PlayerDamaged" => "bg-orange-400 shadow-[0_0_24px_rgba(251,146,60,0.75)]",
+        "PlayerDied" => "bg-red-400 shadow-[0_0_30px_rgba(248,113,113,0.85)]",
+        _ => "bg-slate-500"
+    };
+
+    string EventCode(string eventType) => eventType switch
+    {
+        "SceneChanged" => "SC",
+        "PhaseChanged" => "PH",
+        "GameStateChanged" => "GS",
+        "ObjectiveUpdated" => "OB",
+        "ItemCollected" => "IT",
+        "EnemyEncountered" => "EN",
+        "PlayerDamaged" => "DM",
+        "PlayerDied" => "DE",
+        _ => "EV"
+    };
+
+    string LocalizedSessionStatus(string status) => status switch
+    {
+        "Live" => SharedLocalizer["Status_Live"].Value,
+        "Completed" => SharedLocalizer["Status_Completed"].Value,
+        "Ended" => SharedLocalizer["Status_Ended"].Value,
+        "Expired" => SharedLocalizer["Status_Expired"].Value,
+        _ => status
+    };
+
+    string LocalizedTimeSource(string source) =>
+        source.StartsWith("Client", StringComparison.OrdinalIgnoreCase)
+            ? SharedLocalizer["SessionTimeline_PrimaryTimeClientUtc"].Value
+            : SharedLocalizer["SessionTimeline_PrimaryTimeServerUtc"].Value;
+}
+
+
+<div class="min-h-screen bg-[#070B12] text-slate-100">
+    <div class="mx-auto max-w-[1700px] px-6 py-8">
+        <section class="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-slate-950/80 p-8 shadow-[0_0_50px_rgba(34,211,238,0.06)]">
+            <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl"></div>
+            <div class="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-fuchsia-500/10 blur-3xl"></div>
+
+            <div class="relative flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.38em] text-cyan-300">
+                        @SharedLocalizer["SessionTimeline_Badge"]
+                    </p>
+
+                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white md:text-4xl">
+                        @SharedLocalizer["SessionTimeline_HeroTitle"]
+                    </h1>
+
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                        @SharedLocalizer["SessionTimeline_HeroSubtitle"]
+                    </p>
+
+                    <div class="mt-4 max-w-[820px] truncate text-xs text-slate-600"
+                         title="@Model.SessionId">
+                        @SharedLocalizer["Common_SessionId"]: @Model.SessionId
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <a asp-controller="SessionEvents"
+                       asp-action="Index"
+                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
+                        @SharedLocalizer["SessionTimeline_BackToEvents"]
+                    </a>
+
+                    @if (Model.IsLive)
+                    {
+                        <span class="inline-flex items-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300">
+                            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            @LocalizedSessionStatus(Model.StatusLabel)
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-300">
+                            @LocalizedSessionStatus(Model.StatusLabel)
+                        </span>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <article class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
+                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                    @SharedLocalizer["SessionTimeline_Events"]
+                </div>
+                <div class="mt-3 font-display text-4xl text-cyan-300">
+                    @Model.EventCount
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
+                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                    @SharedLocalizer["Common_Duration"]
+                </div>
+                <div class="mt-3 font-display text-2xl text-fuchsia-300">
+                    @Model.DurationLabel
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
+                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                    @SharedLocalizer["Common_Build"]
+                </div>
+                <div class="mt-3 font-display text-2xl text-amber-300">
+                    @Model.BuildVersion
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-emerald-500/20 bg-slate-950/70 p-6">
+                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
+                    @SharedLocalizer["SessionTimeline_Owner"]
+                </div>
+                <div class="mt-3 truncate text-lg font-semibold text-emerald-300"
+                     title="@Model.OwnerLabel">
+                    @Model.OwnerLabel
+                </div>
+            </article>
+        </section>
+
+        <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <section class="rounded-3xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
+                <p class="font-display text-xs uppercase tracking-[0.32em] text-fuchsia-300">
+                    @SharedLocalizer["SessionTimeline_SessionState"]
+                </p>
+
+                <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            @SharedLocalizer["SessionTimeline_CurrentScene"]
+                        </div>
+                        <div class="mt-2 text-lg font-semibold text-white">
+                            @Model.CurrentScene
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            @SharedLocalizer["Common_GameState"]
+                        </div>
+                        <div class="mt-2 text-lg font-semibold text-white">
+                            @Model.CurrentGameState
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            @SharedLocalizer["Common_Phase"]
+                        </div>
+                        <div class="mt-2 text-lg font-semibold text-white">
+                            @Model.CurrentPhase
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            @SharedLocalizer["Common_StartedAt"]
+                        </div>
+                        <div class="mt-2 text-sm text-cyan-300">
+                            @Model.StartedAtLabel
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            @SharedLocalizer["Common_LastHeartbeat"]
+                        </div>
+                        <div class="mt-2 text-sm text-cyan-300">
+                            @Model.LastHeartbeatLabel
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            @SharedLocalizer["Common_EndedAt"]
+                        </div>
+                        <div class="mt-2 text-sm text-cyan-300">
+                            @Model.EndedAtLabel
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="rounded-3xl border border-cyan-500/20 bg-slate-950/70 p-6">
+                <p class="font-display text-xs uppercase tracking-[0.32em] text-cyan-300">
+                    @SharedLocalizer["SessionTimeline_DeviceIdentity"]
+                </p>
+
+                <div class="mt-5 space-y-4">
+                    <div>
+                        <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
+                            @SharedLocalizer["Common_Device"]
+                        </div>
+                        <div class="mt-1 text-lg font-semibold text-white">
+                            @Model.DeviceName
+                        </div>
+                        <div class="text-sm text-slate-500">
+                            @Model.DeviceModel
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                            <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Common_Platform"]
+                            </div>
+                            <div class="mt-1 text-sm text-slate-200">
+                                @Model.Platform
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                            <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Common_OperatingSystem"]
+                            </div>
+                            <div class="mt-1 truncate text-sm text-slate-200"
+                                 title="@Model.OperatingSystem">
+                                @Model.OperatingSystem
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="truncate text-xs text-slate-600"
+                         title="@Model.InstallationId">
+                        @Model.InstallationId
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="mt-6 rounded-3xl border border-slate-800 bg-slate-950/70 p-6 md:p-8">
+            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p class="font-display text-xs uppercase tracking-[0.34em] text-fuchsia-300">
+                        @SharedLocalizer["SessionTimeline_ChronologicalTelemetry"]
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
+                        @SharedLocalizer["SessionTimeline_EventTimeline"]
+                    </h2>
+
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                        @SharedLocalizer["SessionTimeline_TimelineDescription"]
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-200">
+                    @SharedLocalizer["SessionTimeline_RecordedEvents", Model.EventCount]
+                </div>
+            </div>
+
+            @if (Model.Events.Count == 0)
+            {
+                <div class="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-12 text-center">
+                    <p class="font-display text-sm uppercase tracking-[0.28em] text-slate-400">
+                        @SharedLocalizer["SessionTimeline_NoEvents"]
+                    </p>
+
+                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                        @SharedLocalizer["SessionTimeline_NoEventsDescription"]
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="relative mt-10">
+                    <div class="absolute bottom-0 left-5 top-0 w-px bg-gradient-to-b from-cyan-400/60 via-fuchsia-400/40 to-amber-400/20 lg:left-1/2 lg:-translate-x-1/2"></div>
+
+                    @for (var index = 0; index < Model.Events.Count; index++)
+                    {
+                        var timelineEvent = Model.Events[index];
+                        var placeLeft = index % 2 == 0;
+
+                        <div class="relative mb-10 lg:grid lg:grid-cols-[minmax(0,1fr)_88px_minmax(0,1fr)]">
+                            <div class="ml-14 lg:ml-0 @(placeLeft ? "lg:col-start-1 lg:pr-4" : "lg:col-start-3 lg:pl-4")">
+                                <article class="rounded-2xl border @EventBorder(timelineEvent.EventType) @EventBackground(timelineEvent.EventType) p-5 shadow-[0_0_30px_rgba(15,23,42,0.35)] transition duration-300 hover:-translate-y-1">
+                                    <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                                        <div>
+                                            <div class="flex flex-wrap items-center gap-3">
+                                                <span class="rounded-full border border-current/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] @EventText(timelineEvent.EventType)">
+                                                    @timelineEvent.EventType
+                                                </span>
+
+                                                <span class="text-xs uppercase tracking-[0.16em] text-slate-600">
+                                                    @SharedLocalizer["SessionEvents_EventNumber", timelineEvent.SequenceNumber]
+                                                </span>
+                                            </div>
+
+                                            <div class="mt-4 text-lg font-semibold text-white">
+                                                @timelineEvent.Scene
+                                            </div>
+
+                                            <div class="mt-1 text-sm text-slate-400">
+                                                @timelineEvent.GameState · @timelineEvent.Phase
+                                            </div>
+                                        </div>
+
+                                        <div class="shrink-0 rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+                                            <div class="text-xs uppercase tracking-[0.18em] text-slate-600">
+                                                @LocalizedTimeSource(timelineEvent.PrimaryTimeSource)
+                                            </div>
+
+                                            <div class="mt-1 text-sm font-semibold @EventText(timelineEvent.EventType)">
+                                                @timelineEvent.PrimaryTimeLabel
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                        <div class="rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
+                                            <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
+                                                @SharedLocalizer["Common_Scene"]
+                                            </div>
+                                            <div class="mt-1 truncate text-sm text-slate-200">
+                                                @timelineEvent.Scene
+                                            </div>
+                                        </div>
+
+                                        <div class="rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
+                                            <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
+                                                @SharedLocalizer["Common_GameState"]
+                                            </div>
+                                            <div class="mt-1 truncate text-sm text-slate-200">
+                                                @timelineEvent.GameState
+                                            </div>
+                                        </div>
+
+                                        <div class="rounded-xl border border-slate-800/80 bg-slate-950/50 p-3">
+                                            <div class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
+                                                @SharedLocalizer["Common_Phase"]
+                                            </div>
+                                            <div class="mt-1 truncate text-sm text-slate-200">
+                                                @timelineEvent.Phase
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 flex flex-col gap-1 text-xs text-slate-600 sm:flex-row sm:justify-between">
+                                        <span>@SharedLocalizer["Common_Server"]: @timelineEvent.ServerTimeLabel</span>
+                                        <span>@SharedLocalizer["Common_Client"]: @timelineEvent.ClientTimeLabel</span>
+                                    </div>
+
+                                    @if (timelineEvent.HasPayload)
+                                    {
+                                        <details class="mt-5 rounded-xl border border-slate-800 bg-slate-950/70">
+                                            <summary class="cursor-pointer px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] @EventText(timelineEvent.EventType)">
+                                                @SharedLocalizer["SessionTimeline_InspectPayload"]
+                                            </summary>
+
+                                            <div class="border-t border-slate-800 p-4">
+                                                <pre class="max-h-[320px] overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-slate-300">@timelineEvent.PayloadJson</pre>
+                                            </div>
+                                        </details>
+                                    }
+                                </article>
+                            </div>
+
+                            <div class="absolute left-0 top-6 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-slate-950 bg-slate-950 lg:relative lg:left-auto lg:top-auto lg:col-start-2 lg:row-start-1 lg:mx-auto lg:mt-6">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-full @EventDot(timelineEvent.EventType)">
+                                    <span class="font-display text-[9px] font-bold text-slate-950">
+                                        @EventCode(timelineEvent.EventType)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+</div>

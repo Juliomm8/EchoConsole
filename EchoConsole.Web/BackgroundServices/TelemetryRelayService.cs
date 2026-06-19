@@ -115,91 +115,88 @@ public sealed class TelemetryRelayService : BackgroundService
 
     private void RegisterRelayHandlers(HubConnection connection)
     {
-        connection.On<object>("ReceiveTelemetryUpdate", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", payload);
-        });
-
-        connection.On<object>("sessionStarted", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
+        connection.On<object>(
+            "ReceiveTelemetryUpdate",
+            async payload =>
             {
-                eventType = "sessionStarted",
-                payload
-            });
-        });
+                await BroadcastAsync(
+                    "ReceiveTelemetryUpdate",
+                    payload);
 
-        connection.On<object>("sessionHeartbeat", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
-            {
-                eventType = "sessionHeartbeat",
-                payload
+                await BroadcastAsync(
+                    "LiveOperationsRefresh",
+                    new
+                    {
+                        eventType = "telemetryUpdate"
+                    });
             });
-        });
 
-        connection.On<object>("sessionEnded", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
-            {
-                eventType = "sessionEnded",
-                payload
-            });
-        });
+        RegisterOperationalHandler(
+            connection,
+            "sessionStarted");
 
-        connection.On<object>("sessionExpired", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
-            {
-                eventType = "sessionExpired",
-                payload
-            });
-        });
+        RegisterOperationalHandler(
+            connection,
+            "sessionHeartbeat");
 
-        connection.On<object>("installationUpdated", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
-            {
-                eventType = "installationUpdated",
-                payload
-            });
-        });
+        RegisterOperationalHandler(
+            connection,
+            "sessionEventRecorded");
 
-        connection.On<object>("newInstallation", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
-            {
-                eventType = "newInstallation",
-                payload
-            });
-        });
+        RegisterOperationalHandler(
+            connection,
+            "sessionEnded");
 
-        connection.On<object>("alertCreated", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
-            {
-                eventType = "alertCreated",
-                payload
-            });
-        });
+        RegisterOperationalHandler(
+            connection,
+            "sessionExpired");
 
-        connection.On<object>("alertUpdated", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
-            {
-                eventType = "alertUpdated",
-                payload
-            });
-        });
+        RegisterOperationalHandler(
+            connection,
+            "installationUpdated");
 
-        connection.On<object>("liveSessionsChanged", async payload =>
-        {
-            await BroadcastAsync("ReceiveTelemetryUpdate", new
+        RegisterOperationalHandler(
+            connection,
+            "newInstallation");
+
+        RegisterOperationalHandler(
+            connection,
+            "alertCreated");
+
+        RegisterOperationalHandler(
+            connection,
+            "alertUpdated");
+
+        RegisterOperationalHandler(
+            connection,
+            "liveSessionsChanged");
+    }
+
+    private void RegisterOperationalHandler(
+    HubConnection connection,
+    string sourceEventName)
+    {
+        connection.On<object>(
+            sourceEventName,
+            async payload =>
             {
-                eventType = "liveSessionsChanged",
-                payload
+                var envelope = new
+                {
+                    eventType = sourceEventName,
+                    payload
+                };
+
+                await BroadcastAsync(
+                    "ReceiveTelemetryUpdate",
+                    envelope);
+
+                await BroadcastAsync(
+                    "LiveOperationsRefresh",
+                    new
+                    {
+                        eventType = sourceEventName
+                    });
             });
-        });
     }
 
     private async Task BroadcastAsync(string eventName, object? payload)

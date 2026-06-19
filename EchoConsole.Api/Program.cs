@@ -5,6 +5,7 @@ using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
 using EchoConsole.Api.Services;
+using EchoConsole.Api.Services.LiveOperations;
 using EchoConsole.Api.Services.Ownership;
 using EchoConsole.Api.Services.Profile;
 using EchoConsole.Api.Services.SessionEventAnalytics;
@@ -60,6 +61,7 @@ builder.Services.AddScoped<IUserSessionTimelineService, UserSessionTimelineServi
 builder.Services.AddScoped<IUserProfileSettingsService, UserProfileSettingsService>();
 builder.Services.AddScoped<IAdminSessionEventsService, AdminSessionEventsService>();
 builder.Services.AddScoped<IAdminSessionEventAnalyticsService, AdminSessionEventAnalyticsService>();
+builder.Services.AddScoped<ILiveOperationsService, LiveOperationsService>();
 
 var sessionEventIngestionOptions = builder.Configuration
     .GetSection(SessionEventIngestionOptions.SectionName)

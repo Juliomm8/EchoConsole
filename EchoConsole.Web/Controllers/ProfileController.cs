@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Web.Models.Api.Profile;
 using EchoConsole.Web.Models.Profile;
@@ -53,7 +53,7 @@ public sealed class ProfileController : Controller
             };
 
             ViewData["Title"] = "PROFILE";
-            ViewData["TitleI18nKey"] = "profile_page_title";
+            ViewData["TitleResourceKey"] = "Profile_PageTitle";
 
             return View(fallbackModel);
         }
@@ -61,7 +61,7 @@ public sealed class ProfileController : Controller
         var model = MapProfileToViewModel(profile);
 
         ViewData["Title"] = "PROFILE";
-        ViewData["TitleI18nKey"] = "profile_page_title";
+        ViewData["TitleResourceKey"] = "Profile_PageTitle";
 
         return View(model);
     }
@@ -268,7 +268,7 @@ public sealed class ProfileController : Controller
             };
 
         ViewData["Title"] = "SESSION HISTORY";
-        ViewData["TitleI18nKey"] = "profile_sessions_page_title";
+        ViewData["TitleResourceKey"] = "Profile_SessionsPageTitle";
 
         return View(model);
     }
@@ -327,7 +327,7 @@ public sealed class ProfileController : Controller
         };
 
         ViewData["Title"] = "SESSION DETAIL";
-        ViewData["TitleI18nKey"] = "profile_session_detail_page_title";
+        ViewData["TitleResourceKey"] = "Profile_SessionDetailPageTitle";
 
         return View("SessionDetail", model);
     }

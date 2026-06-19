@@ -1,4 +1,4 @@
-﻿namespace EchoConsole.Web.Models.Dashboard;
+namespace EchoConsole.Web.Models.Dashboard;
 
 public sealed class LiveSessionRowViewModel
 {
@@ -12,7 +12,7 @@ public sealed class LiveSessionRowViewModel
 
     public string CurrentPhase { get; set; } = string.Empty;
 
-    public string LastHeartbeatLabel { get; set; } = string.Empty;
+    public DateTime LastHeartbeatUtc { get; set; }
 
-    public string StatusLabel { get; set; } = "Active";
+    public int Status { get; set; }
 }

@@ -22,6 +22,7 @@ public sealed class EchoConsoleSessionEventAnalyticsApiClient
         string? buildVersion,
         DateTimeOffset? fromUtc,
         DateTimeOffset? toUtcExclusive,
+        string? trendGranularity,
         CancellationToken cancellationToken = default)
     {
         var queryParameters = new Dictionary<string, string?>
@@ -32,7 +33,13 @@ public sealed class EchoConsoleSessionEventAnalyticsApiClient
                 CultureInfo.InvariantCulture),
             ["toUtcExclusive"] = toUtcExclusive?.ToString(
                 "O",
-                CultureInfo.InvariantCulture)
+                CultureInfo.InvariantCulture),
+            ["trendGranularity"] = string.Equals(
+                trendGranularity,
+                "hour",
+                StringComparison.OrdinalIgnoreCase)
+                    ? "hour"
+                    : "day"
         };
 
         var requestUri = QueryHelpers.AddQueryString(

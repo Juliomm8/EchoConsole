@@ -1,76 +1,53 @@
-﻿<!DOCTYPE html>
-<html lang="en" class="h-full">
+@using System.Globalization
+
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName"
+      class="h-full">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Echo Console</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet"
+          href="~/css/tailwind.output.css"
+          asp-append-version="true" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <style>
-        html, body {
-            height: 100%;
+    <script>
+        try {
+            if (sessionStorage.getItem("echoConsole.presentationMode") === "true") {
+                document.documentElement.classList.add("presentation-mode");
+            }
+        } catch {
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #070B12;
-            color: #E2E8F0;
-        }
-
-        .font-display {
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .glass-panel {
-            background: linear-gradient(180deg, rgba(11, 18, 32, 0.90) 0%, rgba(7, 11, 18, 0.82) 100%);
-            backdrop-filter: blur(10px);
-        }
-
-        .neon-border {
-            border: 1px solid rgba(34, 211, 238, 0.18);
-            box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.04), 0 0 24px rgba(34, 211, 238, 0.04);
-        }
-
-        .neon-border-magenta {
-            border: 1px solid rgba(232, 121, 249, 0.14);
-            box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.03), 0 0 24px rgba(232, 121, 249, 0.04);
-        }
-
-        .text-glow-cyan {
-            text-shadow: 0 0 14px rgba(34, 211, 238, 0.18);
-        }
-
-        .text-glow-magenta {
-            text-shadow: 0 0 14px rgba(232, 121, 249, 0.18);
-        }
-
-        .shadow-neon {
-            box-shadow: 0 0 20px rgba(34, 211, 238, 0.05);
-        }
-    </style>
+    </script>
 </head>
-<body class="h-full">
+
+<body class="h-full bg-[#070B12] text-slate-100 antialiased">
     <div class="min-h-screen bg-[#070B12]">
-        <div class="grid min-h-screen grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]">
-            <aside class="border-b border-cyan-500/10 bg-slate-950/80 xl:border-b-0 xl:border-r">
+        <div data-presentation-shell
+             class="grid min-h-screen grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]">
+            <aside data-presentation-sidebar
+                   class="border-b border-cyan-500/10 bg-slate-950/80 xl:sticky xl:top-0 xl:h-screen xl:border-b-0 xl:border-r">
                 @await Html.PartialAsync("_Sidebar")
             </aside>
 
-            <div class="flex min-h-screen flex-col">
+            <div class="flex min-h-screen min-w-0 flex-col">
                 @await Html.PartialAsync("_Topbar")
 
-                <main class="flex-1">
+                <main class="min-w-0 flex-1">
                     @RenderBody()
                 </main>
             </div>
         </div>
     </div>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/presentation-mode.js"
+            asp-append-version="true"></script>
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false)
 </body>
 </html>
