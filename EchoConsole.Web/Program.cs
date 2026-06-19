@@ -1,25 +1,62 @@
+using System.Globalization;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
+using EchoConsole.Web;
 using EchoConsole.Web.BackgroundServices;
 using EchoConsole.Web.Hubs;
 using EchoConsole.Web.Security;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+var supportedCultures = new[]
+{
+    new CultureInfo("en"),
+    new CultureInfo("es")
+};
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddLocalization(options =>
+{
+    options.ResourcesPath = "Resources";
+});
+
+builder.Services
+    .AddControllersWithViews()
+    .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+    .AddDataAnnotationsLocalization(options =>
+    {
+        options.DataAnnotationLocalizerProvider = (_, factory) =>
+            factory.Create(typeof(SharedResource));
+    });
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("en");
+
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+
+    options.RequestCultureProviders = new IRequestCultureProvider[]
+    {
+        new CookieRequestCultureProvider()
+    };
+});
+
+var connectionString = builder.Configuration.GetConnectionString(
+    "DefaultConnection");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+    throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' is not configured.");
 }
 
-// --- CONFIGURACIÓN DE CONTEXTO ---
 builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
     options.UseSqlServer(connectionString, sqlOptions =>
     {
@@ -30,7 +67,6 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<TelemetryRelayService>();
 
-// --- CONFIGURACIÓN DE IDENTITY CORE ---
 builder.Services
     .AddIdentityCore<User>(options =>
     {
@@ -49,54 +85,72 @@ builder.Services
     .AddEntityFrameworkStores<EchoConsoleDbContext>()
     .AddDefaultTokenProviders();
 
-// --- CONFIGURACIÓN DE AUTENTICACIÓN ---
 builder.Services
     .AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultAuthenticateScheme =
+            IdentityConstants.ApplicationScheme;
+
+        options.DefaultChallengeScheme =
+            IdentityConstants.ApplicationScheme;
+
+        options.DefaultSignInScheme =
+            IdentityConstants.ApplicationScheme;
+
+        options.DefaultSignOutScheme =
+            IdentityConstants.ApplicationScheme;
     })
-    .AddCookie(IdentityConstants.ApplicationScheme, options =>
-    {
-        options.LoginPath = "/Auth/Login";
-        options.AccessDeniedPath = "/Auth/AccessDenied";
-        options.Cookie.Name = "EchoConsole.Auth";
-        options.ExpireTimeSpan = TimeSpan.FromDays(7);
-        options.SlidingExpiration = true;
-    });
+    .AddCookie(
+        IdentityConstants.ApplicationScheme,
+        options =>
+        {
+            options.LoginPath = "/Auth/Login";
+            options.AccessDeniedPath = "/Auth/AccessDenied";
+            options.Cookie.Name = "EchoConsole.Auth";
+            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+            options.SlidingExpiration = true;
+        });
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, EchoConsoleUserClaimsPrincipalFactory>();
+builder.Services.AddScoped<
+    IUserClaimsPrincipalFactory<User>,
+    EchoConsoleUserClaimsPrincipalFactory>();
 
-// --- SEGURIDAD DE LA API ---
 builder.Services.AddTransient<AdminApiKeyHandler>();
 
-// --- CLIENTES HTTP ---
-builder.Services.AddHttpClient("EchoConsoleApiPublic", (serviceProvider, client) =>
-{
-    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    var baseUrl = configuration["ApiSettings:BaseUrl"]
-        ?? throw new InvalidOperationException("ApiSettings:BaseUrl is not configured.");
+builder.Services.AddHttpClient(
+    "EchoConsoleApiPublic",
+    (serviceProvider, client) =>
+    {
+        var configuration =
+            serviceProvider.GetRequiredService<IConfiguration>();
 
-    client.BaseAddress = new Uri(baseUrl);
-    client.Timeout = TimeSpan.FromSeconds(10);
-});
+        var baseUrl = configuration["ApiSettings:BaseUrl"]
+            ?? throw new InvalidOperationException(
+                "ApiSettings:BaseUrl is not configured.");
 
-builder.Services.AddHttpClient("EchoConsoleApiAdmin", (serviceProvider, client) =>
-{
-    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    var baseUrl = configuration["ApiSettings:BaseUrl"]
-        ?? throw new InvalidOperationException("ApiSettings:BaseUrl is not configured.");
+        client.BaseAddress = new Uri(baseUrl);
+        client.Timeout = TimeSpan.FromSeconds(10);
+    });
 
-    client.BaseAddress = new Uri(baseUrl);
-    client.Timeout = TimeSpan.FromSeconds(10);
-})
-.AddHttpMessageHandler<AdminApiKeyHandler>();
+builder.Services
+    .AddHttpClient(
+        "EchoConsoleApiAdmin",
+        (serviceProvider, client) =>
+        {
+            var configuration =
+                serviceProvider.GetRequiredService<IConfiguration>();
 
-// --- SERVICIOS DE TELEMETRÍA ---
+            var baseUrl = configuration["ApiSettings:BaseUrl"]
+                ?? throw new InvalidOperationException(
+                    "ApiSettings:BaseUrl is not configured.");
+
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(10);
+        })
+    .AddHttpMessageHandler<AdminApiKeyHandler>();
+
 builder.Services.AddScoped<EchoConsoleDashboardApiClient>();
 builder.Services.AddScoped<EchoConsoleInstallationsApiClient>();
 builder.Services.AddScoped<EchoConsoleBuildsApiClient>();
@@ -116,8 +170,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+var localizationOptions = app.Services
+    .GetRequiredService<IOptions<RequestLocalizationOptions>>()
+    .Value;
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseRequestLocalization(localizationOptions);
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

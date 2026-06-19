@@ -1,0 +1,1350 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="Topbar_Station" xml:space="preserve">
+    <value>Telemetry Control Station</value>
+  </data>
+  <data name="Topbar_Live" xml:space="preserve">
+    <value>Live</value>
+  </data>
+  <data name="Topbar_PlatformOnline" xml:space="preserve">
+    <value>Platform online</value>
+  </data>
+  <data name="Topbar_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Common_Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Common_Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="Common_Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Culture_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Culture_Spanish" xml:space="preserve">
+    <value>Spanish</value>
+  </data>
+  <data name="Home_PageTitle" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Home_Badge" xml:space="preserve">
+    <value>Cosmic Diner</value>
+  </data>
+  <data name="Home_HeroTitle" xml:space="preserve">
+    <value>Echo Console</value>
+  </data>
+  <data name="Home_HeroSubtitle" xml:space="preserve">
+    <value>Official telemetry platform for Cosmic Diner. Explore live community activity, global performance insights, and your personal player profile.</value>
+  </data>
+  <data name="Home_CreateAccount" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
+  <data name="Home_OpenProfile" xml:space="preserve">
+    <value>Open My Profile</value>
+  </data>
+  <data name="Home_CommunitySessions" xml:space="preserve">
+    <value>Community Sessions</value>
+  </data>
+  <data name="Home_CommunitySessionsDescription" xml:space="preserve">
+    <value>Total matches and telemetry sessions recorded.</value>
+  </data>
+  <data name="Common_Of" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="Common_User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Role_Admin" xml:space="preserve">
+    <value>Administrator</value>
+  </data>
+  <data name="Role_Moderator" xml:space="preserve">
+    <value>Moderator</value>
+  </data>
+  <data name="Role_Viewer" xml:space="preserve">
+    <value>Viewer</value>
+  </data>
+  <data name="Role_User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Sidebar_Navigation" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="Sidebar_Description" xml:space="preserve">
+    <value>Product mode access by audience.</value>
+  </data>
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Sidebar_Profile" xml:space="preserve">
+    <value>My Profile</value>
+  </data>
+  <data name="Sidebar_LiveMonitoring" xml:space="preserve">
+    <value>Live Monitoring</value>
+  </data>
+  <data name="Sidebar_GamesBuilds" xml:space="preserve">
+    <value>Games and Builds</value>
+  </data>
+  <data name="Sidebar_DevicesInstallations" xml:space="preserve">
+    <value>Devices and Installations</value>
+  </data>
+  <data name="Sidebar_AlertsReports" xml:space="preserve">
+    <value>Alerts and Reports</value>
+  </data>
+  <data name="Sidebar_UserManagement" xml:space="preserve">
+    <value>User Management</value>
+  </data>
+  <data name="Sidebar_RecentEvents" xml:space="preserve">
+    <value>Recent Events</value>
+  </data>
+  <data name="Sidebar_EventAnalytics" xml:space="preserve">
+    <value>Event Analytics</value>
+  </data>
+  <data name="Sidebar_LiveOperations" xml:space="preserve">
+    <value>Live Operations</value>
+  </data>
+  <data name="Sidebar_GuestDescription" xml:space="preserve">
+    <value>Explore the platform and create your account to unlock your operator profile.</value>
+  </data>
+  <data name="Sidebar_UserDescription" xml:space="preserve">
+    <value>Your personal player block lives in Home. Use it as your entry point into the platform.</value>
+  </data>
+  <data name="Sidebar_AdminDescription" xml:space="preserve">
+    <value>Administrative access enabled. Internal telemetry modules are available.</value>
+  </data>
+  <data name="Sidebar_Access" xml:space="preserve">
+    <value>Access</value>
+  </data>
+  <data name="Sidebar_Mode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="Sidebar_Product" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="Sidebar_RoleAdmin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Sidebar_RoleUser" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Sidebar_RoleGuest" xml:space="preserve">
+    <value>Guest</value>
+  </data>
+  <data name="Sidebar_SelectLanguage" xml:space="preserve">
+    <value>Select language</value>
+  </data>
+  <data name="Dashboard_PageTitle" xml:space="preserve">
+    <value>Live Monitoring</value>
+  </data>
+  <data name="Dashboard_Brand" xml:space="preserve">
+    <value>ECHOCONSOLE WEB</value>
+  </data>
+  <data name="Dashboard_HeroTitle" xml:space="preserve">
+    <value>COSMIC DINER TELEMETRY CONTROL</value>
+  </data>
+  <data name="Dashboard_HeroSubtitle" xml:space="preserve">
+    <value>Live monitoring of sessions, installations, and operational game telemetry.</value>
+  </data>
+  <data name="Dashboard_TelemetryStream" xml:space="preserve">
+    <value>Telemetry Stream</value>
+  </data>
+  <data name="Dashboard_StreamLive" xml:space="preserve">
+    <value>LIVE</value>
+  </data>
+  <data name="Dashboard_StreamOffline" xml:space="preserve">
+    <value>OFFLINE</value>
+  </data>
+  <data name="Dashboard_ServerTimeUtc" xml:space="preserve">
+    <value>Server Time UTC</value>
+  </data>
+  <data name="Dashboard_Module4" xml:space="preserve">
+    <value>Module 4</value>
+  </data>
+  <data name="Dashboard_LiveSessionsMonitor" xml:space="preserve">
+    <value>LIVE SESSIONS MONITOR</value>
+  </data>
+  <data name="Dashboard_SignalRActive" xml:space="preserve">
+    <value>SignalR Active</value>
+  </data>
+  <data name="Dashboard_NoLiveSessions" xml:space="preserve">
+    <value>No live sessions detected.</value>
+  </data>
+  <data name="Dashboard_TableInstallationId" xml:space="preserve">
+    <value>INSTALLATION ID</value>
+  </data>
+  <data name="Dashboard_TableCurrentScene" xml:space="preserve">
+    <value>CURRENT SCENE</value>
+  </data>
+  <data name="Dashboard_TableGameState" xml:space="preserve">
+    <value>GAME STATE</value>
+  </data>
+  <data name="Dashboard_TableCurrentPhase" xml:space="preserve">
+    <value>CURRENT PHASE</value>
+  </data>
+  <data name="Dashboard_TableLastHeartbeat" xml:space="preserve">
+    <value>LAST HEARTBEAT</value>
+  </data>
+  <data name="Dashboard_TableStatus" xml:space="preserve">
+    <value>STATUS</value>
+  </data>
+  <data name="Dashboard_KpiRegisteredInstallationsTitle" xml:space="preserve">
+    <value>REGISTERED INSTALLATIONS</value>
+  </data>
+  <data name="Dashboard_KpiActiveSessionsTitle" xml:space="preserve">
+    <value>ACTIVE SESSIONS</value>
+  </data>
+  <data name="Dashboard_KpiAverageDurationTitle" xml:space="preserve">
+    <value>AVERAGE ACTIVE SESSION DURATION</value>
+  </data>
+  <data name="Dashboard_KpiLatestHeartbeatTitle" xml:space="preserve">
+    <value>MOST RECENT HEARTBEAT</value>
+  </data>
+  <data name="Dashboard_KpiRegisteredInstallationsSubtitle" xml:space="preserve">
+    <value>Persisted in SQL Server through the API</value>
+  </data>
+  <data name="Dashboard_KpiActiveSessionsSubtitle" xml:space="preserve">
+    <value>Current active sessions reported by the backend</value>
+  </data>
+  <data name="Dashboard_KpiAverageDurationSubtitle" xml:space="preserve">
+    <value>Calculated from current live sessions</value>
+  </data>
+  <data name="Dashboard_KpiLatestHeartbeatSubtitle" xml:space="preserve">
+    <value>Freshest session heartbeat received</value>
+  </data>
+  <data name="Dashboard_KpiDeltaRealData" xml:space="preserve">
+    <value>Real data</value>
+  </data>
+  <data name="Dashboard_KpiDeltaLiveNow" xml:space="preserve">
+    <value>Live now</value>
+  </data>
+  <data name="Dashboard_KpiDeltaUnavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="Status_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Status_Ended" xml:space="preserve">
+    <value>Ended</value>
+  </data>
+  <data name="Status_Expired" xml:space="preserve">
+    <value>Expired</value>
+  </data>
+  <data name="Status_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="LiveOps_PageTitle" xml:space="preserve">
+    <value>Live Operations</value>
+  </data>
+  <data name="LiveOps_Badge" xml:space="preserve">
+    <value>Echo Console Command Center</value>
+  </data>
+  <data name="LiveOps_HeroTitle" xml:space="preserve">
+    <value>Live Operations</value>
+  </data>
+  <data name="LiveOps_HeroSubtitle" xml:space="preserve">
+    <value>Real-time fleet status, active sessions, event volume and operational alerts.</value>
+  </data>
+  <data name="LiveOps_RealtimeLink" xml:space="preserve">
+    <value>Realtime Link</value>
+  </data>
+  <data name="LiveOps_ServerUtc" xml:space="preserve">
+    <value>Server UTC</value>
+  </data>
+  <data name="LiveOps_ActiveInstallations" xml:space="preserve">
+    <value>Active Installations</value>
+  </data>
+  <data name="LiveOps_ActiveInstallationsDescription" xml:space="preserve">
+    <value>Receiving telemetry now</value>
+  </data>
+  <data name="LiveOps_DegradedInstallations" xml:space="preserve">
+    <value>Degraded Installations</value>
+  </data>
+  <data name="LiveOps_DegradedInstallationsDescription" xml:space="preserve">
+    <value>Recent but delayed telemetry</value>
+  </data>
+  <data name="LiveOps_InactiveInstallations" xml:space="preserve">
+    <value>Inactive Installations</value>
+  </data>
+  <data name="LiveOps_InactiveInstallationsDescription" xml:space="preserve">
+    <value>No telemetry for 15 minutes</value>
+  </data>
+  <data name="LiveOps_ActiveSessions" xml:space="preserve">
+    <value>Active Sessions</value>
+  </data>
+  <data name="LiveOps_ActiveSessionsDescription" xml:space="preserve">
+    <value>Live Cosmic Diner runs</value>
+  </data>
+  <data name="LiveOps_EventsLast5Minutes" xml:space="preserve">
+    <value>Events Last 5 Minutes</value>
+  </data>
+  <data name="LiveOps_EventsLast5MinutesDescription" xml:space="preserve">
+    <value>Immediate telemetry volume</value>
+  </data>
+  <data name="LiveOps_EventsLast15Minutes" xml:space="preserve">
+    <value>Events Last 15 Minutes</value>
+  </data>
+  <data name="LiveOps_EventsLast15MinutesDescription" xml:space="preserve">
+    <value>Short-term operational load</value>
+  </data>
+  <data name="LiveOps_AlertRate" xml:space="preserve">
+    <value>Alert Rate</value>
+  </data>
+  <data name="LiveOps_PerMinute" xml:space="preserve">
+    <value>per min</value>
+  </data>
+  <data name="LiveOps_UnresolvedAlerts" xml:space="preserve">
+    <value>unresolved alerts</value>
+  </data>
+  <data name="LiveOps_EventPeakIndicator" xml:space="preserve">
+    <value>Event Peak Indicator</value>
+  </data>
+  <data name="LiveOps_EventPeakDescription" xml:space="preserve">
+    <value>Current 5m compared with previous 5m</value>
+  </data>
+  <data name="LiveOps_FleetMatrix" xml:space="preserve">
+    <value>Fleet Matrix</value>
+  </data>
+  <data name="LiveOps_InstallationStatusGrid" xml:space="preserve">
+    <value>Installation Status Grid</value>
+  </data>
+  <data name="LiveOps_Showing" xml:space="preserve">
+    <value>Showing</value>
+  </data>
+  <data name="LiveOps_NoInstallations" xml:space="preserve">
+    <value>No installations registered</value>
+  </data>
+  <data name="LiveOps_NoInstallationsDescription" xml:space="preserve">
+    <value>Installation cards will appear when Unity clients connect.</value>
+  </data>
+  <data name="LiveOps_LastRefreshed" xml:space="preserve">
+    <value>Last refreshed:</value>
+  </data>
+  <data name="LiveOps_Scene" xml:space="preserve">
+    <value>Scene</value>
+  </data>
+  <data name="LiveOps_GameState" xml:space="preserve">
+    <value>Game State</value>
+  </data>
+  <data name="LiveOps_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="LiveOps_NoHeartbeat" xml:space="preserve">
+    <value>No heartbeat</value>
+  </data>
+  <data name="LiveOps_CurrentWindow" xml:space="preserve">
+    <value>current</value>
+  </data>
+  <data name="LiveOps_PreviousWindow" xml:space="preserve">
+    <value>previous</value>
+  </data>
+  <data name="LiveOps_StateActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="LiveOps_StateDegraded" xml:space="preserve">
+    <value>Degraded</value>
+  </data>
+  <data name="LiveOps_StateInactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="LiveOps_SpikeStateQuiet" xml:space="preserve">
+    <value>Quiet</value>
+  </data>
+  <data name="LiveOps_SpikeStateNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="LiveOps_SpikeStateElevated" xml:space="preserve">
+    <value>Elevated</value>
+  </data>
+  <data name="LiveOps_SpikeStateSpike" xml:space="preserve">
+    <value>Spike</value>
+  </data>
+  <data name="LiveOps_ConnectionUnavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="LiveOps_ConnectionReconnecting" xml:space="preserve">
+    <value>Reconnecting</value>
+  </data>
+  <data name="LiveOps_ConnectionConnected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="LiveOps_ConnectionDisconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="LiveOps_ConnectionConnecting" xml:space="preserve">
+    <value>Connecting</value>
+  </data>
+
+  <data name="Alerts_ActionResolve" xml:space="preserve">
+    <value>Resolve</value>
+  </data>
+
+  <data name="Alerts_AllSeverities" xml:space="preserve">
+    <value>All Severities</value>
+  </data>
+
+  <data name="Alerts_AllStatuses" xml:space="preserve">
+    <value>All Statuses</value>
+  </data>
+
+  <data name="Alerts_ColActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+
+  <data name="Alerts_ColDate" xml:space="preserve">
+    <value>Date</value>
+  </data>
+
+  <data name="Alerts_ColMessage" xml:space="preserve">
+    <value>Message</value>
+  </data>
+
+  <data name="Alerts_ColSeverity" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+
+  <data name="Alerts_ColSource" xml:space="preserve">
+    <value>Source</value>
+  </data>
+
+  <data name="Alerts_ColStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+
+  <data name="Alerts_EmptyState" xml:space="preserve">
+    <value>No alerts found.</value>
+  </data>
+
+  <data name="Alerts_FilterSeverity" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+
+  <data name="Alerts_FilterStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+
+  <data name="Alerts_HeroSubtitle" xml:space="preserve">
+    <value>Centralized monitoring of automatic alerts generated by anomalies and critical telemetry events.</value>
+  </data>
+
+  <data name="Alerts_HeroTitle" xml:space="preserve">
+    <value>System Alerts Center</value>
+  </data>
+
+  <data name="Alerts_ModuleBadge" xml:space="preserve">
+    <value>Module 5</value>
+  </data>
+
+  <data name="Alerts_PageTitle" xml:space="preserve">
+    <value>Alerts and Reports</value>
+  </data>
+
+  <data name="Alerts_SeverityCritical" xml:space="preserve">
+    <value>Critical</value>
+  </data>
+
+  <data name="Alerts_SeverityFatal" xml:space="preserve">
+    <value>Fatal</value>
+  </data>
+
+  <data name="Alerts_SeverityInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+
+  <data name="Alerts_SeverityWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+
+  <data name="Alerts_StatusOpen" xml:space="preserve">
+    <value>Open</value>
+  </data>
+
+  <data name="Alerts_StatusResolved" xml:space="preserve">
+    <value>Resolved</value>
+  </data>
+
+  <data name="Alerts_TableBadge" xml:space="preserve">
+    <value>Alert Registry</value>
+  </data>
+
+  <data name="Alerts_TableTitle" xml:space="preserve">
+    <value>Registered Alerts</value>
+  </data>
+
+  <data name="Alerts_TotalLabel" xml:space="preserve">
+    <value>Total Alerts</value>
+  </data>
+
+  <data name="Analytics_ActivityTrend" xml:space="preserve">
+    <value>Activity Trend</value>
+  </data>
+
+  <data name="Analytics_Badge" xml:space="preserve">
+    <value>Telemetry Intelligence</value>
+  </data>
+
+  <data name="Analytics_Builds" xml:space="preserve">
+    <value>Builds</value>
+  </data>
+
+  <data name="Analytics_ChartEventTypes" xml:space="preserve">
+    <value>Event Types</value>
+  </data>
+
+  <data name="Analytics_ChartEvents" xml:space="preserve">
+    <value>Events</value>
+  </data>
+
+  <data name="Analytics_Daily" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+
+  <data name="Analytics_Distribution" xml:space="preserve">
+    <value>Distribution</value>
+  </data>
+
+  <data name="Analytics_EventTypes" xml:space="preserve">
+    <value>Event Types</value>
+  </data>
+
+  <data name="Analytics_EventsByBuild" xml:space="preserve">
+    <value>Events by Build Version</value>
+  </data>
+
+  <data name="Analytics_EventsByScene" xml:space="preserve">
+    <value>Events by Scene</value>
+  </data>
+
+  <data name="Analytics_EventsByType" xml:space="preserve">
+    <value>Events by Type</value>
+  </data>
+
+  <data name="Analytics_EventsOverTime" xml:space="preserve">
+    <value>Events Over Time</value>
+  </data>
+
+  <data name="Analytics_HeroSubtitle" xml:space="preserve">
+    <value>Aggregated gameplay telemetry metrics calculated directly in SQL Server.</value>
+  </data>
+
+  <data name="Analytics_HeroTitle" xml:space="preserve">
+    <value>Event Type Analytics</value>
+  </data>
+
+  <data name="Analytics_HotZones" xml:space="preserve">
+    <value>Hot Zones</value>
+  </data>
+
+  <data name="Analytics_Hourly" xml:space="preserve">
+    <value>Hourly</value>
+  </data>
+
+  <data name="Analytics_NoData" xml:space="preserve">
+    <value>No analytics data found</value>
+  </data>
+
+  <data name="Analytics_NoDataDescription" xml:space="preserve">
+    <value>No session events match the selected build and date range.</value>
+  </data>
+
+  <data name="Analytics_OpenRecentEvents" xml:space="preserve">
+    <value>Open Recent Events</value>
+  </data>
+
+  <data name="Analytics_PageTitle" xml:space="preserve">
+    <value>Event Analytics</value>
+  </data>
+
+  <data name="Analytics_ReleaseComparison" xml:space="preserve">
+    <value>Release Comparison</value>
+  </data>
+
+  <data name="Analytics_Scenes" xml:space="preserve">
+    <value>Scenes</value>
+  </data>
+
+  <data name="Analytics_TotalEvents" xml:space="preserve">
+    <value>Total Events</value>
+  </data>
+
+  <data name="Analytics_TrendResolution" xml:space="preserve">
+    <value>Trend Resolution</value>
+  </data>
+
+  <data name="Builds_ColActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+
+  <data name="Builds_ColEngineVersion" xml:space="preserve">
+    <value>Engine Version</value>
+  </data>
+
+  <data name="Builds_ColReleaseDate" xml:space="preserve">
+    <value>Release Date</value>
+  </data>
+
+  <data name="Builds_ColReleaseNotes" xml:space="preserve">
+    <value>Release Notes</value>
+  </data>
+
+  <data name="Builds_ColVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+
+  <data name="Builds_EmptyState" xml:space="preserve">
+    <value>No builds found.</value>
+  </data>
+
+  <data name="Builds_HeroSubtitle" xml:space="preserve">
+    <value>Centralized registry of monitored Cosmic Diner builds and release versions.</value>
+  </data>
+
+  <data name="Builds_HeroTitle" xml:space="preserve">
+    <value>Game Build Registry</value>
+  </data>
+
+  <data name="Builds_ModuleBadge" xml:space="preserve">
+    <value>Module 2</value>
+  </data>
+
+  <data name="Builds_PageTitle" xml:space="preserve">
+    <value>Games and Builds</value>
+  </data>
+
+  <data name="Builds_SearchPlaceholder" xml:space="preserve">
+    <value>Search by Version Number or Engine Version</value>
+  </data>
+
+  <data name="Builds_TableBadge" xml:space="preserve">
+    <value>Build Registry</value>
+  </data>
+
+  <data name="Builds_TableTitle" xml:space="preserve">
+    <value>Registered Builds</value>
+  </data>
+
+  <data name="Builds_TotalLabel" xml:space="preserve">
+    <value>Total Builds</value>
+  </data>
+
+  <data name="Common_Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+
+  <data name="Common_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+
+  <data name="Common_AllBuilds" xml:space="preserve">
+    <value>All builds</value>
+  </data>
+
+  <data name="Common_Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+
+  <data name="Common_Build" xml:space="preserve">
+    <value>Build</value>
+  </data>
+
+  <data name="Common_Client" xml:space="preserve">
+    <value>Client</value>
+  </data>
+
+  <data name="Common_Device" xml:space="preserve">
+    <value>Device</value>
+  </data>
+
+  <data name="Common_Duration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+
+  <data name="Common_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+
+  <data name="Common_EndedAt" xml:space="preserve">
+    <value>Ended At</value>
+  </data>
+
+  <data name="Common_Event" xml:space="preserve">
+    <value>Event</value>
+  </data>
+
+  <data name="Common_Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+
+  <data name="Common_FromDateUtc" xml:space="preserve">
+    <value>From Date UTC</value>
+  </data>
+
+  <data name="Common_GameState" xml:space="preserve">
+    <value>Game State</value>
+  </data>
+
+  <data name="Common_Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+
+  <data name="Common_InstallationId" xml:space="preserve">
+    <value>Installation ID</value>
+  </data>
+
+  <data name="Common_LastHeartbeat" xml:space="preserve">
+    <value>Last Heartbeat</value>
+  </data>
+
+  <data name="Common_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+
+  <data name="Common_Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+
+  <data name="Common_NoPayload" xml:space="preserve">
+    <value>No payload</value>
+  </data>
+
+  <data name="Common_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+
+  <data name="Common_OperatingSystem" xml:space="preserve">
+    <value>OS</value>
+  </data>
+
+  <data name="Common_Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+
+  <data name="Common_Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+
+  <data name="Common_Payload" xml:space="preserve">
+    <value>Payload</value>
+  </data>
+
+  <data name="Common_Phase" xml:space="preserve">
+    <value>Phase</value>
+  </data>
+
+  <data name="Common_Platform" xml:space="preserve">
+    <value>Platform</value>
+  </data>
+
+  <data name="Common_Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+
+  <data name="Common_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+
+  <data name="Common_Results" xml:space="preserve">
+    <value>Results:</value>
+  </data>
+
+  <data name="Common_Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+
+  <data name="Common_Scene" xml:space="preserve">
+    <value>Scene</value>
+  </data>
+
+  <data name="Common_Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+
+  <data name="Common_Server" xml:space="preserve">
+    <value>Server</value>
+  </data>
+
+  <data name="Common_Session" xml:space="preserve">
+    <value>Session</value>
+  </data>
+
+  <data name="Common_SessionId" xml:space="preserve">
+    <value>Session ID</value>
+  </data>
+
+  <data name="Common_StartedAt" xml:space="preserve">
+    <value>Started At</value>
+  </data>
+
+  <data name="Common_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+
+  <data name="Common_Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+
+  <data name="Common_Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+
+  <data name="Common_ToDateUtc" xml:space="preserve">
+    <value>To Date UTC</value>
+  </data>
+
+  <data name="Common_ViewJson" xml:space="preserve">
+    <value>View JSON</value>
+  </data>
+
+  <data name="Installations_ColDeviceName" xml:space="preserve">
+    <value>Device Name</value>
+  </data>
+
+  <data name="Installations_ColGpu" xml:space="preserve">
+    <value>GPU</value>
+  </data>
+
+  <data name="Installations_ColLastUpdate" xml:space="preserve">
+    <value>Last Update</value>
+  </data>
+
+  <data name="Installations_ColProcessor" xml:space="preserve">
+    <value>Processor</value>
+  </data>
+
+  <data name="Installations_ColRam" xml:space="preserve">
+    <value>RAM</value>
+  </data>
+
+  <data name="Installations_EmptyState" xml:space="preserve">
+    <value>No installations found.</value>
+  </data>
+
+  <data name="Installations_HeroSubtitle" xml:space="preserve">
+    <value>Centralized inventory of registered devices and hardware profiles captured from Cosmic Diner installations.</value>
+  </data>
+
+  <data name="Installations_HeroTitle" xml:space="preserve">
+    <value>Master Hardware Inventory</value>
+  </data>
+
+  <data name="Installations_ModuleBadge" xml:space="preserve">
+    <value>Module 3</value>
+  </data>
+
+  <data name="Installations_PageTitle" xml:space="preserve">
+    <value>Devices and Installations</value>
+  </data>
+
+  <data name="Installations_SearchPlaceholder" xml:space="preserve">
+    <value>Search by Installation ID or Device Name</value>
+  </data>
+
+  <data name="Installations_TableBadge" xml:space="preserve">
+    <value>Device Registry</value>
+  </data>
+
+  <data name="Installations_TableTitle" xml:space="preserve">
+    <value>Registered Installations</value>
+  </data>
+
+  <data name="Installations_TotalLabel" xml:space="preserve">
+    <value>Total Devices</value>
+  </data>
+
+  <data name="ProfileSessionDetail_BackToHistory" xml:space="preserve">
+    <value>Back to History</value>
+  </data>
+
+  <data name="ProfileSessionDetail_Badge" xml:space="preserve">
+    <value>Terminal Report</value>
+  </data>
+
+  <data name="ProfileSessionDetail_ChronologicalEvents" xml:space="preserve">
+    <value>Chronological Session Events</value>
+  </data>
+
+  <data name="ProfileSessionDetail_CurrentFinalScene" xml:space="preserve">
+    <value>Current / Final Scene</value>
+  </data>
+
+  <data name="ProfileSessionDetail_DeviceCard" xml:space="preserve">
+    <value>Device Card</value>
+  </data>
+
+  <data name="ProfileSessionDetail_EventNumber" xml:space="preserve">
+    <value>Event #{0}</value>
+  </data>
+
+  <data name="ProfileSessionDetail_EventTimeline" xml:space="preserve">
+    <value>Event Timeline</value>
+  </data>
+
+  <data name="ProfileSessionDetail_GameplayState" xml:space="preserve">
+    <value>Gameplay State</value>
+  </data>
+
+  <data name="ProfileSessionDetail_HeroSubtitle" xml:space="preserve">
+    <value>Technical summary and chronological event timeline for a Cosmic Diner session linked to your owned installation.</value>
+  </data>
+
+  <data name="ProfileSessionDetail_HeroTitle" xml:space="preserve">
+    <value>Session Detail</value>
+  </data>
+
+  <data name="ProfileSessionDetail_NoEvents" xml:space="preserve">
+    <value>No timeline events found</value>
+  </data>
+
+  <data name="ProfileSessionDetail_NoEventsDescription" xml:space="preserve">
+    <value>This session exists, but the Unity client has not reported gameplay events for it yet.</value>
+  </data>
+
+  <data name="ProfileSessionDetail_PageTitle" xml:space="preserve">
+    <value>Session Detail</value>
+  </data>
+
+  <data name="ProfileSessionDetail_PayloadJson" xml:space="preserve">
+    <value>Payload JSON</value>
+  </data>
+
+  <data name="ProfileSessionDetail_SessionTiming" xml:space="preserve">
+    <value>Session Timing</value>
+  </data>
+
+  <data name="ProfileSessionDetail_TimelineDescription" xml:space="preserve">
+    <value>Ordered gameplay telemetry events received from the Cosmic Diner Unity client.</value>
+  </data>
+
+  <data name="ProfileSessions_BackToProfile" xml:space="preserve">
+    <value>Back to Profile</value>
+  </data>
+
+  <data name="ProfileSessions_Badge" xml:space="preserve">
+    <value>Cosmic Diner Telemetry</value>
+  </data>
+
+  <data name="ProfileSessions_ColScenePhase" xml:space="preserve">
+    <value>Scene / Phase</value>
+  </data>
+
+  <data name="ProfileSessions_Count" xml:space="preserve">
+    <value>{0} session(s)</value>
+  </data>
+
+  <data name="ProfileSessions_HeroSubtitle" xml:space="preserve">
+    <value>Review gameplay sessions linked exclusively to your owned Cosmic Diner installations.</value>
+  </data>
+
+  <data name="ProfileSessions_HeroTitle" xml:space="preserve">
+    <value>Personal Session History</value>
+  </data>
+
+  <data name="ProfileSessions_LastSignal" xml:space="preserve">
+    <value>Last Signal</value>
+  </data>
+
+  <data name="ProfileSessions_NoSessions" xml:space="preserve">
+    <value>No sessions found</value>
+  </data>
+
+  <data name="ProfileSessions_NoSessionsDescription" xml:space="preserve">
+    <value>Once your linked Cosmic Diner installations start sending telemetry, your personal session history will appear here.</value>
+  </data>
+
+  <data name="ProfileSessions_PageTitle" xml:space="preserve">
+    <value>Session History</value>
+  </data>
+
+  <data name="Profile_Access" xml:space="preserve">
+    <value>Access</value>
+  </data>
+
+  <data name="Profile_Alias" xml:space="preserve">
+    <value>Alias</value>
+  </data>
+
+  <data name="Profile_Avatar" xml:space="preserve">
+    <value>Avatar</value>
+  </data>
+
+  <data name="Profile_DeviceCount" xml:space="preserve">
+    <value>{0} device(s)</value>
+  </data>
+
+  <data name="Profile_FavoriteBuild" xml:space="preserve">
+    <value>Favorite Build</value>
+  </data>
+
+  <data name="Profile_FirstSeen" xml:space="preserve">
+    <value>First Seen</value>
+  </data>
+
+  <data name="Profile_HeroSubtitle" xml:space="preserve">
+    <value>Premium player profile for Cosmic Diner telemetry ownership and personal gameplay visibility.</value>
+  </data>
+
+  <data name="Profile_Installations" xml:space="preserve">
+    <value>Installations</value>
+  </data>
+
+  <data name="Profile_LastActivity" xml:space="preserve">
+    <value>Last Activity</value>
+  </data>
+
+  <data name="Profile_LastUpdate" xml:space="preserve">
+    <value>Last Update</value>
+  </data>
+
+  <data name="Profile_LinkDevice" xml:space="preserve">
+    <value>Link Device</value>
+  </data>
+
+  <data name="Profile_LinkSubtitle" xml:space="preserve">
+    <value>Paste the Installation ID shown by the game client to link that device to your Echo Console profile. The user identifier is read from your secure session and is never submitted by the browser.</value>
+  </data>
+
+  <data name="Profile_LinkTitle" xml:space="preserve">
+    <value>Link Cosmic Diner Installation</value>
+  </data>
+
+  <data name="Profile_LinkedInstallationsBadge" xml:space="preserve">
+    <value>Linked Installations</value>
+  </data>
+
+  <data name="Profile_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+
+  <data name="Profile_NoLinkedDevices" xml:space="preserve">
+    <value>No linked devices</value>
+  </data>
+
+  <data name="Profile_NoLinkedDevicesDescription" xml:space="preserve">
+    <value>Paste the Installation ID from Cosmic Diner in the ownership panel above to link your first device.</value>
+  </data>
+
+  <data name="Profile_OperatorIdentity" xml:space="preserve">
+    <value>Operator Identity</value>
+  </data>
+
+  <data name="Profile_OwnedDevices" xml:space="preserve">
+    <value>Owned Devices</value>
+  </data>
+
+  <data name="Profile_OwnedDevicesSubtitle" xml:space="preserve">
+    <value>These devices are currently linked to your Echo Console account through the ownership system.</value>
+  </data>
+
+  <data name="Profile_OwnershipBadge" xml:space="preserve">
+    <value>Device Ownership</value>
+  </data>
+
+  <data name="Profile_PageTitle" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+
+  <data name="Profile_PlayTime" xml:space="preserve">
+    <value>Play Time</value>
+  </data>
+
+  <data name="Profile_PlayerCard" xml:space="preserve">
+    <value>Player Card</value>
+  </data>
+
+  <data name="Profile_RoleLabel" xml:space="preserve">
+    <value>Role</value>
+  </data>
+
+  <data name="Profile_RoleStatusLocked" xml:space="preserve">
+    <value>Role and status are locked</value>
+  </data>
+
+  <data name="Profile_SaveProfile" xml:space="preserve">
+    <value>Save Profile</value>
+  </data>
+
+  <data name="Profile_Sessions" xml:space="preserve">
+    <value>Sessions</value>
+  </data>
+
+  <data name="Profile_SettingsBadge" xml:space="preserve">
+    <value>Profile Settings</value>
+  </data>
+
+  <data name="Profile_SettingsSubtitle" xml:space="preserve">
+    <value>Update your public operator identity. Role and account status are protected system fields and cannot be modified here.</value>
+  </data>
+
+  <data name="Profile_SettingsTitle" xml:space="preserve">
+    <value>Customize Operator Identity</value>
+  </data>
+
+  <data name="Profile_StatusLabel" xml:space="preserve">
+    <value>Status</value>
+  </data>
+
+  <data name="Profile_ThemeLabel" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+
+  <data name="Profile_Unlink" xml:space="preserve">
+    <value>Unlink</value>
+  </data>
+
+  <data name="Profile_UnlinkConfirm" xml:space="preserve">
+    <value>This will unlink the device from your account. Historical sessions will be preserved. Continue?</value>
+  </data>
+
+  <data name="Profile_ViewSessionHistory" xml:space="preserve">
+    <value>View Session History</value>
+  </data>
+
+  <data name="SessionEvents_AllEventTypes" xml:space="preserve">
+    <value>All event types</value>
+  </data>
+
+  <data name="SessionEvents_Badge" xml:space="preserve">
+    <value>Global Telemetry Feed</value>
+  </data>
+
+  <data name="SessionEvents_ColSceneState" xml:space="preserve">
+    <value>Scene / State</value>
+  </data>
+
+  <data name="SessionEvents_EventNumber" xml:space="preserve">
+    <value>Event #{0}</value>
+  </data>
+
+  <data name="SessionEvents_EventType" xml:space="preserve">
+    <value>Event Type</value>
+  </data>
+
+  <data name="SessionEvents_HeroSubtitle" xml:space="preserve">
+    <value>Administrative view of gameplay telemetry events received from every Cosmic Diner installation.</value>
+  </data>
+
+  <data name="SessionEvents_HeroTitle" xml:space="preserve">
+    <value>Recent Session Events</value>
+  </data>
+
+  <data name="SessionEvents_MatchingEvents" xml:space="preserve">
+    <value>Matching Events</value>
+  </data>
+
+  <data name="SessionEvents_NoEvents" xml:space="preserve">
+    <value>No events found</value>
+  </data>
+
+  <data name="SessionEvents_NoEventsDescription" xml:space="preserve">
+    <value>No session events match the current administrative filters.</value>
+  </data>
+
+  <data name="SessionEvents_OpenTimeline" xml:space="preserve">
+    <value>Open Timeline</value>
+  </data>
+
+  <data name="SessionEvents_PageTitle" xml:space="preserve">
+    <value>Recent Session Events</value>
+  </data>
+
+  <data name="SessionTimeline_BackToEvents" xml:space="preserve">
+    <value>Back to Events</value>
+  </data>
+
+  <data name="SessionTimeline_Badge" xml:space="preserve">
+    <value>Telemetry Story Reconstruction</value>
+  </data>
+
+  <data name="SessionTimeline_ChronologicalTelemetry" xml:space="preserve">
+    <value>Chronological Telemetry</value>
+  </data>
+
+  <data name="SessionTimeline_CurrentScene" xml:space="preserve">
+    <value>Current Scene</value>
+  </data>
+
+  <data name="SessionTimeline_DeviceIdentity" xml:space="preserve">
+    <value>Device Identity</value>
+  </data>
+
+  <data name="SessionTimeline_EventTimeline" xml:space="preserve">
+    <value>Event Timeline</value>
+  </data>
+
+  <data name="SessionTimeline_Events" xml:space="preserve">
+    <value>Events</value>
+  </data>
+
+  <data name="SessionTimeline_HeroSubtitle" xml:space="preserve">
+    <value>Chronological reconstruction of the gameplay events received during this Cosmic Diner session.</value>
+  </data>
+
+  <data name="SessionTimeline_HeroTitle" xml:space="preserve">
+    <value>Session Timeline</value>
+  </data>
+
+  <data name="SessionTimeline_InspectPayload" xml:space="preserve">
+    <value>Inspect Payload JSON</value>
+  </data>
+
+  <data name="SessionTimeline_NoEvents" xml:space="preserve">
+    <value>No events were recorded</value>
+  </data>
+
+  <data name="SessionTimeline_NoEventsDescription" xml:space="preserve">
+    <value>This session exists, but the Unity client did not send timeline events.</value>
+  </data>
+
+  <data name="SessionTimeline_Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+
+  <data name="SessionTimeline_PageTitle" xml:space="preserve">
+    <value>Session Timeline</value>
+  </data>
+
+  <data name="SessionTimeline_PrimaryTimeClientUtc" xml:space="preserve">
+    <value>Client UTC</value>
+  </data>
+
+  <data name="SessionTimeline_PrimaryTimeServerUtc" xml:space="preserve">
+    <value>Server UTC</value>
+  </data>
+
+  <data name="SessionTimeline_RecordedEvents" xml:space="preserve">
+    <value>{0} recorded events</value>
+  </data>
+
+  <data name="SessionTimeline_SessionState" xml:space="preserve">
+    <value>Session State</value>
+  </data>
+
+  <data name="SessionTimeline_TimelineDescription" xml:space="preserve">
+    <value>Events are ordered from the beginning of the session to the most recent telemetry point.</value>
+  </data>
+
+  <data name="Status_Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+
+  <data name="Status_Live" xml:space="preserve">
+    <value>Live</value>
+  </data>
+
+  <data name="Users_ColJoinedDate" xml:space="preserve">
+    <value>Joined Date</value>
+  </data>
+
+  <data name="Users_EmptyState" xml:space="preserve">
+    <value>No users found.</value>
+  </data>
+
+  <data name="Users_HeroSubtitle" xml:space="preserve">
+    <value>Administrative directory of system users, roles, and account states for the EchoConsole platform.</value>
+  </data>
+
+  <data name="Users_HeroTitle" xml:space="preserve">
+    <value>User Management</value>
+  </data>
+
+  <data name="Users_ModuleBadge" xml:space="preserve">
+    <value>Module 5</value>
+  </data>
+
+  <data name="Users_PageTitle" xml:space="preserve">
+    <value>User Management</value>
+  </data>
+
+  <data name="Users_RoleAdmin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+
+  <data name="Users_RoleModerator" xml:space="preserve">
+    <value>Moderator</value>
+  </data>
+
+  <data name="Users_RoleViewer" xml:space="preserve">
+    <value>Viewer</value>
+  </data>
+
+  <data name="Users_SearchPlaceholder" xml:space="preserve">
+    <value>Search by Name or Email</value>
+  </data>
+
+  <data name="Users_StatusActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+
+  <data name="Users_StatusSuspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+
+  <data name="Users_TableBadge" xml:space="preserve">
+    <value>User Registry</value>
+  </data>
+
+  <data name="Users_TableTitle" xml:space="preserve">
+    <value>Registered Users</value>
+  </data>
+
+  <data name="Users_TotalLabel" xml:space="preserve">
+    <value>Total Users</value>
+  </data>
+</root>

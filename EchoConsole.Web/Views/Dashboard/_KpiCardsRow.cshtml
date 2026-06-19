@@ -1,4 +1,4 @@
-﻿@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
+@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
 
 @functions {
     private string GetAccentClasses(string accent)
@@ -30,50 +30,54 @@
     {
         var titleKey = kpi.ValueElementId switch
         {
-            "kpi-registered-installations" => "kpi_registered_installations_title",
-            "kpi-active-sessions" => "kpi_active_sessions_title",
-            "kpi-average-duration" => "kpi_average_duration_title",
-            "kpi-latest-heartbeat" => "kpi_latest_heartbeat_title",
+            "kpi-registered-installations" => "Dashboard_KpiRegisteredInstallationsTitle",
+            "kpi-active-sessions" => "Dashboard_KpiActiveSessionsTitle",
+            "kpi-average-duration" => "Dashboard_KpiAverageDurationTitle",
+            "kpi-latest-heartbeat" => "Dashboard_KpiLatestHeartbeatTitle",
             _ => string.Empty
         };
 
         var subtitleKey = kpi.ValueElementId switch
         {
-            "kpi-registered-installations" => "kpi_registered_installations_subtitle",
-            "kpi-active-sessions" => "kpi_active_sessions_subtitle",
-            "kpi-average-duration" => "kpi_average_duration_subtitle",
-            "kpi-latest-heartbeat" => "kpi_latest_heartbeat_subtitle",
+            "kpi-registered-installations" => "Dashboard_KpiRegisteredInstallationsSubtitle",
+            "kpi-active-sessions" => "Dashboard_KpiActiveSessionsSubtitle",
+            "kpi-average-duration" => "Dashboard_KpiAverageDurationSubtitle",
+            "kpi-latest-heartbeat" => "Dashboard_KpiLatestHeartbeatSubtitle",
             _ => string.Empty
         };
 
         var deltaKey = kpi.DeltaText switch
         {
-            "Real data" => "kpi_delta_real_data",
-            "Live now" => "kpi_delta_live_now",
-            "Unavailable" => "kpi_delta_unavailable",
+            "Real data" => "Dashboard_KpiDeltaRealData",
+            "Live now" => "Dashboard_KpiDeltaLiveNow",
+            "Unavailable" => "Dashboard_KpiDeltaUnavailable",
             _ => string.Empty
         };
 
         <div class="rounded-2xl border @GetAccentClasses(kpi.Accent) p-5">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <p class="font-display text-xs uppercase tracking-[0.25em] text-slate-400"
-                       data-i18n="@titleKey">
-                        @kpi.Title
+                    <p class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
+                        @(string.IsNullOrWhiteSpace(titleKey)
+                            ? kpi.Title
+                            : SharedLocalizer[titleKey].Value)
                     </p>
 
-                    <p id="@kpi.ValueElementId" class="mt-4 font-display text-3xl uppercase tracking-[0.08em] text-white">
+                    <p id="@kpi.ValueElementId"
+                       class="mt-4 font-display text-3xl uppercase tracking-[0.08em] text-white">
                         @kpi.Value
                     </p>
 
-                    <p class="mt-2 text-sm text-slate-400"
-                       data-i18n="@subtitleKey">
-                        @kpi.Subtitle
+                    <p class="mt-2 text-sm text-slate-400">
+                        @(string.IsNullOrWhiteSpace(subtitleKey)
+                            ? kpi.Subtitle
+                            : SharedLocalizer[subtitleKey].Value)
                     </p>
 
-                    <p class="mt-3 text-sm font-semibold @GetDeltaClass(kpi.IsPositiveDelta)"
-                       data-i18n="@deltaKey">
-                        @kpi.DeltaText
+                    <p class="mt-3 text-sm font-semibold @GetDeltaClass(kpi.IsPositiveDelta)">
+                        @(string.IsNullOrWhiteSpace(deltaKey)
+                            ? kpi.DeltaText
+                            : SharedLocalizer[deltaKey].Value)
                     </p>
                 </div>
 

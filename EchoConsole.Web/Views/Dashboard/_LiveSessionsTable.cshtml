@@ -1,22 +1,25 @@
-﻿@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
+@model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
 
 <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur">
     <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-            <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400" data-i18n="dash_mod4">Module 4</p>
-            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white" data-i18n="live_sessions_monitor_title">
-                LIVE SESSIONS MONITOR
+            <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">
+                @SharedLocalizer["Dashboard_Module4"]
+            </p>
+
+            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
+                @SharedLocalizer["Dashboard_LiveSessionsMonitor"]
             </h2>
         </div>
 
         <div class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
             <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-            <span data-i18n="dash_signalr_ready">SignalR Active</span>
+            <span>@SharedLocalizer["Dashboard_SignalRActive"]</span>
         </div>
     </div>
 
-    <span id="live-sessions-empty-text" class="hidden" data-i18n="table_no_live_sessions">
-        No live sessions detected.
+    <span id="live-sessions-empty-text" class="hidden">
+        @SharedLocalizer["Dashboard_NoLiveSessions"]
     </span>
 
     <div class="overflow-hidden rounded-2xl border border-slate-800">
@@ -24,41 +27,80 @@
             <table class="min-w-full divide-y divide-slate-800">
                 <thead class="bg-slate-900/90">
                     <tr class="text-left">
-                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="table_installation_id">
-                            INSTALLATION ID
+                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">
+                            @SharedLocalizer["Dashboard_TableInstallationId"]
                         </th>
-                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="table_current_scene">
-                            CURRENT SCENE
+                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">
+                            @SharedLocalizer["Dashboard_TableCurrentScene"]
                         </th>
-                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="table_game_state">
-                            GAME STATE
+                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">
+                            @SharedLocalizer["Dashboard_TableGameState"]
                         </th>
-                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="table_current_phase">
-                            CURRENT PHASE
+                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">
+                            @SharedLocalizer["Dashboard_TableCurrentPhase"]
                         </th>
-                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="table_last_heartbeat">
-                            LAST HEARTBEAT
+                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">
+                            @SharedLocalizer["Dashboard_TableLastHeartbeat"]
                         </th>
-                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400" data-i18n="table_status">
-                            STATUS
+                        <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">
+                            @SharedLocalizer["Dashboard_TableStatus"]
                         </th>
                     </tr>
                 </thead>
-                <tbody id="live-sessions-body" class="divide-y divide-slate-900 bg-slate-950/80">
-                    @if (Model.Sessions != null && Model.Sessions.Any())
+
+                <tbody id="live-sessions-body"
+                       class="divide-y divide-slate-900 bg-slate-950/80">
+                    @if (Model.Sessions.Any())
                     {
                         @foreach (var session in Model.Sessions)
                         {
-                            <tr data-session-id="@session.SessionId" class="transition-colors duration-150 hover:bg-slate-900/70">
-                                <td class="px-5 py-4 text-sm text-cyan-300">@session.InstallationId</td>
-                                <td class="px-5 py-4 text-sm text-slate-200 cell-current-scene">@session.CurrentScene</td>
-                                <td class="px-5 py-4 text-sm text-slate-200 cell-game-state">@session.GameState</td>
-                                <td class="px-5 py-4 text-sm text-slate-300 cell-current-phase">@session.CurrentPhase</td>
-                                <td class="px-5 py-4 text-sm text-slate-400 cell-last-heartbeat">@session.LastHeartbeatLabel</td>
+                            var statusLabel = session.Status switch
+                            {
+                                1 => SharedLocalizer["Status_Active"].Value,
+                                2 => SharedLocalizer["Status_Ended"].Value,
+                                3 => SharedLocalizer["Status_Expired"].Value,
+                                _ => SharedLocalizer["Status_Unknown"].Value
+                            };
+
+                            var statusClasses = session.Status switch
+                            {
+                                1 => "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+                                2 => "border-amber-500/30 bg-amber-500/10 text-amber-400",
+                                3 => "border-rose-500/30 bg-rose-500/10 text-rose-400",
+                                _ => "border-slate-500/30 bg-slate-500/10 text-slate-300"
+                            };
+
+                            var statusDot = session.Status switch
+                            {
+                                1 => "bg-emerald-400",
+                                2 => "bg-amber-400",
+                                3 => "bg-rose-400",
+                                _ => "bg-slate-400"
+                            };
+
+                            <tr data-session-id="@session.SessionId"
+                                class="transition-colors duration-150 hover:bg-slate-900/70">
+                                <td class="px-5 py-4 text-sm text-cyan-300">
+                                    @session.InstallationId
+                                </td>
+                                <td class="px-5 py-4 text-sm text-slate-200">
+                                    @session.CurrentScene
+                                </td>
+                                <td class="px-5 py-4 text-sm text-slate-200">
+                                    @session.GameState
+                                </td>
+                                <td class="px-5 py-4 text-sm text-slate-300">
+                                    @session.CurrentPhase
+                                </td>
+                                <td class="px-5 py-4 text-sm text-slate-400">
+                                    <time datetime="@session.LastHeartbeatUtc.ToString("O")">
+                                        @session.LastHeartbeatUtc.ToString("yyyy-MM-dd HH:mm:ss 'UTC'")
+                                    </time>
+                                </td>
                                 <td class="px-5 py-4">
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400 cell-status">
-                                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                                        @session.StatusLabel
+                                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] @statusClasses">
+                                        <span class="h-2 w-2 rounded-full @statusDot"></span>
+                                        @statusLabel
                                     </span>
                                 </td>
                             </tr>
@@ -67,8 +109,9 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="px-5 py-6 text-center text-sm text-slate-400" data-i18n="table_no_live_sessions">
-                                No live sessions detected.
+                            <td colspan="6"
+                                class="px-5 py-6 text-center text-sm text-slate-400">
+                                @SharedLocalizer["Dashboard_NoLiveSessions"]
                             </td>
                         </tr>
                     }

@@ -1,12 +1,68 @@
-﻿@using System.Security.Claims
+@using System.Security.Claims
 
 @{
-    var currentTitle = ViewData["Title"]?.ToString() ?? "Home";
-    var titleI18nKey = ViewData["TitleI18nKey"]?.ToString() ?? string.Empty;
+    var legacyTitleKeyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["home_page_title"] = "Home_PageTitle",
+        ["dashboard_live_monitoring_title"] = "Dashboard_PageTitle",
+        ["builds_page_title"] = "Builds_PageTitle",
+        ["installations_page_title"] = "Installations_PageTitle",
+        ["alerts_page_title"] = "Alerts_PageTitle",
+        ["users_page_title"] = "Users_PageTitle",
+        ["profile_page_title"] = "Profile_PageTitle",
+        ["profile_sessions_page_title"] = "Profile_SessionsPageTitle",
+        ["profile_session_detail_page_title"] = "Profile_SessionDetailPageTitle"
+    };
 
-    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-    var alias = User.FindFirst("alias")?.Value ?? User.Identity?.Name ?? "User";
-    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "User";
+    var fallbackTitle =
+        ViewData["Title"]?.ToString()
+        ?? SharedLocalizer["Home_PageTitle"].Value;
+
+    var titleResourceKey =
+        ViewData["TitleResourceKey"]?.ToString();
+
+    if (string.IsNullOrWhiteSpace(titleResourceKey))
+    {
+        var legacyKey = ViewData["TitleI18nKey"]?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(legacyKey) &&
+            legacyTitleKeyMap.TryGetValue(legacyKey, out var mappedKey))
+        {
+            titleResourceKey = mappedKey;
+        }
+    }
+
+    var currentTitle = fallbackTitle;
+
+    if (!string.IsNullOrWhiteSpace(titleResourceKey))
+    {
+        var localizedTitle = SharedLocalizer[titleResourceKey];
+
+        if (!localizedTitle.IsResourceNotFound)
+        {
+            currentTitle = localizedTitle.Value;
+        }
+    }
+
+    var isAuthenticated =
+        User.Identity?.IsAuthenticated ?? false;
+
+    var alias =
+        User.FindFirst("alias")?.Value
+        ?? User.Identity?.Name
+        ?? SharedLocalizer["Common_User"].Value;
+
+    var role =
+        User.FindFirst(ClaimTypes.Role)?.Value
+        ?? "User";
+
+    var roleLabel = role switch
+    {
+        "Admin" => SharedLocalizer["Role_Admin"].Value,
+        "Moderator" => SharedLocalizer["Role_Moderator"].Value,
+        "Viewer" => SharedLocalizer["Role_Viewer"].Value,
+        _ => SharedLocalizer["Role_User"].Value
+    };
 }
 
 <header class="sticky top-0 z-40 border-b border-cyan-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -15,11 +71,10 @@
             <div class="flex items-center gap-4">
                 <div>
                     <div class="font-display text-xs uppercase tracking-[0.34em] text-cyan-400">
-                        Telemetry Control Station
+                        @SharedLocalizer["Topbar_Station"]
                     </div>
 
-                    <div class="mt-1 font-display text-2xl uppercase tracking-[0.14em] text-white"
-                         @(string.IsNullOrWhiteSpace(titleI18nKey) ? "" : $"data-i18n=\"{titleI18nKey}\"")>
+                    <div class="mt-1 font-display text-2xl uppercase tracking-[0.14em] text-white">
                         @currentTitle
                     </div>
                 </div>
@@ -28,9 +83,16 @@
             <div class="flex flex-wrap items-center gap-3">
                 <div class="inline-flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+
                     <div>
-                        <div class="font-display text-xs uppercase tracking-[0.28em] text-emerald-300">Live</div>
-                        <div id="topbar-server-time" class="text-xs text-slate-400">Platform online</div>
+                        <div class="font-display text-xs uppercase tracking-[0.28em] text-emerald-300">
+                            @SharedLocalizer["Topbar_Live"]
+                        </div>
+
+                        <div id="topbar-server-time"
+                             class="text-xs text-slate-400">
+                            @SharedLocalizer["Topbar_PlatformOnline"]
+                        </div>
                     </div>
                 </div>
 
@@ -39,32 +101,44 @@
                     <a asp-controller="Auth"
                        asp-action="Login"
                        class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                        Login
+                        @SharedLocalizer["Common_Login"]
                     </a>
 
                     <a asp-controller="Auth"
                        asp-action="Register"
                        class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
-                        Register
+                        @SharedLocalizer["Common_Register"]
                     </a>
                 }
                 else
                 {
                     <div class="inline-flex items-center gap-3 rounded-2xl border border-fuchsia-400/15 bg-slate-900/80 px-4 py-3">
                         <div class="flex h-11 w-11 items-center justify-center rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 font-display text-sm uppercase tracking-[0.2em] text-fuchsia-200">
-                            @(alias.Length >= 2 ? alias.Substring(0, 2).ToUpperInvariant() : alias.ToUpperInvariant())
+                            @(alias.Length >= 2
+                                ? alias[..2].ToUpperInvariant()
+                                : alias.ToUpperInvariant())
                         </div>
+
                         <div>
-                            <div class="font-display text-xs uppercase tracking-[0.24em] text-white">@alias</div>
-                            <div class="text-xs text-slate-400">@role</div>
+                            <div class="font-display text-xs uppercase tracking-[0.24em] text-white">
+                                @alias
+                            </div>
+
+                            <div class="text-xs text-slate-400">
+                                @roleLabel
+                            </div>
                         </div>
                     </div>
 
-                    <form asp-controller="Auth" asp-action="LogoutPost" method="post" class="m-0">
+                    <form asp-controller="Auth"
+                          asp-action="LogoutPost"
+                          method="post"
+                          class="m-0">
                         @Html.AntiForgeryToken()
+
                         <button type="submit"
                                 class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
-                            Logout
+                            @SharedLocalizer["Common_Logout"]
                         </button>
                     </form>
                 }

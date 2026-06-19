@@ -16,19 +16,15 @@
             nextPageLinkId: config.nextPageLinkId,
             searchInputId: config.searchInputId,
             pageSizeInputId: config.pageSizeInputId,
-            emptyTextElementId: config.emptyTextElementId
+            emptyTextElementId: config.emptyTextElementId,
+            culture: config.culture || document.documentElement.lang || "en",
+            labels: config.labels || {}
         };
 
         if (!window.signalR) {
             console.error("Installations realtime: SignalR library not found.");
             return;
         }
-
-        window.addEventListener("echoConsole:languageChanged", () => {
-            if (currentResponse) {
-                renderInstallations(currentResponse);
-            }
-        });
 
         buildConnection();
         startConnection();
@@ -164,7 +160,7 @@
         if (items.length === 0) {
             const emptyRow = document.createElement("tr");
             const emptyText =
-                window.echoConsoleI18n?.t?.("installations_empty_state") ||
+                options.labels.emptyState ||
                 document.getElementById(options.emptyTextElementId)?.textContent?.trim() ||
                 "No installations found.";
 
@@ -276,7 +272,7 @@
             return "0";
         }
 
-        return numeric.toLocaleString("en-US");
+        return new Intl.NumberFormat(options.culture).format(numeric);
     }
 
     function formatRam(value) {
@@ -289,7 +285,7 @@
             return "-";
         }
 
-        return `${numeric.toLocaleString("en-US")} MB`;
+        return `${new Intl.NumberFormat(options.culture).format(numeric)} MB`;
     }
 
     function formatUtc(value) {
@@ -302,7 +298,7 @@
             return "-";
         }
 
-        return date.toLocaleString("en-GB", {
+        return new Intl.DateTimeFormat(options.culture, {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
@@ -311,7 +307,7 @@
             second: "2-digit",
             hour12: false,
             timeZone: "UTC"
-        }) + " UTC";
+        }).format(date) + " UTC";
     }
 
     function escapeHtml(value) {

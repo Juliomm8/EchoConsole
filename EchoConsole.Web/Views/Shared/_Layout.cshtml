@@ -1,18 +1,30 @@
-﻿<!DOCTYPE html>
-<html lang="en" class="h-full">
+@using System.Globalization
+
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName"
+      class="h-full">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Echo Console</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com" />
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap"
+          rel="stylesheet" />
 
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        html, body {
+        html,
+        body {
             height: 100%;
         }
 
@@ -27,7 +39,7 @@
         }
 
         .glass-panel {
-            background: linear-gradient(180deg, rgba(11, 18, 32, 0.90) 0%, rgba(7, 11, 18, 0.82) 100%);
+            background: linear-gradient( 180deg, rgba(11, 18, 32, 0.90) 0%, rgba(7, 11, 18, 0.82) 100%);
             backdrop-filter: blur(10px);
         }
 
@@ -54,10 +66,11 @@
         }
     </style>
 </head>
+
 <body class="h-full">
     <div class="min-h-screen bg-[#070B12]">
         <div class="grid min-h-screen grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]">
-            <aside class="border-b border-cyan-500/10 bg-slate-950/80 xl:border-b-0 xl:border-r">
+            <aside class="border-b border-cyan-500/10 bg-slate-950/80 xl:sticky xl:top-0 xl:h-screen xl:border-b-0 xl:border-r">
                 @await Html.PartialAsync("_Sidebar")
             </aside>
 
@@ -71,6 +84,8 @@
         </div>
     </div>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false)
 </body>
 </html>

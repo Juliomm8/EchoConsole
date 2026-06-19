@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Models.Dashboard;
+using EchoConsole.Web.Models.Dashboard;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -62,13 +62,6 @@ public sealed class DashboardController : Controller
             ? TimeSpan.FromTicks(Convert.ToInt64(activeDurations.Average(x => x.Ticks)))
             : TimeSpan.Zero;
 
-        var latestHeartbeatAge = liveSessions.Count > 0
-            ? liveSessions
-                .Select(x => nowUtc - DateTime.SpecifyKind(x.LastHeartbeatUtc, DateTimeKind.Utc))
-                .Where(x => x >= TimeSpan.Zero)
-                .DefaultIfEmpty(TimeSpan.Zero)
-                .Min()
-            : TimeSpan.Zero;
 
         var model = new LiveMonitoringDashboardViewModel
         {
@@ -109,7 +102,7 @@ public sealed class DashboardController : Controller
                 new()
                 {
                     Title = "Most Recent Heartbeat",
-                    Value = sessionsLoaded ? FormatRelativeAge(latestHeartbeatAge) : "--",
+                    Value = "--",
                     Subtitle = sessionsLoaded ? "Freshest session heartbeat received" : "Sessions unavailable",
                     DeltaText = sessionsLoaded ? "Real data" : "Unavailable",
                     IsPositiveDelta = sessionsLoaded,
@@ -126,8 +119,8 @@ public sealed class DashboardController : Controller
                     CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene) ? "-" : x.CurrentScene,
                     GameState = string.IsNullOrWhiteSpace(x.CurrentGameState) ? "-" : x.CurrentGameState,
                     CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase) ? "-" : x.CurrentPhase!,
-                    LastHeartbeatLabel = FormatRelativeAge(nowUtc - DateTime.SpecifyKind(x.LastHeartbeatUtc, DateTimeKind.Utc)),
-                    StatusLabel = MapSessionStatus(x.Status)
+                    LastHeartbeatUtc = DateTime.SpecifyKind(x.LastHeartbeatUtc, DateTimeKind.Utc),
+                    Status = x.Status
                 })
                 .ToList()
         };
@@ -171,17 +164,6 @@ public sealed class DashboardController : Controller
         }
     }
 
-    private static string MapSessionStatus(int status)
-    {
-        return status switch
-        {
-            1 => "Active",
-            2 => "Ended",
-            3 => "Expired",
-            _ => $"Unknown ({status})"
-        };
-    }
-
     private static string FormatDuration(TimeSpan value)
     {
         if (value < TimeSpan.Zero)
@@ -192,28 +174,4 @@ public sealed class DashboardController : Controller
         return $"{(int)value.TotalHours:00}:{value.Minutes:00}:{value.Seconds:00}";
     }
 
-    private static string FormatRelativeAge(TimeSpan value)
-    {
-        if (value < TimeSpan.Zero)
-        {
-            value = TimeSpan.Zero;
-        }
-
-        if (value.TotalSeconds < 60)
-        {
-            return $"{Math.Max(0, (int)value.TotalSeconds)}s ago";
-        }
-
-        if (value.TotalMinutes < 60)
-        {
-            return $"{Math.Max(0, (int)value.TotalMinutes)}m ago";
-        }
-
-        if (value.TotalHours < 24)
-        {
-            return $"{Math.Max(0, (int)value.TotalHours)}h ago";
-        }
-
-        return $"{Math.Max(0, (int)value.TotalDays)}d ago";
-    }
 }

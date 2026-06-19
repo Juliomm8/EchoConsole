@@ -1,8 +1,17 @@
-﻿@model EchoConsole.Web.Models.Profile.ProfileSessionHistoryViewModel
+@model EchoConsole.Web.Models.Profile.ProfileSessionHistoryViewModel
 
 @{
-    ViewData["Title"] = "SESSION HISTORY";
-    ViewData["TitleI18nKey"] = "profile_sessions_page_title";
+    ViewData["Title"] = SharedLocalizer["ProfileSessions_PageTitle"].Value;
+    ViewData["TitleResourceKey"] = "ProfileSessions_PageTitle";
+
+    string LocalizedSessionStatus(string status) => status switch
+    {
+        "Live" => SharedLocalizer["Status_Live"].Value,
+        "Completed" => SharedLocalizer["Status_Completed"].Value,
+        "Ended" => SharedLocalizer["Status_Ended"].Value,
+        "Expired" => SharedLocalizer["Status_Expired"].Value,
+        _ => status
+    };
 
     var previousPage = Math.Max(1, Model.Page - 1);
     var nextPage = Math.Min(Model.TotalPages, Model.Page + 1);
@@ -14,15 +23,15 @@
             <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
                     <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        Cosmic Diner Telemetry
+                        @SharedLocalizer["ProfileSessions_Badge"]
                     </p>
 
                     <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white">
-                        Personal Session History
+                        @SharedLocalizer["ProfileSessions_HeroTitle"]
                     </h1>
 
                     <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-                        Review gameplay sessions linked exclusively to your owned Cosmic Diner installations.
+                        @SharedLocalizer["ProfileSessions_HeroSubtitle"]
                     </p>
                 </div>
 
@@ -30,11 +39,11 @@
                     <a asp-controller="Profile"
                        asp-action="Index"
                        class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
-                        Back to Profile
+                        @SharedLocalizer["ProfileSessions_BackToProfile"]
                     </a>
 
                     <div class="rounded-xl border border-cyan-400/15 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-200">
-                        @Model.TotalCount.ToString("N0") session(s)
+                        @SharedLocalizer["ProfileSessions_Count", Model.TotalCount.ToString("N0")]
                     </div>
                 </div>
             </div>
@@ -43,11 +52,11 @@
             {
                 <div class="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-10 text-center">
                     <p class="font-display text-sm uppercase tracking-[0.28em] text-slate-400">
-                        No sessions found
+                        @SharedLocalizer["ProfileSessions_NoSessions"]
                     </p>
 
                     <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                        Once your linked Cosmic Diner installations start sending telemetry, your personal session history will appear here.
+                        @SharedLocalizer["ProfileSessions_NoSessionsDescription"]
                     </p>
                 </div>
             }
@@ -57,14 +66,14 @@
                     <table class="min-w-full divide-y divide-slate-800">
                         <thead>
                             <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
-                                <th class="px-4 py-3">Started At</th>
-                                <th class="px-4 py-3">Duration</th>
-                                <th class="px-4 py-3">Scene / Phase</th>
-                                <th class="px-4 py-3">Status</th>
-                                <th class="px-4 py-3">Build</th>
-                                <th class="px-4 py-3">Device</th>
-                                <th class="px-4 py-3">Last Signal</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
+                                <th class="px-4 py-3">@SharedLocalizer["Common_StartedAt"]</th>
+                                <th class="px-4 py-3">@SharedLocalizer["Common_Duration"]</th>
+                                <th class="px-4 py-3">@SharedLocalizer["ProfileSessions_ColScenePhase"]</th>
+                                <th class="px-4 py-3">@SharedLocalizer["Common_Status"]</th>
+                                <th class="px-4 py-3">@SharedLocalizer["Common_Build"]</th>
+                                <th class="px-4 py-3">@SharedLocalizer["Common_Device"]</th>
+                                <th class="px-4 py-3">@SharedLocalizer["ProfileSessions_LastSignal"]</th>
+                                <th class="px-4 py-3 text-right">@SharedLocalizer["Common_Actions"]</th>
                             </tr>
                         </thead>
 
@@ -89,13 +98,13 @@
                                         @if (session.IsLive)
                                         {
                                             <span class="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
-                                                @session.StatusLabel
+                                                @LocalizedSessionStatus(session.StatusLabel)
                                             </span>
                                         }
                                         else
                                         {
                                             <span class="inline-flex rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-fuchsia-300">
-                                                @session.StatusLabel
+                                                @LocalizedSessionStatus(session.StatusLabel)
                                             </span>
                                         }
                                     </td>
@@ -119,7 +128,7 @@
                                            asp-action="SessionDetail"
                                            asp-route-id="@session.SessionId"
                                            class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200 transition hover:bg-cyan-500/15">
-                                            Open
+                                            @SharedLocalizer["Common_Open"]
                                         </a>
                                     </td>
                                 </tr>
@@ -130,7 +139,7 @@
 
                 <div class="mt-8 flex flex-col gap-4 border-t border-slate-800 pt-6 md:flex-row md:items-center md:justify-between">
                     <div class="text-sm text-slate-400">
-                        Page <span class="text-cyan-300">@Model.Page</span> of <span class="text-cyan-300">@Model.TotalPages</span>
+                        @SharedLocalizer["Common_Page"] <span class="text-cyan-300">@Model.Page</span> @SharedLocalizer["Common_Of"] <span class="text-cyan-300">@Model.TotalPages</span>
                     </div>
 
                     <div class="flex gap-3">
@@ -141,13 +150,13 @@
                                asp-route-page="@previousPage"
                                asp-route-pageSize="@Model.PageSize"
                                class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                                Previous
+                                @SharedLocalizer["Common_Previous"]
                             </a>
                         }
                         else
                         {
                             <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
-                                Previous
+                                @SharedLocalizer["Common_Previous"]
                             </span>
                         }
 
@@ -158,13 +167,13 @@
                                asp-route-page="@nextPage"
                                asp-route-pageSize="@Model.PageSize"
                                class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                                Next
+                                @SharedLocalizer["Common_Next"]
                             </a>
                         }
                         else
                         {
                             <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
-                                Next
+                                @SharedLocalizer["Common_Next"]
                             </span>
                         }
                     </div>
