@@ -28,36 +28,34 @@
                 currentController,
                 controller,
                 StringComparison.OrdinalIgnoreCase))
-            ? "flex items-center gap-3 rounded-md border border-green-400/40 bg-green-500/10 px-3 py-2.5 text-green-100 shadow-phosphor transition xl:justify-center xl:group-hover/sidebar:justify-start"
-            : "flex items-center gap-3 rounded-md border border-transparent px-3 py-2.5 text-slate-500 transition hover:border-green-500/25 hover:bg-green-500/10 hover:text-green-100 xl:justify-center xl:group-hover/sidebar:justify-start";
+            ? "flex h-14 w-full flex-nowrap items-center gap-3 overflow-hidden rounded-md border border-green-400/40 bg-green-500/10 px-2.5 text-green-100 shadow-phosphor transition"
+            : "flex h-14 w-full flex-nowrap items-center gap-3 overflow-hidden rounded-md border border-transparent px-2.5 text-slate-500 transition hover:border-green-500/25 hover:bg-green-500/10 hover:text-green-100";
 
     const string labelClass =
-        "whitespace-nowrap text-sm font-semibold xl:hidden xl:group-hover/sidebar:inline";
+        "min-w-max whitespace-nowrap text-sm font-semibold leading-none transition-all duration-200 xl:max-w-0 xl:overflow-hidden xl:opacity-0 xl:group-hover/sidebar:max-w-[14rem] xl:group-hover/sidebar:opacity-100";
 
     const string iconClass =
         "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-green-500/25 bg-black text-green-300";
 }
 
-<div class="flex h-full min-h-0 w-full flex-col overflow-hidden p-3 xl:p-3 xl:group-hover/sidebar:p-4">
-    <div class="shrink-0 rounded-lg border border-green-500/25 bg-green-500/5 p-2 shadow-phosphor xl:h-[4.25rem] xl:p-2 xl:group-hover/sidebar:h-auto xl:group-hover/sidebar:p-3">
-        <div class="flex items-center gap-3">
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-green-400/40 bg-black font-display text-sm uppercase tracking-[0.12em] text-green-200 shadow-phosphor">
+<div class="flex h-full min-h-0 w-full flex-col overflow-hidden p-3">
+    <div class="h-[4.25rem] shrink-0 rounded-lg border border-green-500/25 bg-green-500/5 p-2 shadow-phosphor">
+        <div class="flex h-full flex-nowrap items-center gap-3 overflow-hidden">
+            <a asp-controller="Home"
+               asp-action="Index"
+               aria-label="@SharedLocalizer["Sidebar_Home"]"
+               title="@SharedLocalizer["Sidebar_Home"]"
+               class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-green-400/40 bg-black font-display text-sm uppercase tracking-[0.12em] text-green-200 shadow-phosphor transition hover:border-green-300 hover:text-white hover:shadow-phosphor-strong">
                 EC
-            </div>
+            </a>
 
-            <div class="min-w-0 xl:hidden xl:group-hover/sidebar:block">
+            <div class="min-w-max overflow-hidden whitespace-nowrap transition-all duration-200 xl:max-w-0 xl:opacity-0 xl:group-hover/sidebar:max-w-[14rem] xl:group-hover/sidebar:opacity-100">
                 <div class="font-display text-lg uppercase tracking-[0.12em] text-green-200 text-glow-cyan">
                     Echo Console
                 </div>
                 <div class="mt-0.5 text-[10px] uppercase tracking-[0.28em] text-amber-400">
                     Retro Telemetry OS
                 </div>
-            </div>
-        </div>
-
-        <div class="mt-3 hidden border-t border-green-500/15 pt-3 xl:group-hover/sidebar:block">
-            <div class="text-[10px] uppercase tracking-[0.24em] text-slate-600">
-                @SharedLocalizer["Sidebar_Navigation"]
             </div>
         </div>
     </div>
@@ -216,7 +214,7 @@
         <details data-echo-dropdown
                  class="group relative">
             <summary title="@SharedLocalizer["Topbar_Language"]"
-                     class="flex cursor-pointer items-center gap-3 rounded-md border border-green-500/20 bg-green-500/5 px-3 py-2.5 text-left transition hover:border-green-400/40 hover:bg-green-500/10 xl:justify-center xl:group-hover/sidebar:justify-start">
+                     class="flex h-14 w-full cursor-pointer flex-nowrap items-center gap-3 overflow-hidden rounded-md border border-green-500/20 bg-green-500/5 px-2.5 text-left transition hover:border-green-400/40 hover:bg-green-500/10">
                 <span class="@iconClass">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <circle cx="12" cy="12" r="9" />
@@ -224,7 +222,7 @@
                     </svg>
                 </span>
 
-                <span class="min-w-0 xl:hidden xl:group-hover/sidebar:block">
+                <span class="min-w-max overflow-hidden whitespace-nowrap transition-all duration-200 xl:max-w-0 xl:opacity-0 xl:group-hover/sidebar:max-w-[12rem] xl:group-hover/sidebar:opacity-100">
                     <span class="block text-[10px] uppercase tracking-[0.2em] text-slate-600">
                         @SharedLocalizer["Topbar_Language"]
                     </span>
@@ -243,7 +241,7 @@
                 </svg>
             </summary>
 
-            <div class="absolute bottom-[calc(100%+0.65rem)] left-0 z-50 w-64 overflow-hidden rounded-lg border border-green-500/30 bg-black/98 p-2 shadow-phosphor-strong backdrop-blur-xl">
+            <div class="absolute bottom-[calc(100%+0.65rem)] left-0 z-50 w-64 overflow-hidden rounded-lg border border-green-500/30 bg-black p-2 shadow-phosphor-strong">
                 <div class="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
                     @SharedLocalizer["Sidebar_SelectLanguage"]
                 </div>
