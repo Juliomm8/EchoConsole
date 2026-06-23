@@ -1507,4 +1507,82 @@
   <data name="Sidebar_PatchNotesCms" xml:space="preserve">
     <value>CMS de parches</value>
   </data>
+  <data name="PatchNotesAdmin_DashboardPageTitle" xml:space="preserve">
+    <value>Panel de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardEyebrow" xml:space="preserve">
+    <value>Archivo de transmisiones SQLite</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardTitle" xml:space="preserve">
+    <value>CMS de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardSubtitle" xml:space="preserve">
+    <value>Revisa todas las actualizaciones almacenadas de Cosmic Diner, publica nuevas transmisiones y elimina registros incorrectos del CMS local.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateNew" xml:space="preserve">
+    <value>Crear parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveBadge" xml:space="preserve">
+    <value>Registros de base de datos</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveTitle" xml:space="preserve">
+    <value>Archivo de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_TotalRecords" xml:space="preserve">
+    <value>Registros totales</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyTitle" xml:space="preserve">
+    <value>No hay transmisiones de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyDescription" xml:space="preserve">
+    <value>El archivo SQLite está vacío. Crea la primera nota de parche para poblar la landing pública.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateFirst" xml:space="preserve">
+    <value>Crear primer parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ColVersion" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="PatchNotesAdmin_ColCategory" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+  <data name="PatchNotesAdmin_ColTitle" xml:space="preserve">
+    <value>Título y descripción</value>
+  </data>
+  <data name="PatchNotesAdmin_ColStatus" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="PatchNotesAdmin_ColDate" xml:space="preserve">
+    <value>Creado</value>
+  </data>
+  <data name="PatchNotesAdmin_ColActions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="PatchNotesAdmin_Published" xml:space="preserve">
+    <value>Publicado</value>
+  </data>
+  <data name="PatchNotesAdmin_Draft" xml:space="preserve">
+    <value>Borrador</value>
+  </data>
+  <data name="PatchNotesAdmin_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteConfirm" xml:space="preserve">
+    <value>Esta operación elimina permanentemente la nota de parche. ¿Deseas continuar?</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteSuccess" xml:space="preserve">
+    <value>La nota de parche se eliminó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la nota de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_LoadError" xml:space="preserve">
+    <value>No se pudo cargar el panel de notas de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_InvalidId" xml:space="preserve">
+    <value>El identificador de la nota de parche no es válido.</value>
+  </data>
+  <data name="PatchNotesAdmin_BackToDashboard" xml:space="preserve">
+    <value>Volver al panel</value>
+  </data>
 </root>

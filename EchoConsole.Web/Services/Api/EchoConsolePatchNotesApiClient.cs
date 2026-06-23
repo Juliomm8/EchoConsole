@@ -42,6 +42,31 @@ public sealed class EchoConsolePatchNotesApiClient
         }
     }
 
+    public async Task<IReadOnlyList<PatchNoteApiDto>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+
+            var patchNotes = await client.GetFromJsonAsync<List<PatchNoteApiDto>>(
+                "/api/patchnotes/admin",
+                cancellationToken);
+
+            return patchNotes is null
+                ? Array.Empty<PatchNoteApiDto>()
+                : patchNotes;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to retrieve patch notes for the CMS dashboard.");
+
+            throw;
+        }
+    }
+
     public async Task<CreatePatchNoteApiResult> CreateAsync(
         CreatePatchNoteApiRequest request,
         CancellationToken cancellationToken = default)
@@ -84,6 +109,49 @@ public sealed class EchoConsolePatchNotesApiClient
                 "Unexpected error while creating a patch note.");
 
             return CreatePatchNoteApiResult.Failure(
+                "The patch note service is currently unavailable.");
+        }
+    }
+
+    public async Task<DeletePatchNoteApiResult> DeleteAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+
+            using var response = await client.DeleteAsync(
+                $"/api/patchnotes/{id}",
+                cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return DeletePatchNoteApiResult.Success();
+            }
+
+            var errorMessage = await ReadErrorMessageAsync(
+                response,
+                cancellationToken);
+
+            _logger.LogWarning(
+                "Delete patch note request failed. PatchNoteId: {PatchNoteId}, StatusCode: {StatusCode}, Error: {ErrorMessage}",
+                id,
+                response.StatusCode,
+                errorMessage);
+
+            return DeletePatchNoteApiResult.Failure(
+                errorMessage,
+                response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unexpected error while deleting patch note {PatchNoteId}.",
+                id);
+
+            return DeletePatchNoteApiResult.Failure(
                 "The patch note service is currently unavailable.");
         }
     }
@@ -210,6 +278,43 @@ public sealed class CreatePatchNoteApiResult
         return new CreatePatchNoteApiResult(
             false,
             null,
+            errorMessage,
+            statusCode);
+    }
+}
+
+public sealed class DeletePatchNoteApiResult
+{
+    private DeletePatchNoteApiResult(
+        bool succeeded,
+        string? errorMessage,
+        HttpStatusCode? statusCode)
+    {
+        Succeeded = succeeded;
+        ErrorMessage = errorMessage;
+        StatusCode = statusCode;
+    }
+
+    public bool Succeeded { get; }
+
+    public string? ErrorMessage { get; }
+
+    public HttpStatusCode? StatusCode { get; }
+
+    public static DeletePatchNoteApiResult Success()
+    {
+        return new DeletePatchNoteApiResult(
+            true,
+            null,
+            null);
+    }
+
+    public static DeletePatchNoteApiResult Failure(
+        string errorMessage,
+        HttpStatusCode? statusCode = null)
+    {
+        return new DeletePatchNoteApiResult(
+            false,
             errorMessage,
             statusCode);
     }

@@ -1507,4 +1507,82 @@
   <data name="Sidebar_PatchNotesCms" xml:space="preserve">
     <value>Patch Notes CMS</value>
   </data>
+  <data name="PatchNotesAdmin_DashboardPageTitle" xml:space="preserve">
+    <value>Patch Notes Dashboard</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardEyebrow" xml:space="preserve">
+    <value>SQLite transmission archive</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardTitle" xml:space="preserve">
+    <value>Patch Notes CMS</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardSubtitle" xml:space="preserve">
+    <value>Review every stored Cosmic Diner update, publish new transmissions and remove incorrect records from the local CMS.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateNew" xml:space="preserve">
+    <value>Create patch</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveBadge" xml:space="preserve">
+    <value>Database records</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveTitle" xml:space="preserve">
+    <value>Patch archive</value>
+  </data>
+  <data name="PatchNotesAdmin_TotalRecords" xml:space="preserve">
+    <value>Total records</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyTitle" xml:space="preserve">
+    <value>No patch transmissions found</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyDescription" xml:space="preserve">
+    <value>The SQLite archive is empty. Create the first patch note to populate the public landing page.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateFirst" xml:space="preserve">
+    <value>Create first patch</value>
+  </data>
+  <data name="PatchNotesAdmin_ColVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="PatchNotesAdmin_ColCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="PatchNotesAdmin_ColTitle" xml:space="preserve">
+    <value>Title and description</value>
+  </data>
+  <data name="PatchNotesAdmin_ColStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="PatchNotesAdmin_ColDate" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="PatchNotesAdmin_ColActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="PatchNotesAdmin_Published" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="PatchNotesAdmin_Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="PatchNotesAdmin_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteConfirm" xml:space="preserve">
+    <value>This operation permanently deletes the patch note. Continue?</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteSuccess" xml:space="preserve">
+    <value>Patch note deleted successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteError" xml:space="preserve">
+    <value>The patch note could not be deleted.</value>
+  </data>
+  <data name="PatchNotesAdmin_LoadError" xml:space="preserve">
+    <value>The Patch Notes dashboard could not be loaded.</value>
+  </data>
+  <data name="PatchNotesAdmin_InvalidId" xml:space="preserve">
+    <value>The patch note identifier is invalid.</value>
+  </data>
+  <data name="PatchNotesAdmin_BackToDashboard" xml:space="preserve">
+    <value>Back to dashboard</value>
+  </data>
 </root>

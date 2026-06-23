@@ -28,22 +28,23 @@ public sealed class PatchNotesController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<PatchNoteDto>>> GetPublished(
         CancellationToken cancellationToken = default)
     {
-        var patchNotes = await _dbContext.PatchNotes
-            .AsNoTracking()
+        var patchNotes = await BuildPatchNotesQuery()
             .Where(x => x.IsPublished)
             .OrderByDescending(x => x.CreatedAtUtc)
             .ThenByDescending(x => x.Id)
-            .Select(x => new PatchNoteDto
-            {
-                Id = x.Id,
-                Version = x.Version,
-                Category = x.Category,
-                Tone = x.Tone,
-                Title = x.Title,
-                Description = x.Description,
-                CreatedAtUtc = x.CreatedAtUtc,
-                IsPublished = x.IsPublished
-            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(patchNotes);
+    }
+
+    [Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
+    [HttpGet("admin")]
+    public async Task<ActionResult<IReadOnlyList<PatchNoteDto>>> GetAll(
+        CancellationToken cancellationToken = default)
+    {
+        var patchNotes = await BuildPatchNotesQuery()
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ThenByDescending(x => x.Id)
             .ToListAsync(cancellationToken);
 
         return Ok(patchNotes);
@@ -138,17 +139,7 @@ public sealed class PatchNotesController : ControllerBase
             });
         }
 
-        var response = new PatchNoteDto
-        {
-            Id = patchNote.Id,
-            Version = patchNote.Version,
-            Category = patchNote.Category,
-            Tone = patchNote.Tone,
-            Title = patchNote.Title,
-            Description = patchNote.Description,
-            CreatedAtUtc = patchNote.CreatedAtUtc,
-            IsPublished = patchNote.IsPublished
-        };
+        var response = MapPatchNote(patchNote);
 
         _logger.LogInformation(
             "Patch note created. Id: {PatchNoteId}, Version: {Version}, IsPublished: {IsPublished}",
@@ -160,5 +151,68 @@ public sealed class PatchNotesController : ControllerBase
             nameof(GetPublished),
             null,
             response);
+    }
+
+    [Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var patchNote = await _dbContext.PatchNotes
+            .SingleOrDefaultAsync(
+                x => x.Id == id,
+                cancellationToken);
+
+        if (patchNote is null)
+        {
+            return NotFound(new
+            {
+                message = $"Patch note with id '{id}' was not found."
+            });
+        }
+
+        _dbContext.PatchNotes.Remove(patchNote);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Patch note deleted. Id: {PatchNoteId}, Version: {Version}",
+            patchNote.Id,
+            patchNote.Version);
+
+        return NoContent();
+    }
+
+    private IQueryable<PatchNoteDto> BuildPatchNotesQuery()
+    {
+        return _dbContext.PatchNotes
+            .AsNoTracking()
+            .Select(x => new PatchNoteDto
+            {
+                Id = x.Id,
+                Version = x.Version,
+                Category = x.Category,
+                Tone = x.Tone,
+                Title = x.Title,
+                Description = x.Description,
+                CreatedAtUtc = x.CreatedAtUtc,
+                IsPublished = x.IsPublished
+            });
+    }
+
+    private static PatchNoteDto MapPatchNote(
+        PatchNote patchNote)
+    {
+        return new PatchNoteDto
+        {
+            Id = patchNote.Id,
+            Version = patchNote.Version,
+            Category = patchNote.Category,
+            Tone = patchNote.Tone,
+            Title = patchNote.Title,
+            Description = patchNote.Description,
+            CreatedAtUtc = patchNote.CreatedAtUtc,
+            IsPublished = patchNote.IsPublished
+        };
     }
 }

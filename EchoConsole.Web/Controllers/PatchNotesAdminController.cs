@@ -24,10 +24,55 @@ public sealed class PatchNotesAdminController : Controller
         _logger = logger;
     }
 
+    [HttpGet("")]
+    public async Task<IActionResult> Index(
+        CancellationToken cancellationToken = default)
+    {
+        ConfigurePageMetadata(
+            "PatchNotesAdmin_DashboardPageTitle");
+
+        try
+        {
+            var patchNotes = await _patchNotesApiClient.GetAllAsync(
+                cancellationToken);
+
+            var model = new PatchNotesAdminIndexViewModel
+            {
+                Items = patchNotes
+                    .Select(x => new PatchNotesAdminListItemViewModel
+                    {
+                        Id = x.Id,
+                        Version = x.Version,
+                        Category = x.Category,
+                        Tone = x.Tone,
+                        Title = x.Title,
+                        Description = x.Description,
+                        CreatedAtUtc = x.CreatedAtUtc,
+                        IsPublished = x.IsPublished
+                    })
+                    .ToArray()
+            };
+
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to load the Patch Notes CMS dashboard.");
+
+            TempData["PatchNotesAdminError"] =
+                _localizer["PatchNotesAdmin_LoadError"].Value;
+
+            return View(new PatchNotesAdminIndexViewModel());
+        }
+    }
+
     [HttpGet("create")]
     public IActionResult Create()
     {
-        ConfigurePageMetadata();
+        ConfigurePageMetadata(
+            "PatchNotesAdmin_PageTitle");
 
         return View(new PatchNoteCreateViewModel
         {
@@ -41,7 +86,8 @@ public sealed class PatchNotesAdminController : Controller
         PatchNoteCreateViewModel model,
         CancellationToken cancellationToken = default)
     {
-        ConfigurePageMetadata();
+        ConfigurePageMetadata(
+            "PatchNotesAdmin_PageTitle");
 
         if (!ModelState.IsValid)
         {
@@ -81,15 +127,55 @@ public sealed class PatchNotesAdminController : Controller
         TempData["PatchNotesAdminSuccess"] =
             _localizer["PatchNotesAdmin_Success"].Value;
 
-        return RedirectToAction(nameof(Create));
+        return RedirectToAction(nameof(Index));
     }
 
-    private void ConfigurePageMetadata()
+    [HttpPost("delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            TempData["PatchNotesAdminError"] =
+                _localizer["PatchNotesAdmin_InvalidId"].Value;
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var result = await _patchNotesApiClient.DeleteAsync(
+            id,
+            cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            _logger.LogWarning(
+                "Patch note deletion failed. PatchNoteId: {PatchNoteId}, Error: {ErrorMessage}",
+                id,
+                result.ErrorMessage);
+
+            TempData["PatchNotesAdminError"] =
+                string.IsNullOrWhiteSpace(result.ErrorMessage)
+                    ? _localizer["PatchNotesAdmin_DeleteError"].Value
+                    : result.ErrorMessage;
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        TempData["PatchNotesAdminSuccess"] =
+            _localizer["PatchNotesAdmin_DeleteSuccess"].Value;
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    private void ConfigurePageMetadata(
+        string resourceKey)
     {
         ViewData["Title"] =
-            _localizer["PatchNotesAdmin_PageTitle"].Value;
+            _localizer[resourceKey].Value;
 
         ViewData["TitleResourceKey"] =
-            "PatchNotesAdmin_PageTitle";
+            resourceKey;
     }
 }
