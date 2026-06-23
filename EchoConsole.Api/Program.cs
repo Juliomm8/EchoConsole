@@ -2,6 +2,7 @@ using EchoConsole.Api.BackgroundServices;
 using EchoConsole.Api.Configuration;
 using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
+using EchoConsole.Api.Persistence.Cms;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
 using EchoConsole.Api.Services;
@@ -24,7 +25,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
 
-// --- INYECCIÓN DE SEGURIDAD: API KEY (Server-to-Server) ---
+// Server-to-server API key authentication
 builder.Services.AddAuthentication(AdminApiKeyAuthenticationOptions.SchemeName)
     .AddScheme<AdminApiKeyAuthenticationOptions, AdminApiKeyAuthenticationHandler>(
         AdminApiKeyAuthenticationOptions.SchemeName,
@@ -51,6 +52,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+var cmsConnectionString = builder.Configuration.GetConnectionString("CmsConnection")
+    ?? throw new InvalidOperationException("ConnectionStrings:CmsConnection is not configured.");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(cmsConnectionString));
 
 builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
 builder.Services.AddSingleton<SessionTokenService>();
@@ -173,7 +180,7 @@ builder.Services.AddSignalR(options =>
     options.AddFilter<TelemetryHubApiKeyFilter>();
 });
 
-// --- INYECCIÓN DEL SEEDER DE DATOS (Fake Data) ---
+// Development demo data seeding
 builder.Services.Configure<DemoSeedOptions>(
     builder.Configuration.GetSection(DemoSeedOptions.SectionName));
 

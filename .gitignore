@@ -480,3 +480,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Local SQLite CMS database
+CosmicDinerDb.db
+CosmicDinerDb.db-shm
+CosmicDinerDb.db-wal
