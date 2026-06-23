@@ -1,6 +1,4 @@
 @model EchoConsole.Web.Models.Home.HomeIndexViewModel
-@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
-
 @{
     ViewData["Title"] =
         SharedLocalizer["Home_PageTitle"].Value;
@@ -8,17 +6,15 @@
     ViewData["TitleResourceKey"] =
         "Home_PageTitle";
 
-    var steamWishlistUrl =
-        Configuration["ExternalLinks:SteamWishlist"];
-
-    var steamLinkConfigured =
-        !string.IsNullOrWhiteSpace(steamWishlistUrl);
 }
 
 <div class="bg-black text-green-100">
     <section class="relative isolate overflow-hidden border-b border-green-500/20">
-        <img src="~/images/cosmic-diner/showcase-hero.svg"
+        <img src="~/images/cosmic-diner/showcase-hero.png"
              alt="@SharedLocalizer["Home_HeroImageAlt"]"
+             loading="eager"
+             fetchpriority="high"
+             decoding="async"
              class="absolute inset-0 -z-20 h-full w-full object-cover opacity-40" />
 
         <div class="absolute inset-0 -z-10 bg-[linear-gradient(90deg,#000_0%,rgba(0,0,0,0.90)_42%,rgba(0,0,0,0.52)_72%,#000_100%)]"></div>
@@ -43,56 +39,52 @@
                     @SharedLocalizer["Home_CommercialHeroDescription"]
                 </p>
 
-                <div class="mt-9 flex flex-wrap items-center gap-4">
-                    <a href="@(steamLinkConfigured ? steamWishlistUrl : "#")"
-                       target="@(steamLinkConfigured ? "_blank" : null)"
-                       rel="@(steamLinkConfigured ? "noopener noreferrer" : null)"
-                       title="@(steamLinkConfigured ? SharedLocalizer["Home_WishlistButton"].Value : SharedLocalizer["Home_ExternalLinkPending"].Value)"
+                <div class="mt-9 flex items-center">
+                    <a href="https://store.steampowered.com/"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       title="@SharedLocalizer["Home_WishlistButton"]"
                        class="steam-store-button">
                         <svg class="h-8 w-8"
                              viewBox="0 0 32 32"
                              fill="none"
                              aria-hidden="true">
-                            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" opacity="0.35" />
-                            <circle cx="21.5" cy="10.5" r="4.5" stroke="currentColor" stroke-width="2.2" />
-                            <circle cx="10" cy="22" r="3.5" stroke="currentColor" stroke-width="2.2" />
-                            <path d="m13 20 5.2-7.2M13.1 22.1l5.2 2.2a4.2 4.2 0 0 0 5.4-2.4l1.2-3.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                            <circle cx="16"
+                                    cy="16"
+                                    r="14"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    opacity="0.35" />
+
+                            <circle cx="21.5"
+                                    cy="10.5"
+                                    r="4.5"
+                                    stroke="currentColor"
+                                    stroke-width="2.2" />
+
+                            <circle cx="10"
+                                    cy="22"
+                                    r="3.5"
+                                    stroke="currentColor"
+                                    stroke-width="2.2" />
+
+                            <path d="m13 20 5.2-7.2M13.1 22.1l5.2 2.2a4.2 4.2 0 0 0 5.4-2.4l1.2-3.1"
+                                  stroke="currentColor"
+                                  stroke-width="2.2"
+                                  stroke-linecap="round" />
                         </svg>
 
                         <span>
                             <span class="block text-[10px] font-medium tracking-[0.16em] text-slate-300">
                                 @SharedLocalizer["Home_WishlistEyebrow"]
                             </span>
+
                             <span class="mt-1 block text-sm">
                                 @SharedLocalizer["Home_WishlistButton"]
                             </span>
                         </span>
                     </a>
-
-                    @if (!Model.IsAuthenticated)
-                    {
-                        <a asp-controller="Auth"
-                           asp-action="Register"
-                           class="terminal-button">
-                            @SharedLocalizer["Home_CreateAccount"]
-                        </a>
-                    }
-                    else
-                    {
-                        <a asp-controller="Profile"
-                           asp-action="Index"
-                           class="terminal-button">
-                            @SharedLocalizer["Home_OpenProfile"]
-                        </a>
-                    }
                 </div>
-
-                @if (!steamLinkConfigured)
-                {
-                    <p class="mt-4 text-xs text-amber-400/100">
-                        [CONFIG] @SharedLocalizer["Home_ExternalLinkPending"]
-                    </p>
-                }
             </div>
 
             <aside class="terminal-panel rounded-lg p-5 lg:justify-self-end lg:p-7">
@@ -162,8 +154,10 @@
         <div class="mt-14 space-y-12 lg:space-y-20">
             <article class="grid items-center gap-8 lg:grid-cols-2">
                 <div class="overflow-hidden rounded-lg border border-green-500/25 bg-green-500/5 shadow-phosphor">
-                    <img src="~/images/cosmic-diner/showcase-01.svg"
+                    <img src="~/images/cosmic-diner/showcase-01.png"
                          alt="@SharedLocalizer["Home_ShowcaseOneAlt"]"
+                         loading="lazy"
+                         decoding="async"
                          class="aspect-video h-full w-full object-cover transition duration-500 hover:scale-[1.02]" />
                 </div>
 
@@ -180,8 +174,10 @@
 
             <article class="grid items-center gap-8 lg:grid-cols-2">
                 <div class="overflow-hidden rounded-lg border border-amber-500/25 bg-amber-500/5 shadow-amber lg:order-2">
-                    <img src="~/images/cosmic-diner/showcase-02.svg"
+                    <img src="~/images/cosmic-diner/showcase-02.png"
                          alt="@SharedLocalizer["Home_ShowcaseTwoAlt"]"
+                         loading="lazy"
+                         decoding="async"
                          class="aspect-video h-full w-full object-cover transition duration-500 hover:scale-[1.02]" />
                 </div>
 
@@ -198,8 +194,10 @@
 
             <article class="grid items-center gap-8 lg:grid-cols-2">
                 <div class="overflow-hidden rounded-lg border border-green-500/25 bg-green-500/5 shadow-phosphor">
-                    <img src="~/images/cosmic-diner/showcase-03.svg"
+                    <img src="~/images/cosmic-diner/showcase-03.png"
                          alt="@SharedLocalizer["Home_ShowcaseThreeAlt"]"
+                         loading="lazy"
+                         decoding="async"
                          class="aspect-video h-full w-full object-cover transition duration-500 hover:scale-[1.02]" />
                 </div>
 
