@@ -1289,4 +1289,148 @@
   <data name="Validation_StringLength" xml:space="preserve">
     <value>El campo {0} debe tener una longitud mínima de {2} y máxima de {1} caracteres.</value>
   </data>
+  <data name="Topbar_UserMenu" xml:space="preserve">
+    <value>Menú de operador</value>
+  </data>
+  <data name="Topbar_MyProfile" xml:space="preserve">
+    <value>Mi perfil</value>
+  </data>
+  <data name="Topbar_Settings" xml:space="preserve">
+    <value>Ajustes</value>
+  </data>
+  <data name="Footer_Transmission" xml:space="preserve">
+    <value>Canales oficiales de transmisión</value>
+  </data>
+  <data name="Footer_Description" xml:space="preserve">
+    <value>Cosmic Diner es un juego de exploración y terror analógico ambientado en un restaurante retrofuturista abandonado. Sigue los canales oficiales para recibir señales del desarrollo y nuevas transmisiones.</value>
+  </data>
+  <data name="Footer_Follow" xml:space="preserve">
+    <value>Sigue a Cosmic Diner</value>
+  </data>
+  <data name="Footer_LinkPending" xml:space="preserve">
+    <value>Configura la URL oficial en los ajustes ExternalLinks.</value>
+  </data>
+  <data name="Footer_Rights" xml:space="preserve">
+    <value>© {0} Cosmic Diner. Todas las señales reservadas.</value>
+  </data>
+  <data name="Home_HeroSignal" xml:space="preserve">
+    <value>Señal adquirida // transmisión comercial</value>
+  </data>
+  <data name="Home_CommercialHeroDescription" xml:space="preserve">
+    <value>Las luces están fallando. La cocina permanece en silencio. Algo en el comedor todavía espera ser atendido. Entra en un restaurante de la era espacial abandonado y sobrevive a la transmisión.</value>
+  </data>
+  <data name="Home_WishlistEyebrow" xml:space="preserve">
+    <value>Próximamente en Steam</value>
+  </data>
+  <data name="Home_WishlistButton" xml:space="preserve">
+    <value>Añade Cosmic Diner a tu Wishlist</value>
+  </data>
+  <data name="Home_ExternalLinkPending" xml:space="preserve">
+    <value>Configura ExternalLinks:SteamWishlist antes de publicar.</value>
+  </data>
+  <data name="Home_HeroImageAlt" xml:space="preserve">
+    <value>Placeholder promocional de Cosmic Diner</value>
+  </data>
+  <data name="Home_LiveReadout" xml:space="preserve">
+    <value>Lectura en vivo de la comunidad</value>
+  </data>
+  <data name="Home_ActivePlayers" xml:space="preserve">
+    <value>Jugadores en línea</value>
+  </data>
+  <data name="Home_MonitoredBuilds" xml:space="preserve">
+    <value>Builds del juego</value>
+  </data>
+  <data name="Home_FeaturedBuild" xml:space="preserve">
+    <value>Señal actual</value>
+  </data>
+  <data name="Home_LiveReadoutDescription" xml:space="preserve">
+    <value>Echo Console está recibiendo telemetría operativa de instalaciones activas de Cosmic Diner.</value>
+  </data>
+  <data name="Home_ShowcaseEyebrow" xml:space="preserve">
+    <value>Registros visuales recuperados</value>
+  </data>
+  <data name="Home_ShowcaseTitle" xml:space="preserve">
+    <value>Un diner construido para las estrellas. Abandonado por una razón.</value>
+  </data>
+  <data name="Home_ShowcaseIntro" xml:space="preserve">
+    <value>Reemplaza los placeholders de terminal por capturas finales del gameplay. El layout está listo para imágenes cinematográficas, narrativa ambiental y textos comerciales.</value>
+  </data>
+  <data name="Home_ShowcaseOneTitle" xml:space="preserve">
+    <value>Tu turno comienza después del cierre</value>
+  </data>
+  <data name="Home_ShowcaseOneDescription" xml:space="preserve">
+    <value>Explora un restaurante retrofuturista congelado entre los restos de la carrera espacial. Revisa oficinas, bodegas y comedores silenciosos mientras el edificio reacciona a tu presencia.</value>
+  </data>
+  <data name="Home_ShowcaseOneAlt" xml:space="preserve">
+    <value>Placeholder de gameplay mostrando el interior de Cosmic Diner</value>
+  </data>
+  <data name="Home_ShowcaseTwoTitle" xml:space="preserve">
+    <value>La luz es una herramienta, una advertencia y un riesgo</value>
+  </data>
+  <data name="Home_ShowcaseTwoDescription" xml:space="preserve">
+    <value>Administra baterías, restaura sistemas averiados y utiliza la linterna con cuidado. Cada circuito encendido revela otra parte del diner y también puede revelar tu posición.</value>
+  </data>
+  <data name="Home_ShowcaseTwoAlt" xml:space="preserve">
+    <value>Placeholder de gameplay mostrando una secuencia de apagón</value>
+  </data>
+  <data name="Home_ShowcaseThreeTitle" xml:space="preserve">
+    <value>El astronauta no forma parte de la atracción</value>
+  </data>
+  <data name="Home_ShowcaseThreeDescription" xml:space="preserve">
+    <value>Escucha el movimiento detrás de las paredes, escóndete cuando la ruta se cierre y reconstruye lo ocurrido mediante fotografías, objetos y grabaciones corruptas.</value>
+  </data>
+  <data name="Home_ShowcaseThreeAlt" xml:space="preserve">
+    <value>Placeholder de gameplay mostrando un encuentro con el enemigo</value>
+  </data>
+  <data name="Home_ChangelogEyebrow" xml:space="preserve">
+    <value>Archivo de desarrollo del juego</value>
+  </data>
+  <data name="Home_ChangelogTitle" xml:space="preserve">
+    <value>Notas del parche</value>
+  </data>
+  <data name="Home_ChangelogDescription" xml:space="preserve">
+    <value>Estos registros describen la evolución del videojuego Cosmic Diner, no la página web Echo Console.</value>
+  </data>
+  <data name="Home_ChangelogV01Title" xml:space="preserve">
+    <value>Alpha jugable</value>
+  </data>
+  <data name="Home_ChangelogV01Description" xml:space="preserve">
+    <value>Bucle inicial de exploración, navegación por el diner, interacción con objetos y primera ruta de progresión jugable.</value>
+  </data>
+  <data name="Home_ChangelogV02Title" xml:space="preserve">
+    <value>Protocolo de apagón</value>
+  </data>
+  <data name="Home_ChangelogV02Description" xml:space="preserve">
+    <value>Sistemas de linterna y baterías, objetos físicos dinámicos, restauración de energía y respuesta de audio ambiental.</value>
+  </data>
+  <data name="Home_ChangelogV03Title" xml:space="preserve">
+    <value>El astronauta</value>
+  </data>
+  <data name="Home_ChangelogV03Description" xml:space="preserve">
+    <value>Encuentros con el enemigo, lógica de escondites, sistemas de tensión y evidencia narrativa ampliada por todo el restaurante.</value>
+  </data>
+
+  <data name="Home_InterceptedSignals" xml:space="preserve">
+    <value>SEÑALES INTERCEPTADAS</value>
+  </data>
+
+  <data name="Home_ActiveInvestigators" xml:space="preserve">
+    <value>INVESTIGADORES ACTIVOS</value>
+  </data>
+
+  <data name="Home_LiveFrequencyScan" xml:space="preserve">
+    <value>ESCANEO DE FRECUENCIAS EN VIVO</value>
+  </data>
+
+  <data name="Home_ScanLocked" xml:space="preserve">
+    <value>ESCANEO FIJADO</value>
+  </data>
+
+  <data name="Home_SurviveShiftTitle" xml:space="preserve">
+    <value>SOBREVIVE AL TURNO</value>
+  </data>
+
+  <data name="Home_CorruptedData" xml:space="preserve">
+    <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
+  </data>
 </root>

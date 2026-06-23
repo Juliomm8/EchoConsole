@@ -1289,4 +1289,148 @@
   <data name="Validation_StringLength" xml:space="preserve">
     <value>The {0} field must be a string with a minimum length of {2} and a maximum length of {1}.</value>
   </data>
+  <data name="Topbar_UserMenu" xml:space="preserve">
+    <value>Operator Menu</value>
+  </data>
+  <data name="Topbar_MyProfile" xml:space="preserve">
+    <value>My Profile</value>
+  </data>
+  <data name="Topbar_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Footer_Transmission" xml:space="preserve">
+    <value>Official Transmission Channels</value>
+  </data>
+  <data name="Footer_Description" xml:space="preserve">
+    <value>Cosmic Diner is an analog-horror exploration game set inside an abandoned retro-futuristic restaurant. Follow the official channels for development signals and new transmissions.</value>
+  </data>
+  <data name="Footer_Follow" xml:space="preserve">
+    <value>Follow Cosmic Diner</value>
+  </data>
+  <data name="Footer_LinkPending" xml:space="preserve">
+    <value>Configure the official URL in ExternalLinks settings.</value>
+  </data>
+  <data name="Footer_Rights" xml:space="preserve">
+    <value>© {0} Cosmic Diner. All signals reserved.</value>
+  </data>
+  <data name="Home_HeroSignal" xml:space="preserve">
+    <value>Signal acquired // commercial broadcast</value>
+  </data>
+  <data name="Home_CommercialHeroDescription" xml:space="preserve">
+    <value>The lights are failing. The kitchen is silent. Something in the dining room is still waiting for service. Enter an abandoned space-age restaurant and survive the transmission.</value>
+  </data>
+  <data name="Home_WishlistEyebrow" xml:space="preserve">
+    <value>Available soon on Steam</value>
+  </data>
+  <data name="Home_WishlistButton" xml:space="preserve">
+    <value>Add Cosmic Diner to your Wishlist</value>
+  </data>
+  <data name="Home_ExternalLinkPending" xml:space="preserve">
+    <value>Configure ExternalLinks:SteamWishlist before publishing.</value>
+  </data>
+  <data name="Home_HeroImageAlt" xml:space="preserve">
+    <value>Cosmic Diner promotional screenshot placeholder</value>
+  </data>
+  <data name="Home_LiveReadout" xml:space="preserve">
+    <value>Live community readout</value>
+  </data>
+  <data name="Home_ActivePlayers" xml:space="preserve">
+    <value>Players online</value>
+  </data>
+  <data name="Home_MonitoredBuilds" xml:space="preserve">
+    <value>Game builds</value>
+  </data>
+  <data name="Home_FeaturedBuild" xml:space="preserve">
+    <value>Current signal</value>
+  </data>
+  <data name="Home_LiveReadoutDescription" xml:space="preserve">
+    <value>Echo Console is receiving operational telemetry from active Cosmic Diner installations.</value>
+  </data>
+  <data name="Home_ShowcaseEyebrow" xml:space="preserve">
+    <value>Recovered visual records</value>
+  </data>
+  <data name="Home_ShowcaseTitle" xml:space="preserve">
+    <value>A diner built for the stars. Abandoned for a reason.</value>
+  </data>
+  <data name="Home_ShowcaseIntro" xml:space="preserve">
+    <value>Replace the terminal placeholders with final gameplay captures. The layout is ready for cinematic screenshots, environmental storytelling and store-page copy.</value>
+  </data>
+  <data name="Home_ShowcaseOneTitle" xml:space="preserve">
+    <value>Your shift begins after closing time</value>
+  </data>
+  <data name="Home_ShowcaseOneDescription" xml:space="preserve">
+    <value>Explore a retro-futuristic restaurant frozen in the remains of the space race. Search offices, storage rooms and silent dining halls while the building reacts to your presence.</value>
+  </data>
+  <data name="Home_ShowcaseOneAlt" xml:space="preserve">
+    <value>Gameplay screenshot placeholder showing the Cosmic Diner interior</value>
+  </data>
+  <data name="Home_ShowcaseTwoTitle" xml:space="preserve">
+    <value>Light is a tool, a warning and a risk</value>
+  </data>
+  <data name="Home_ShowcaseTwoDescription" xml:space="preserve">
+    <value>Manage batteries, restore failing systems and use the flashlight carefully. Every powered circuit reveals another part of the diner, and may reveal you in return.</value>
+  </data>
+  <data name="Home_ShowcaseTwoAlt" xml:space="preserve">
+    <value>Gameplay screenshot placeholder showing a blackout sequence</value>
+  </data>
+  <data name="Home_ShowcaseThreeTitle" xml:space="preserve">
+    <value>The astronaut is not part of the attraction</value>
+  </data>
+  <data name="Home_ShowcaseThreeDescription" xml:space="preserve">
+    <value>Listen for movement beyond the walls, hide when the route closes and reconstruct what happened through photographs, objects and corrupted recordings.</value>
+  </data>
+  <data name="Home_ShowcaseThreeAlt" xml:space="preserve">
+    <value>Gameplay screenshot placeholder showing an enemy encounter</value>
+  </data>
+  <data name="Home_ChangelogEyebrow" xml:space="preserve">
+    <value>Game development archive</value>
+  </data>
+  <data name="Home_ChangelogTitle" xml:space="preserve">
+    <value>Patch Notes</value>
+  </data>
+  <data name="Home_ChangelogDescription" xml:space="preserve">
+    <value>These records describe the evolution of the Cosmic Diner videogame, not the Echo Console website.</value>
+  </data>
+  <data name="Home_ChangelogV01Title" xml:space="preserve">
+    <value>Playable Alpha</value>
+  </data>
+  <data name="Home_ChangelogV01Description" xml:space="preserve">
+    <value>Initial exploration loop, diner navigation, object interaction and the first playable progression route.</value>
+  </data>
+  <data name="Home_ChangelogV02Title" xml:space="preserve">
+    <value>Blackout Protocol</value>
+  </data>
+  <data name="Home_ChangelogV02Description" xml:space="preserve">
+    <value>Flashlight and battery systems, dynamic physical props, power restoration and environmental audio feedback.</value>
+  </data>
+  <data name="Home_ChangelogV03Title" xml:space="preserve">
+    <value>The Astronaut</value>
+  </data>
+  <data name="Home_ChangelogV03Description" xml:space="preserve">
+    <value>Enemy encounters, hiding logic, tension systems and expanded narrative evidence throughout the restaurant.</value>
+  </data>
+
+  <data name="Home_InterceptedSignals" xml:space="preserve">
+    <value>INTERCEPTED SIGNALS</value>
+  </data>
+
+  <data name="Home_ActiveInvestigators" xml:space="preserve">
+    <value>ACTIVE INVESTIGATORS</value>
+  </data>
+
+  <data name="Home_LiveFrequencyScan" xml:space="preserve">
+    <value>LIVE FREQUENCY SCAN</value>
+  </data>
+
+  <data name="Home_ScanLocked" xml:space="preserve">
+    <value>SCAN LOCKED</value>
+  </data>
+
+  <data name="Home_SurviveShiftTitle" xml:space="preserve">
+    <value>SURVIVE THE SHIFT</value>
+  </data>
+
+  <data name="Home_CorruptedData" xml:space="preserve">
+    <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
+  </data>
 </root>
