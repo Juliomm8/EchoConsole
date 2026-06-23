@@ -144,6 +144,14 @@
                 <span class="@labelClass">@SharedLocalizer["Sidebar_GamesBuilds"]</span>
             </a>
 
+            <a asp-controller="PatchNotesAdmin"
+               asp-action="Create"
+               title="@SharedLocalizer["Sidebar_PatchNotesCms"]"
+               class="@navClass(new[] { "PatchNotesAdmin" })">
+                <span class="@iconClass font-display text-[10px]">PN</span>
+                <span class="@labelClass">@SharedLocalizer["Sidebar_PatchNotesCms"]</span>
+            </a>
+
             <a asp-controller="Installations"
                asp-action="Index"
                title="@SharedLocalizer["Sidebar_DevicesInstallations"]"

@@ -292,37 +292,6 @@
             </article>
         </div>
     </section>
-
-    @{
-        var previewPatchNotes = new[]
-        {
-            new
-            {
-                Version = "v0.1",
-                Category = "ALPHA",
-                Tone = "green",
-                Title = SharedLocalizer["Home_ChangelogV01Title"].Value,
-                Description = SharedLocalizer["Home_ChangelogV01Description"].Value
-            },
-            new
-            {
-                Version = "v0.2",
-                Category = "SYSTEMS",
-                Tone = "amber",
-                Title = SharedLocalizer["Home_ChangelogV02Title"].Value,
-                Description = SharedLocalizer["Home_ChangelogV02Description"].Value
-            },
-            new
-            {
-                Version = "v0.3",
-                Category = "ENCOUNTER",
-                Tone = "rose",
-                Title = SharedLocalizer["Home_ChangelogV03Title"].Value,
-                Description = SharedLocalizer["Home_ChangelogV03Description"].Value
-            }
-        };
-    }
-
     <style>
         .patch-carousel-scroll {
             scrollbar-width: thin;
@@ -388,14 +357,12 @@
 
                     <div class="patch-carousel-scroll flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 py-7 pb-8">
                         @*
-                            CMS integration:
-                            Replace previewPatchNotes with Model.PatchNotes after the
-                            SQLite and Entity Framework Core service is connected.
-                            Keep the article markup unchanged so every CMS record
-                            renders with the same responsive card structure.
+                            Patch notes are loaded from EchoConsole.Api.
+                            Keep the article markup unchanged so every database
+                            record renders with the same card structure.
                         *@
 
-                        @foreach (var patch in previewPatchNotes)
+                        @foreach (var patch in Model.PatchNotes)
                         {
                             var borderClass = "border-green-500/30";
                             var badgeClass = "border-green-500/35 bg-green-500/10 text-green-300";

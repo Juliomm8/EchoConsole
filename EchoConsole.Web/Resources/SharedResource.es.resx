@@ -1433,4 +1433,78 @@
   <data name="Home_CorruptedData" xml:space="preserve">
     <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
   </data>
+
+  <data name="PatchNotesAdmin_PageTitle" xml:space="preserve">
+    <value>CMS de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_Eyebrow" xml:space="preserve">
+    <value>Consola de transmisión de contenido</value>
+  </data>
+  <data name="PatchNotesAdmin_Title" xml:space="preserve">
+    <value>Publicar nota de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_Subtitle" xml:space="preserve">
+    <value>Crea una nueva actualización de Cosmic Diner y transmítela mediante Echo Console al archivo público de parches.</value>
+  </data>
+  <data name="PatchNotesAdmin_Version" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="PatchNotesAdmin_Category" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+  <data name="PatchNotesAdmin_Tone" xml:space="preserve">
+    <value>Tono de terminal</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneGreen" xml:space="preserve">
+    <value>Verde // Transmisión estándar</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneAmber" xml:space="preserve">
+    <value>Ámbar // Advertencia de sistemas</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneRose" xml:space="preserve">
+    <value>Rojo // Encuentro crítico</value>
+  </data>
+  <data name="PatchNotesAdmin_PatchTitle" xml:space="preserve">
+    <value>Título del parche</value>
+  </data>
+  <data name="PatchNotesAdmin_TitlePlaceholder" xml:space="preserve">
+    <value>PROTOCOLO DE APAGÓN</value>
+  </data>
+  <data name="PatchNotesAdmin_Description" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="PatchNotesAdmin_DescriptionPlaceholder" xml:space="preserve">
+    <value>Describe los cambios de jugabilidad, correcciones y sistemas nuevos incluidos en esta versión.</value>
+  </data>
+  <data name="PatchNotesAdmin_PublishNotice" xml:space="preserve">
+    <value>Esta transmisión se publicará inmediatamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_Back" xml:space="preserve">
+    <value>Volver a la landing</value>
+  </data>
+  <data name="PatchNotesAdmin_Submit" xml:space="preserve">
+    <value>Transmitir parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTitle" xml:space="preserve">
+    <value>Protocolo de publicación</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolOne" xml:space="preserve">
+    <value>Los identificadores de versión deben ser únicos. La API rechaza versiones existentes.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTwo" xml:space="preserve">
+    <value>Las categorías se normalizan a mayúsculas y los tonos se limitan a green, amber o rose.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolThree" xml:space="preserve">
+    <value>La API asigna la fecha UTC de publicación y la landing solo consume registros publicados.</value>
+  </data>
+  <data name="PatchNotesAdmin_Success" xml:space="preserve">
+    <value>La nota de parche se publicó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_Error" xml:space="preserve">
+    <value>No se pudo publicar la nota de parche.</value>
+  </data>
+
+  <data name="Sidebar_PatchNotesCms" xml:space="preserve">
+    <value>CMS de parches</value>
+  </data>
 </root>

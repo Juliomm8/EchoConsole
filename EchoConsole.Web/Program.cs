@@ -161,6 +161,7 @@ builder.Services.AddScoped<EchoConsoleProfileApiClient>();
 builder.Services.AddScoped<EchoConsoleSessionEventsApiClient>();
 builder.Services.AddScoped<EchoConsoleSessionEventAnalyticsApiClient>();
 builder.Services.AddScoped<EchoConsoleLiveOperationsApiClient>();
+builder.Services.AddScoped<EchoConsolePatchNotesApiClient>();
 
 var app = builder.Build();
 
