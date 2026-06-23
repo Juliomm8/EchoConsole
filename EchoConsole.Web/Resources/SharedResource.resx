@@ -1409,4 +1409,28 @@
   <data name="Home_ChangelogV03Description" xml:space="preserve">
     <value>Enemy encounters, hiding logic, tension systems and expanded narrative evidence throughout the restaurant.</value>
   </data>
+
+  <data name="Home_InterceptedSignals" xml:space="preserve">
+    <value>INTERCEPTED SIGNALS</value>
+  </data>
+
+  <data name="Home_ActiveInvestigators" xml:space="preserve">
+    <value>ACTIVE INVESTIGATORS</value>
+  </data>
+
+  <data name="Home_LiveFrequencyScan" xml:space="preserve">
+    <value>LIVE FREQUENCY SCAN</value>
+  </data>
+
+  <data name="Home_ScanLocked" xml:space="preserve">
+    <value>SCAN LOCKED</value>
+  </data>
+
+  <data name="Home_SurviveShiftTitle" xml:space="preserve">
+    <value>SURVIVE THE SHIFT</value>
+  </data>
+
+  <data name="Home_CorruptedData" xml:space="preserve">
+    <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
+  </data>
 </root>
