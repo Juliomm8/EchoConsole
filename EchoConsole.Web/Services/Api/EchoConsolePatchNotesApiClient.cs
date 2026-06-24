@@ -30,11 +30,7 @@ public sealed class EchoConsolePatchNotesApiClient
 
             return patchNotes is null
                 ? Array.Empty<PatchNoteApiDto>()
-                : patchNotes
-                    .Where(x => x.IsPublished)
-                    .OrderByDescending(x => x.CreatedAtUtc)
-                    .ThenByDescending(x => x.Id)
-                    .ToArray();
+                : patchNotes;
         }
         catch (Exception ex)
         {
@@ -113,6 +109,58 @@ public sealed class EchoConsolePatchNotesApiClient
                 "Unexpected error while creating a patch note.");
 
             return CreatePatchNoteApiResult.Failure(
+                "The patch note service is currently unavailable.");
+        }
+    }
+
+    public async Task<TogglePatchNotePublishApiResult> TogglePublishAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+
+            using var request = new HttpRequestMessage(
+                HttpMethod.Patch,
+                $"/api/patchnotes/{id}/toggle");
+
+            using var response = await client.SendAsync(
+                request,
+                cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var patchNote = await response.Content
+                    .ReadFromJsonAsync<PatchNoteApiDto>(
+                        cancellationToken: cancellationToken);
+
+                return TogglePatchNotePublishApiResult.Success(
+                    patchNote);
+            }
+
+            var errorMessage = await ReadErrorMessageAsync(
+                response,
+                cancellationToken);
+
+            _logger.LogWarning(
+                "Toggle patch note publication request failed. PatchNoteId: {PatchNoteId}, StatusCode: {StatusCode}, Error: {ErrorMessage}",
+                id,
+                response.StatusCode,
+                errorMessage);
+
+            return TogglePatchNotePublishApiResult.Failure(
+                errorMessage,
+                response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unexpected error while toggling patch note {PatchNoteId} publication status.",
+                id);
+
+            return TogglePatchNotePublishApiResult.Failure(
                 "The patch note service is currently unavailable.");
         }
     }
@@ -280,6 +328,50 @@ public sealed class CreatePatchNoteApiResult
         HttpStatusCode? statusCode = null)
     {
         return new CreatePatchNoteApiResult(
+            false,
+            null,
+            errorMessage,
+            statusCode);
+    }
+}
+
+public sealed class TogglePatchNotePublishApiResult
+{
+    private TogglePatchNotePublishApiResult(
+        bool succeeded,
+        PatchNoteApiDto? patchNote,
+        string? errorMessage,
+        HttpStatusCode? statusCode)
+    {
+        Succeeded = succeeded;
+        PatchNote = patchNote;
+        ErrorMessage = errorMessage;
+        StatusCode = statusCode;
+    }
+
+    public bool Succeeded { get; }
+
+    public PatchNoteApiDto? PatchNote { get; }
+
+    public string? ErrorMessage { get; }
+
+    public HttpStatusCode? StatusCode { get; }
+
+    public static TogglePatchNotePublishApiResult Success(
+        PatchNoteApiDto? patchNote)
+    {
+        return new TogglePatchNotePublishApiResult(
+            true,
+            patchNote,
+            null,
+            null);
+    }
+
+    public static TogglePatchNotePublishApiResult Failure(
+        string errorMessage,
+        HttpStatusCode? statusCode = null)
+    {
+        return new TogglePatchNotePublishApiResult(
             false,
             null,
             errorMessage,

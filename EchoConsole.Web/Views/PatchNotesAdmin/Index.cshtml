@@ -131,6 +131,18 @@
                                     _ => "border-green-500/35 bg-green-500/10 text-green-300"
                                 };
 
+                                var visibilityButtonClasses = patch.IsPublished
+                                    ? "border-green-500/40 bg-green-500/10 text-green-300 hover:border-green-400/70 hover:bg-green-500/20 hover:text-green-100"
+                                    : "border-slate-600/50 bg-slate-800/40 text-slate-400 hover:border-slate-500/80 hover:bg-slate-800/70 hover:text-slate-200";
+
+                                var visibilityLabel = patch.IsPublished
+                                    ? SharedLocalizer["PatchNotesAdmin_Published"]
+                                    : SharedLocalizer["PatchNotesAdmin_Hidden"];
+
+                                var visibilityTitle = patch.IsPublished
+                                    ? SharedLocalizer["PatchNotesAdmin_ToggleToHidden"]
+                                    : SharedLocalizer["PatchNotesAdmin_ToggleToPublished"];
+
                                 <tr class="transition hover:bg-green-500/[0.025]">
                                     <td class="whitespace-nowrap px-5 py-5 align-top">
                                         <span class="inline-flex rounded border px-3 py-1.5 text-xs font-bold @toneClasses">
@@ -156,15 +168,15 @@
                                         @if (patch.IsPublished)
                                         {
                                             <span class="inline-flex items-center gap-2 rounded border border-green-500/30 bg-green-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-green-300">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-green-400"></span>
+                                                <span class="h-1.5 w-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.75)]"></span>
                                                 @SharedLocalizer["PatchNotesAdmin_Published"]
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="inline-flex items-center gap-2 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-                                                @SharedLocalizer["PatchNotesAdmin_Draft"]
+                                            <span class="inline-flex items-center gap-2 rounded border border-slate-600/40 bg-slate-800/30 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-slate-600"></span>
+                                                @SharedLocalizer["PatchNotesAdmin_Hidden"]
                                             </span>
                                         }
                                     </td>
@@ -174,21 +186,41 @@
                                     </td>
 
                                     <td class="whitespace-nowrap px-5 py-5 text-right align-top">
-                                        <form asp-controller="PatchNotesAdmin"
-                                              asp-action="Delete"
-                                              method="post"
-                                              onsubmit='return confirm(@Html.Raw(deleteConfirmation));'>
-                                            @Html.AntiForgeryToken()
+                                        <div class="flex items-center justify-end gap-2">
+                                            <form asp-controller="PatchNotesAdmin"
+                                                  asp-action="TogglePublish"
+                                                  method="post">
+                                                @Html.AntiForgeryToken()
 
-                                            <input type="hidden"
-                                                   name="id"
-                                                   value="@patch.Id" />
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="@patch.Id" />
 
-                                            <button type="submit"
-                                                    class="rounded border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-rose-300 transition hover:border-rose-400/70 hover:bg-rose-500/20 hover:text-rose-100">
-                                                @SharedLocalizer["PatchNotesAdmin_Delete"]
-                                            </button>
-                                        </form>
+                                                <button type="submit"
+                                                        title="@visibilityTitle"
+                                                        aria-pressed="@patch.IsPublished.ToString().ToLowerInvariant()"
+                                                        class="inline-flex items-center gap-2 rounded border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] transition @visibilityButtonClasses">
+                                                    <span class="h-1.5 w-1.5 rounded-full @(patch.IsPublished ? "bg-green-400" : "bg-slate-600")"></span>
+                                                    @visibilityLabel
+                                                </button>
+                                            </form>
+
+                                            <form asp-controller="PatchNotesAdmin"
+                                                  asp-action="Delete"
+                                                  method="post"
+                                                  onsubmit='return confirm(@Html.Raw(deleteConfirmation));'>
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="@patch.Id" />
+
+                                                <button type="submit"
+                                                        class="rounded border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-rose-300 transition hover:border-rose-400/70 hover:bg-rose-500/20 hover:text-rose-100">
+                                                    @SharedLocalizer["PatchNotesAdmin_Delete"]
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }

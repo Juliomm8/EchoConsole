@@ -130,6 +130,49 @@ public sealed class PatchNotesAdminController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost("toggle")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TogglePublish(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            TempData["PatchNotesAdminError"] =
+                _localizer["PatchNotesAdmin_InvalidId"].Value;
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var result = await _patchNotesApiClient.TogglePublishAsync(
+            id,
+            cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            _logger.LogWarning(
+                "Patch note publication toggle failed. PatchNoteId: {PatchNoteId}, Error: {ErrorMessage}",
+                id,
+                result.ErrorMessage);
+
+            TempData["PatchNotesAdminError"] =
+                string.IsNullOrWhiteSpace(result.ErrorMessage)
+                    ? _localizer["PatchNotesAdmin_ToggleError"].Value
+                    : result.ErrorMessage;
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var successKey = result.PatchNote?.IsPublished == true
+            ? "PatchNotesAdmin_TogglePublishedSuccess"
+            : "PatchNotesAdmin_ToggleHiddenSuccess";
+
+        TempData["PatchNotesAdminSuccess"] =
+            _localizer[successKey].Value;
+
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost("delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(

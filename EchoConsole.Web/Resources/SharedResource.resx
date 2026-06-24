@@ -1585,4 +1585,22 @@
   <data name="PatchNotesAdmin_BackToDashboard" xml:space="preserve">
     <value>Back to dashboard</value>
   </data>
+  <data name="PatchNotesAdmin_Hidden" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToHidden" xml:space="preserve">
+    <value>Hide from the public landing page</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToPublished" xml:space="preserve">
+    <value>Publish on the public landing page</value>
+  </data>
+  <data name="PatchNotesAdmin_TogglePublishedSuccess" xml:space="preserve">
+    <value>Patch note published successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleHiddenSuccess" xml:space="preserve">
+    <value>Patch note hidden successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleError" xml:space="preserve">
+    <value>The patch note visibility could not be changed.</value>
+  </data>
 </root>

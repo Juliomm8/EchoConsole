@@ -154,6 +154,38 @@ public sealed class PatchNotesController : ControllerBase
     }
 
     [Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
+    [HttpPatch("{id:int}/toggle")]
+    public async Task<ActionResult<PatchNoteDto>> TogglePublished(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var patchNote = await _dbContext.PatchNotes
+            .SingleOrDefaultAsync(
+                x => x.Id == id,
+                cancellationToken);
+
+        if (patchNote is null)
+        {
+            return NotFound(new
+            {
+                message = $"Patch note with id '{id}' was not found."
+            });
+        }
+
+        patchNote.IsPublished = !patchNote.IsPublished;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Patch note publication status changed. Id: {PatchNoteId}, Version: {Version}, IsPublished: {IsPublished}",
+            patchNote.Id,
+            patchNote.Version,
+            patchNote.IsPublished);
+
+        return Ok(MapPatchNote(patchNote));
+    }
+
+    [Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(
         int id,

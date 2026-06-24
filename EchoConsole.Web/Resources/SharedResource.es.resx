@@ -1585,4 +1585,22 @@
   <data name="PatchNotesAdmin_BackToDashboard" xml:space="preserve">
     <value>Volver al panel</value>
   </data>
+  <data name="PatchNotesAdmin_Hidden" xml:space="preserve">
+    <value>Oculto</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToHidden" xml:space="preserve">
+    <value>Ocultar de la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToPublished" xml:space="preserve">
+    <value>Publicar en la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_TogglePublishedSuccess" xml:space="preserve">
+    <value>La nota de parche se publicó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleHiddenSuccess" xml:space="preserve">
+    <value>La nota de parche se ocultó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleError" xml:space="preserve">
+    <value>No se pudo cambiar la visibilidad de la nota de parche.</value>
+  </data>
 </root>
