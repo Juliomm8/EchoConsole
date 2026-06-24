@@ -1,31 +1,120 @@
 @model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
 
 @functions {
-    private string GetAccentClasses(string accent)
+    private static bool IsZeroLike(string value)
     {
-        return accent switch
+        if (string.IsNullOrWhiteSpace(value))
         {
-            "magenta" => "border-fuchsia-500/20 bg-fuchsia-500/5 shadow-[0_0_25px_rgba(217,70,239,0.08)]",
-            _ => "border-cyan-500/20 bg-cyan-500/5 shadow-[0_0_25px_rgba(34,211,238,0.08)]"
+            return true;
+        }
+
+        var normalized = value.Trim();
+
+        return normalized is "0" or "00:00:00" or "--" or "-";
+    }
+
+    private static string GetNodeCode(string valueElementId)
+    {
+        return valueElementId switch
+        {
+            "kpi-registered-installations" => "NODE_01",
+            "kpi-active-sessions" => "NODE_02",
+            "kpi-average-duration" => "NODE_03",
+            "kpi-latest-heartbeat" => "NODE_04",
+            _ => "NODE_XX"
         };
     }
 
-    private string GetIconAccent(string accent)
+    private static string GetPanelClasses(string valueElementId, bool isZeroLike)
     {
-        return accent switch
+        return valueElementId switch
         {
-            "magenta" => "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-300",
-            _ => "border-cyan-400/30 bg-cyan-500/10 text-cyan-300"
+            "kpi-registered-installations" => "border-slate-800 bg-[linear-gradient(145deg,rgba(8,47,73,0.18),rgba(0,0,0,0.96))] hover:border-[#22d3ee]/35 hover:shadow-[0_0_22px_rgba(34,211,238,0.08)]",
+            "kpi-active-sessions" when isZeroLike => "border-amber-500/25 bg-[linear-gradient(145deg,rgba(69,26,3,0.18),rgba(0,0,0,0.96))] hover:border-amber-400/40 hover:shadow-[0_0_22px_rgba(245,158,11,0.08)]",
+            "kpi-active-sessions" => "border-green-900/50 bg-[linear-gradient(145deg,rgba(5,46,22,0.20),rgba(0,0,0,0.96))] hover:border-green-400/35 hover:shadow-[0_0_22px_rgba(34,197,94,0.08)]",
+            "kpi-average-duration" => "border-slate-800 bg-[linear-gradient(145deg,rgba(30,41,59,0.22),rgba(0,0,0,0.96))] hover:border-slate-600 hover:shadow-[0_0_22px_rgba(148,163,184,0.06)]",
+            "kpi-latest-heartbeat" when isZeroLike => "border-amber-500/20 bg-[linear-gradient(145deg,rgba(69,26,3,0.14),rgba(0,0,0,0.96))] hover:border-amber-400/35 hover:shadow-[0_0_22px_rgba(245,158,11,0.07)]",
+            "kpi-latest-heartbeat" => "border-[#22d3ee]/20 bg-[linear-gradient(145deg,rgba(8,47,73,0.16),rgba(0,0,0,0.96))] hover:border-[#22d3ee]/35 hover:shadow-[0_0_22px_rgba(34,211,238,0.07)]",
+            _ => "border-slate-800 bg-[#010301] hover:border-slate-700"
         };
     }
 
-    private string GetDeltaClass(bool positive)
+    private static string GetValueClasses(string valueElementId, bool isZeroLike)
     {
-        return positive ? "text-emerald-400" : "text-rose-400";
+        if (isZeroLike)
+        {
+            return "text-amber-400";
+        }
+
+        return valueElementId switch
+        {
+            "kpi-registered-installations" => "text-[#67e8f9]",
+            "kpi-active-sessions" => "text-green-400",
+            "kpi-average-duration" => "text-slate-200",
+            "kpi-latest-heartbeat" => "text-[#67e8f9]",
+            _ => "text-slate-200"
+        };
+    }
+
+    private static string GetBadgeClasses(string valueElementId, bool isZeroLike)
+    {
+        if (isZeroLike)
+        {
+            return "border-amber-500/30 bg-amber-500/5 text-amber-500";
+        }
+
+        return valueElementId switch
+        {
+            "kpi-registered-installations" => "border-[#22d3ee]/25 bg-[#083344]/20 text-[#67e8f9]",
+            "kpi-active-sessions" => "border-green-500/30 bg-green-500/5 text-green-400",
+            "kpi-average-duration" => "border-slate-700 bg-slate-900/35 text-slate-300",
+            "kpi-latest-heartbeat" => "border-[#22d3ee]/25 bg-[#083344]/20 text-[#67e8f9]",
+            _ => "border-slate-700 bg-slate-900/35 text-slate-400"
+        };
+    }
+
+    private static string GetGaugeText(string valueElementId, bool isZeroLike)
+    {
+        if (isZeroLike)
+        {
+            return "[░░░░░░░░░░░░] 00%";
+        }
+
+        return valueElementId switch
+        {
+            "kpi-registered-installations" => "[████████░░░░] 67%",
+            "kpi-active-sessions" => "[██████░░░░░░] 50%",
+            "kpi-average-duration" => "[█████████░░░] 75%",
+            "kpi-latest-heartbeat" => "[██████████░░] 84%",
+            _ => "[██████░░░░░░] 50%"
+        };
+    }
+
+    private static string GetGaugeClasses(string valueElementId, bool isZeroLike)
+    {
+        if (isZeroLike)
+        {
+            return "text-amber-500/80";
+        }
+
+        return valueElementId switch
+        {
+            "kpi-active-sessions" => "text-green-500/80",
+            "kpi-average-duration" => "text-slate-500",
+            _ => "text-[#22d3ee]/70"
+        };
+    }
+
+    private static string GetDeltaClass(bool positive)
+    {
+        return positive
+            ? "text-green-400"
+            : "text-amber-400";
     }
 }
 
-<div class="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-4">
+<section aria-label="Global telemetry metrics"
+         class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
     @foreach (var kpi in Model.Kpis)
     {
         var titleKey = kpi.ValueElementId switch
@@ -54,37 +143,64 @@
             _ => string.Empty
         };
 
-        <div class="rounded-2xl border @GetAccentClasses(kpi.Accent) p-5">
+        var isZeroLike = IsZeroLike(kpi.Value);
+
+        <article class="group relative min-h-[18rem] overflow-hidden rounded-lg border p-5 transition duration-200 @GetPanelClasses(kpi.ValueElementId, isZeroLike)">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-500/35 to-transparent opacity-60 transition group-hover:opacity-100"></div>
+
             <div class="flex items-start justify-between gap-4">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
+                <div class="min-w-0">
+                    <p class="text-[9px] font-bold uppercase tracking-[0.24em] text-slate-600">
+                        &gt; _ @GetNodeCode(kpi.ValueElementId) // TELEMETRY
+                    </p>
+
+                    <h2 class="mt-4 text-[11px] font-bold uppercase leading-5 tracking-widest text-slate-300">
                         @(string.IsNullOrWhiteSpace(titleKey)
                             ? kpi.Title
                             : SharedLocalizer[titleKey].Value)
-                    </p>
-
-                    <p id="@kpi.ValueElementId"
-                       class="mt-4 font-display text-3xl uppercase tracking-[0.08em] text-white">
-                        @kpi.Value
-                    </p>
-
-                    <p class="mt-2 text-sm text-slate-400">
-                        @(string.IsNullOrWhiteSpace(subtitleKey)
-                            ? kpi.Subtitle
-                            : SharedLocalizer[subtitleKey].Value)
-                    </p>
-
-                    <p class="mt-3 text-sm font-semibold @GetDeltaClass(kpi.IsPositiveDelta)">
-                        @(string.IsNullOrWhiteSpace(deltaKey)
-                            ? kpi.DeltaText
-                            : SharedLocalizer[deltaKey].Value)
-                    </p>
+                    </h2>
                 </div>
 
-                <div class="flex h-14 w-14 items-center justify-center rounded-xl border @GetIconAccent(kpi.Accent)">
-                    <span class="font-display text-lg">EC</span>
-                </div>
+                <span class="inline-flex h-10 min-w-10 items-center justify-center rounded border px-2 text-[9px] font-bold uppercase tracking-[0.16em] @GetBadgeClasses(kpi.ValueElementId, isZeroLike)">
+                    [EC]
+                </span>
             </div>
-        </div>
+
+            <p id="@kpi.ValueElementId"
+               data-metric-value
+               class="mt-8 break-words font-display text-3xl uppercase tracking-[0.08em] sm:text-4xl @GetValueClasses(kpi.ValueElementId, isZeroLike)">
+                @kpi.Value
+            </p>
+
+            <p class="mt-4 min-h-12 text-xs leading-6 text-slate-600">
+                @(string.IsNullOrWhiteSpace(subtitleKey)
+                    ? kpi.Subtitle
+                    : SharedLocalizer[subtitleKey].Value)
+            </p>
+
+            <div class="mt-5 rounded border border-slate-800/80 bg-black/45 px-3 py-3">
+                <div class="flex items-center justify-between gap-3 text-[8px] font-bold uppercase tracking-[0.18em] text-slate-700">
+                    <span>LOAD CHANNEL</span>
+                    <span>@(isZeroLike ? "IDLE" : "SYNC")</span>
+                </div>
+                <p id="@(kpi.ValueElementId)-gauge"
+                   class="mt-2 overflow-hidden whitespace-nowrap text-[10px] tracking-[0.06em] @GetGaugeClasses(kpi.ValueElementId, isZeroLike)">
+                    @GetGaugeText(kpi.ValueElementId, isZeroLike)
+                </p>
+            </div>
+
+            <div class="mt-5 flex items-center justify-between gap-3 border-t border-slate-800 pt-4">
+                <span class="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-700">
+                    DATA_SOURCE: API
+                </span>
+
+                <span class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] @GetDeltaClass(kpi.IsPositiveDelta)">
+                    <span class="h-1.5 w-1.5 rounded-full @(kpi.IsPositiveDelta ? "bg-green-400 animate-signal-pulse" : "bg-amber-400")"></span>
+                    [@(string.IsNullOrWhiteSpace(deltaKey)
+                        ? kpi.DeltaText
+                        : SharedLocalizer[deltaKey].Value)]
+                </span>
+            </div>
+        </article>
     }
-</div>
+</section>
