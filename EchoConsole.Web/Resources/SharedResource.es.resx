@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1745,5 +1745,74 @@
   </data>
   <data name="SimulationOrchestrator_PersistentHint" xml:space="preserve">
     <value>El modo persistente permanece activo entre páginas hasta que se termine manualmente.</value>
+  </data>
+  <data name="Builds_RegisterNew" xml:space="preserve">
+    <value>REGISTRAR_NUEVA_BUILD</value>
+  </data>
+  <data name="Builds_FieldVersion" xml:space="preserve">
+    <value>Número de versión</value>
+  </data>
+  <data name="Builds_FieldEngine" xml:space="preserve">
+    <value>Versión base del motor</value>
+  </data>
+  <data name="Builds_FieldReleaseDate" xml:space="preserve">
+    <value>Fecha de lanzamiento UTC</value>
+  </data>
+  <data name="Builds_FieldNotes" xml:space="preserve">
+    <value>Notas de versión</value>
+  </data>
+  <data name="Builds_NotesPlaceholder" xml:space="preserve">
+    <value>Describe cambios relevantes, correcciones y contexto del despliegue.</value>
+  </data>
+  <data name="Builds_FieldSetActive" xml:space="preserve">
+    <value>Establecer como build activa de producción</value>
+  </data>
+  <data name="Builds_RegisterSubmit" xml:space="preserve">
+    <value>REGISTRAR_BUILD</value>
+  </data>
+  <data name="Builds_KpiTotal" xml:space="preserve">
+    <value>Total de builds registradas</value>
+  </data>
+  <data name="Builds_KpiActive" xml:space="preserve">
+    <value>Build activa en producción</value>
+  </data>
+  <data name="Builds_KpiEngine" xml:space="preserve">
+    <value>Versión base del motor</value>
+  </data>
+  <data name="Builds_NoActiveBuild" xml:space="preserve">
+    <value>SIN_BUILD_ACTIVA</value>
+  </data>
+  <data name="Builds_EngineUnavailable" xml:space="preserve">
+    <value>MOTOR_NO_REPORTADO</value>
+  </data>
+  <data name="Builds_ColInstallations" xml:space="preserve">
+    <value>Instalaciones vinculadas</value>
+  </data>
+  <data name="Builds_ColSessions" xml:space="preserve">
+    <value>Sesiones totales</value>
+  </data>
+  <data name="Builds_NoReleaseNotes" xml:space="preserve">
+    <value>Sin notas de versión</value>
+  </data>
+  <data name="Builds_Activate" xml:space="preserve">
+    <value>Activar build</value>
+  </data>
+  <data name="Builds_Deactivate" xml:space="preserve">
+    <value>Desactivar build</value>
+  </data>
+  <data name="Builds_EmptyHint" xml:space="preserve">
+    <value>Registra una build para inicializar la telemetría de versiones.</value>
+  </data>
+  <data name="Builds_CreateSuccess" xml:space="preserve">
+    <value>La build se registró correctamente.</value>
+  </data>
+  <data name="Builds_CreateError" xml:space="preserve">
+    <value>No se pudo registrar la build.</value>
+  </data>
+  <data name="Builds_StatusUpdated" xml:space="preserve">
+    <value>El estado de la build se actualizó correctamente.</value>
+  </data>
+  <data name="Builds_StatusError" xml:space="preserve">
+    <value>No se pudo actualizar el estado de la build.</value>
   </data>
 </root>

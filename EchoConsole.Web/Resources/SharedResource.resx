@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1745,5 +1745,74 @@
   </data>
   <data name="SimulationOrchestrator_PersistentHint" xml:space="preserve">
     <value>Persistent mode remains active across page navigation until terminated.</value>
+  </data>
+  <data name="Builds_RegisterNew" xml:space="preserve">
+    <value>REGISTER_NEW_BUILD</value>
+  </data>
+  <data name="Builds_FieldVersion" xml:space="preserve">
+    <value>Version number</value>
+  </data>
+  <data name="Builds_FieldEngine" xml:space="preserve">
+    <value>Base engine version</value>
+  </data>
+  <data name="Builds_FieldReleaseDate" xml:space="preserve">
+    <value>Release date UTC</value>
+  </data>
+  <data name="Builds_FieldNotes" xml:space="preserve">
+    <value>Release notes</value>
+  </data>
+  <data name="Builds_NotesPlaceholder" xml:space="preserve">
+    <value>Describe relevant changes, fixes, and deployment context.</value>
+  </data>
+  <data name="Builds_FieldSetActive" xml:space="preserve">
+    <value>Set as active production build</value>
+  </data>
+  <data name="Builds_RegisterSubmit" xml:space="preserve">
+    <value>REGISTER_BUILD</value>
+  </data>
+  <data name="Builds_KpiTotal" xml:space="preserve">
+    <value>Total registered builds</value>
+  </data>
+  <data name="Builds_KpiActive" xml:space="preserve">
+    <value>Active production build</value>
+  </data>
+  <data name="Builds_KpiEngine" xml:space="preserve">
+    <value>Base engine version</value>
+  </data>
+  <data name="Builds_NoActiveBuild" xml:space="preserve">
+    <value>NO_ACTIVE_BUILD</value>
+  </data>
+  <data name="Builds_EngineUnavailable" xml:space="preserve">
+    <value>ENGINE_NOT_REPORTED</value>
+  </data>
+  <data name="Builds_ColInstallations" xml:space="preserve">
+    <value>Linked installations</value>
+  </data>
+  <data name="Builds_ColSessions" xml:space="preserve">
+    <value>Total sessions</value>
+  </data>
+  <data name="Builds_NoReleaseNotes" xml:space="preserve">
+    <value>No release notes provided</value>
+  </data>
+  <data name="Builds_Activate" xml:space="preserve">
+    <value>Activate build</value>
+  </data>
+  <data name="Builds_Deactivate" xml:space="preserve">
+    <value>Deactivate build</value>
+  </data>
+  <data name="Builds_EmptyHint" xml:space="preserve">
+    <value>Register a build to initialize version telemetry.</value>
+  </data>
+  <data name="Builds_CreateSuccess" xml:space="preserve">
+    <value>Build registered successfully.</value>
+  </data>
+  <data name="Builds_CreateError" xml:space="preserve">
+    <value>The build could not be registered.</value>
+  </data>
+  <data name="Builds_StatusUpdated" xml:space="preserve">
+    <value>Build status updated successfully.</value>
+  </data>
+  <data name="Builds_StatusError" xml:space="preserve">
+    <value>The build status could not be updated.</value>
   </data>
 </root>

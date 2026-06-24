@@ -1,11 +1,11 @@
-﻿using EchoConsole.Api.Contracts.Admin;
+using EchoConsole.Api.Contracts.Admin;
 using EchoConsole.Api.Contracts.Common;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using EchoConsole.Api.Security;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EchoConsole.Api.Controllers.Admin;
 
@@ -51,7 +51,8 @@ public sealed class BuildsAdminController : ControllerBase
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderByDescending(x => x.ReleaseDateUtc)
+            .OrderByDescending(x => x.IsActive)
+            .ThenByDescending(x => x.ReleaseDateUtc)
             .ThenByDescending(x => x.Id)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -66,6 +67,48 @@ public sealed class BuildsAdminController : ControllerBase
             })
             .ToListAsync(cancellationToken);
 
+        var versions = items
+            .Select(x => x.VersionNumber)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (versions.Length > 0)
+        {
+            var installationCounts = await _dbContext.Installations
+                .AsNoTracking()
+                .Where(x => versions.Contains(x.BuildVersion))
+                .GroupBy(x => x.BuildVersion)
+                .Select(group => new
+                {
+                    BuildVersion = group.Key,
+                    Count = group.Count()
+                })
+                .ToDictionaryAsync(
+                    x => x.BuildVersion,
+                    x => x.Count,
+                    cancellationToken);
+
+            var sessionCounts = await _dbContext.GameSessions
+                .AsNoTracking()
+                .Where(x => versions.Contains(x.BuildVersion))
+                .GroupBy(x => x.BuildVersion)
+                .Select(group => new
+                {
+                    BuildVersion = group.Key,
+                    Count = group.Count()
+                })
+                .ToDictionaryAsync(
+                    x => x.BuildVersion,
+                    x => x.Count,
+                    cancellationToken);
+
+            foreach (var item in items)
+            {
+                item.LinkedInstallations = installationCounts.GetValueOrDefault(item.VersionNumber);
+                item.TotalSessions = sessionCounts.GetValueOrDefault(item.VersionNumber);
+            }
+        }
+
         var response = new PagedResponse<GameBuildDto>
         {
             Items = items,
@@ -76,6 +119,49 @@ public sealed class BuildsAdminController : ControllerBase
         };
 
         return Ok(response);
+    }
+
+    [HttpGet("summary")]
+    public async Task<ActionResult<GameBuildSummaryDto>> GetSummary(
+        CancellationToken cancellationToken = default)
+    {
+        var totalBuilds = await _dbContext.GameBuilds
+            .AsNoTracking()
+            .CountAsync(cancellationToken);
+
+        var activeBuild = await _dbContext.GameBuilds
+            .AsNoTracking()
+            .Where(x => x.IsActive)
+            .OrderByDescending(x => x.ReleaseDateUtc)
+            .ThenByDescending(x => x.Id)
+            .Select(x => new
+            {
+                x.VersionNumber,
+                x.EngineVersion
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var fallbackBuild = activeBuild is null
+            ? await _dbContext.GameBuilds
+                .AsNoTracking()
+                .OrderByDescending(x => x.ReleaseDateUtc)
+                .ThenByDescending(x => x.Id)
+                .Select(x => new
+                {
+                    x.VersionNumber,
+                    x.EngineVersion
+                })
+                .FirstOrDefaultAsync(cancellationToken)
+            : null;
+
+        return Ok(new GameBuildSummaryDto
+        {
+            TotalBuilds = totalBuilds,
+            ActiveVersion = activeBuild?.VersionNumber ?? string.Empty,
+            BaseEngineVersion = activeBuild?.EngineVersion
+                ?? fallbackBuild?.EngineVersion
+                ?? string.Empty
+        });
     }
 
     [HttpPost]
@@ -99,14 +185,11 @@ public sealed class BuildsAdminController : ControllerBase
 
         if (request.IsActive)
         {
-            var activeBuilds = await _dbContext.GameBuilds
+            await _dbContext.GameBuilds
                 .Where(x => x.IsActive)
-                .ToListAsync(cancellationToken);
-
-            foreach (var activeBuild in activeBuilds)
-            {
-                activeBuild.IsActive = false;
-            }
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(x => x.IsActive, false),
+                    cancellationToken);
         }
 
         var entity = new GameBuild
@@ -136,12 +219,71 @@ public sealed class BuildsAdminController : ControllerBase
             ReleaseNotes = entity.ReleaseNotes,
             ReleaseDateUtc = entity.ReleaseDateUtc,
             IsActive = entity.IsActive,
-            EngineVersion = entity.EngineVersion
+            EngineVersion = entity.EngineVersion,
+            LinkedInstallations = 0,
+            TotalSessions = 0
         };
 
         return CreatedAtAction(
             nameof(GetAll),
             new { searchTerm = entity.VersionNumber, pageNumber = 1, pageSize = 20 },
             dto);
+    }
+
+    [HttpPatch("{id:int}/active")]
+    public async Task<ActionResult<GameBuildDto>> SetActive(
+        int id,
+        [FromBody] SetGameBuildActiveRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var build = await _dbContext.GameBuilds
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (build is null)
+        {
+            return NotFound();
+        }
+
+        if (request.IsActive)
+        {
+            await _dbContext.GameBuilds
+                .Where(x => x.IsActive && x.Id != id)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(x => x.IsActive, false),
+                    cancellationToken);
+        }
+
+        build.IsActive = request.IsActive;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var linkedInstallations = await _dbContext.Installations
+            .AsNoTracking()
+            .CountAsync(
+                x => x.BuildVersion == build.VersionNumber,
+                cancellationToken);
+
+        var totalSessions = await _dbContext.GameSessions
+            .AsNoTracking()
+            .CountAsync(
+                x => x.BuildVersion == build.VersionNumber,
+                cancellationToken);
+
+        _logger.LogInformation(
+            "Game build active status updated. BuildId: {BuildId}, Version: {VersionNumber}, IsActive: {IsActive}",
+            build.Id,
+            build.VersionNumber,
+            build.IsActive);
+
+        return Ok(new GameBuildDto
+        {
+            Id = build.Id,
+            VersionNumber = build.VersionNumber,
+            ReleaseNotes = build.ReleaseNotes,
+            ReleaseDateUtc = build.ReleaseDateUtc,
+            IsActive = build.IsActive,
+            EngineVersion = build.EngineVersion,
+            LinkedInstallations = linkedInstallations,
+            TotalSessions = totalSessions
+        });
     }
 }
