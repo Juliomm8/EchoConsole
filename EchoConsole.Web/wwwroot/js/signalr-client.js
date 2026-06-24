@@ -189,13 +189,19 @@ window.echoConsoleRealtime = (() => {
     }
 
     function applyOverview(overview) {
-        setText(
+        setMetricValue(
             options.registeredInstallationsValueId,
-            formatNumber(overview.registeredInstallations));
+            formatNumber(overview.registeredInstallations),
+            Number(overview.registeredInstallations),
+            "neutral");
 
-        setText(
+        setMetricValue(
             options.activeSessionsValueId,
-            formatNumber(overview.activeSessions));
+            formatNumber(overview.activeSessions),
+            Number(overview.activeSessions),
+            Number(overview.activeSessions) > 0
+                ? "active"
+                : "warning");
 
         if (overview.serverTimeUtc) {
             const serverTime = new Date(
@@ -219,13 +225,17 @@ window.echoConsoleRealtime = (() => {
 
         if (!Array.isArray(sessions) ||
             sessions.length === 0) {
-            setText(
+            setMetricValue(
                 options.averageDurationValueId,
-                "00:00:00");
+                "00:00:00",
+                0,
+                "warning");
 
-            setText(
+            setMetricValue(
                 options.latestHeartbeatValueId,
-                "--");
+                "--",
+                0,
+                "warning");
             return;
         }
 
@@ -253,14 +263,18 @@ window.echoConsoleRealtime = (() => {
                     (sum, value) => sum + value,
                     0) / validDurations.length;
 
-            setText(
+            setMetricValue(
                 options.averageDurationValueId,
                 formatDurationFromMilliseconds(
-                    averageMilliseconds));
+                    averageMilliseconds),
+                averageMilliseconds,
+                "neutral");
         } else {
-            setText(
+            setMetricValue(
                 options.averageDurationValueId,
-                "00:00:00");
+                "00:00:00",
+                0,
+                "warning");
         }
 
         const latestHeartbeat = sessions
@@ -271,15 +285,19 @@ window.echoConsoleRealtime = (() => {
                 right.getTime() - left.getTime())[0];
 
         if (latestHeartbeat) {
-            setText(
+            setMetricValue(
                 options.latestHeartbeatValueId,
                 formatRelativeAge(
                     now.getTime() -
-                    latestHeartbeat.getTime()));
+                    latestHeartbeat.getTime()),
+                1,
+                "neutral");
         } else {
-            setText(
+            setMetricValue(
                 options.latestHeartbeatValueId,
-                "--");
+                "--",
+                0,
+                "warning");
         }
     }
 
@@ -298,13 +316,19 @@ window.echoConsoleRealtime = (() => {
             const emptyRow = document.createElement("tr");
 
             emptyRow.innerHTML = `
-                <td colspan="6" class="px-5 py-14 text-center">
-                    <div class="mx-auto max-w-lg">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-green-800">
-                            &gt; _ NO_ACTIVE_SIGNAL
+                <td colspan="6" class="px-5 py-16 text-center">
+                    <div class="mx-auto max-w-xl rounded border border-amber-500/20 bg-[linear-gradient(135deg,rgba(69,26,3,0.14),rgba(0,0,0,0.78))] px-6 py-8 shadow-[0_0_24px_rgba(245,158,11,0.05)]">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-amber-500/25 bg-amber-500/5 text-amber-500">
+                            !
+                        </div>
+                        <p class="mt-5 text-[11px] font-bold uppercase tracking-[0.24em] text-amber-400">
+                            [ NO ACTIVE SIGNALS DETECTED ]
                         </p>
-                        <p class="mt-3 text-sm text-green-900">
+                        <p class="mt-3 text-sm leading-6 text-slate-600">
                             ${escapeHtml(getLabel("noLiveSessions", "No live sessions detected."))}
+                        </p>
+                        <p class="mt-5 overflow-hidden whitespace-nowrap text-[10px] tracking-[0.08em] text-slate-700">
+                            [░░░░░░░░░░░░] CHANNEL_IDLE
                         </p>
                     </div>
                 </td>
@@ -333,7 +357,7 @@ window.echoConsoleRealtime = (() => {
                 session.sessionId ?? "");
 
             row.className =
-                "border-b border-green-500/10 bg-black transition-colors duration-150 hover:bg-green-500/[0.035]";
+                "border-b border-slate-900 bg-black transition-colors duration-150 hover:bg-slate-950/85";
 
             const lastHeartbeatDate = parseDate(
                 session.lastHeartbeatUtc);
@@ -350,11 +374,11 @@ window.echoConsoleRealtime = (() => {
                 session.status);
 
             row.innerHTML = `
-                <td class="whitespace-nowrap px-5 py-4 text-xs font-bold uppercase tracking-[0.08em] text-green-300">${escapeHtml(session.installationId ?? "-")}</td>
-                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-600">${escapeHtml(session.currentScene ?? "-")}</td>
-                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-600">${escapeHtml(session.currentGameState ?? "-")}</td>
-                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-700">${escapeHtml(session.currentPhase ?? "-")}</td>
-                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-800">${escapeHtml(lastHeartbeatLabel)}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs font-bold uppercase tracking-[0.08em] text-[#67e8f9]">${escapeHtml(session.installationId ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-300">${escapeHtml(session.currentScene ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-400">${escapeHtml(session.currentGameState ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-500">${escapeHtml(session.currentPhase ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-amber-500/80">${escapeHtml(lastHeartbeatLabel)}</td>
                 <td class="whitespace-nowrap px-5 py-4">
                     <span class="inline-flex items-center gap-2 rounded border px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] ${statusClasses}">
                         <span class="h-1.5 w-1.5 rounded-full ${mapStatusDotClass(session.status)}"></span>
@@ -533,6 +557,139 @@ window.echoConsoleRealtime = (() => {
 
         if (element) {
             element.textContent = value;
+        }
+    }
+
+    function setMetricValue(
+        elementId,
+        displayValue,
+        numericValue,
+        state) {
+        setText(
+            elementId,
+            displayValue);
+
+        updateMetricVisualState(
+            elementId,
+            numericValue,
+            state);
+
+        updateMetricGauge(
+            elementId,
+            numericValue,
+            state);
+    }
+
+    function updateMetricVisualState(
+        elementId,
+        numericValue,
+        state) {
+        if (!elementId) {
+            return;
+        }
+
+        const element = document.getElementById(
+            elementId);
+
+        if (!element) {
+            return;
+        }
+
+        const stateClasses = [
+            "text-[#67e8f9]",
+            "text-slate-200",
+            "text-green-400",
+            "text-amber-400"
+        ];
+
+        element.classList.remove(
+            ...stateClasses);
+
+        if (state === "warning" ||
+            Number(numericValue) === 0) {
+            element.classList.add(
+                "text-amber-400");
+            return;
+        }
+
+        if (state === "active") {
+            element.classList.add(
+                "text-green-400");
+            return;
+        }
+
+        if (elementId ===
+            options.averageDurationValueId) {
+            element.classList.add(
+                "text-slate-200");
+            return;
+        }
+
+        element.classList.add(
+            "text-[#67e8f9]");
+    }
+
+    function updateMetricGauge(
+        elementId,
+        numericValue,
+        state) {
+        if (!elementId) {
+            return;
+        }
+
+        const gauge = document.getElementById(
+            `${elementId}-gauge`);
+
+        if (!gauge) {
+            return;
+        }
+
+        const normalizedValue = Number.isFinite(
+            Number(numericValue))
+            ? Math.max(0, Number(numericValue))
+            : 0;
+
+        const percentage = state === "warning" ||
+            normalizedValue === 0
+            ? 0
+            : Math.min(
+                100,
+                Math.max(
+                    8,
+                    Math.round(
+                        normalizedValue % 101)));
+
+        const segments = 12;
+        const filledSegments = Math.round(
+            percentage / 100 * segments);
+
+        const bar =
+            "█".repeat(filledSegments) +
+            "░".repeat(
+                segments - filledSegments);
+
+        gauge.textContent =
+            `[${bar}] ${String(percentage).padStart(2, "0")}%`;
+
+        gauge.classList.remove(
+            "text-[#22d3ee]/70",
+            "text-green-500/80",
+            "text-slate-500",
+            "text-amber-500/80");
+
+        if (percentage === 0) {
+            gauge.classList.add(
+                "text-amber-500/80");
+        } else if (state === "active") {
+            gauge.classList.add(
+                "text-green-500/80");
+        } else if (elementId ===
+            options.averageDurationValueId) {
+            gauge.classList.add(
+                "text-slate-500");
+        } else {
+            gauge.classList.add(
+                "text-[#22d3ee]/70");
         }
     }
 

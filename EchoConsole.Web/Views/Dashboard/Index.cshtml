@@ -6,81 +6,119 @@
     ViewData["Title"] = SharedLocalizer["Dashboard_PageTitle"].Value;
     ViewData["TitleResourceKey"] = "Dashboard_PageTitle";
 
-    var realtimeLabels = new
+    string[] overviewBarHeights =
     {
-        noLiveSessions = SharedLocalizer["Dashboard_NoLiveSessions"].Value,
-        statusActive = SharedLocalizer["Status_Active"].Value,
-        statusEnded = SharedLocalizer["Status_Ended"].Value,
-        statusExpired = SharedLocalizer["Status_Expired"].Value,
-        statusUnknown = SharedLocalizer["Status_Unknown"].Value
+        "h-4",
+        "h-8",
+        "h-5",
+        "h-11",
+        "h-7",
+        "h-3"
     };
 
-    var realtimeLabelsJson = JsonSerializer.Serialize(realtimeLabels);
+    var realtimeConfig = new
+    {
+        culture = CultureInfo.CurrentUICulture.Name,
+        labels = new
+        {
+            noLiveSessions = SharedLocalizer["Dashboard_NoLiveSessions"].Value,
+            statusActive = SharedLocalizer["Status_Active"].Value,
+            statusEnded = SharedLocalizer["Status_Ended"].Value,
+            statusExpired = SharedLocalizer["Status_Expired"].Value,
+            statusUnknown = SharedLocalizer["Status_Unknown"].Value
+        },
+        tableBodyId = "live-sessions-body",
+        registeredInstallationsValueId = "kpi-registered-installations",
+        activeSessionsValueId = "kpi-active-sessions",
+        averageDurationValueId = "kpi-average-duration",
+        latestHeartbeatValueId = "kpi-latest-heartbeat",
+        serverTimeValueId = "dashboard-server-time",
+        topbarServerTimeValueId = "topbar-server-time"
+    };
+
+    var realtimeConfigJson =
+        JsonSerializer.Serialize(realtimeConfig);
 }
 
-<div class="relative min-h-screen overflow-hidden bg-black font-mono text-green-100">
-    <div class="crt-grid-background pointer-events-none absolute inset-0 opacity-20"></div>
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(57,255,20,0.08),transparent_65%)]"></div>
+<div id="dashboard-console"
+     class="relative min-h-screen overflow-hidden bg-black font-mono text-slate-300">
+    <div class="crt-grid-background pointer-events-none absolute inset-0 opacity-15"></div>
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_18%_0%,rgba(34,211,238,0.08),transparent_42%),radial-gradient(circle_at_82%_8%,rgba(245,158,11,0.05),transparent_36%)]"></div>
 
     <div class="relative mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
-        <header class="terminal-panel relative overflow-hidden rounded-lg p-5 shadow-phosphor sm:p-7 lg:p-8">
-            <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-green-400/60 to-transparent"></div>
+        <header class="relative overflow-hidden rounded-lg border border-slate-800 bg-[linear-gradient(135deg,rgba(2,6,8,0.98),rgba(0,0,0,0.94))] shadow-[0_0_38px_rgba(34,211,238,0.05)]">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#67e8f9]/55 to-transparent"></div>
 
-            <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,29rem)] lg:items-end">
-                <div class="min-w-0">
-                    <p class="terminal-kicker">
+            <div class="grid gap-0 xl:grid-cols-[minmax(0,1.35fr)_minmax(24rem,0.65fr)]">
+                <div class="relative p-5 sm:p-7 lg:p-8">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.26em] text-[#67e8f9]">
                         &gt; _ SYSTEM_OVERVIEW // GLOBAL_METRICS
                     </p>
 
-                    <p class="mt-5 text-[10px] font-bold uppercase tracking-[0.24em] text-green-700">
+                    <p class="mt-5 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-600">
                         [@SharedLocalizer["Dashboard_Brand"]]
                     </p>
 
-                    <h1 class="mt-3 max-w-5xl font-display text-3xl uppercase leading-tight tracking-[0.08em] text-green-100 text-glow-cyan sm:text-4xl lg:text-5xl">
+                    <h1 class="mt-3 max-w-5xl font-display text-3xl uppercase leading-tight tracking-[0.08em] text-slate-100 sm:text-4xl lg:text-5xl">
                         @SharedLocalizer["Dashboard_HeroTitle"]
                     </h1>
 
-                    <p class="mt-5 max-w-3xl text-sm leading-7 text-green-700 sm:text-base">
+                    <p class="mt-5 max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
                         @SharedLocalizer["Dashboard_HeroSubtitle"]
                     </p>
 
                     <div class="mt-7 flex flex-wrap gap-3 text-[9px] font-bold uppercase tracking-[0.2em]">
-                        <span class="rounded border border-green-500/20 bg-green-500/5 px-3 py-2 text-green-700">
+                        <span class="rounded border border-slate-800 bg-slate-950/60 px-3 py-2 text-slate-500">
                             NODE: ECHO-CONSOLE-01
                         </span>
-                        <span class="rounded border border-green-500/20 bg-green-500/5 px-3 py-2 text-green-700">
+                        <span class="rounded border border-[#22d3ee]/20 bg-[#083344]/20 px-3 py-2 text-[#67e8f9]">
                             PROTOCOL: TELEMETRY/8
                         </span>
-                        <span class="rounded border border-green-500/20 bg-green-500/5 px-3 py-2 text-green-700">
+                        <span class="rounded border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-amber-500">
                             ACCESS: ADMIN
                         </span>
                     </div>
+
+                    <div class="mt-8 grid max-w-3xl grid-cols-12 items-end gap-1.5" aria-hidden="true">
+                        @for (var barIndex = 0; barIndex < 24; barIndex++)
+                        {
+                            var heightClass =
+                                overviewBarHeights[
+                                    barIndex % overviewBarHeights.Length];
+
+                            var colorClass = barIndex % 5 == 0
+                                ? "bg-amber-500/55"
+                                : "bg-[#22d3ee]/45";
+
+                            <span class="@heightClass @colorClass rounded-sm"></span>
+                        }
+                    </div>
                 </div>
 
-                <div class="border-t border-green-500/15 pt-5 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
-                    <div class="flex items-center justify-between gap-4 border-b border-green-500/15 pb-4">
+                <aside class="border-t border-slate-800 bg-black/55 p-5 sm:p-7 xl:border-l xl:border-t-0 lg:p-8">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-800 pb-5">
                         <div>
-                            <p class="text-[9px] font-bold uppercase tracking-[0.22em] text-green-800">
+                            <p class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600">
                                 SYSTEM STATUS
                             </p>
-                            <p class="mt-2 text-xs uppercase tracking-[0.16em] text-green-500">
+                            <p class="mt-2 text-xs uppercase tracking-[0.16em] text-slate-300">
                                 TELEMETRY OPERATING SYSTEM
                             </p>
                         </div>
 
-                        <span class="inline-flex items-center gap-2 rounded border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] @(Model.IsLive ? "border-green-400/35 bg-green-500/10 text-green-300 shadow-phosphor" : "border-rose-500/35 bg-rose-500/10 text-rose-300")">
-                            <span class="h-2 w-2 rounded-full @(Model.IsLive ? "bg-green-400 animate-signal-pulse" : "bg-rose-400")"></span>
+                        <span class="inline-flex items-center gap-2 rounded border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] @(Model.IsLive ? "border-green-400/35 bg-green-500/10 text-green-300 shadow-[0_0_15px_rgba(34,197,94,0.1)]" : "border-amber-500/35 bg-amber-500/10 text-amber-300")">
+                            <span class="h-2 w-2 rounded-full @(Model.IsLive ? "bg-green-400 animate-signal-pulse" : "bg-amber-400")"></span>
                             [@(Model.IsLive ? "ONLINE" : "DEGRADED")]
                         </span>
                     </div>
 
-                    <dl class="mt-4 divide-y divide-green-500/10 border-y border-green-500/10">
+                    <dl class="mt-5 divide-y divide-slate-800 border-y border-slate-800">
                         <div class="grid grid-cols-[1fr_auto] items-center gap-4 py-4">
-                            <dt class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-800">
+                            <dt class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
                                 @SharedLocalizer["Dashboard_TelemetryStream"]
                             </dt>
-                            <dd class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] @(Model.IsLive ? "text-green-300" : "text-rose-300")">
-                                <span class="h-1.5 w-1.5 rounded-full @(Model.IsLive ? "bg-green-400" : "bg-rose-400")"></span>
+                            <dd class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] @(Model.IsLive ? "text-green-400" : "text-amber-400")">
+                                <span class="h-1.5 w-1.5 rounded-full @(Model.IsLive ? "bg-green-400" : "bg-amber-400")"></span>
                                 @(Model.IsLive
                                     ? SharedLocalizer["Dashboard_StreamLive"]
                                     : SharedLocalizer["Dashboard_StreamOffline"])
@@ -88,34 +126,49 @@
                         </div>
 
                         <div class="grid grid-cols-[1fr_auto] items-center gap-4 py-4">
-                            <dt class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-800">
+                            <dt class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
                                 @SharedLocalizer["Dashboard_ServerTimeUtc"]
                             </dt>
                             <dd id="dashboard-server-time"
-                                class="text-right text-xs font-bold uppercase tracking-[0.12em] text-green-300">
+                                class="text-right text-xs font-bold uppercase tracking-[0.12em] text-[#67e8f9]">
                                 @Model.ServerTimeUtc.ToString("MMM dd, yyyy HH:mm:ss", CultureInfo.CurrentCulture)
                             </dd>
                         </div>
                     </dl>
 
-                    <p class="mt-4 text-right text-[9px] uppercase tracking-[0.18em] text-green-900">
+                    <div class="mt-5 rounded border border-slate-800 bg-slate-950/45 p-4">
+                        <div class="flex items-center justify-between text-[9px] uppercase tracking-[0.18em]">
+                            <span class="text-slate-600">LOAD PROFILE</span>
+                            <span class="text-[#67e8f9]">72%</span>
+                        </div>
+                        <p class="mt-3 overflow-hidden whitespace-nowrap text-[11px] tracking-[0.08em] text-slate-400">
+                            [█████████░░░]
+                        </p>
+                    </div>
+
+                    <p class="mt-4 text-right text-[9px] uppercase tracking-[0.18em] text-slate-700">
                         STATUS: SYNCHRONIZED // SIGNAL LOCKED
                     </p>
-                </div>
+                </aside>
             </div>
         </header>
 
         <div class="my-7 flex items-center gap-4" aria-hidden="true">
-            <span class="h-px flex-1 bg-gradient-to-r from-green-500/45 to-green-500/5"></span>
-            <span class="text-[9px] font-bold uppercase tracking-[0.28em] text-green-800">
+            <span class="h-px flex-1 bg-gradient-to-r from-[#22d3ee]/35 via-slate-800 to-transparent"></span>
+            <span class="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-600">
                 METRIC_STREAM
             </span>
-            <span class="h-px flex-1 bg-gradient-to-l from-green-500/45 to-green-500/5"></span>
+            <span class="h-px flex-1 bg-gradient-to-l from-amber-500/25 via-slate-800 to-transparent"></span>
         </div>
 
         @await Html.PartialAsync("_KpiCardsRow", Model)
         @await Html.PartialAsync("_LiveSessionsTable", Model)
     </div>
+</div>
+
+<div id="dashboard-realtime-config"
+     data-config="@realtimeConfigJson"
+     hidden>
 </div>
 
 @section Scripts {
@@ -126,17 +179,33 @@
             asp-append-version="true"></script>
 
     <script>
-        window.echoConsoleRealtime.init({
-            webBaseUrl: window.location.origin,
-            culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
-            labels: @Html.Raw(realtimeLabelsJson),
-            tableBodyId: "live-sessions-body",
-            registeredInstallationsValueId: "kpi-registered-installations",
-            activeSessionsValueId: "kpi-active-sessions",
-            averageDurationValueId: "kpi-average-duration",
-            latestHeartbeatValueId: "kpi-latest-heartbeat",
-            serverTimeValueId: "dashboard-server-time",
-            topbarServerTimeValueId: "topbar-server-time"
-        });
+        (() => {
+            const configElement =
+                document.getElementById(
+                    "dashboard-realtime-config");
+
+            if (
+                !configElement
+                || !window.echoConsoleRealtime
+            ) {
+                return;
+            }
+
+            const serializedConfig =
+                configElement.dataset.config;
+
+            if (!serializedConfig) {
+                return;
+            }
+
+            const realtimeConfig =
+                JSON.parse(serializedConfig);
+
+            realtimeConfig.webBaseUrl =
+                window.location.origin;
+
+            window.echoConsoleRealtime.init(
+                realtimeConfig);
+        })();
     </script>
 }
