@@ -6,36 +6,6 @@
     ViewData["Title"] = SharedLocalizer["Dashboard_PageTitle"].Value;
     ViewData["TitleResourceKey"] = "Dashboard_PageTitle";
 
-    string[] overviewBarHeights =
-    {
-        "h-4",
-        "h-8",
-        "h-5",
-        "h-11",
-        "h-7",
-        "h-3"
-    };
-
-    string[] overviewBarDelays =
-    {
-        "-0.15s",
-        "-0.45s",
-        "-0.75s",
-        "-1.05s",
-        "-1.35s",
-        "-1.65s"
-    };
-
-    string[] overviewBarDurations =
-    {
-        "2.4s",
-        "2.8s",
-        "2.6s",
-        "3.0s",
-        "2.5s",
-        "2.9s"
-    };
-
     var realtimeConfig = new
     {
         culture = CultureInfo.CurrentUICulture.Name,
@@ -98,31 +68,7 @@
                             ACCESS: ADMIN
                         </span>
                     </div>
-
-                    <div class="mt-8 grid max-w-3xl grid-cols-12 items-end gap-1.5" aria-hidden="true">
-                        @for (var barIndex = 0; barIndex < 24; barIndex++)
-                        {
-                            var heightClass =
-                                overviewBarHeights[
-                                    barIndex % overviewBarHeights.Length];
-
-                            var colorClass = barIndex % 5 == 0
-                                ? "bg-amber-500/55"
-                                : "bg-[#22d3ee]/45";
-
-                            var animationDelay =
-                                overviewBarDelays[
-                                    barIndex % overviewBarDelays.Length];
-
-                            var animationDuration =
-                                overviewBarDurations[
-                                    barIndex % overviewBarDurations.Length];
-
-                            <span class="network-frequency-bar transform-gpu [will-change:transform] @heightClass @colorClass rounded-sm"
-                                  style="--scan-delay: @animationDelay; --scan-duration: @animationDuration;">
-                            </span>
-                        }
-                    </div>
+                    <div class="mt-8 min-h-11 max-w-3xl" aria-hidden="true"></div>
                 </div>
 
                 <aside class="border-t border-slate-800 bg-black/55 p-5 sm:p-7 xl:border-l xl:border-t-0 lg:p-8">
