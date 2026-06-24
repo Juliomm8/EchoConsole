@@ -30,7 +30,11 @@ public sealed class EchoConsolePatchNotesApiClient
 
             return patchNotes is null
                 ? Array.Empty<PatchNoteApiDto>()
-                : patchNotes;
+                : patchNotes
+                    .Where(x => x.IsPublished)
+                    .OrderByDescending(x => x.CreatedAtUtc)
+                    .ThenByDescending(x => x.Id)
+                    .ToArray();
         }
         catch (Exception ex)
         {
