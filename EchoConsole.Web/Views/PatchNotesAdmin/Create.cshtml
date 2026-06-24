@@ -66,6 +66,7 @@
 
                             <input asp-for="Version"
                                    autocomplete="off"
+                                   maxlength="32"
                                    placeholder="v0.4"
                                    class="w-full rounded border border-green-500/25 bg-black px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
 
@@ -82,6 +83,7 @@
 
                             <input asp-for="Category"
                                    autocomplete="off"
+                                   maxlength="32"
                                    placeholder="SYSTEMS"
                                    class="w-full rounded border border-green-500/25 bg-black px-4 py-3 text-sm uppercase text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
 
@@ -123,6 +125,8 @@
 
                         <input asp-for="Title"
                                autocomplete="off"
+                               minlength="5"
+                               maxlength="160"
                                placeholder="@SharedLocalizer["PatchNotesAdmin_TitlePlaceholder"]"
                                class="w-full rounded border border-green-500/25 bg-black px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
 
@@ -139,6 +143,8 @@
 
                         <textarea asp-for="Description"
                                   rows="10"
+                                  minlength="10"
+                                  maxlength="4000"
                                   placeholder="@SharedLocalizer["PatchNotesAdmin_DescriptionPlaceholder"]"
                                   class="w-full resize-y rounded border border-green-500/25 bg-black px-4 py-3 text-sm leading-7 text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10"></textarea>
 

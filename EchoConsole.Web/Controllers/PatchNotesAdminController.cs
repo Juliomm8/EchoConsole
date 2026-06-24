@@ -31,41 +31,41 @@ public sealed class PatchNotesAdminController : Controller
         ConfigurePageMetadata(
             "PatchNotesAdmin_DashboardPageTitle");
 
-        try
-        {
-            var patchNotes = await _patchNotesApiClient.GetAllAsync(
-                cancellationToken);
+        var result = await _patchNotesApiClient.GetAllAsync(
+            cancellationToken);
 
-            var model = new PatchNotesAdminIndexViewModel
-            {
-                Items = patchNotes
-                    .Select(x => new PatchNotesAdminListItemViewModel
-                    {
-                        Id = x.Id,
-                        Version = x.Version,
-                        Category = x.Category,
-                        Tone = x.Tone,
-                        Title = x.Title,
-                        Description = x.Description,
-                        CreatedAtUtc = x.CreatedAtUtc,
-                        IsPublished = x.IsPublished
-                    })
-                    .ToArray()
-            };
-
-            return View(model);
-        }
-        catch (Exception ex)
+        if (!result.Succeeded)
         {
-            _logger.LogError(
-                ex,
-                "Failed to load the Patch Notes CMS dashboard.");
+            _logger.LogWarning(
+                "Failed to load the Patch Notes CMS dashboard. Error: {ErrorMessage}",
+                result.ErrorMessage);
 
             TempData["PatchNotesAdminError"] =
-                _localizer["PatchNotesAdmin_LoadError"].Value;
+                string.IsNullOrWhiteSpace(result.ErrorMessage)
+                    ? _localizer["PatchNotesAdmin_LoadError"].Value
+                    : result.ErrorMessage;
 
             return View(new PatchNotesAdminIndexViewModel());
         }
+
+        var model = new PatchNotesAdminIndexViewModel
+        {
+            Items = result.PatchNotes
+                .Select(x => new PatchNotesAdminListItemViewModel
+                {
+                    Id = x.Id,
+                    Version = x.Version,
+                    Category = x.Category,
+                    Tone = x.Tone,
+                    Title = x.Title,
+                    Description = x.Description,
+                    CreatedAtUtc = x.CreatedAtUtc,
+                    IsPublished = x.IsPublished
+                })
+                .ToArray()
+        };
+
+        return View(model);
     }
 
     [HttpGet("create")]
@@ -89,6 +89,52 @@ public sealed class PatchNotesAdminController : Controller
         ConfigurePageMetadata(
             "PatchNotesAdmin_PageTitle");
 
+        model.Version = model.Version?.Trim() ?? string.Empty;
+        model.Category = model.Category?.Trim() ?? string.Empty;
+        model.Tone = model.Tone?.Trim().ToLowerInvariant() ?? string.Empty;
+        model.Title = model.Title?.Trim() ?? string.Empty;
+        model.Description = model.Description?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(model.Version))
+        {
+            ModelState.AddModelError(
+                nameof(model.Version),
+                "Version is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Category))
+        {
+            ModelState.AddModelError(
+                nameof(model.Category),
+                "Category is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            ModelState.AddModelError(
+                nameof(model.Title),
+                "Title is required.");
+        }
+        else if (model.Title.Length < 5)
+        {
+            ModelState.AddModelError(
+                nameof(model.Title),
+                "Title must contain at least 5 characters.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Description))
+        {
+            ModelState.AddModelError(
+                nameof(model.Description),
+                "Description is required.");
+        }
+        else if (model.Description.Length < 10)
+        {
+            ModelState.AddModelError(
+                nameof(model.Description),
+                "Description must contain at least 10 characters.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -96,11 +142,11 @@ public sealed class PatchNotesAdminController : Controller
 
         var request = new CreatePatchNoteApiRequest
         {
-            Version = model.Version.Trim(),
-            Category = model.Category.Trim(),
-            Tone = model.Tone.Trim().ToLowerInvariant(),
-            Title = model.Title.Trim(),
-            Description = model.Description.Trim(),
+            Version = model.Version,
+            Category = model.Category,
+            Tone = model.Tone,
+            Title = model.Title,
+            Description = model.Description,
             IsPublished = true
         };
 

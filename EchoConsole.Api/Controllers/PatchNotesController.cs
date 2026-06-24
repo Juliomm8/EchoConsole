@@ -82,12 +82,24 @@ public sealed class PatchNotesController : ControllerBase
                 nameof(request.Title),
                 "Title is required.");
         }
+        else if (normalizedTitle.Length < 5)
+        {
+            ModelState.AddModelError(
+                nameof(request.Title),
+                "Title must contain at least 5 characters.");
+        }
 
         if (string.IsNullOrWhiteSpace(normalizedDescription))
         {
             ModelState.AddModelError(
                 nameof(request.Description),
                 "Description is required.");
+        }
+        else if (normalizedDescription.Length < 10)
+        {
+            ModelState.AddModelError(
+                nameof(request.Description),
+                "Description must contain at least 10 characters.");
         }
 
         if (!ModelState.IsValid)

@@ -42,20 +42,41 @@ public sealed class EchoConsolePatchNotesApiClient
         }
     }
 
-    public async Task<IReadOnlyList<PatchNoteApiDto>> GetAllAsync(
+    public async Task<GetPatchNotesApiResult> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
         try
         {
             var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
 
-            var patchNotes = await client.GetFromJsonAsync<List<PatchNoteApiDto>>(
+            using var response = await client.GetAsync(
                 "/api/patchnotes/admin",
                 cancellationToken);
 
-            return patchNotes is null
-                ? Array.Empty<PatchNoteApiDto>()
-                : patchNotes;
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await ReadErrorMessageAsync(
+                    response,
+                    cancellationToken);
+
+                _logger.LogWarning(
+                    "Patch notes dashboard request failed. StatusCode: {StatusCode}. Error: {ErrorMessage}",
+                    response.StatusCode,
+                    errorMessage);
+
+                return GetPatchNotesApiResult.Failure(
+                    errorMessage,
+                    response.StatusCode);
+            }
+
+            var patchNotes = await response.Content
+                .ReadFromJsonAsync<List<PatchNoteApiDto>>(
+                    cancellationToken: cancellationToken);
+
+            return GetPatchNotesApiResult.Success(
+                patchNotes is null
+                    ? Array.Empty<PatchNoteApiDto>()
+                    : patchNotes);
         }
         catch (Exception ex)
         {
@@ -63,7 +84,8 @@ public sealed class EchoConsolePatchNotesApiClient
                 ex,
                 "Failed to retrieve patch notes for the CMS dashboard.");
 
-            throw;
+            return GetPatchNotesApiResult.Failure(
+                "The patch note service is currently unavailable.");
         }
     }
 
@@ -236,6 +258,40 @@ public sealed class EchoConsolePatchNotesApiClient
             }
 
             if (document.RootElement.TryGetProperty(
+                    "errors",
+                    out var errorsElement)
+                && errorsElement.ValueKind == JsonValueKind.Object)
+            {
+                var messages = new List<string>();
+
+                foreach (var property in errorsElement.EnumerateObject())
+                {
+                    if (property.Value.ValueKind != JsonValueKind.Array)
+                    {
+                        continue;
+                    }
+
+                    foreach (var value in property.Value.EnumerateArray())
+                    {
+                        var message = value.GetString();
+
+                        if (!string.IsNullOrWhiteSpace(message)
+                            && !messages.Contains(
+                                message,
+                                StringComparer.Ordinal))
+                        {
+                            messages.Add(message);
+                        }
+                    }
+                }
+
+                if (messages.Count > 0)
+                {
+                    return string.Join(" ", messages);
+                }
+            }
+
+            if (document.RootElement.TryGetProperty(
                     "title",
                     out var titleElement))
             {
@@ -289,6 +345,50 @@ public sealed class CreatePatchNoteApiRequest
     public string Description { get; set; } = string.Empty;
 
     public bool IsPublished { get; set; } = true;
+}
+
+public sealed class GetPatchNotesApiResult
+{
+    private GetPatchNotesApiResult(
+        bool succeeded,
+        IReadOnlyList<PatchNoteApiDto> patchNotes,
+        string? errorMessage,
+        HttpStatusCode? statusCode)
+    {
+        Succeeded = succeeded;
+        PatchNotes = patchNotes;
+        ErrorMessage = errorMessage;
+        StatusCode = statusCode;
+    }
+
+    public bool Succeeded { get; }
+
+    public IReadOnlyList<PatchNoteApiDto> PatchNotes { get; }
+
+    public string? ErrorMessage { get; }
+
+    public HttpStatusCode? StatusCode { get; }
+
+    public static GetPatchNotesApiResult Success(
+        IReadOnlyList<PatchNoteApiDto> patchNotes)
+    {
+        return new GetPatchNotesApiResult(
+            true,
+            patchNotes,
+            null,
+            null);
+    }
+
+    public static GetPatchNotesApiResult Failure(
+        string errorMessage,
+        HttpStatusCode? statusCode = null)
+    {
+        return new GetPatchNotesApiResult(
+            false,
+            Array.Empty<PatchNoteApiDto>(),
+            errorMessage,
+            statusCode);
+    }
 }
 
 public sealed class CreatePatchNoteApiResult
