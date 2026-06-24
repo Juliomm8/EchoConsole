@@ -305,12 +305,9 @@
 
                                             <button type="submit"
                                                     title="@SharedLocalizer[actionKey]"
-                                                    class="group inline-flex min-w-28 items-center justify-center gap-2 border px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.15em] transition @(item.IsActive ? "border-green-500/30 bg-green-500/10 text-green-400 hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-amber-400" : "border-slate-700 bg-slate-900/60 text-slate-500 hover:border-green-500/40 hover:bg-green-500/10 hover:text-green-400")">
-                                                <span class="h-1.5 w-1.5 rounded-full @(item.IsActive ? "bg-green-400" : "bg-slate-600 group-hover:bg-green-400")"></span>
-                                                <span>@SharedLocalizer[stateKey]</span>
-                                                <span class="hidden text-[8px] opacity-0 transition group-hover:inline group-hover:opacity-100">
-                                                    / @SharedLocalizer[actionKey]
-                                                </span>
+                                                    class="group inline-flex h-8 w-28 shrink-0 items-center justify-center gap-2 border px-3 text-[9px] font-semibold uppercase tracking-[0.15em] transition-colors duration-150 @(item.IsActive ? "border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/15 hover:text-green-300" : "border-slate-700 bg-slate-900/60 text-slate-500 hover:bg-slate-800/80 hover:text-green-400/70")">
+                                                <span class="h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-150 @(item.IsActive ? "bg-green-400" : "bg-slate-600 group-hover:bg-green-500/70")"></span>
+                                                <span class="whitespace-nowrap">@SharedLocalizer[stateKey]</span>
                                             </button>
                                         </form>
                                     </td>
