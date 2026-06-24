@@ -1,6 +1,16 @@
 @{
     const int DefaultSimulationTarget = 40;
+    const string JavaScriptFormatPlaceholder = "{0}";
 }
+
+<button type="button"
+        data-sim-open
+        class="pointer-events-auto fixed right-0 top-1/2 z-[9999] flex -translate-y-1/2 items-center justify-center border-y border-l border-cyan-500/30 bg-black/95 px-2 py-4 font-mono text-[9px] font-bold uppercase tracking-[0.20em] text-cyan-300 opacity-100 shadow-[-8px_0_24px_rgba(34,211,238,0.12)] transition duration-200 [writing-mode:vertical-rl] [text-orientation:mixed] hover:border-cyan-300/60 hover:bg-cyan-500/10 hover:text-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
+        aria-controls="simulation-orchestrator-panel"
+        aria-expanded="false"
+        aria-label="@SharedLocalizer["SimulationOrchestrator_OpenButton"]">
+    &gt;_ @SharedLocalizer["SimulationOrchestrator_OpenButton"]
+</button>
 
 <div id="simulation-orchestrator-root"
      data-status-url="/admin/simulation/status"
@@ -17,8 +27,8 @@
      data-i18n-state-transmitting="@SharedLocalizer["SimulationOrchestrator_StateTransmitting"]"
      data-i18n-state-error="@SharedLocalizer["SimulationOrchestrator_StateError"]"
      data-i18n-endpoint-not-configured="@SharedLocalizer["SimulationOrchestrator_EndpointNotConfigured"]"
-     data-i18n-request-failed-status="@SharedLocalizer["SimulationOrchestrator_RequestFailedStatus"]"
-     data-i18n-last-sync="@SharedLocalizer["SimulationOrchestrator_LastSync"]"
+     data-i18n-request-failed-status="@SharedLocalizer["SimulationOrchestrator_RequestFailedStatus", JavaScriptFormatPlaceholder]"
+     data-i18n-last-sync="@SharedLocalizer["SimulationOrchestrator_LastSync", JavaScriptFormatPlaceholder]"
      data-i18n-status-error="@SharedLocalizer["SimulationOrchestrator_StatusError"]"
      data-i18n-channel-busy="@SharedLocalizer["SimulationOrchestrator_ChannelBusy"]"
      data-i18n-request-sent="@SharedLocalizer["SimulationOrchestrator_RequestSent"]"
@@ -31,22 +41,14 @@
      data-i18n-confirm-wipe-first="@SharedLocalizer["SimulationOrchestrator_ConfirmWipeFirst"]"
      data-i18n-confirm-wipe-final="@SharedLocalizer["SimulationOrchestrator_ConfirmWipeFinal"]"
      data-i18n-console-cleared="@SharedLocalizer["SimulationOrchestrator_ConsoleCleared"]"
-     class="pointer-events-none fixed inset-0 z-[90]">
+     class="pointer-events-none fixed inset-0 z-[9998]" aria-hidden="true">
     <div data-sim-overlay
-         class="absolute inset-0 bg-black/70 opacity-0 backdrop-blur-sm transition-opacity duration-300">
+         class="absolute inset-0 z-0 bg-black/70 opacity-0 backdrop-blur-sm transition-opacity duration-300">
     </div>
-
-    <button type="button"
-            data-sim-open
-            class="pointer-events-auto fixed right-0 top-1/2 z-[92] -translate-y-1/2 rounded-l border border-r-0 border-cyan-500/30 bg-black/95 px-3 py-4 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300 shadow-[0_0_24px_rgba(34,211,238,0.12)] transition hover:border-cyan-400/60 hover:bg-cyan-500/10 hover:text-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
-            aria-controls="simulation-orchestrator-panel"
-            aria-expanded="false">
-        &gt;_ @SharedLocalizer["SimulationOrchestrator_OpenButton"]
-    </button>
 
     <aside id="simulation-orchestrator-panel"
            data-sim-panel
-           class="pointer-events-auto absolute right-0 top-0 flex h-dvh w-[min(31rem,calc(100vw-0.75rem))] translate-x-full flex-col border-l border-cyan-500/25 bg-[#010301] shadow-[-18px_0_48px_rgba(0,0,0,0.75)] transition-transform duration-300"
+           class="pointer-events-auto absolute right-0 top-0 z-[9999] flex h-dvh w-[min(31rem,calc(100vw-0.75rem))] translate-x-full flex-col border-l border-cyan-500/25 bg-[#010301] shadow-[-18px_0_48px_rgba(0,0,0,0.75)] transition-transform duration-300"
            role="dialog"
            aria-modal="true"
            aria-hidden="true"

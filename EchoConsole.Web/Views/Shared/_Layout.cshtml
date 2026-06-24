@@ -47,7 +47,8 @@
     @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
     {
         <script src="~/js/simulation-orchestrator.js"
-                asp-append-version="true"></script>
+                asp-append-version="true"
+                defer></script>
     }
 
     @await RenderSectionAsync(
