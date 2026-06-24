@@ -1,31 +1,55 @@
 @model EchoConsole.Web.Models.Dashboard.LiveMonitoringDashboardViewModel
 
 @functions {
-    private string GetAccentClasses(string accent)
+    private string GetPanelClasses(string accent)
     {
         return accent switch
         {
-            "magenta" => "border-fuchsia-500/20 bg-fuchsia-500/5 shadow-[0_0_25px_rgba(217,70,239,0.08)]",
-            _ => "border-cyan-500/20 bg-cyan-500/5 shadow-[0_0_25px_rgba(34,211,238,0.08)]"
+            "magenta" => "border-amber-500/25 hover:border-amber-400/45 hover:shadow-[0_0_22px_rgba(245,158,11,0.10)]",
+            _ => "border-green-500/25 hover:border-green-400/45 hover:shadow-[0_0_22px_rgba(34,197,94,0.10)]"
         };
     }
 
-    private string GetIconAccent(string accent)
+    private string GetValueClasses(string accent)
     {
         return accent switch
         {
-            "magenta" => "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-300",
-            _ => "border-cyan-400/30 bg-cyan-500/10 text-cyan-300"
+            "magenta" => "text-amber-300 text-glow-magenta",
+            _ => "text-green-300 text-glow-cyan"
+        };
+    }
+
+    private string GetIndexClasses(string accent)
+    {
+        return accent switch
+        {
+            "magenta" => "border-amber-500/30 bg-amber-500/5 text-amber-500",
+            _ => "border-green-500/30 bg-green-500/5 text-green-500"
         };
     }
 
     private string GetDeltaClass(bool positive)
     {
-        return positive ? "text-emerald-400" : "text-rose-400";
+        return positive
+            ? "text-green-400"
+            : "text-rose-400";
+    }
+
+    private string GetNodeCode(string valueElementId)
+    {
+        return valueElementId switch
+        {
+            "kpi-registered-installations" => "NODE_01",
+            "kpi-active-sessions" => "NODE_02",
+            "kpi-average-duration" => "NODE_03",
+            "kpi-latest-heartbeat" => "NODE_04",
+            _ => "NODE_XX"
+        };
     }
 }
 
-<div class="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-4">
+<section aria-label="Global telemetry metrics"
+         class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
     @foreach (var kpi in Model.Kpis)
     {
         var titleKey = kpi.ValueElementId switch
@@ -54,37 +78,50 @@
             _ => string.Empty
         };
 
-        <div class="rounded-2xl border @GetAccentClasses(kpi.Accent) p-5">
+        <article class="group relative min-h-[17rem] overflow-hidden rounded-lg border bg-[#010301] p-5 transition duration-200 @GetPanelClasses(kpi.Accent)">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-green-400/35 to-transparent opacity-0 transition group-hover:opacity-100"></div>
+
             <div class="flex items-start justify-between gap-4">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
+                <div class="min-w-0">
+                    <p class="text-[9px] font-bold uppercase tracking-[0.24em] text-green-800">
+                        &gt; _ @GetNodeCode(kpi.ValueElementId) // TELEMETRY
+                    </p>
+
+                    <h2 class="mt-4 text-[11px] font-bold uppercase leading-5 tracking-widest text-green-600">
                         @(string.IsNullOrWhiteSpace(titleKey)
                             ? kpi.Title
                             : SharedLocalizer[titleKey].Value)
-                    </p>
-
-                    <p id="@kpi.ValueElementId"
-                       class="mt-4 font-display text-3xl uppercase tracking-[0.08em] text-white">
-                        @kpi.Value
-                    </p>
-
-                    <p class="mt-2 text-sm text-slate-400">
-                        @(string.IsNullOrWhiteSpace(subtitleKey)
-                            ? kpi.Subtitle
-                            : SharedLocalizer[subtitleKey].Value)
-                    </p>
-
-                    <p class="mt-3 text-sm font-semibold @GetDeltaClass(kpi.IsPositiveDelta)">
-                        @(string.IsNullOrWhiteSpace(deltaKey)
-                            ? kpi.DeltaText
-                            : SharedLocalizer[deltaKey].Value)
-                    </p>
+                    </h2>
                 </div>
 
-                <div class="flex h-14 w-14 items-center justify-center rounded-xl border @GetIconAccent(kpi.Accent)">
-                    <span class="font-display text-lg">EC</span>
-                </div>
+                <span class="inline-flex h-10 min-w-10 items-center justify-center rounded border px-2 text-[9px] font-bold uppercase tracking-[0.16em] @GetIndexClasses(kpi.Accent)">
+                    [EC]
+                </span>
             </div>
-        </div>
+
+            <p id="@kpi.ValueElementId"
+               class="mt-8 break-words font-display text-3xl uppercase tracking-[0.08em] sm:text-4xl @GetValueClasses(kpi.Accent)">
+                @kpi.Value
+            </p>
+
+            <p class="mt-4 min-h-12 text-xs leading-6 text-green-800">
+                @(string.IsNullOrWhiteSpace(subtitleKey)
+                    ? kpi.Subtitle
+                    : SharedLocalizer[subtitleKey].Value)
+            </p>
+
+            <div class="mt-6 flex items-center justify-between gap-3 border-t border-green-500/10 pt-4">
+                <span class="text-[9px] font-bold uppercase tracking-[0.18em] text-green-900">
+                    DATA_SOURCE: API
+                </span>
+
+                <span class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] @GetDeltaClass(kpi.IsPositiveDelta)">
+                    <span class="h-1.5 w-1.5 rounded-full @(kpi.IsPositiveDelta ? "bg-green-400 animate-signal-pulse" : "bg-rose-400")"></span>
+                    [@(string.IsNullOrWhiteSpace(deltaKey)
+                        ? kpi.DeltaText
+                        : SharedLocalizer[deltaKey].Value)]
+                </span>
+            </div>
+        </article>
     }
-</div>
+</section>

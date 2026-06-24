@@ -298,8 +298,15 @@ window.echoConsoleRealtime = (() => {
             const emptyRow = document.createElement("tr");
 
             emptyRow.innerHTML = `
-                <td colspan="6" class="px-5 py-6 text-center text-sm text-slate-400">
-                    ${escapeHtml(getLabel("noLiveSessions", "No live sessions detected."))}
+                <td colspan="6" class="px-5 py-14 text-center">
+                    <div class="mx-auto max-w-lg">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-green-800">
+                            &gt; _ NO_ACTIVE_SIGNAL
+                        </p>
+                        <p class="mt-3 text-sm text-green-900">
+                            ${escapeHtml(getLabel("noLiveSessions", "No live sessions detected."))}
+                        </p>
+                    </div>
                 </td>
             `;
 
@@ -326,7 +333,7 @@ window.echoConsoleRealtime = (() => {
                 session.sessionId ?? "");
 
             row.className =
-                "transition-colors duration-150 hover:bg-slate-900/70";
+                "border-b border-green-500/10 bg-black transition-colors duration-150 hover:bg-green-500/[0.035]";
 
             const lastHeartbeatDate = parseDate(
                 session.lastHeartbeatUtc);
@@ -343,15 +350,15 @@ window.echoConsoleRealtime = (() => {
                 session.status);
 
             row.innerHTML = `
-                <td class="px-5 py-4 text-sm text-cyan-300">${escapeHtml(session.installationId ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentScene ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-200">${escapeHtml(session.currentGameState ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-300">${escapeHtml(session.currentPhase ?? "-")}</td>
-                <td class="px-5 py-4 text-sm text-slate-400">${escapeHtml(lastHeartbeatLabel)}</td>
-                <td class="px-5 py-4">
-                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${statusClasses}">
-                        <span class="h-2 w-2 rounded-full ${mapStatusDotClass(session.status)}"></span>
-                        ${escapeHtml(statusLabel)}
+                <td class="whitespace-nowrap px-5 py-4 text-xs font-bold uppercase tracking-[0.08em] text-green-300">${escapeHtml(session.installationId ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-600">${escapeHtml(session.currentScene ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-600">${escapeHtml(session.currentGameState ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-700">${escapeHtml(session.currentPhase ?? "-")}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-green-800">${escapeHtml(lastHeartbeatLabel)}</td>
+                <td class="whitespace-nowrap px-5 py-4">
+                    <span class="inline-flex items-center gap-2 rounded border px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] ${statusClasses}">
+                        <span class="h-1.5 w-1.5 rounded-full ${mapStatusDotClass(session.status)}"></span>
+                        [${escapeHtml(statusLabel)}]
                     </span>
                 </td>
             `;
@@ -396,20 +403,20 @@ window.echoConsoleRealtime = (() => {
     function mapStatusClasses(status) {
         switch (Number(status)) {
             case 1:
-                return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
+                return "border-green-500/35 bg-green-500/10 text-green-300";
             case 2:
-                return "border-amber-500/30 bg-amber-500/10 text-amber-400";
+                return "border-amber-500/35 bg-amber-500/10 text-amber-300";
             case 3:
-                return "border-rose-500/30 bg-rose-500/10 text-rose-400";
+                return "border-rose-500/35 bg-rose-500/10 text-rose-300";
             default:
-                return "border-slate-500/30 bg-slate-500/10 text-slate-300";
+                return "border-slate-500/25 bg-slate-500/5 text-slate-400";
         }
     }
 
     function mapStatusDotClass(status) {
         switch (Number(status)) {
             case 1:
-                return "bg-emerald-400";
+                return "bg-green-400";
             case 2:
                 return "bg-amber-400";
             case 3:

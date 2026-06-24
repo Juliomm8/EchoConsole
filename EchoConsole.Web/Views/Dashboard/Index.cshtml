@@ -18,50 +18,99 @@
     var realtimeLabelsJson = JsonSerializer.Serialize(realtimeLabels);
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1600px] px-6 py-6">
-        <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
-            <div>
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">
-                    @SharedLocalizer["Dashboard_Brand"]
-                </p>
+<div class="relative min-h-screen overflow-hidden bg-black font-mono text-green-100">
+    <div class="crt-grid-background pointer-events-none absolute inset-0 opacity-20"></div>
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(57,255,20,0.08),transparent_65%)]"></div>
 
-                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">
-                    @SharedLocalizer["Dashboard_HeroTitle"]
-                </h1>
+    <div class="relative mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        <header class="terminal-panel relative overflow-hidden rounded-lg p-5 shadow-phosphor sm:p-7 lg:p-8">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-green-400/60 to-transparent"></div>
 
-                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base">
-                    @SharedLocalizer["Dashboard_HeroSubtitle"]
-                </p>
-            </div>
+            <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,29rem)] lg:items-end">
+                <div class="min-w-0">
+                    <p class="terminal-kicker">
+                        &gt; _ SYSTEM_OVERVIEW // GLOBAL_METRICS
+                    </p>
 
-            <div class="grid gap-3 md:min-w-[340px]">
-                <div class="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3">
-                    <span class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
-                        @SharedLocalizer["Dashboard_TelemetryStream"]
-                    </span>
+                    <p class="mt-5 text-[10px] font-bold uppercase tracking-[0.24em] text-green-700">
+                        [@SharedLocalizer["Dashboard_Brand"]]
+                    </p>
 
-                    <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                        <span>
-                            @(Model.IsLive
-                                ? SharedLocalizer["Dashboard_StreamLive"]
-                                : SharedLocalizer["Dashboard_StreamOffline"])
+                    <h1 class="mt-3 max-w-5xl font-display text-3xl uppercase leading-tight tracking-[0.08em] text-green-100 text-glow-cyan sm:text-4xl lg:text-5xl">
+                        @SharedLocalizer["Dashboard_HeroTitle"]
+                    </h1>
+
+                    <p class="mt-5 max-w-3xl text-sm leading-7 text-green-700 sm:text-base">
+                        @SharedLocalizer["Dashboard_HeroSubtitle"]
+                    </p>
+
+                    <div class="mt-7 flex flex-wrap gap-3 text-[9px] font-bold uppercase tracking-[0.2em]">
+                        <span class="rounded border border-green-500/20 bg-green-500/5 px-3 py-2 text-green-700">
+                            NODE: ECHO-CONSOLE-01
                         </span>
-                    </span>
+                        <span class="rounded border border-green-500/20 bg-green-500/5 px-3 py-2 text-green-700">
+                            PROTOCOL: TELEMETRY/8
+                        </span>
+                        <span class="rounded border border-green-500/20 bg-green-500/5 px-3 py-2 text-green-700">
+                            ACCESS: ADMIN
+                        </span>
+                    </div>
                 </div>
 
-                <div class="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3">
-                    <span class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
-                        @SharedLocalizer["Dashboard_ServerTimeUtc"]
-                    </span>
+                <div class="border-t border-green-500/15 pt-5 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
+                    <div class="flex items-center justify-between gap-4 border-b border-green-500/15 pb-4">
+                        <div>
+                            <p class="text-[9px] font-bold uppercase tracking-[0.22em] text-green-800">
+                                SYSTEM STATUS
+                            </p>
+                            <p class="mt-2 text-xs uppercase tracking-[0.16em] text-green-500">
+                                TELEMETRY OPERATING SYSTEM
+                            </p>
+                        </div>
 
-                    <span id="dashboard-server-time"
-                          class="font-display text-sm uppercase tracking-[0.12em] text-cyan-300">
-                        @Model.ServerTimeUtc.ToString("MMM dd, yyyy HH:mm:ss", CultureInfo.CurrentCulture)
-                    </span>
+                        <span class="inline-flex items-center gap-2 rounded border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] @(Model.IsLive ? "border-green-400/35 bg-green-500/10 text-green-300 shadow-phosphor" : "border-rose-500/35 bg-rose-500/10 text-rose-300")">
+                            <span class="h-2 w-2 rounded-full @(Model.IsLive ? "bg-green-400 animate-signal-pulse" : "bg-rose-400")"></span>
+                            [@(Model.IsLive ? "ONLINE" : "DEGRADED")]
+                        </span>
+                    </div>
+
+                    <dl class="mt-4 divide-y divide-green-500/10 border-y border-green-500/10">
+                        <div class="grid grid-cols-[1fr_auto] items-center gap-4 py-4">
+                            <dt class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-800">
+                                @SharedLocalizer["Dashboard_TelemetryStream"]
+                            </dt>
+                            <dd class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] @(Model.IsLive ? "text-green-300" : "text-rose-300")">
+                                <span class="h-1.5 w-1.5 rounded-full @(Model.IsLive ? "bg-green-400" : "bg-rose-400")"></span>
+                                @(Model.IsLive
+                                    ? SharedLocalizer["Dashboard_StreamLive"]
+                                    : SharedLocalizer["Dashboard_StreamOffline"])
+                            </dd>
+                        </div>
+
+                        <div class="grid grid-cols-[1fr_auto] items-center gap-4 py-4">
+                            <dt class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-800">
+                                @SharedLocalizer["Dashboard_ServerTimeUtc"]
+                            </dt>
+                            <dd id="dashboard-server-time"
+                                class="text-right text-xs font-bold uppercase tracking-[0.12em] text-green-300">
+                                @Model.ServerTimeUtc.ToString("MMM dd, yyyy HH:mm:ss", CultureInfo.CurrentCulture)
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <p class="mt-4 text-right text-[9px] uppercase tracking-[0.18em] text-green-900">
+                        STATUS: SYNCHRONIZED // SIGNAL LOCKED
+                    </p>
                 </div>
             </div>
+        </header>
+
+        <div class="my-7 flex items-center gap-4" aria-hidden="true">
+            <span class="h-px flex-1 bg-gradient-to-r from-green-500/45 to-green-500/5"></span>
+            <span class="text-[9px] font-bold uppercase tracking-[0.28em] text-green-800">
+                METRIC_STREAM
+            </span>
+            <span class="h-px flex-1 bg-gradient-to-l from-green-500/45 to-green-500/5"></span>
         </div>
 
         @await Html.PartialAsync("_KpiCardsRow", Model)
