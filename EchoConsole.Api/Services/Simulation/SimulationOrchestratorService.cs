@@ -28,6 +28,28 @@ public sealed class SimulationOrchestratorService
         "Gameplay"
     };
 
+    private static readonly SimulationBuildSeed[] DefaultSimulationBuilds =
+    {
+        new(
+            "v1.0.0-Stable",
+            "Production-ready Cosmic Diner baseline with the complete core investigation loop.",
+            120,
+            false,
+            "Unity 2022.3.62f2"),
+        new(
+            "v1.1.2-Beta-Testing",
+            "Beta telemetry build with network resilience tests and expanded session diagnostics.",
+            35,
+            false,
+            "Unity 2022.3.62f2"),
+        new(
+            "v2.0.0-RetroUI",
+            "Current RetroUI branch with the Echo Console telemetry and CMS integration.",
+            7,
+            true,
+            "Unity 2022.3.62f2")
+    };
+
     private readonly EchoConsoleDbContext _dbContext;
     private readonly SessionTokenService _tokenService;
     private readonly IHubContext<TelemetryHub> _hubContext;
@@ -115,6 +137,9 @@ public sealed class SimulationOrchestratorService
                 cancellationToken);
         }
 
+        var buildCatalog =
+            await EnsureSimulationBuildCatalogAsync(cancellationToken);
+
         var now = _timeProvider.GetUtcNow();
 
         await RefreshSimulatedPresenceAsync(
@@ -126,6 +151,11 @@ public sealed class SimulationOrchestratorService
             .Include(session => session.Installation)
             .OrderByDescending(session => session.LastHeartbeatUtc)
             .ToListAsync(cancellationToken);
+
+        var normalizedBuildAssignments =
+            NormalizeActiveSessionBuildAssignments(
+                activeSessions,
+                buildCatalog);
 
         var target = Math.Max(0, request.TargetActiveSessions);
         var createdCount = 0;
@@ -146,10 +176,13 @@ public sealed class SimulationOrchestratorService
                 activeSessions
                     .Select(session => session.InstallationDbId)
                     .ToHashSet(),
+                buildCatalog,
                 cancellationToken);
         }
 
-        if (createdCount > 0 || endedCount > 0)
+        if (createdCount > 0 ||
+            endedCount > 0 ||
+            normalizedBuildAssignments > 0)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -161,7 +194,7 @@ public sealed class SimulationOrchestratorService
         }
 
         var message =
-            $"Target reconciled. Created {createdCount} session(s) and ended {endedCount} session(s).";
+            $"Target reconciled. Created {createdCount} session(s), ended {endedCount} session(s), and normalized {normalizedBuildAssignments} build assignment(s).";
 
         if (activeSessions.Count < target &&
             createdCount < target - activeSessions.Count &&
@@ -187,6 +220,9 @@ public sealed class SimulationOrchestratorService
                 cancellationToken);
         }
 
+        var buildCatalog =
+            await EnsureSimulationBuildCatalogAsync(cancellationToken);
+
         var now = _timeProvider.GetUtcNow();
 
         await RefreshSimulatedPresenceAsync(
@@ -198,6 +234,11 @@ public sealed class SimulationOrchestratorService
             .Include(session => session.Installation)
             .OrderByDescending(session => session.LastHeartbeatUtc)
             .ToListAsync(cancellationToken);
+
+        var normalizedBuildAssignments =
+            NormalizeActiveSessionBuildAssignments(
+                activeSessions,
+                buildCatalog);
 
         var target = Math.Max(0, request.TargetActiveSessions);
         var roll = Random.Shared.Next(0, 100);
@@ -212,6 +253,7 @@ public sealed class SimulationOrchestratorService
                 request.Modules.Installations,
                 now,
                 [],
+                buildCatalog,
                 cancellationToken);
         }
         else if (activeSessions.Count < target && roll < 45)
@@ -225,6 +267,7 @@ public sealed class SimulationOrchestratorService
                 activeSessions
                     .Select(session => session.InstallationDbId)
                     .ToHashSet(),
+                buildCatalog,
                 cancellationToken);
         }
         else if (activeSessions.Count > 0 && roll < 70)
@@ -263,17 +306,26 @@ public sealed class SimulationOrchestratorService
         if (request.Modules.Alerts &&
             Random.Shared.Next(0, 100) >= 92)
         {
+            var alertSession = activeSessions
+                .OrderBy(_ => Random.Shared.Next())
+                .FirstOrDefault();
+
+            var alertBuildVersion =
+                alertSession?.Installation.BuildVersion
+                ?? buildCatalog[0].VersionNumber;
+
             _dbContext.SystemAlerts.Add(
                 CreateAlert(
                     AlertSeverity.Warning,
-                    "Organic simulation detected a transient telemetry spike.",
-                    null,
+                    $"Organic simulation detected a transient telemetry spike on build {alertBuildVersion}.",
+                    alertSession?.Installation.DeviceName,
                     now));
         }
 
         if (createdCount > 0 ||
             endedCount > 0 ||
             updatedCount > 0 ||
+            normalizedBuildAssignments > 0 ||
             _dbContext.ChangeTracker.HasChanges())
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -286,7 +338,7 @@ public sealed class SimulationOrchestratorService
         }
 
         return await CreateCommandResponseAsync(
-            $"Organic pulse complete. Created {createdCount}, updated {updatedCount}, ended {endedCount}.",
+            $"Organic pulse complete. Created {createdCount}, updated {updatedCount}, ended {endedCount}, normalized {normalizedBuildAssignments} build assignment(s).",
             cancellationToken);
     }
 
@@ -302,9 +354,12 @@ public sealed class SimulationOrchestratorService
                 cancellationToken);
         }
 
+        var buildCatalog =
+            await EnsureSimulationBuildCatalogAsync(cancellationToken);
+
         var now = _timeProvider.GetUtcNow();
 
-        var installationName = await _dbContext.Installations
+        var installationContext = await _dbContext.Installations
             .AsNoTracking()
             .Where(
                 installation =>
@@ -314,14 +369,28 @@ public sealed class SimulationOrchestratorService
                 installation =>
                     installation.LastUpdateUtc)
             .Select(
-                installation =>
-                    installation.DeviceName)
+                installation => new
+                {
+                    installation.DeviceName,
+                    installation.BuildVersion
+                })
             .FirstOrDefaultAsync(cancellationToken);
+
+        var alertBuildVersion =
+            installationContext is not null &&
+            buildCatalog.Any(
+                build =>
+                    string.Equals(
+                        build.VersionNumber,
+                        installationContext.BuildVersion,
+                        StringComparison.OrdinalIgnoreCase))
+                ? installationContext.BuildVersion
+                : buildCatalog[0].VersionNumber;
 
         var alert = CreateAlert(
             AlertSeverity.Critical,
-            "Injected critical network and software anomaly for administrative load testing.",
-            installationName,
+            $"Injected critical network and software anomaly for administrative load testing on build {alertBuildVersion}.",
+            installationContext?.DeviceName,
             now);
 
         _dbContext.SystemAlerts.Add(alert);
@@ -355,6 +424,8 @@ public sealed class SimulationOrchestratorService
                 "Sessions module is disabled. Mass drop was not executed.",
                 cancellationToken);
         }
+
+        await EnsureSimulationBuildCatalogAsync(cancellationToken);
 
         var now = _timeProvider.GetUtcNow();
 
@@ -604,6 +675,7 @@ public sealed class SimulationOrchestratorService
         bool allowInstallationCreation,
         DateTimeOffset now,
         HashSet<int> unavailableInstallationIds,
+        IReadOnlyList<SimulationBuildReference> buildCatalog,
         CancellationToken cancellationToken)
     {
         if (requestedCount <= 0)
@@ -636,19 +708,21 @@ public sealed class SimulationOrchestratorService
                 .Select(installation => installation.DeviceName)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            var buildVersion = await GetSimulationBuildVersionAsync(
-                cancellationToken);
-
             for (var index = 0; index < missingCount; index++)
             {
                 var deviceName = CreateNextDeviceName(existingNames);
                 existingNames.Add(deviceName);
 
+                var assignedBuild =
+                    buildCatalog[
+                        (installations.Count + index) %
+                        buildCatalog.Count];
+
                 var installation = new Installation
                 {
                     InstallationId = Guid.NewGuid(),
                     GameCode = GameCode,
-                    BuildVersion = buildVersion,
+                    BuildVersion = assignedBuild.VersionNumber,
                     Platform = "Windows",
                     DeviceName = deviceName,
                     DeviceModel = "Echo Simulation Node",
@@ -672,11 +746,22 @@ public sealed class SimulationOrchestratorService
             .Take(requestedCount)
             .ToArray();
 
-        var build = await GetSimulationBuildVersionAsync(
-            cancellationToken);
+        var validBuildVersions = buildCatalog
+            .Select(build => build.VersionNumber)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var installation in selectedInstallations)
         {
+            if (!validBuildVersions.Contains(
+                    installation.BuildVersion))
+            {
+                installation.BuildVersion =
+                    SelectBuildForInstallation(
+                        installation,
+                        buildCatalog)
+                        .VersionNumber;
+            }
+
             var scene =
                 SimulationScenes[
                     Random.Shared.Next(
@@ -692,7 +777,7 @@ public sealed class SimulationOrchestratorService
                     InstallationDbId = installation.Id,
                     SessionTokenHash =
                         _tokenService.HashToken(sessionToken),
-                    BuildVersion = build,
+                    BuildVersion = installation.BuildVersion,
                     CurrentScene = scene,
                     CurrentGameState =
                         scene == "Menu"
@@ -762,16 +847,151 @@ public sealed class SimulationOrchestratorService
         return count;
     }
 
-    private async Task<string> GetSimulationBuildVersionAsync(
-        CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<SimulationBuildReference>>
+        EnsureSimulationBuildCatalogAsync(
+            CancellationToken cancellationToken)
+    {
+        var existingBuilds =
+            await LoadSimulationBuildCatalogAsync(cancellationToken);
+
+        if (existingBuilds.Count > 0)
+        {
+            return existingBuilds;
+        }
+
+        var now = _timeProvider.GetUtcNow();
+
+        var seededBuilds = DefaultSimulationBuilds
+            .Select(
+                seed => new GameBuild
+                {
+                    VersionNumber = seed.VersionNumber,
+                    ReleaseNotes = seed.ReleaseNotes,
+                    ReleaseDateUtc =
+                        now.AddDays(-seed.ReleaseAgeDays),
+                    IsActive = seed.IsActive,
+                    EngineVersion = seed.EngineVersion
+                })
+            .ToArray();
+
+        _dbContext.GameBuilds.AddRange(seededBuilds);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Created {BuildCount} base Cosmic Diner build records for simulation.",
+                seededBuilds.Length);
+        }
+        catch (DbUpdateException)
+        {
+            foreach (var entry in _dbContext.ChangeTracker
+                         .Entries<GameBuild>()
+                         .Where(entry => entry.State == EntityState.Added))
+            {
+                entry.State = EntityState.Detached;
+            }
+
+            existingBuilds =
+                await LoadSimulationBuildCatalogAsync(
+                    cancellationToken);
+
+            if (existingBuilds.Count == 0)
+            {
+                throw;
+            }
+
+            return existingBuilds;
+        }
+
+        return seededBuilds
+            .OrderByDescending(build => build.IsActive)
+            .ThenByDescending(build => build.ReleaseDateUtc)
+            .Select(
+                build => new SimulationBuildReference(
+                    build.Id,
+                    build.VersionNumber,
+                    build.IsActive))
+            .ToArray();
+    }
+
+    private async Task<IReadOnlyList<SimulationBuildReference>>
+        LoadSimulationBuildCatalogAsync(
+            CancellationToken cancellationToken)
     {
         return await _dbContext.GameBuilds
             .AsNoTracking()
-            .Where(build => build.IsActive)
-            .OrderByDescending(build => build.ReleaseDateUtc)
+            .OrderByDescending(build => build.IsActive)
+            .ThenByDescending(build => build.ReleaseDateUtc)
+            .Take(3)
+            .Select(
+                build => new SimulationBuildReference(
+                    build.Id,
+                    build.VersionNumber,
+                    build.IsActive))
+            .ToListAsync(cancellationToken);
+    }
+
+    private static int NormalizeActiveSessionBuildAssignments(
+        IReadOnlyCollection<GameSession> sessions,
+        IReadOnlyList<SimulationBuildReference> buildCatalog)
+    {
+        if (sessions.Count == 0 ||
+            buildCatalog.Count == 0)
+        {
+            return 0;
+        }
+
+        var validBuildVersions = buildCatalog
             .Select(build => build.VersionNumber)
-            .FirstOrDefaultAsync(cancellationToken)
-            ?? "simulation-1.0.0";
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var changedCount = 0;
+
+        foreach (var session in sessions)
+        {
+            var installation = session.Installation;
+
+            if (!validBuildVersions.Contains(
+                    installation.BuildVersion))
+            {
+                installation.BuildVersion =
+                    SelectBuildForInstallation(
+                        installation,
+                        buildCatalog)
+                        .VersionNumber;
+
+                changedCount++;
+            }
+
+            if (!string.Equals(
+                    session.BuildVersion,
+                    installation.BuildVersion,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                session.BuildVersion =
+                    installation.BuildVersion;
+
+                changedCount++;
+            }
+        }
+
+        return changedCount;
+    }
+
+    private static SimulationBuildReference
+        SelectBuildForInstallation(
+            Installation installation,
+            IReadOnlyList<SimulationBuildReference> buildCatalog)
+    {
+        var stableIndex = installation.Id > 0
+            ? installation.Id
+            : installation.InstallationId.GetHashCode() &
+              int.MaxValue;
+
+        return buildCatalog[
+            stableIndex % buildCatalog.Count];
     }
 
     private static string CreateNextDeviceName(
@@ -843,6 +1063,18 @@ public sealed class SimulationOrchestratorService
             createdCount,
             endedCount);
     }
+    private sealed record SimulationBuildSeed(
+        string VersionNumber,
+        string ReleaseNotes,
+        int ReleaseAgeDays,
+        bool IsActive,
+        string EngineVersion);
+
+    private sealed record SimulationBuildReference(
+        int Id,
+        string VersionNumber,
+        bool IsActive);
+
     private sealed record DeletedTelemetryCounts(
         int SessionEvents,
         int Sessions,
