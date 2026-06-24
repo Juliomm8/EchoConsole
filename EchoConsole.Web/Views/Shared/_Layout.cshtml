@@ -36,8 +36,20 @@
         </div>
     </div>
 
+    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+    {
+        @await Html.PartialAsync("_SimulationOrchestrator")
+    }
+
     <script src="~/js/navigation-shell.js"
             asp-append-version="true"></script>
+
+    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+    {
+        <script src="~/js/simulation-orchestrator.js"
+                asp-append-version="true"
+                defer></script>
+    }
 
     @await RenderSectionAsync(
         "Scripts",

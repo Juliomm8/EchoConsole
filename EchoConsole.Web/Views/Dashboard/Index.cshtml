@@ -16,6 +16,26 @@
         "h-3"
     };
 
+    string[] overviewBarDelays =
+    {
+        "-0.15s",
+        "-0.45s",
+        "-0.75s",
+        "-1.05s",
+        "-1.35s",
+        "-1.65s"
+    };
+
+    string[] overviewBarDurations =
+    {
+        "2.4s",
+        "2.8s",
+        "2.6s",
+        "3.0s",
+        "2.5s",
+        "2.9s"
+    };
+
     var realtimeConfig = new
     {
         culture = CultureInfo.CurrentUICulture.Name,
@@ -90,7 +110,17 @@
                                 ? "bg-amber-500/55"
                                 : "bg-[#22d3ee]/45";
 
-                            <span class="@heightClass @colorClass rounded-sm"></span>
+                            var animationDelay =
+                                overviewBarDelays[
+                                    barIndex % overviewBarDelays.Length];
+
+                            var animationDuration =
+                                overviewBarDurations[
+                                    barIndex % overviewBarDurations.Length];
+
+                            <span class="network-frequency-bar transform-gpu [will-change:transform] @heightClass @colorClass rounded-sm"
+                                  style="--scan-delay: @animationDelay; --scan-duration: @animationDuration;">
+                            </span>
                         }
                     </div>
                 </div>

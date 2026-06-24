@@ -10,6 +10,7 @@ using EchoConsole.Api.Services.Ownership;
 using EchoConsole.Api.Services.Profile;
 using EchoConsole.Api.Services.SessionEventAnalytics;
 using EchoConsole.Api.Services.SessionEvents;
+using EchoConsole.Api.Services.Simulation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
@@ -62,6 +63,16 @@ var cmsConnectionString = builder.Configuration.GetConnectionString("CmsConnecti
 
 builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
     options.UseSqlite(cmsConnectionString));
+
+builder.Services.AddSingleton(TimeProvider.System);
+
+builder.Services.Configure<SimulationOrchestratorOptions>(
+    builder.Configuration.GetSection(
+        SimulationOrchestratorOptions.SectionName));
+
+builder.Services.AddScoped<
+    ISimulationOrchestratorService,
+    SimulationOrchestratorService>();
 
 builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
 builder.Services.AddSingleton<SessionTokenService>();

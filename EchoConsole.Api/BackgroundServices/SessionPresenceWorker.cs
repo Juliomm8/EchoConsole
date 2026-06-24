@@ -1,4 +1,4 @@
-﻿using EchoConsole.Api.Domain.Enums;
+using EchoConsole.Api.Domain.Enums;
 using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
 using Microsoft.AspNetCore.SignalR;
@@ -32,7 +32,9 @@ public sealed class SessionPresenceWorker : BackgroundService
                 .Where(x =>
                     x.Status == SessionStatus.Active &&
                     x.EndedAtUtc == null &&
-                    x.LastHeartbeatUtc < cutoff)
+                    x.LastHeartbeatUtc < cutoff &&
+                    !x.Installation.DeviceName.StartsWith(
+                        "PC-Player-"))
                 .ToListAsync(stoppingToken);
 
             if (expiredSessions.Count > 0)

@@ -11,6 +11,28 @@
         "h-2",
         "h-4"
     };
+
+    string[] liveSessionBarDelays =
+    {
+        "-0.20s",
+        "-0.52s",
+        "-0.84s",
+        "-1.16s",
+        "-1.48s",
+        "-1.80s",
+        "-2.12s"
+    };
+
+    string[] liveSessionBarDurations =
+    {
+        "2.6s",
+        "2.9s",
+        "2.7s",
+        "3.1s",
+        "2.8s",
+        "3.0s",
+        "2.5s"
+    };
 }
 
 <section class="mt-7 overflow-hidden rounded-lg border border-slate-800 bg-[linear-gradient(180deg,rgba(2,6,8,0.96),rgba(0,0,0,0.99))] shadow-[0_0_28px_rgba(15,23,42,0.26)]">
@@ -53,7 +75,17 @@
                     ? "bg-amber-500/55"
                     : "bg-slate-700/70";
 
-                <span class="@heightClass @lineClass rounded-sm"></span>
+                var animationDelay =
+                    liveSessionBarDelays[
+                        lineIndex % liveSessionBarDelays.Length];
+
+                var animationDuration =
+                    liveSessionBarDurations[
+                        lineIndex % liveSessionBarDurations.Length];
+
+                <span class="network-frequency-bar transform-gpu [will-change:transform] @heightClass @lineClass rounded-sm"
+                      style="--scan-delay: @animationDelay; --scan-duration: @animationDuration;">
+                </span>
             }
         </div>
     </header>

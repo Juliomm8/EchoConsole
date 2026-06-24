@@ -1385,31 +1385,24 @@
   <data name="Home_ChangelogV03Description" xml:space="preserve">
     <value>Encuentros con el enemigo, lógica de escondites, sistemas de tensión y evidencia narrativa ampliada por todo el restaurante.</value>
   </data>
-
   <data name="Home_InterceptedSignals" xml:space="preserve">
     <value>SEÑALES INTERCEPTADAS</value>
   </data>
-
   <data name="Home_ActiveInvestigators" xml:space="preserve">
     <value>INVESTIGADORES ACTIVOS</value>
   </data>
-
   <data name="Home_LiveFrequencyScan" xml:space="preserve">
     <value>ESCANEO DE FRECUENCIAS EN VIVO</value>
   </data>
-
   <data name="Home_ScanLocked" xml:space="preserve">
     <value>ESCANEO FIJADO</value>
   </data>
-
   <data name="Home_SurviveShiftTitle" xml:space="preserve">
     <value>SOBREVIVE AL TURNO</value>
   </data>
-
   <data name="Home_CorruptedData" xml:space="preserve">
     <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
   </data>
-
   <data name="PatchNotesAdmin_PageTitle" xml:space="preserve">
     <value>CMS de notas de parche</value>
   </data>
@@ -1479,7 +1472,6 @@
   <data name="PatchNotesAdmin_Error" xml:space="preserve">
     <value>No se pudo publicar la nota de parche.</value>
   </data>
-
   <data name="Sidebar_PatchNotesCms" xml:space="preserve">
     <value>CMS de parches</value>
   </data>
@@ -1578,5 +1570,180 @@
   </data>
   <data name="PatchNotesAdmin_ToggleError" xml:space="preserve">
     <value>No se pudo cambiar la visibilidad de la nota de parche.</value>
+  </data>
+  <data name="SimulationOrchestrator_OpenButton" xml:space="preserve">
+    <value>CONTROL_SIM</value>
+  </data>
+  <data name="SimulationOrchestrator_Kicker" xml:space="preserve">
+    <value>SO_SIMULACIÓN_TELEMETRÍA</value>
+  </data>
+  <data name="SimulationOrchestrator_Title" xml:space="preserve">
+    <value>Orquestador de Simulación</value>
+  </data>
+  <data name="SimulationOrchestrator_AdminOnly" xml:space="preserve">
+    <value>CANAL DE CONTROL // SOLO ADMIN</value>
+  </data>
+  <data name="SimulationOrchestrator_Close" xml:space="preserve">
+    <value>CERRAR</value>
+  </data>
+  <data name="SimulationOrchestrator_Module04" xml:space="preserve">
+    <value>MÓDULO_04</value>
+  </data>
+  <data name="SimulationOrchestrator_ActiveSessionControl" xml:space="preserve">
+    <value>Control de Sesiones Activas</value>
+  </data>
+  <data name="SimulationOrchestrator_StateIdle" xml:space="preserve">
+    <value>INACTIVO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateActive" xml:space="preserve">
+    <value>ACTIVO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateOffline" xml:space="preserve">
+    <value>DESCONECTADO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateTransmitting" xml:space="preserve">
+    <value>TRANSMITIENDO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateError" xml:space="preserve">
+    <value>ERROR</value>
+  </data>
+  <data name="SimulationOrchestrator_ActiveReal" xml:space="preserve">
+    <value>REALES_ACTIVAS</value>
+  </data>
+  <data name="SimulationOrchestrator_ActiveSimulated" xml:space="preserve">
+    <value>SIMULADAS_ACTIVAS</value>
+  </data>
+  <data name="SimulationOrchestrator_ConnectedUserTarget" xml:space="preserve">
+    <value>OBJETIVO DE USUARIOS CONECTADOS</value>
+  </data>
+  <data name="SimulationOrchestrator_Apply" xml:space="preserve">
+    <value>APLICAR</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicMode" xml:space="preserve">
+    <value>MODO ORGÁNICO ESTOCÁSTICO</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicDescription" xml:space="preserve">
+    <value>Genera entradas, cambios de escena y salidas aleatorias cada 4–8 segundos.</value>
+  </data>
+  <data name="SimulationOrchestrator_ComponentMatrix" xml:space="preserve">
+    <value>MATRIZ_DE_COMPONENTES</value>
+  </data>
+  <data name="SimulationOrchestrator_Sessions" xml:space="preserve">
+    <value>Sesiones</value>
+  </data>
+  <data name="SimulationOrchestrator_Installations" xml:space="preserve">
+    <value>Instalaciones</value>
+  </data>
+  <data name="SimulationOrchestrator_Alerts" xml:space="preserve">
+    <value>Alertas</value>
+  </data>
+  <data name="SimulationOrchestrator_Module05" xml:space="preserve">
+    <value>MÓDULO_05</value>
+  </data>
+  <data name="SimulationOrchestrator_IncidentInjector" xml:space="preserve">
+    <value>INYECTOR_DE_INCIDENTES</value>
+  </data>
+  <data name="SimulationOrchestrator_InjectCriticalAlarm" xml:space="preserve">
+    <value>INYECTAR_ALARMA_CRÍTICA</value>
+  </data>
+  <data name="SimulationOrchestrator_InjectMassDrop" xml:space="preserve">
+    <value>INYECTAR_CAÍDA_MASIVA</value>
+  </data>
+  <data name="SimulationOrchestrator_DatabaseMaintenance" xml:space="preserve">
+    <value>MANTENIMIENTO_BASE_DATOS</value>
+  </data>
+  <data name="SimulationOrchestrator_PurgeSimulatedData" xml:space="preserve">
+    <value>PURGAR_DATOS_SIMULADOS</value>
+  </data>
+  <data name="SimulationOrchestrator_WipeAllTelemetry" xml:space="preserve">
+    <value>BORRAR_TODA_TELEMETRÍA</value>
+  </data>
+  <data name="SimulationOrchestrator_MaintenanceScope" xml:space="preserve">
+    <value>Los usuarios de identidad, builds del juego y registros del CMS están fuera de este mantenimiento.</value>
+  </data>
+  <data name="SimulationOrchestrator_DebugConsole" xml:space="preserve">
+    <value>CONSOLA_DEPURACIÓN</value>
+  </data>
+  <data name="SimulationOrchestrator_Clear" xml:space="preserve">
+    <value>LIMPIAR</value>
+  </data>
+  <data name="SimulationOrchestrator_Ready" xml:space="preserve">
+    <value>ORQUESTADOR_LISTO</value>
+  </data>
+  <data name="SimulationOrchestrator_LastSyncNever" xml:space="preserve">
+    <value>ÚLTIMA_SINCRONIZACIÓN: NUNCA</value>
+  </data>
+  <data name="SimulationOrchestrator_TransportBffProxy" xml:space="preserve">
+    <value>TRANSPORTE: PROXY_BFF</value>
+  </data>
+  <data name="SimulationOrchestrator_EndpointNotConfigured" xml:space="preserve">
+    <value>El endpoint de simulación no está configurado.</value>
+  </data>
+  <data name="SimulationOrchestrator_RequestFailedStatus" xml:space="preserve">
+    <value>La solicitud falló con estado {0}.</value>
+  </data>
+  <data name="SimulationOrchestrator_LastSync" xml:space="preserve">
+    <value>ÚLTIMA_SINCRONIZACIÓN: {0}</value>
+  </data>
+  <data name="SimulationOrchestrator_StatusError" xml:space="preserve">
+    <value>ERROR_ESTADO</value>
+  </data>
+  <data name="SimulationOrchestrator_ChannelBusy" xml:space="preserve">
+    <value>CANAL_OCUPADO: el comando anterior sigue ejecutándose.</value>
+  </data>
+  <data name="SimulationOrchestrator_RequestSent" xml:space="preserve">
+    <value>SOLICITUD_ENVIADA</value>
+  </data>
+  <data name="SimulationOrchestrator_Complete" xml:space="preserve">
+    <value>COMPLETADO</value>
+  </data>
+  <data name="SimulationOrchestrator_AccessDenied" xml:space="preserve">
+    <value>ACCESO_DENEGADO: se requiere una sesión de administrador.</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicEnabled" xml:space="preserve">
+    <value>MODO_ORGÁNICO: ACTIVADO</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicDisabled" xml:space="preserve">
+    <value>MODO_ORGÁNICO: DESACTIVADO</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmMassDrop" xml:space="preserve">
+    <value>¿Desconectar ahora todas las sesiones simuladas activas?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmPurge" xml:space="preserve">
+    <value>¿Eliminar todos los registros de telemetría generados por simulaciones PC-Player?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmWipeFirst" xml:space="preserve">
+    <value>Esto eliminará permanentemente todas las instalaciones, sesiones, eventos y alertas de telemetría. ¿Continuar?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmWipeFinal" xml:space="preserve">
+    <value>CONFIRMACIÓN FINAL: ¿Borrar ahora todos los datos de telemetría?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConsoleCleared" xml:space="preserve">
+    <value>CONSOLA_DEPURACIÓN_LIMPIADA</value>
+  </data>
+
+  <data name="SimulationOrchestrator_Step01" xml:space="preserve">
+    <value>[ PASO_01: CARGAR_CONFIGURACIÓN ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step02" xml:space="preserve">
+    <value>[ PASO_02: MATRIZ_DE_COMPONENTES ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step03" xml:space="preserve">
+    <value>[ PASO_03: INYECCIÓN_DE_ANOMALÍAS ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step04" xml:space="preserve">
+    <value>[ PASO_04: MANTENIMIENTO_DE_BASE_DE_DATOS ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step05" xml:space="preserve">
+    <value>[ PASO_05: SALIDA_DE_DEPURACIÓN ]</value>
+  </data>
+  <data name="SimulationOrchestrator_TerminateSimulation" xml:space="preserve">
+    <value>TERMINAR_SIMULACIÓN</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmTerminate" xml:space="preserve">
+    <value>¿Detener la simulación persistente y desconectar todas las sesiones simuladas?</value>
+  </data>
+  <data name="SimulationOrchestrator_PersistentHint" xml:space="preserve">
+    <value>El modo persistente permanece activo entre páginas hasta que se termine manualmente.</value>
   </data>
 </root>
