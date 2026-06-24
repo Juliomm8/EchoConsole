@@ -170,19 +170,17 @@ builder.Services.AddScoped<EchoConsolePatchNotesApiClient>();
 
 var app = builder.Build();
 
-app.UseResponseCompression();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    app.UseHttpsRedirection();
+    app.UseResponseCompression();
 }
 
 var localizationOptions = app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>()
     .Value;
-
-app.UseHttpsRedirection();
 
 app.UseStaticFiles(new StaticFileOptions
 {

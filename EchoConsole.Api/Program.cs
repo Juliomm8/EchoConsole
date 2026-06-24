@@ -192,7 +192,6 @@ builder.Services.AddScoped<DevelopmentDataSeeder>();
 
 var app = builder.Build();
 
-app.UseResponseCompression();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -204,8 +203,12 @@ if (app.Environment.IsDevelopment())
     var seeder = scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
     await seeder.SeedAsync();
 }
+else
+{
+    app.UseHttpsRedirection();
+    app.UseResponseCompression();
+}
 
-app.UseHttpsRedirection();
 app.UseRateLimiter();
 app.UseCors("EchoConsoleCors");
 app.UseAuthentication();

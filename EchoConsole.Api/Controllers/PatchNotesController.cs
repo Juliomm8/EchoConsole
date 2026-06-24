@@ -36,19 +36,20 @@ public sealed class PatchNotesController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<PatchNoteDto>>> GetPublished(
         CancellationToken cancellationToken = default)
     {
-        var patchNotes = await _memoryCache.GetOrCreateAsync<IReadOnlyList<PatchNoteDto>>(
-            PublishedCacheKey,
-            async cacheEntry =>
-            {
-                cacheEntry.AbsoluteExpirationRelativeToNow =
-                    PublishedCacheDuration;
+        var patchNotes = await _memoryCache
+            .GetOrCreateAsync<IReadOnlyList<PatchNoteDto>>(
+                PublishedCacheKey,
+                async cacheEntry =>
+                {
+                    cacheEntry.AbsoluteExpirationRelativeToNow =
+                        PublishedCacheDuration;
 
-                return await BuildPatchNotesQuery()
-                    .Where(x => x.IsPublished)
-                    .OrderByDescending(x => x.CreatedAtUtc)
-                    .ThenByDescending(x => x.Id)
-                    .ToListAsync(cancellationToken);
-            });
+                    return await BuildPatchNotesQuery()
+                        .Where(x => x.IsPublished)
+                        .OrderByDescending(x => x.CreatedAtUtc)
+                        .ThenByDescending(x => x.Id)
+                        .ToListAsync(cancellationToken);
+                });
 
         return Ok(
             patchNotes
