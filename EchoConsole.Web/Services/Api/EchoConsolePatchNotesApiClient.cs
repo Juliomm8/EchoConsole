@@ -22,7 +22,7 @@ public sealed class EchoConsolePatchNotesApiClient
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("EchoConsoleApiPublic");
+            var client = _httpClientFactory.CreateClient(EchoConsoleApiClientNames.Public);
 
             var patchNotes = await client.GetFromJsonAsync<List<PatchNoteApiDto>>(
                 "/api/patchnotes",
@@ -30,7 +30,16 @@ public sealed class EchoConsolePatchNotesApiClient
 
             return patchNotes is null
                 ? Array.Empty<PatchNoteApiDto>()
-                : patchNotes;
+                : patchNotes
+                    .Where(x => x.IsPublished)
+                    .OrderByDescending(x => x.CreatedAtUtc)
+                    .ThenByDescending(x => x.Id)
+                    .ToArray();
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -47,7 +56,7 @@ public sealed class EchoConsolePatchNotesApiClient
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+            var client = _httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
 
             using var response = await client.GetAsync(
                 "/api/patchnotes/admin",
@@ -78,6 +87,11 @@ public sealed class EchoConsolePatchNotesApiClient
                     ? Array.Empty<PatchNoteApiDto>()
                     : patchNotes);
         }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(
@@ -95,7 +109,7 @@ public sealed class EchoConsolePatchNotesApiClient
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+            var client = _httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
 
             using var response = await client.PostAsJsonAsync(
                 "/api/patchnotes",
@@ -124,6 +138,11 @@ public sealed class EchoConsolePatchNotesApiClient
                 errorMessage,
                 response.StatusCode);
         }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(
@@ -141,7 +160,7 @@ public sealed class EchoConsolePatchNotesApiClient
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+            var client = _httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
 
             using var request = new HttpRequestMessage(
                 HttpMethod.Patch,
@@ -175,6 +194,11 @@ public sealed class EchoConsolePatchNotesApiClient
                 errorMessage,
                 response.StatusCode);
         }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(
@@ -193,7 +217,7 @@ public sealed class EchoConsolePatchNotesApiClient
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+            var client = _httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
 
             using var response = await client.DeleteAsync(
                 $"/api/patchnotes/{id}",
@@ -217,6 +241,11 @@ public sealed class EchoConsolePatchNotesApiClient
             return DeletePatchNoteApiResult.Failure(
                 errorMessage,
                 response.StatusCode);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace EchoConsole.Web.Services.Api;
@@ -12,7 +12,7 @@ public sealed class EchoConsoleDashboardApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleDashboardApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
         _logger = logger;
     }
 
@@ -40,6 +40,11 @@ public sealed class EchoConsoleDashboardApiClient
         {
             _logger.LogError(ex, "JSON deserialization error while reading dashboard overview.");
             return new DashboardOverviewApiDto();
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -72,6 +77,11 @@ public sealed class EchoConsoleDashboardApiClient
         {
             _logger.LogError(ex, "JSON deserialization error while reading live sessions.");
             return new List<LiveSessionApiDto>();
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

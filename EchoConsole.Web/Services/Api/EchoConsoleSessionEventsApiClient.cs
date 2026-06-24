@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Models.Api.SessionEvents;
+using EchoConsole.Web.Models.Api.SessionEvents;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Globalization;
 using System.Net;
@@ -15,7 +15,7 @@ public sealed class EchoConsoleSessionEventsApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleSessionEventsApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
         _logger = logger;
     }
 
@@ -61,6 +61,11 @@ public sealed class EchoConsoleSessionEventsApiClient
             return await response.Content
                 .ReadFromJsonAsync<AdminSessionEventsPageApiModel>(
                     cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -118,6 +123,11 @@ public sealed class EchoConsoleSessionEventsApiClient
             return await response.Content
                 .ReadFromJsonAsync<AdminSessionTimelineDetailApiModel>(
                     cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

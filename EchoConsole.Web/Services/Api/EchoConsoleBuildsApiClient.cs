@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace EchoConsole.Web.Services.Api;
@@ -12,7 +12,7 @@ public sealed class EchoConsoleBuildsApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleBuildsApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
         _logger = logger;
     }
 
@@ -55,6 +55,11 @@ public sealed class EchoConsoleBuildsApiClient
 
             return data ?? new PagedResponse<GameBuildApiDto>();
         }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error while reading builds from EchoConsole.Api.");
@@ -85,6 +90,11 @@ public sealed class EchoConsoleBuildsApiClient
             }
 
             return await response.Content.ReadFromJsonAsync<GameBuildApiDto>(cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

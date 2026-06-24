@@ -26,6 +26,11 @@ builder.Services.AddLocalization(options =>
     options.ResourcesPath = "Resources";
 });
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
 builder.Services
     .AddControllersWithViews()
     .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
@@ -107,6 +112,9 @@ builder.Services
             options.LoginPath = "/Auth/Login";
             options.AccessDeniedPath = "/Auth/AccessDenied";
             options.Cookie.Name = "EchoConsole.Auth";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.ExpireTimeSpan = TimeSpan.FromDays(7);
             options.SlidingExpiration = true;
         });
@@ -119,36 +127,33 @@ builder.Services.AddScoped<
 
 builder.Services.AddTransient<AdminApiKeyHandler>();
 
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]
+    ?? throw new InvalidOperationException(
+        "ApiSettings:BaseUrl is not configured.");
+
+if (!Uri.TryCreate(
+        apiBaseUrl,
+        UriKind.Absolute,
+        out var apiBaseUri))
+{
+    throw new InvalidOperationException(
+        "ApiSettings:BaseUrl must be an absolute URI.");
+}
+
+void ConfigureApiClient(HttpClient client)
+{
+    client.BaseAddress = apiBaseUri;
+    client.Timeout = TimeSpan.FromSeconds(10);
+}
+
 builder.Services.AddHttpClient(
-    "EchoConsoleApiPublic",
-    (serviceProvider, client) =>
-    {
-        var configuration =
-            serviceProvider.GetRequiredService<IConfiguration>();
-
-        var baseUrl = configuration["ApiSettings:BaseUrl"]
-            ?? throw new InvalidOperationException(
-                "ApiSettings:BaseUrl is not configured.");
-
-        client.BaseAddress = new Uri(baseUrl);
-        client.Timeout = TimeSpan.FromSeconds(10);
-    });
+    EchoConsoleApiClientNames.Public,
+    (_, client) => ConfigureApiClient(client));
 
 builder.Services
     .AddHttpClient(
-        "EchoConsoleApiAdmin",
-        (serviceProvider, client) =>
-        {
-            var configuration =
-                serviceProvider.GetRequiredService<IConfiguration>();
-
-            var baseUrl = configuration["ApiSettings:BaseUrl"]
-                ?? throw new InvalidOperationException(
-                    "ApiSettings:BaseUrl is not configured.");
-
-            client.BaseAddress = new Uri(baseUrl);
-            client.Timeout = TimeSpan.FromSeconds(10);
-        })
+        EchoConsoleApiClientNames.Admin,
+        (_, client) => ConfigureApiClient(client))
     .AddHttpMessageHandler<AdminApiKeyHandler>();
 
 builder.Services.AddScoped<EchoConsoleDashboardApiClient>();
@@ -165,6 +170,8 @@ builder.Services.AddScoped<EchoConsolePatchNotesApiClient>();
 
 var app = builder.Build();
 
+app.UseResponseCompression();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -176,7 +183,18 @@ var localizationOptions = app.Services
     .Value;
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        if (!app.Environment.IsDevelopment())
+        {
+            context.Context.Response.Headers.CacheControl =
+                "public,max-age=604800";
+        }
+    }
+});
 
 app.UseRequestLocalization(localizationOptions);
 

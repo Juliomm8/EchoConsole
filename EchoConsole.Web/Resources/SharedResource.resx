@@ -1253,30 +1253,6 @@
   <data name="Error_RequestId" xml:space="preserve">
     <value>Request ID</value>
   </data>
-  <data name="Privacy_PageTitle" xml:space="preserve">
-    <value>Privacy</value>
-  </data>
-  <data name="Privacy_Badge" xml:space="preserve">
-    <value>Data Governance</value>
-  </data>
-  <data name="Privacy_Title" xml:space="preserve">
-    <value>Privacy and Telemetry</value>
-  </data>
-  <data name="Privacy_Description" xml:space="preserve">
-    <value>Echo Console processes technical gameplay telemetry to operate dashboards, diagnostics and player-facing history.</value>
-  </data>
-  <data name="Privacy_TelemetryTitle" xml:space="preserve">
-    <value>Telemetry Scope</value>
-  </data>
-  <data name="Privacy_TelemetryDescription" xml:space="preserve">
-    <value>Telemetry is limited to operational game data such as sessions, scenes, events, builds and device status.</value>
-  </data>
-  <data name="Privacy_SecurityTitle" xml:space="preserve">
-    <value>Security</value>
-  </data>
-  <data name="Privacy_SecurityDescription" xml:space="preserve">
-    <value>Session tokens and administrative credentials are never displayed in the interface or included in gameplay payloads.</value>
-  </data>
   <data name="Validation_Required" xml:space="preserve">
     <value>The {0} field is required.</value>
   </data>

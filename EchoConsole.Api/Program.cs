@@ -5,7 +5,6 @@ using EchoConsole.Api.Persistence;
 using EchoConsole.Api.Persistence.Cms;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
-using EchoConsole.Api.Services;
 using EchoConsole.Api.Services.LiveOperations;
 using EchoConsole.Api.Services.Ownership;
 using EchoConsole.Api.Services.Profile;
@@ -15,13 +14,16 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
 
 builder.Services.AddControllers();
 
@@ -50,13 +52,15 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 
-builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContextPool<EchoConsoleDbContext>(options =>
+    options.UseSqlServer(
+        connectionString,
+        sqlOptions => sqlOptions.EnableRetryOnFailure()));
 
 var cmsConnectionString = builder.Configuration.GetConnectionString("CmsConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:CmsConnection is not configured.");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
     options.UseSqlite(cmsConnectionString));
 
 builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
@@ -188,6 +192,7 @@ builder.Services.AddScoped<DevelopmentDataSeeder>();
 
 var app = builder.Build();
 
+app.UseResponseCompression();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())

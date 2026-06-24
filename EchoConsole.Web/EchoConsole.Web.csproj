@@ -1,23 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<UserSecretsId>0b486692-a301-4bbc-9962-260859c61457</UserSecretsId>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>0b486692-a301-4bbc-9962-260859c61457</UserSecretsId>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<Folder Include="Views\Reports\" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.8" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\EchoConsole.Api\EchoConsole.Api.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EchoConsole.Api\EchoConsole.Api.csproj" />
+  </ItemGroup>
 
 </Project>

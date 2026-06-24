@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace EchoConsole.Web.Services.Api;
@@ -12,7 +12,7 @@ public sealed class EchoConsoleUsersApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleUsersApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
         _logger = logger;
     }
 
@@ -54,6 +54,11 @@ public sealed class EchoConsoleUsersApiClient
                 cancellationToken: cancellationToken);
 
             return data ?? new PagedResponse<UserApiDto>();
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
