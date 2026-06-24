@@ -318,3 +318,42 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+@layer utilities {
+    .network-frequency-bar {
+        transform-origin: bottom center;
+        animation:
+            network-frequency-scan
+            var(--scan-duration, 2.6s)
+            ease-in-out
+            infinite;
+        animation-delay: var(--scan-delay, 0s);
+        will-change: transform, opacity;
+    }
+}
+
+@keyframes network-frequency-scan {
+    0%,
+    100% {
+        transform: scaleY(0.72);
+        opacity: 0.45;
+    }
+
+    45% {
+        transform: scaleY(1.06);
+        opacity: 0.95;
+    }
+
+    72% {
+        transform: scaleY(0.86);
+        opacity: 0.68;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .network-frequency-bar {
+        animation: none;
+        transform: none;
+        opacity: 0.75;
+    }
+}
