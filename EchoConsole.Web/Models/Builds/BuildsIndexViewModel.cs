@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Services.Api;
+using EchoConsole.Web.Services.Api;
 
 namespace EchoConsole.Web.Models.Builds;
 
@@ -13,6 +13,16 @@ public sealed class BuildsIndexViewModel
     public int TotalCount { get; set; }
 
     public int TotalPages { get; set; }
+
+    public int TotalRegisteredBuilds { get; set; }
+
+    public string ActiveBuildVersion { get; set; } = string.Empty;
+
+    public string BaseEngineVersion { get; set; } = string.Empty;
+
+    public CreateBuildInputModel NewBuild { get; set; } = new();
+
+    public UpdateBuildInputModel EditBuild { get; set; } = new();
 
     public bool HasPreviousPage => PageNumber > 1;
 

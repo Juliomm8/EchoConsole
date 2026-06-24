@@ -1721,7 +1721,6 @@
   <data name="SimulationOrchestrator_ConsoleCleared" xml:space="preserve">
     <value>CONSOLA_DEPURACIÓN_LIMPIADA</value>
   </data>
-
   <data name="SimulationOrchestrator_Step01" xml:space="preserve">
     <value>[ PASO_01: CARGAR_CONFIGURACIÓN ]</value>
   </data>
@@ -1745,5 +1744,128 @@
   </data>
   <data name="SimulationOrchestrator_PersistentHint" xml:space="preserve">
     <value>El modo persistente permanece activo entre páginas hasta que se termine manualmente.</value>
+  </data>
+  <data name="Builds_RegisterNew" xml:space="preserve">
+    <value>REGISTRAR_NUEVA_BUILD</value>
+  </data>
+  <data name="Builds_FieldVersion" xml:space="preserve">
+    <value>Número de versión</value>
+  </data>
+  <data name="Builds_FieldEngine" xml:space="preserve">
+    <value>Versión base del motor</value>
+  </data>
+  <data name="Builds_FieldReleaseDate" xml:space="preserve">
+    <value>Fecha de lanzamiento UTC</value>
+  </data>
+  <data name="Builds_FieldNotes" xml:space="preserve">
+    <value>Notas de versión</value>
+  </data>
+  <data name="Builds_NotesPlaceholder" xml:space="preserve">
+    <value>Describe cambios relevantes, correcciones y contexto del despliegue.</value>
+  </data>
+  <data name="Builds_FieldSetActive" xml:space="preserve">
+    <value>Establecer como build activa de producción</value>
+  </data>
+  <data name="Builds_RegisterSubmit" xml:space="preserve">
+    <value>REGISTRAR_BUILD</value>
+  </data>
+  <data name="Builds_KpiTotal" xml:space="preserve">
+    <value>Total de builds registradas</value>
+  </data>
+  <data name="Builds_KpiActive" xml:space="preserve">
+    <value>Build activa en producción</value>
+  </data>
+  <data name="Builds_KpiEngine" xml:space="preserve">
+    <value>Versión base del motor</value>
+  </data>
+  <data name="Builds_NoActiveBuild" xml:space="preserve">
+    <value>SIN_BUILD_ACTIVA</value>
+  </data>
+  <data name="Builds_EngineUnavailable" xml:space="preserve">
+    <value>MOTOR_NO_REPORTADO</value>
+  </data>
+  <data name="Builds_ColInstallations" xml:space="preserve">
+    <value>Instalaciones vinculadas</value>
+  </data>
+  <data name="Builds_ColSessions" xml:space="preserve">
+    <value>Sesiones totales</value>
+  </data>
+  <data name="Builds_NoReleaseNotes" xml:space="preserve">
+    <value>Sin notas de versión</value>
+  </data>
+  <data name="Builds_Activate" xml:space="preserve">
+    <value>Activar build</value>
+  </data>
+  <data name="Builds_Deactivate" xml:space="preserve">
+    <value>Desactivar build</value>
+  </data>
+  <data name="Builds_EmptyHint" xml:space="preserve">
+    <value>Registra una build para inicializar la telemetría de versiones.</value>
+  </data>
+  <data name="Builds_CreateSuccess" xml:space="preserve">
+    <value>La build se registró correctamente.</value>
+  </data>
+  <data name="Builds_CreateError" xml:space="preserve">
+    <value>No se pudo registrar la build.</value>
+  </data>
+  <data name="Builds_StatusUpdated" xml:space="preserve">
+    <value>El estado de la build se actualizó correctamente.</value>
+  </data>
+  <data name="Builds_StatusError" xml:space="preserve">
+    <value>No se pudo actualizar el estado de la build.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Builds_ColActions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="Builds_Edit" xml:space="preserve">
+    <value>EDITAR</value>
+  </data>
+  <data name="Builds_Delete" xml:space="preserve">
+    <value>ELIMINAR</value>
+  </data>
+  <data name="Builds_DeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar esta build de forma permanente?</value>
+  </data>
+  <data name="Builds_DeleteActiveHint" xml:space="preserve">
+    <value>Desactiva la build de producción antes de eliminarla.</value>
+  </data>
+  <data name="Builds_DeleteTelemetryHint" xml:space="preserve">
+    <value>Esta build está protegida porque existen registros de telemetría vinculados.</value>
+  </data>
+  <data name="Builds_EditTitle" xml:space="preserve">
+    <value>Editar registro de build</value>
+  </data>
+  <data name="Builds_SaveChanges" xml:space="preserve">
+    <value>GUARDAR_CAMBIOS</value>
+  </data>
+  <data name="Builds_UpdateSuccess" xml:space="preserve">
+    <value>La build se actualizó correctamente.</value>
+  </data>
+  <data name="Builds_UpdateError" xml:space="preserve">
+    <value>No se pudo actualizar la build.</value>
+  </data>
+  <data name="Builds_UpdateValidationError" xml:space="preserve">
+    <value>Revisa los datos de la build antes de guardar los cambios.</value>
+  </data>
+  <data name="Builds_DeleteSuccess" xml:space="preserve">
+    <value>La build se eliminó correctamente.</value>
+  </data>
+  <data name="Builds_DeleteActiveBlocked" xml:space="preserve">
+    <value>La build activa de producción debe desactivarse antes de eliminarla.</value>
+  </data>
+  <data name="Builds_DeleteTelemetryBlocked" xml:space="preserve">
+    <value>No se puede eliminar la build mientras existan instalaciones o sesiones vinculadas.</value>
+  </data>
+  <data name="Builds_DeleteNotFound" xml:space="preserve">
+    <value>La build seleccionada ya no existe.</value>
+  </data>
+  <data name="Builds_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la build.</value>
   </data>
 </root>
