@@ -322,6 +322,8 @@
 @layer utilities {
     .network-frequency-bar {
         transform-origin: bottom center;
+        backface-visibility: hidden;
+        contain: paint;
         animation:
             network-frequency-scan
             var(--scan-duration, 2.6s)
@@ -335,17 +337,17 @@
 @keyframes network-frequency-scan {
     0%,
     100% {
-        transform: scaleY(0.72);
+        transform: translate3d(0, 0, 0) scaleY(0.72);
         opacity: 0.45;
     }
 
     45% {
-        transform: scaleY(1.06);
+        transform: translate3d(0, 0, 0) scaleY(1.06);
         opacity: 0.95;
     }
 
     72% {
-        transform: scaleY(0.86);
+        transform: translate3d(0, 0, 0) scaleY(0.86);
         opacity: 0.68;
     }
 }

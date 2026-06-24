@@ -72,7 +72,6 @@ public sealed class SimulationOrchestratorService
                     session =>
                         session.Status == SessionStatus.Active &&
                         session.EndedAtUtc == null &&
-                        session.LastHeartbeatUtc >= cutoff &&
                         session.Installation.DeviceName.StartsWith(
                             SimulationDevicePrefix),
                     cancellationToken);
@@ -117,9 +116,13 @@ public sealed class SimulationOrchestratorService
         }
 
         var now = _timeProvider.GetUtcNow();
-        var cutoff = now.Subtract(ActiveSessionWindow);
 
-        var activeSessions = await ActiveSimulatedSessionsQuery(cutoff)
+        await RefreshSimulatedPresenceAsync(
+            now,
+            request.Modules.Installations,
+            cancellationToken);
+
+        var activeSessions = await ActiveSimulatedSessionsQuery()
             .Include(session => session.Installation)
             .OrderByDescending(session => session.LastHeartbeatUtc)
             .ToListAsync(cancellationToken);
@@ -185,9 +188,13 @@ public sealed class SimulationOrchestratorService
         }
 
         var now = _timeProvider.GetUtcNow();
-        var cutoff = now.Subtract(ActiveSessionWindow);
 
-        var activeSessions = await ActiveSimulatedSessionsQuery(cutoff)
+        await RefreshSimulatedPresenceAsync(
+            now,
+            request.Modules.Installations,
+            cancellationToken);
+
+        var activeSessions = await ActiveSimulatedSessionsQuery()
             .Include(session => session.Installation)
             .OrderByDescending(session => session.LastHeartbeatUtc)
             .ToListAsync(cancellationToken);
@@ -350,9 +357,8 @@ public sealed class SimulationOrchestratorService
         }
 
         var now = _timeProvider.GetUtcNow();
-        var cutoff = now.Subtract(ActiveSessionWindow);
 
-        var droppedCount = await ActiveSimulatedSessionsQuery(cutoff)
+        var droppedCount = await ActiveSimulatedSessionsQuery()
             .ExecuteUpdateAsync(
                 setters => setters
                     .SetProperty(
@@ -547,17 +553,50 @@ public sealed class SimulationOrchestratorService
         };
     }
 
-    private IQueryable<GameSession> ActiveSimulatedSessionsQuery(
-        DateTimeOffset cutoff)
+    private IQueryable<GameSession> ActiveSimulatedSessionsQuery()
     {
         return _dbContext.GameSessions
             .Where(
                 session =>
                     session.Status == SessionStatus.Active &&
                     session.EndedAtUtc == null &&
-                    session.LastHeartbeatUtc >= cutoff &&
                     session.Installation.DeviceName.StartsWith(
                         SimulationDevicePrefix));
+    }
+
+    private async Task RefreshSimulatedPresenceAsync(
+        DateTimeOffset now,
+        bool updateInstallations,
+        CancellationToken cancellationToken)
+    {
+        await ActiveSimulatedSessionsQuery()
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    session => session.LastHeartbeatUtc,
+                    now),
+                cancellationToken);
+
+        if (!updateInstallations)
+        {
+            return;
+        }
+
+        await _dbContext.Installations
+            .Where(
+                installation =>
+                    installation.DeviceName.StartsWith(
+                        SimulationDevicePrefix))
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(
+                        installation =>
+                            installation.LastUpdateUtc,
+                        now)
+                    .SetProperty(
+                        installation =>
+                            installation.Status,
+                        "Active"),
+                cancellationToken);
     }
 
     private async Task<int> CreateSessionsAsync(

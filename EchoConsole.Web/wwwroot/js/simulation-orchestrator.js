@@ -3,7 +3,14 @@
 
     const rootId = "simulation-orchestrator-root";
     const openSelector = "[data-sim-open]";
-    const managerKey = "__echoSimulationOrchestratorManager";
+    const managerKey = "__echoConsoleSimulationManager";
+    const storageKey = "echo-console:simulation-orchestrator:v3";
+
+    const statusPollIntervalMs = 10000;
+    const statusUiThrottleMs = 1800;
+    const logFlushIntervalMs = 300;
+    const organicMinimumDelayMs = 4000;
+    const organicMaximumDelayMs = 8000;
 
     function unlockDocumentScroll() {
         const body = document.body;
@@ -12,13 +19,17 @@
             return;
         }
 
-        if (body.dataset.simulationScrollLocked === "true") {
+        if (
+            body.dataset.simulationScrollLocked
+            === "true"
+        ) {
             body.style.overflow =
-                body.dataset.simulationPreviousOverflow ?? "";
-
-            delete body.dataset.simulationScrollLocked;
-            delete body.dataset.simulationPreviousOverflow;
+                body.dataset.simulationPreviousOverflow
+                ?? "";
         }
+
+        delete body.dataset.simulationScrollLocked;
+        delete body.dataset.simulationPreviousOverflow;
     }
 
     function resetVisualState() {
@@ -27,23 +38,36 @@
         document
             .querySelectorAll(`#${rootId}`)
             .forEach(root => {
-                root.classList.add("pointer-events-none");
-                root.setAttribute("aria-hidden", "true");
+                root.classList.add(
+                    "pointer-events-none");
+
+                root.setAttribute(
+                    "aria-hidden",
+                    "true");
 
                 const overlay =
-                    root.querySelector("[data-sim-overlay]");
+                    root.querySelector(
+                        "[data-sim-overlay]");
 
                 const panel =
-                    root.querySelector("[data-sim-panel]");
+                    root.querySelector(
+                        "[data-sim-panel]");
 
                 if (overlay) {
-                    overlay.classList.remove("opacity-100");
-                    overlay.classList.add("opacity-0");
+                    overlay.classList.remove(
+                        "opacity-100");
+
+                    overlay.classList.add(
+                        "opacity-0");
                 }
 
                 if (panel) {
-                    panel.classList.add("translate-x-full");
-                    panel.setAttribute("aria-hidden", "true");
+                    panel.classList.add(
+                        "translate-x-full");
+
+                    panel.setAttribute(
+                        "aria-hidden",
+                        "true");
                 }
             });
 
@@ -73,6 +97,7 @@
             target: "[data-sim-target]",
             applyTarget: "[data-sim-apply-target]",
             organic: "[data-sim-organic]",
+            terminate: "[data-sim-terminate]",
             critical: "[data-sim-critical]",
             massDrop: "[data-sim-mass-drop]",
             purge: "[data-sim-purge]",
@@ -104,6 +129,35 @@
         }
 
         return elements;
+    }
+
+    function readStoredState() {
+        try {
+            const serialized =
+                window.localStorage.getItem(storageKey);
+
+            if (!serialized) {
+                return null;
+            }
+
+            const value = JSON.parse(serialized);
+
+            return value
+                && typeof value === "object"
+                    ? value
+                    : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function writeStoredState(value) {
+        try {
+            window.localStorage.setItem(
+                storageKey,
+                JSON.stringify(value));
+        } catch {
+        }
     }
 
     class SimulationOrchestrator {
@@ -179,6 +233,9 @@
                 organicDisabled:
                     root.dataset.i18nOrganicDisabled
                     ?? "ORGANIC_MODE: DISABLED",
+                confirmTerminate:
+                    root.dataset.i18nConfirmTerminate
+                    ?? "Stop the persistent simulation and disconnect all simulated sessions?",
                 confirmMassDrop:
                     root.dataset.i18nConfirmMassDrop
                     ?? "Disconnect all simulated sessions?",
@@ -199,8 +256,14 @@
             this.state = {
                 isOpen: false,
                 requestInFlight: false,
+                statusRequestInFlight: false,
                 organicTimerId: null,
                 statusTimerId: null,
+                uiFlushTimerId: null,
+                logFlushTimerId: null,
+                pendingStatus: null,
+                pendingLogs: [],
+                lastUiFlushAt: 0,
                 lastFocusedElement: null,
                 destroyed: false
             };
@@ -214,22 +277,31 @@
 
         initialize() {
             this.forceClosedState();
+            this.restorePersistentState();
             this.bindEvents();
 
             this.state.statusTimerId =
                 window.setInterval(
                     () => {
                         if (
-                            !document.hidden
-                            && !this.state.destroyed
+                            !this.state.destroyed
                             && this.root.isConnected
                         ) {
                             void this.refreshStatus();
                         }
                     },
-                    5000);
+                    statusPollIntervalMs);
 
-            void this.refreshStatus();
+            void this.refreshStatus({
+                immediate: true
+            });
+
+            if (this.elements.organic.checked) {
+                this.startOrganicMode({
+                    writeLog: false,
+                    immediate: true
+                });
+            }
         }
 
         isCurrent(root, openButton) {
@@ -249,6 +321,108 @@
                         `{${index}}`,
                         String(value)),
                 template);
+        }
+
+        getModules() {
+            return this.moduleInputs.reduce(
+                (modules, input) => {
+                    modules[input.dataset.simModule] =
+                        input.checked;
+
+                    return modules;
+                },
+                {
+                    sessions: false,
+                    installations: false,
+                    alerts: false
+                });
+        }
+
+        getTarget() {
+            const rawValue = Number.parseInt(
+                this.elements.target.value,
+                10);
+
+            const fallbackValue = Number.parseInt(
+                this.root.dataset.defaultTarget
+                    ?? "40",
+                10);
+
+            const normalizedValue =
+                Number.isFinite(rawValue)
+                    ? rawValue
+                    : fallbackValue;
+
+            return Math.min(
+                250,
+                Math.max(0, normalizedValue));
+        }
+
+        readPersistentState() {
+            const stored = readStoredState();
+
+            return {
+                target:
+                    Number.isFinite(
+                        Number(stored?.target))
+                        ? Math.min(
+                            250,
+                            Math.max(
+                                0,
+                                Number(stored.target)))
+                        : this.getTarget(),
+                organicEnabled:
+                    stored?.organicEnabled === true,
+                modules: {
+                    sessions:
+                        stored?.modules?.sessions
+                        !== false,
+                    installations:
+                        stored?.modules?.installations
+                        !== false,
+                    alerts:
+                        stored?.modules?.alerts
+                        !== false
+                }
+            };
+        }
+
+        restorePersistentState() {
+            const persisted =
+                this.readPersistentState();
+
+            this.elements.target.value =
+                String(persisted.target);
+
+            this.elements.organic.checked =
+                persisted.organicEnabled;
+
+            this.moduleInputs.forEach(input => {
+                const key =
+                    input.dataset.simModule;
+
+                input.checked =
+                    persisted.modules[key]
+                    !== false;
+            });
+        }
+
+        persistState(overrides = {}) {
+            const current = {
+                target: this.getTarget(),
+                organicEnabled:
+                    this.elements.organic.checked,
+                modules: this.getModules()
+            };
+
+            writeStoredState({
+                ...current,
+                ...overrides,
+                modules: {
+                    ...current.modules,
+                    ...(overrides.modules ?? {})
+                }
+            });
         }
 
         lockDocumentScroll() {
@@ -364,7 +538,11 @@
                     "opacity-0");
 
                 this.elements.close.focus();
-                void this.refreshStatus();
+
+                void this.refreshStatus({
+                    immediate: true
+                });
+
                 return;
             }
 
@@ -380,41 +558,6 @@
             }
         }
 
-        getModules() {
-            return this.moduleInputs.reduce(
-                (modules, input) => {
-                    modules[input.dataset.simModule] =
-                        input.checked;
-
-                    return modules;
-                },
-                {
-                    sessions: false,
-                    installations: false,
-                    alerts: false
-                });
-        }
-
-        getTarget() {
-            const rawValue = Number.parseInt(
-                this.elements.target.value,
-                10);
-
-            const fallbackValue = Number.parseInt(
-                this.root.dataset.defaultTarget
-                    ?? "40",
-                10);
-
-            const normalizedValue =
-                Number.isFinite(rawValue)
-                    ? rawValue
-                    : fallbackValue;
-
-            return Math.min(
-                250,
-                Math.max(0, normalizedValue));
-        }
-
         appendLog(message, tone = "default") {
             if (
                 this.state.destroyed
@@ -423,32 +566,71 @@
                 return;
             }
 
-            const line =
-                document.createElement("div");
+            this.state.pendingLogs.push({
+                message,
+                tone,
+                timestamp:
+                    new Date().toLocaleTimeString(
+                        [],
+                        {
+                            hour12: false
+                        })
+            });
 
-            const timestamp =
-                new Date().toLocaleTimeString(
-                    [],
-                    {
-                        hour12: false
-                    });
-
-            line.textContent =
-                `[${timestamp}] ${message}`;
-
-            if (tone === "error") {
-                line.className = "text-rose-400";
-            } else if (tone === "warning") {
-                line.className = "text-amber-400";
-            } else if (tone === "success") {
-                line.className = "text-green-400";
-            } else if (tone === "info") {
-                line.className = "text-cyan-400";
+            if (this.state.logFlushTimerId !== null) {
+                return;
             }
 
-            this.elements.log.appendChild(line);
-            this.elements.log.scrollTop =
-                this.elements.log.scrollHeight;
+            this.state.logFlushTimerId =
+                window.setTimeout(
+                    () => this.flushLogs(),
+                    logFlushIntervalMs);
+        }
+
+        flushLogs() {
+            window.clearTimeout(
+                this.state.logFlushTimerId);
+
+            this.state.logFlushTimerId = null;
+
+            if (
+                this.state.destroyed
+                || !this.elements.log.isConnected
+                || this.state.pendingLogs.length === 0
+            ) {
+                this.state.pendingLogs = [];
+                return;
+            }
+
+            const fragment =
+                document.createDocumentFragment();
+
+            for (const entry of this.state.pendingLogs) {
+                const line =
+                    document.createElement("div");
+
+                line.textContent =
+                    `[${entry.timestamp}] ${entry.message}`;
+
+                if (entry.tone === "error") {
+                    line.className =
+                        "text-rose-400";
+                } else if (entry.tone === "warning") {
+                    line.className =
+                        "text-amber-400";
+                } else if (entry.tone === "success") {
+                    line.className =
+                        "text-green-400";
+                } else if (entry.tone === "info") {
+                    line.className =
+                        "text-cyan-400";
+                }
+
+                fragment.appendChild(line);
+            }
+
+            this.state.pendingLogs = [];
+            this.elements.log.appendChild(fragment);
 
             while (
                 this.elements.log.childElementCount > 80
@@ -457,6 +639,9 @@
                     .firstElementChild
                     ?.remove();
             }
+
+            this.elements.log.scrollTop =
+                this.elements.log.scrollHeight;
         }
 
         setChannelState(label, tone = "idle") {
@@ -579,64 +764,129 @@
             return payload;
         }
 
-        applyStatus(status) {
+        queueStatus(status, options = {}) {
             if (
                 this.state.destroyed
-                || !this.root.isConnected
+                || !status
             ) {
                 return;
             }
 
-            this.elements.realCount.textContent =
-                String(
-                    status.activeRealSessions
-                    ?? status.realSessions
-                    ?? 0);
+            this.state.pendingStatus = status;
 
-            this.elements.simulatedCount.textContent =
-                String(
-                    status.activeSimulatedSessions
-                    ?? status.simulatedSessions
-                    ?? 0);
+            if (options.immediate === true) {
+                this.flushStatus();
+                return;
+            }
 
-            this.elements.lastSync.textContent =
-                this.formatMessage(
-                    this.messages.lastSync,
-                    new Date().toLocaleTimeString(
-                        [],
-                        {
-                            hour12: false
-                        }));
+            if (this.state.uiFlushTimerId !== null) {
+                return;
+            }
 
-            const activeSimulated =
-                Number(
-                    status.activeSimulatedSessions
-                    ?? status.simulatedSessions
-                    ?? 0);
+            const elapsed =
+                performance.now()
+                - this.state.lastUiFlushAt;
 
-            this.setChannelState(
-                activeSimulated > 0
-                    ? this.messages.stateActive
-                    : this.messages.stateIdle,
-                activeSimulated > 0
-                    ? "active"
-                    : "idle");
+            const delay =
+                Math.max(
+                    0,
+                    statusUiThrottleMs - elapsed);
+
+            this.state.uiFlushTimerId =
+                window.setTimeout(
+                    () => this.flushStatus(),
+                    delay);
         }
 
-        async refreshStatus() {
+        flushStatus() {
+            window.clearTimeout(
+                this.state.uiFlushTimerId);
+
+            this.state.uiFlushTimerId = null;
+
+            const status =
+                this.state.pendingStatus;
+
+            this.state.pendingStatus = null;
+
             if (
                 this.state.destroyed
+                || !status
                 || !this.root.isConnected
             ) {
                 return;
             }
+
+            window.requestAnimationFrame(() => {
+                if (
+                    this.state.destroyed
+                    || !this.root.isConnected
+                ) {
+                    return;
+                }
+
+                const activeReal =
+                    Number(
+                        status.activeRealSessions
+                        ?? status.realSessions
+                        ?? 0);
+
+                const activeSimulated =
+                    Number(
+                        status.activeSimulatedSessions
+                        ?? status.simulatedSessions
+                        ?? 0);
+
+                this.elements.realCount.textContent =
+                    String(activeReal);
+
+                this.elements.simulatedCount.textContent =
+                    String(activeSimulated);
+
+                this.elements.lastSync.textContent =
+                    this.formatMessage(
+                        this.messages.lastSync,
+                        new Date().toLocaleTimeString(
+                            [],
+                            {
+                                hour12: false
+                            }));
+
+                this.setChannelState(
+                    activeSimulated > 0
+                        ? this.messages.stateActive
+                        : this.messages.stateIdle,
+                    activeSimulated > 0
+                        ? "active"
+                        : "idle");
+
+                this.state.lastUiFlushAt =
+                    performance.now();
+            });
+        }
+
+        async refreshStatus(options = {}) {
+            if (
+                this.state.destroyed
+                || !this.root.isConnected
+                || this.state.statusRequestInFlight
+            ) {
+                return;
+            }
+
+            this.state.statusRequestInFlight = true;
 
             try {
                 const status =
                     await this.request(
                         this.endpoints.status);
 
-                this.applyStatus(status);
+                this.queueStatus(
+                    status,
+                    {
+                        immediate:
+                            options.immediate === true
+                    });
             } catch (error) {
                 if (
                     error.name === "AbortError"
@@ -654,6 +904,8 @@
                         `${this.messages.statusError}: ${error.message}`,
                         "error");
                 }
+            } finally {
+                this.state.statusRequestInFlight = false;
             }
         }
 
@@ -697,9 +949,9 @@
                     "success");
 
                 if (result.status) {
-                    this.applyStatus(result.status);
+                    this.queueStatus(result.status);
                 } else {
-                    await this.refreshStatus();
+                    void this.refreshStatus();
                 }
 
                 return result;
@@ -723,10 +975,6 @@
                     error.status === 401
                     || error.status === 403
                 ) {
-                    this.stopOrganicMode({
-                        writeLog: false
-                    });
-
                     this.appendLog(
                         this.messages.accessDenied,
                         "error");
@@ -745,6 +993,10 @@
             this.elements.target.value =
                 String(targetActiveSessions);
 
+            this.persistState({
+                target: targetActiveSessions
+            });
+
             await this.runCommand(
                 "RECONCILE_TARGET",
                 this.endpoints.reconcile,
@@ -756,13 +1008,18 @@
 
         getOrganicDelay() {
             return (
-                4000
+                organicMinimumDelayMs
                 + Math.floor(
-                    Math.random() * 4001)
+                    Math.random()
+                    * (
+                        organicMaximumDelayMs
+                        - organicMinimumDelayMs
+                        + 1
+                    ))
             );
         }
 
-        scheduleOrganicPulse() {
+        scheduleOrganicPulse(options = {}) {
             window.clearTimeout(
                 this.state.organicTimerId);
 
@@ -775,12 +1032,18 @@
                 return;
             }
 
+            const delay =
+                options.immediate === true
+                    ? 750
+                    : this.getOrganicDelay();
+
             this.state.organicTimerId =
                 window.setTimeout(
                     async () => {
                         if (
                             this.state.destroyed
                             || !this.root.isConnected
+                            || !this.elements.organic.checked
                         ) {
                             return;
                         }
@@ -801,15 +1064,26 @@
 
                         this.scheduleOrganicPulse();
                     },
-                    this.getOrganicDelay());
+                    delay);
         }
 
-        startOrganicMode() {
-            this.appendLog(
-                this.messages.organicEnabled,
-                "warning");
+        startOrganicMode(options = {}) {
+            this.elements.organic.checked = true;
 
-            this.scheduleOrganicPulse();
+            this.persistState({
+                organicEnabled: true
+            });
+
+            if (options.writeLog !== false) {
+                this.appendLog(
+                    this.messages.organicEnabled,
+                    "warning");
+            }
+
+            this.scheduleOrganicPulse({
+                immediate:
+                    options.immediate === true
+            });
         }
 
         stopOrganicMode(options = {}) {
@@ -817,9 +1091,12 @@
                 this.state.organicTimerId);
 
             this.state.organicTimerId = null;
+            this.elements.organic.checked = false;
 
-            if (this.elements.organic.isConnected) {
-                this.elements.organic.checked = false;
+            if (options.persist !== false) {
+                this.persistState({
+                    organicEnabled: false
+                });
             }
 
             if (options.writeLog !== false) {
@@ -827,6 +1104,28 @@
                     this.messages.organicDisabled,
                     "info");
             }
+        }
+
+        async terminateSimulation() {
+            if (
+                !window.confirm(
+                    this.messages.confirmTerminate)
+            ) {
+                return;
+            }
+
+            this.stopOrganicMode();
+
+            await this.runCommand(
+                "TERMINATE_SIMULATION",
+                this.endpoints.reconcile,
+                {
+                    targetActiveSessions: 0,
+                    modules: {
+                        ...this.getModules(),
+                        sessions: true
+                    }
+                });
         }
 
         bindEvents() {
@@ -856,6 +1155,11 @@
                 { signal });
 
             this.elements.target.addEventListener(
+                "change",
+                () => this.persistState(),
+                { signal });
+
+            this.elements.target.addEventListener(
                 "keydown",
                 event => {
                     if (event.key === "Enter") {
@@ -877,6 +1181,20 @@
                     }
                 },
                 { signal });
+
+            this.elements.terminate.addEventListener(
+                "click",
+                () => {
+                    void this.terminateSimulation();
+                },
+                { signal });
+
+            this.moduleInputs.forEach(input => {
+                input.addEventListener(
+                    "change",
+                    () => this.persistState(),
+                    { signal });
+            });
 
             this.elements.critical.addEventListener(
                 "click",
@@ -975,6 +1293,8 @@
             this.elements.clearLog.addEventListener(
                 "click",
                 () => {
+                    this.state.pendingLogs = [];
+
                     this.elements.log
                         .replaceChildren();
 
@@ -995,12 +1315,36 @@
                     }
                 },
                 { signal });
+
+            document.addEventListener(
+                "visibilitychange",
+                () => {
+                    if (
+                        document.hidden
+                        || this.state.destroyed
+                    ) {
+                        return;
+                    }
+
+                    void this.refreshStatus({
+                        immediate: true
+                    });
+
+                    if (this.elements.organic.checked) {
+                        this.scheduleOrganicPulse({
+                            immediate: true
+                        });
+                    }
+                },
+                { signal });
         }
 
         destroy(options = {}) {
             if (this.state.destroyed) {
                 return;
             }
+
+            this.persistState();
 
             this.state.destroyed = true;
 
@@ -1010,10 +1354,19 @@
             window.clearInterval(
                 this.state.statusTimerId);
 
+            window.clearTimeout(
+                this.state.uiFlushTimerId);
+
+            window.clearTimeout(
+                this.state.logFlushTimerId);
+
             this.lifecycleController.abort();
             this.requestController.abort();
 
             this.state.requestInFlight = false;
+            this.state.statusRequestInFlight = false;
+            this.state.pendingStatus = null;
+            this.state.pendingLogs = [];
 
             this.forceClosedState();
 
@@ -1133,7 +1486,7 @@
             this.reinitializeTimerId =
                 window.setTimeout(
                     () => this.reinitialize(),
-                    40);
+                    80);
         }
 
         reinitialize() {

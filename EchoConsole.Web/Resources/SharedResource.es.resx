@@ -1721,4 +1721,29 @@
   <data name="SimulationOrchestrator_ConsoleCleared" xml:space="preserve">
     <value>CONSOLA_DEPURACIÓN_LIMPIADA</value>
   </data>
+
+  <data name="SimulationOrchestrator_Step01" xml:space="preserve">
+    <value>[ PASO_01: CARGAR_CONFIGURACIÓN ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step02" xml:space="preserve">
+    <value>[ PASO_02: MATRIZ_DE_COMPONENTES ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step03" xml:space="preserve">
+    <value>[ PASO_03: INYECCIÓN_DE_ANOMALÍAS ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step04" xml:space="preserve">
+    <value>[ PASO_04: MANTENIMIENTO_DE_BASE_DE_DATOS ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step05" xml:space="preserve">
+    <value>[ PASO_05: SALIDA_DE_DEPURACIÓN ]</value>
+  </data>
+  <data name="SimulationOrchestrator_TerminateSimulation" xml:space="preserve">
+    <value>TERMINAR_SIMULACIÓN</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmTerminate" xml:space="preserve">
+    <value>¿Detener la simulación persistente y desconectar todas las sesiones simuladas?</value>
+  </data>
+  <data name="SimulationOrchestrator_PersistentHint" xml:space="preserve">
+    <value>El modo persistente permanece activo entre páginas hasta que se termine manualmente.</value>
+  </data>
 </root>

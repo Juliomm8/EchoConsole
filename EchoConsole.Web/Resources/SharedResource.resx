@@ -1721,4 +1721,29 @@
   <data name="SimulationOrchestrator_ConsoleCleared" xml:space="preserve">
     <value>DEBUG_CONSOLE_CLEARED</value>
   </data>
+
+  <data name="SimulationOrchestrator_Step01" xml:space="preserve">
+    <value>[ STEP_01: LOAD_CONFIGURATION ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step02" xml:space="preserve">
+    <value>[ STEP_02: COMPONENT_MATRIX ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step03" xml:space="preserve">
+    <value>[ STEP_03: ANOMALY_INJECTION ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step04" xml:space="preserve">
+    <value>[ STEP_04: DATABASE_MAINTENANCE ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step05" xml:space="preserve">
+    <value>[ STEP_05: DEBUG_OUTPUT ]</value>
+  </data>
+  <data name="SimulationOrchestrator_TerminateSimulation" xml:space="preserve">
+    <value>TERMINATE_SIMULATION</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmTerminate" xml:space="preserve">
+    <value>Stop the persistent simulation and disconnect all simulated sessions?</value>
+  </data>
+  <data name="SimulationOrchestrator_PersistentHint" xml:space="preserve">
+    <value>Persistent mode remains active across page navigation until terminated.</value>
+  </data>
 </root>

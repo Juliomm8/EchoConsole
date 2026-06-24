@@ -13,6 +13,8 @@ namespace EchoConsole.Api.Controllers.Admin;
 [Route("api/admin/dashboard")]
 public sealed class DashboardController : ControllerBase
 {
+    private const string SimulationDevicePrefix = "PC-Player-";
+
     private readonly EchoConsoleDbContext _db;
 
     public DashboardController(EchoConsoleDbContext db)
@@ -31,7 +33,11 @@ public sealed class DashboardController : ControllerBase
             .CountAsync(x =>
                 x.Status == SessionStatus.Active &&
                 x.EndedAtUtc == null &&
-                x.LastHeartbeatUtc >= cutoff,
+                (
+                    x.LastHeartbeatUtc >= cutoff ||
+                    x.Installation.DeviceName.StartsWith(
+                        SimulationDevicePrefix)
+                ),
                 cancellationToken);
 
         var registeredInstallations = await _db.Installations
@@ -56,7 +62,11 @@ public sealed class DashboardController : ControllerBase
             .Where(x =>
                 x.Status == SessionStatus.Active &&
                 x.EndedAtUtc == null &&
-                x.LastHeartbeatUtc >= cutoff)
+                (
+                    x.LastHeartbeatUtc >= cutoff ||
+                    x.Installation.DeviceName.StartsWith(
+                        SimulationDevicePrefix)
+                ))
             .OrderByDescending(x => x.LastHeartbeatUtc)
             .Select(x => new LiveSessionDto
             {

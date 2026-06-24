@@ -3,6 +3,10 @@ window.echoConsoleRealtime = (() => {
     let options = null;
     let refreshTimer = null;
     let relativeTimer = null;
+    let refreshInFlight = false;
+    let refreshPending = false;
+    let lastRefreshCompletedAt = 0;
+    const minimumRefreshIntervalMs = 1750;
     let currentSessions = [];
     let relativeTimeFormatter = null;
     let numberFormatter = null;
@@ -118,35 +122,79 @@ window.echoConsoleRealtime = (() => {
     }
 
     function scheduleRefresh(immediate) {
+        refreshPending = true;
+
+        if (refreshInFlight) {
+            return;
+        }
+
+        const elapsed =
+            performance.now()
+            - lastRefreshCompletedAt;
+
+        const delay =
+            immediate
+                ? 0
+                : Math.max(
+                    0,
+                    minimumRefreshIntervalMs
+                    - elapsed);
+
         if (refreshTimer) {
-            clearTimeout(refreshTimer);
+            return;
         }
 
         refreshTimer = setTimeout(
-            refreshDashboard,
-            immediate ? 0 : 250);
+            () => {
+                refreshTimer = null;
+                void refreshDashboard();
+            },
+            delay);
     }
 
     async function refreshDashboard() {
+        if (refreshInFlight) {
+            refreshPending = true;
+            return;
+        }
+
+        refreshInFlight = true;
+        refreshPending = false;
+
         try {
             const [overview, sessions] = await Promise.all([
                 fetchOverview(),
                 fetchLiveSessions()
             ]);
 
-            if (overview) {
-                applyOverview(overview);
-            }
+            await new Promise(resolve => {
+                window.requestAnimationFrame(() => {
+                    if (overview) {
+                        applyOverview(overview);
+                    }
 
-            if (sessions) {
-                currentSessions = sessions;
-                renderSessions(sessions);
-                applyDerivedKpisFromSessions(sessions);
-            }
+                    if (sessions) {
+                        currentSessions = sessions;
+                        renderSessions(sessions);
+                        applyDerivedKpisFromSessions(
+                            sessions);
+                    }
+
+                    resolve();
+                });
+            });
         } catch (error) {
             console.error(
                 "Dashboard refresh failed.",
                 error);
+        } finally {
+            refreshInFlight = false;
+            lastRefreshCompletedAt =
+                performance.now();
+
+            if (refreshPending) {
+                scheduleRefresh(false);
+            }
         }
     }
 
