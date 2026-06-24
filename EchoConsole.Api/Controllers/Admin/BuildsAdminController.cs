@@ -1,3 +1,4 @@
+using System.Data;
 using EchoConsole.Api.Contracts.Admin;
 using EchoConsole.Api.Contracts.Common;
 using EchoConsole.Api.Domain.Entities;
@@ -14,6 +15,10 @@ namespace EchoConsole.Api.Controllers.Admin;
 [Route("api/admin/builds")]
 public sealed class BuildsAdminController : ControllerBase
 {
+    private const string ActiveBuildDeleteCode = "active_build_cannot_be_deleted";
+    private const string ReferencedBuildDeleteCode = "build_has_linked_telemetry";
+    private const string DuplicateVersionCode = "duplicate_build_version";
+
     private readonly EchoConsoleDbContext _dbContext;
     private readonly ILogger<BuildsAdminController> _logger;
 
@@ -109,16 +114,14 @@ public sealed class BuildsAdminController : ControllerBase
             }
         }
 
-        var response = new PagedResponse<GameBuildDto>
+        return Ok(new PagedResponse<GameBuildDto>
         {
             Items = items,
             PageNumber = pageNumber,
             PageSize = pageSize,
             TotalCount = totalCount,
             TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
-        };
-
-        return Ok(response);
+        });
     }
 
     [HttpGet("summary")]
@@ -172,32 +175,29 @@ public sealed class BuildsAdminController : ControllerBase
         var normalizedVersion = request.VersionNumber.Trim();
         var normalizedEngineVersion = request.EngineVersion.Trim();
 
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+
         var existing = await _dbContext.GameBuilds
             .AnyAsync(x => x.VersionNumber == normalizedVersion, cancellationToken);
 
         if (existing)
         {
-            return Conflict(new
-            {
-                message = $"A build with version '{normalizedVersion}' already exists."
-            });
+            return Conflict(CreateError(
+                DuplicateVersionCode,
+                $"A build with version '{normalizedVersion}' already exists."));
         }
 
         if (request.IsActive)
         {
-            await _dbContext.GameBuilds
-                .Where(x => x.IsActive)
-                .ExecuteUpdateAsync(
-                    setters => setters.SetProperty(x => x.IsActive, false),
-                    cancellationToken);
+            await DeactivateOtherBuildsAsync(null, cancellationToken);
         }
 
         var entity = new GameBuild
         {
             VersionNumber = normalizedVersion,
-            ReleaseNotes = string.IsNullOrWhiteSpace(request.ReleaseNotes)
-                ? null
-                : request.ReleaseNotes.Trim(),
+            ReleaseNotes = NormalizeReleaseNotes(request.ReleaseNotes),
             ReleaseDateUtc = request.ReleaseDateUtc,
             IsActive = request.IsActive,
             EngineVersion = normalizedEngineVersion
@@ -205,6 +205,7 @@ public sealed class BuildsAdminController : ControllerBase
 
         _dbContext.GameBuilds.Add(entity);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         _logger.LogInformation(
             "New game build created. Version: {VersionNumber}, EngineVersion: {EngineVersion}, IsActive: {IsActive}",
@@ -212,22 +213,10 @@ public sealed class BuildsAdminController : ControllerBase
             entity.EngineVersion,
             entity.IsActive);
 
-        var dto = new GameBuildDto
-        {
-            Id = entity.Id,
-            VersionNumber = entity.VersionNumber,
-            ReleaseNotes = entity.ReleaseNotes,
-            ReleaseDateUtc = entity.ReleaseDateUtc,
-            IsActive = entity.IsActive,
-            EngineVersion = entity.EngineVersion,
-            LinkedInstallations = 0,
-            TotalSessions = 0
-        };
-
         return CreatedAtAction(
             nameof(GetAll),
             new { searchTerm = entity.VersionNumber, pageNumber = 1, pageSize = 20 },
-            dto);
+            await CreateDtoAsync(entity, cancellationToken));
     }
 
     [HttpPatch("{id:int}/active")]
@@ -236,6 +225,10 @@ public sealed class BuildsAdminController : ControllerBase
         [FromBody] SetGameBuildActiveRequest request,
         CancellationToken cancellationToken = default)
     {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+
         var build = await _dbContext.GameBuilds
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
@@ -246,15 +239,160 @@ public sealed class BuildsAdminController : ControllerBase
 
         if (request.IsActive)
         {
-            await _dbContext.GameBuilds
-                .Where(x => x.IsActive && x.Id != id)
-                .ExecuteUpdateAsync(
-                    setters => setters.SetProperty(x => x.IsActive, false),
-                    cancellationToken);
+            await DeactivateOtherBuildsAsync(id, cancellationToken);
         }
 
         build.IsActive = request.IsActive;
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Game build active status updated. BuildId: {BuildId}, Version: {VersionNumber}, IsActive: {IsActive}",
+            build.Id,
+            build.VersionNumber,
+            build.IsActive);
+
+        return Ok(await CreateDtoAsync(build, cancellationToken));
+    }
+
+    [HttpPatch("{id:int}/toggle-active")]
+    public async Task<ActionResult<GameBuildDto>> ToggleActive(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+
+        var build = await _dbContext.GameBuilds
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (build is null)
+        {
+            return NotFound();
+        }
+
+        var shouldActivate = !build.IsActive;
+
+        if (shouldActivate)
+        {
+            await DeactivateOtherBuildsAsync(id, cancellationToken);
+        }
+        else
+        {
+            await DeactivateOtherBuildsAsync(null, cancellationToken);
+        }
+
+        build.IsActive = shouldActivate;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Game build toggled. BuildId: {BuildId}, Version: {VersionNumber}, IsActive: {IsActive}",
+            build.Id,
+            build.VersionNumber,
+            build.IsActive);
+
+        return Ok(await CreateDtoAsync(build, cancellationToken));
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<GameBuildDto>> Update(
+        int id,
+        [FromBody] UpdateGameBuildRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedVersion = request.VersionNumber.Trim();
+        var normalizedEngineVersion = request.EngineVersion.Trim();
+
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+
+        var build = await _dbContext.GameBuilds
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (build is null)
+        {
+            return NotFound();
+        }
+
+        var duplicateVersion = await _dbContext.GameBuilds
+            .AnyAsync(
+                x => x.Id != id && x.VersionNumber == normalizedVersion,
+                cancellationToken);
+
+        if (duplicateVersion)
+        {
+            return Conflict(CreateError(
+                DuplicateVersionCode,
+                $"A build with version '{normalizedVersion}' already exists."));
+        }
+
+        var previousVersion = build.VersionNumber;
+
+        if (!string.Equals(
+                previousVersion,
+                normalizedVersion,
+                StringComparison.Ordinal))
+        {
+            await _dbContext.Installations
+                .Where(x => x.BuildVersion == previousVersion)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(
+                        x => x.BuildVersion,
+                        normalizedVersion),
+                    cancellationToken);
+
+            await _dbContext.GameSessions
+                .Where(x => x.BuildVersion == previousVersion)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(
+                        x => x.BuildVersion,
+                        normalizedVersion),
+                    cancellationToken);
+        }
+
+        build.VersionNumber = normalizedVersion;
+        build.EngineVersion = normalizedEngineVersion;
+        build.ReleaseDateUtc = request.ReleaseDateUtc;
+        build.ReleaseNotes = NormalizeReleaseNotes(request.ReleaseNotes);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Game build updated. BuildId: {BuildId}, PreviousVersion: {PreviousVersion}, Version: {VersionNumber}",
+            build.Id,
+            previousVersion,
+            build.VersionNumber);
+
+        return Ok(await CreateDtoAsync(build, cancellationToken));
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable,
+            cancellationToken);
+
+        var build = await _dbContext.GameBuilds
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (build is null)
+        {
+            return NotFound();
+        }
+
+        if (build.IsActive)
+        {
+            return Conflict(CreateError(
+                ActiveBuildDeleteCode,
+                "The active production build must be deactivated before deletion."));
+        }
 
         var linkedInstallations = await _dbContext.Installations
             .AsNoTracking()
@@ -268,13 +406,62 @@ public sealed class BuildsAdminController : ControllerBase
                 x => x.BuildVersion == build.VersionNumber,
                 cancellationToken);
 
-        _logger.LogInformation(
-            "Game build active status updated. BuildId: {BuildId}, Version: {VersionNumber}, IsActive: {IsActive}",
-            build.Id,
-            build.VersionNumber,
-            build.IsActive);
+        if (linkedInstallations > 0 || totalSessions > 0)
+        {
+            return Conflict(CreateError(
+                ReferencedBuildDeleteCode,
+                "The build cannot be deleted while telemetry records reference its version.",
+                linkedInstallations,
+                totalSessions));
+        }
 
-        return Ok(new GameBuildDto
+        _dbContext.GameBuilds.Remove(build);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Game build deleted. BuildId: {BuildId}, Version: {VersionNumber}",
+            build.Id,
+            build.VersionNumber);
+
+        return NoContent();
+    }
+
+    private async Task DeactivateOtherBuildsAsync(
+        int? buildIdToKeepActive,
+        CancellationToken cancellationToken)
+    {
+        var query = _dbContext.GameBuilds
+            .Where(x => x.IsActive);
+
+        if (buildIdToKeepActive.HasValue)
+        {
+            var id = buildIdToKeepActive.Value;
+            query = query.Where(x => x.Id != id);
+        }
+
+        await query.ExecuteUpdateAsync(
+            setters => setters.SetProperty(x => x.IsActive, false),
+            cancellationToken);
+    }
+
+    private async Task<GameBuildDto> CreateDtoAsync(
+        GameBuild build,
+        CancellationToken cancellationToken)
+    {
+        var linkedInstallations = await _dbContext.Installations
+            .AsNoTracking()
+            .CountAsync(
+                x => x.BuildVersion == build.VersionNumber,
+                cancellationToken);
+
+        var totalSessions = await _dbContext.GameSessions
+            .AsNoTracking()
+            .CountAsync(
+                x => x.BuildVersion == build.VersionNumber,
+                cancellationToken);
+
+        return new GameBuildDto
         {
             Id = build.Id,
             VersionNumber = build.VersionNumber,
@@ -284,6 +471,28 @@ public sealed class BuildsAdminController : ControllerBase
             EngineVersion = build.EngineVersion,
             LinkedInstallations = linkedInstallations,
             TotalSessions = totalSessions
-        });
+        };
+    }
+
+    private static BuildOperationErrorResponse CreateError(
+        string code,
+        string message,
+        int linkedInstallations = 0,
+        int totalSessions = 0)
+    {
+        return new BuildOperationErrorResponse
+        {
+            Code = code,
+            Message = message,
+            LinkedInstallations = linkedInstallations,
+            TotalSessions = totalSessions
+        };
+    }
+
+    private static string? NormalizeReleaseNotes(string? releaseNotes)
+    {
+        return string.IsNullOrWhiteSpace(releaseNotes)
+            ? null
+            : releaseNotes.Trim();
     }
 }

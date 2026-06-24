@@ -22,6 +22,8 @@ public sealed class BuildsIndexViewModel
 
     public CreateBuildInputModel NewBuild { get; set; } = new();
 
+    public UpdateBuildInputModel EditBuild { get; set; } = new();
+
     public bool HasPreviousPage => PageNumber > 1;
 
     public bool HasNextPage => PageNumber < TotalPages;

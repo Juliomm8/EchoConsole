@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1721,7 +1721,6 @@
   <data name="SimulationOrchestrator_ConsoleCleared" xml:space="preserve">
     <value>CONSOLA_DEPURACIÓN_LIMPIADA</value>
   </data>
-
   <data name="SimulationOrchestrator_Step01" xml:space="preserve">
     <value>[ PASO_01: CARGAR_CONFIGURACIÓN ]</value>
   </data>
@@ -1814,5 +1813,59 @@
   </data>
   <data name="Builds_StatusError" xml:space="preserve">
     <value>No se pudo actualizar el estado de la build.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Builds_ColActions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="Builds_Edit" xml:space="preserve">
+    <value>EDITAR</value>
+  </data>
+  <data name="Builds_Delete" xml:space="preserve">
+    <value>ELIMINAR</value>
+  </data>
+  <data name="Builds_DeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar esta build de forma permanente?</value>
+  </data>
+  <data name="Builds_DeleteActiveHint" xml:space="preserve">
+    <value>Desactiva la build de producción antes de eliminarla.</value>
+  </data>
+  <data name="Builds_DeleteTelemetryHint" xml:space="preserve">
+    <value>Esta build está protegida porque existen registros de telemetría vinculados.</value>
+  </data>
+  <data name="Builds_EditTitle" xml:space="preserve">
+    <value>Editar registro de build</value>
+  </data>
+  <data name="Builds_SaveChanges" xml:space="preserve">
+    <value>GUARDAR_CAMBIOS</value>
+  </data>
+  <data name="Builds_UpdateSuccess" xml:space="preserve">
+    <value>La build se actualizó correctamente.</value>
+  </data>
+  <data name="Builds_UpdateError" xml:space="preserve">
+    <value>No se pudo actualizar la build.</value>
+  </data>
+  <data name="Builds_UpdateValidationError" xml:space="preserve">
+    <value>Revisa los datos de la build antes de guardar los cambios.</value>
+  </data>
+  <data name="Builds_DeleteSuccess" xml:space="preserve">
+    <value>La build se eliminó correctamente.</value>
+  </data>
+  <data name="Builds_DeleteActiveBlocked" xml:space="preserve">
+    <value>La build activa de producción debe desactivarse antes de eliminarla.</value>
+  </data>
+  <data name="Builds_DeleteTelemetryBlocked" xml:space="preserve">
+    <value>No se puede eliminar la build mientras existan instalaciones o sesiones vinculadas.</value>
+  </data>
+  <data name="Builds_DeleteNotFound" xml:space="preserve">
+    <value>La build seleccionada ya no existe.</value>
+  </data>
+  <data name="Builds_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la build.</value>
   </data>
 </root>

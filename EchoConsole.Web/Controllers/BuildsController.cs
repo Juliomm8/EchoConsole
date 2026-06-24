@@ -27,7 +27,7 @@ public sealed class BuildsController : Controller
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        pageNumber = NormalizePageNumber(pageNumber);
 
         var model = await LoadIndexModelAsync(
             searchTerm,
@@ -47,7 +47,7 @@ public sealed class BuildsController : Controller
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        pageNumber = NormalizePageNumber(pageNumber);
 
         if (!ModelState.IsValid)
         {
@@ -61,17 +61,12 @@ public sealed class BuildsController : Controller
             return View("Index", invalidModel);
         }
 
-        var releaseDateUtc = new DateTimeOffset(
-            DateTime.SpecifyKind(input.ReleaseDateUtc, DateTimeKind.Utc));
-
         var createdBuild = await _buildsApiClient.CreateBuildAsync(
             new CreateGameBuildApiRequest
             {
                 VersionNumber = input.VersionNumber.Trim(),
-                ReleaseNotes = string.IsNullOrWhiteSpace(input.ReleaseNotes)
-                    ? null
-                    : input.ReleaseNotes.Trim(),
-                ReleaseDateUtc = releaseDateUtc,
+                ReleaseNotes = NormalizeReleaseNotes(input.ReleaseNotes),
+                ReleaseDateUtc = ToUtcOffset(input.ReleaseDateUtc),
                 IsActive = input.IsActive,
                 EngineVersion = input.EngineVersion.Trim()
             },
@@ -82,11 +77,27 @@ public sealed class BuildsController : Controller
                 ? "Builds_CreateError"
                 : "Builds_CreateSuccess";
 
-        return RedirectToAction(nameof(Index), new
-        {
-            searchTerm,
-            pageNumber
-        });
+        return RedirectToIndex(searchTerm, pageNumber);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleActive(
+        int id,
+        string searchTerm = "",
+        int pageNumber = 1,
+        CancellationToken cancellationToken = default)
+    {
+        var updatedBuild = await _buildsApiClient.ToggleBuildActiveAsync(
+            id,
+            cancellationToken);
+
+        TempData[updatedBuild is null ? "BuildsError" : "BuildsSuccess"] =
+            updatedBuild is null
+                ? "Builds_StatusError"
+                : "Builds_StatusUpdated";
+
+        return RedirectToIndex(searchTerm, pageNumber);
     }
 
     [HttpPost]
@@ -108,11 +119,66 @@ public sealed class BuildsController : Controller
                 ? "Builds_StatusUpdated"
                 : "Builds_StatusError";
 
-        return RedirectToAction(nameof(Index), new
+        return RedirectToIndex(searchTerm, pageNumber);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(
+        [Bind(Prefix = "EditBuild")] UpdateBuildInputModel input,
+        string searchTerm = "",
+        int pageNumber = 1,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
         {
-            searchTerm,
-            pageNumber = pageNumber < 1 ? 1 : pageNumber
-        });
+            TempData["BuildsError"] = "Builds_UpdateValidationError";
+            return RedirectToIndex(searchTerm, pageNumber);
+        }
+
+        var updatedBuild = await _buildsApiClient.UpdateBuildAsync(
+            input.Id,
+            new UpdateGameBuildApiRequest
+            {
+                VersionNumber = input.VersionNumber.Trim(),
+                ReleaseNotes = NormalizeReleaseNotes(input.ReleaseNotes),
+                ReleaseDateUtc = ToUtcOffset(input.ReleaseDateUtc),
+                EngineVersion = input.EngineVersion.Trim()
+            },
+            cancellationToken);
+
+        TempData[updatedBuild is null ? "BuildsError" : "BuildsSuccess"] =
+            updatedBuild is null
+                ? "Builds_UpdateError"
+                : "Builds_UpdateSuccess";
+
+        return RedirectToIndex(searchTerm, pageNumber);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(
+        int id,
+        string searchTerm = "",
+        int pageNumber = 1,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _buildsApiClient.DeleteBuildAsync(
+            id,
+            cancellationToken);
+
+        var isSuccess = result.Status == DeleteGameBuildApiStatus.Deleted;
+
+        TempData[isSuccess ? "BuildsSuccess" : "BuildsError"] = result.Status switch
+        {
+            DeleteGameBuildApiStatus.Deleted => "Builds_DeleteSuccess",
+            DeleteGameBuildApiStatus.ActiveBuild => "Builds_DeleteActiveBlocked",
+            DeleteGameBuildApiStatus.HasLinkedTelemetry => "Builds_DeleteTelemetryBlocked",
+            DeleteGameBuildApiStatus.NotFound => "Builds_DeleteNotFound",
+            _ => "Builds_DeleteError"
+        };
+
+        return RedirectToIndex(searchTerm, pageNumber);
     }
 
     private async Task<BuildsIndexViewModel> LoadIndexModelAsync(
@@ -147,7 +213,8 @@ public sealed class BuildsController : Controller
                 ActiveBuildVersion = summary.ActiveVersion,
                 BaseEngineVersion = summary.BaseEngineVersion,
                 Items = response.Items ?? Array.Empty<GameBuildApiDto>(),
-                NewBuild = newBuild
+                NewBuild = newBuild,
+                EditBuild = new UpdateBuildInputModel()
             };
         }
         catch (OperationCanceledException)
@@ -168,9 +235,37 @@ public sealed class BuildsController : Controller
                 TotalPages = 1,
                 TotalRegisteredBuilds = 0,
                 Items = Array.Empty<GameBuildApiDto>(),
-                NewBuild = newBuild
+                NewBuild = newBuild,
+                EditBuild = new UpdateBuildInputModel()
             };
         }
+    }
+
+    private IActionResult RedirectToIndex(string? searchTerm, int pageNumber)
+    {
+        return RedirectToAction(nameof(Index), new
+        {
+            searchTerm = searchTerm?.Trim() ?? string.Empty,
+            pageNumber = NormalizePageNumber(pageNumber)
+        });
+    }
+
+    private static DateTimeOffset ToUtcOffset(DateTime value)
+    {
+        return new DateTimeOffset(
+            DateTime.SpecifyKind(value, DateTimeKind.Utc));
+    }
+
+    private static string? NormalizeReleaseNotes(string? releaseNotes)
+    {
+        return string.IsNullOrWhiteSpace(releaseNotes)
+            ? null
+            : releaseNotes.Trim();
+    }
+
+    private static int NormalizePageNumber(int pageNumber)
+    {
+        return pageNumber < 1 ? 1 : pageNumber;
     }
 
     private void SetPageTitle()
