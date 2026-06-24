@@ -1,10 +1,10 @@
-﻿using EchoConsole.Api.Contracts.Dashboard;
+using EchoConsole.Api.Contracts.Dashboard;
 using EchoConsole.Api.Domain.Enums;
 using EchoConsole.Api.Persistence;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using EchoConsole.Api.Security;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EchoConsole.Api.Controllers.Admin;
 
@@ -27,13 +27,16 @@ public sealed class DashboardController : ControllerBase
         var cutoff = now.AddSeconds(-45);
 
         var activeSessions = await _db.GameSessions
+            .AsNoTracking()
             .CountAsync(x =>
                 x.Status == SessionStatus.Active &&
                 x.EndedAtUtc == null &&
                 x.LastHeartbeatUtc >= cutoff,
                 cancellationToken);
 
-        var registeredInstallations = await _db.Installations.CountAsync(cancellationToken);
+        var registeredInstallations = await _db.Installations
+            .AsNoTracking()
+            .CountAsync(cancellationToken);
 
         return Ok(new DashboardOverviewDto
         {
@@ -49,7 +52,7 @@ public sealed class DashboardController : ControllerBase
         var cutoff = DateTimeOffset.UtcNow.AddSeconds(-45);
 
         var sessions = await _db.GameSessions
-            .Include(x => x.Installation)
+            .AsNoTracking()
             .Where(x =>
                 x.Status == SessionStatus.Active &&
                 x.EndedAtUtc == null &&

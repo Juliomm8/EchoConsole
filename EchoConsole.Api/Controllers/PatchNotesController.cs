@@ -5,6 +5,7 @@ using EchoConsole.Api.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace EchoConsole.Api.Controllers;
 
@@ -12,14 +13,21 @@ namespace EchoConsole.Api.Controllers;
 [Route("api/patchnotes")]
 public sealed class PatchNotesController : ControllerBase
 {
+    private const string PublishedCacheKey = "patch-notes:published";
+    private static readonly TimeSpan PublishedCacheDuration =
+        TimeSpan.FromMinutes(1);
+
     private readonly ApplicationDbContext _dbContext;
+    private readonly IMemoryCache _memoryCache;
     private readonly ILogger<PatchNotesController> _logger;
 
     public PatchNotesController(
         ApplicationDbContext dbContext,
+        IMemoryCache memoryCache,
         ILogger<PatchNotesController> logger)
     {
         _dbContext = dbContext;
+        _memoryCache = memoryCache;
         _logger = logger;
     }
 
@@ -28,13 +36,24 @@ public sealed class PatchNotesController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<PatchNoteDto>>> GetPublished(
         CancellationToken cancellationToken = default)
     {
-        var patchNotes = await BuildPatchNotesQuery()
-            .Where(x => x.IsPublished)
-            .OrderByDescending(x => x.CreatedAtUtc)
-            .ThenByDescending(x => x.Id)
-            .ToListAsync(cancellationToken);
+        var patchNotes = await _memoryCache
+            .GetOrCreateAsync<IReadOnlyList<PatchNoteDto>>(
+                PublishedCacheKey,
+                async cacheEntry =>
+                {
+                    cacheEntry.AbsoluteExpirationRelativeToNow =
+                        PublishedCacheDuration;
 
-        return Ok(patchNotes);
+                    return await BuildPatchNotesQuery()
+                        .Where(x => x.IsPublished)
+                        .OrderByDescending(x => x.CreatedAtUtc)
+                        .ThenByDescending(x => x.Id)
+                        .ToListAsync(cancellationToken);
+                });
+
+        return Ok(
+            patchNotes
+            ?? Array.Empty<PatchNoteDto>());
     }
 
     [Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
@@ -137,6 +156,11 @@ public sealed class PatchNotesController : ControllerBase
         try
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            if (patchNote.IsPublished)
+            {
+                _memoryCache.Remove(PublishedCacheKey);
+            }
         }
         catch (DbUpdateException ex)
         {
@@ -187,6 +211,7 @@ public sealed class PatchNotesController : ControllerBase
         patchNote.IsPublished = !patchNote.IsPublished;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        _memoryCache.Remove(PublishedCacheKey);
 
         _logger.LogInformation(
             "Patch note publication status changed. Id: {PatchNoteId}, Version: {Version}, IsPublished: {IsPublished}",
@@ -203,12 +228,11 @@ public sealed class PatchNotesController : ControllerBase
         int id,
         CancellationToken cancellationToken = default)
     {
-        var patchNote = await _dbContext.PatchNotes
-            .SingleOrDefaultAsync(
-                x => x.Id == id,
-                cancellationToken);
+        var deletedRows = await _dbContext.PatchNotes
+            .Where(x => x.Id == id)
+            .ExecuteDeleteAsync(cancellationToken);
 
-        if (patchNote is null)
+        if (deletedRows == 0)
         {
             return NotFound(new
             {
@@ -216,13 +240,11 @@ public sealed class PatchNotesController : ControllerBase
             });
         }
 
-        _dbContext.PatchNotes.Remove(patchNote);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _memoryCache.Remove(PublishedCacheKey);
 
         _logger.LogInformation(
-            "Patch note deleted. Id: {PatchNoteId}, Version: {Version}",
-            patchNote.Id,
-            patchNote.Version);
+            "Patch note deleted. Id: {PatchNoteId}",
+            id);
 
         return NoContent();
     }

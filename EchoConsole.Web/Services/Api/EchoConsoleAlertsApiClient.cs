@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace EchoConsole.Web.Services.Api;
@@ -12,7 +12,7 @@ public sealed class EchoConsoleAlertsApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleAlertsApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
         _logger = logger;
     }
 
@@ -61,6 +61,11 @@ public sealed class EchoConsoleAlertsApiClient
 
             return data ?? new PagedResponse<SystemAlertApiDto>();
         }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error while reading alerts from EchoConsole.Api.");
@@ -93,6 +98,11 @@ public sealed class EchoConsoleAlertsApiClient
             }
 
             return await response.Content.ReadFromJsonAsync<SystemAlertApiDto>(cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

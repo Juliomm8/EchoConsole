@@ -84,6 +84,11 @@ public sealed class HomeController : Controller
 
             return View(model);
         }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(

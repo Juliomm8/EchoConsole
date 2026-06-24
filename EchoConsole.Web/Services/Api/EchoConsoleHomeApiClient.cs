@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using EchoConsole.Web.Models.Api;
 
 namespace EchoConsole.Web.Services.Api;
@@ -12,8 +12,7 @@ public sealed class EchoConsoleHomeApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleHomeApiClient> logger)
     {
-        // Usa el cliente público configurado en Program.cs
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiPublic");
+        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Public);
         _logger = logger;
     }
 
@@ -26,6 +25,11 @@ public sealed class EchoConsoleHomeApiClient
                 cancellationToken);
 
             return data ?? CreateFallbackModel();
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
