@@ -1433,4 +1433,174 @@
   <data name="Home_CorruptedData" xml:space="preserve">
     <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
   </data>
+
+  <data name="PatchNotesAdmin_PageTitle" xml:space="preserve">
+    <value>CMS de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_Eyebrow" xml:space="preserve">
+    <value>Consola de transmisión de contenido</value>
+  </data>
+  <data name="PatchNotesAdmin_Title" xml:space="preserve">
+    <value>Publicar nota de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_Subtitle" xml:space="preserve">
+    <value>Crea una nueva actualización de Cosmic Diner y transmítela mediante Echo Console al archivo público de parches.</value>
+  </data>
+  <data name="PatchNotesAdmin_Version" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="PatchNotesAdmin_Category" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+  <data name="PatchNotesAdmin_Tone" xml:space="preserve">
+    <value>Tono de terminal</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneGreen" xml:space="preserve">
+    <value>Verde // Transmisión estándar</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneAmber" xml:space="preserve">
+    <value>Ámbar // Advertencia de sistemas</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneRose" xml:space="preserve">
+    <value>Rojo // Encuentro crítico</value>
+  </data>
+  <data name="PatchNotesAdmin_PatchTitle" xml:space="preserve">
+    <value>Título del parche</value>
+  </data>
+  <data name="PatchNotesAdmin_TitlePlaceholder" xml:space="preserve">
+    <value>PROTOCOLO DE APAGÓN</value>
+  </data>
+  <data name="PatchNotesAdmin_Description" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="PatchNotesAdmin_DescriptionPlaceholder" xml:space="preserve">
+    <value>Describe los cambios de jugabilidad, correcciones y sistemas nuevos incluidos en esta versión.</value>
+  </data>
+  <data name="PatchNotesAdmin_PublishNotice" xml:space="preserve">
+    <value>Esta transmisión se publicará inmediatamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_Back" xml:space="preserve">
+    <value>Volver a la landing</value>
+  </data>
+  <data name="PatchNotesAdmin_Submit" xml:space="preserve">
+    <value>Transmitir parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTitle" xml:space="preserve">
+    <value>Protocolo de publicación</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolOne" xml:space="preserve">
+    <value>Los identificadores de versión deben ser únicos. La API rechaza versiones existentes.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTwo" xml:space="preserve">
+    <value>Las categorías se normalizan a mayúsculas y los tonos se limitan a green, amber o rose.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolThree" xml:space="preserve">
+    <value>La API asigna la fecha UTC de publicación y la landing solo consume registros publicados.</value>
+  </data>
+  <data name="PatchNotesAdmin_Success" xml:space="preserve">
+    <value>La nota de parche se publicó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_Error" xml:space="preserve">
+    <value>No se pudo publicar la nota de parche.</value>
+  </data>
+
+  <data name="Sidebar_PatchNotesCms" xml:space="preserve">
+    <value>CMS de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardPageTitle" xml:space="preserve">
+    <value>Panel de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardEyebrow" xml:space="preserve">
+    <value>Archivo de transmisiones SQLite</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardTitle" xml:space="preserve">
+    <value>CMS de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardSubtitle" xml:space="preserve">
+    <value>Revisa todas las actualizaciones almacenadas de Cosmic Diner, publica nuevas transmisiones y elimina registros incorrectos del CMS local.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateNew" xml:space="preserve">
+    <value>Crear parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveBadge" xml:space="preserve">
+    <value>Registros de base de datos</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveTitle" xml:space="preserve">
+    <value>Archivo de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_TotalRecords" xml:space="preserve">
+    <value>Registros totales</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyTitle" xml:space="preserve">
+    <value>No hay transmisiones de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyDescription" xml:space="preserve">
+    <value>El archivo SQLite está vacío. Crea la primera nota de parche para poblar la landing pública.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateFirst" xml:space="preserve">
+    <value>Crear primer parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ColVersion" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="PatchNotesAdmin_ColCategory" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+  <data name="PatchNotesAdmin_ColTitle" xml:space="preserve">
+    <value>Título y descripción</value>
+  </data>
+  <data name="PatchNotesAdmin_ColStatus" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="PatchNotesAdmin_ColDate" xml:space="preserve">
+    <value>Creado</value>
+  </data>
+  <data name="PatchNotesAdmin_ColActions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="PatchNotesAdmin_Published" xml:space="preserve">
+    <value>Publicado</value>
+  </data>
+  <data name="PatchNotesAdmin_Draft" xml:space="preserve">
+    <value>Borrador</value>
+  </data>
+  <data name="PatchNotesAdmin_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteConfirm" xml:space="preserve">
+    <value>Esta operación elimina permanentemente la nota de parche. ¿Deseas continuar?</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteSuccess" xml:space="preserve">
+    <value>La nota de parche se eliminó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la nota de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_LoadError" xml:space="preserve">
+    <value>No se pudo cargar el panel de notas de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_InvalidId" xml:space="preserve">
+    <value>El identificador de la nota de parche no es válido.</value>
+  </data>
+  <data name="PatchNotesAdmin_BackToDashboard" xml:space="preserve">
+    <value>Volver al panel</value>
+  </data>
+  <data name="PatchNotesAdmin_Hidden" xml:space="preserve">
+    <value>Oculto</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToHidden" xml:space="preserve">
+    <value>Ocultar de la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToPublished" xml:space="preserve">
+    <value>Publicar en la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_TogglePublishedSuccess" xml:space="preserve">
+    <value>La nota de parche se publicó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleHiddenSuccess" xml:space="preserve">
+    <value>La nota de parche se ocultó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleError" xml:space="preserve">
+    <value>No se pudo cambiar la visibilidad de la nota de parche.</value>
+  </data>
 </root>

@@ -1433,4 +1433,174 @@
   <data name="Home_CorruptedData" xml:space="preserve">
     <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
   </data>
+
+  <data name="PatchNotesAdmin_PageTitle" xml:space="preserve">
+    <value>Patch Notes CMS</value>
+  </data>
+  <data name="PatchNotesAdmin_Eyebrow" xml:space="preserve">
+    <value>Content transmission console</value>
+  </data>
+  <data name="PatchNotesAdmin_Title" xml:space="preserve">
+    <value>Publish Patch Note</value>
+  </data>
+  <data name="PatchNotesAdmin_Subtitle" xml:space="preserve">
+    <value>Create a new Cosmic Diner update and transmit it through Echo Console to the public patch archive.</value>
+  </data>
+  <data name="PatchNotesAdmin_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="PatchNotesAdmin_Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="PatchNotesAdmin_Tone" xml:space="preserve">
+    <value>Terminal tone</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneGreen" xml:space="preserve">
+    <value>Green // Standard transmission</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneAmber" xml:space="preserve">
+    <value>Amber // Systems warning</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneRose" xml:space="preserve">
+    <value>Rose // Critical encounter</value>
+  </data>
+  <data name="PatchNotesAdmin_PatchTitle" xml:space="preserve">
+    <value>Patch title</value>
+  </data>
+  <data name="PatchNotesAdmin_TitlePlaceholder" xml:space="preserve">
+    <value>BLACKOUT PROTOCOL</value>
+  </data>
+  <data name="PatchNotesAdmin_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="PatchNotesAdmin_DescriptionPlaceholder" xml:space="preserve">
+    <value>Describe the gameplay changes, fixes and new systems included in this version.</value>
+  </data>
+  <data name="PatchNotesAdmin_PublishNotice" xml:space="preserve">
+    <value>This transmission will be published immediately.</value>
+  </data>
+  <data name="PatchNotesAdmin_Back" xml:space="preserve">
+    <value>Return to landing</value>
+  </data>
+  <data name="PatchNotesAdmin_Submit" xml:space="preserve">
+    <value>Transmit patch</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTitle" xml:space="preserve">
+    <value>Publishing protocol</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolOne" xml:space="preserve">
+    <value>Version identifiers must be unique. Existing versions are rejected by the API.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTwo" xml:space="preserve">
+    <value>Categories are normalized to uppercase and tone values are restricted to green, amber or rose.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolThree" xml:space="preserve">
+    <value>The API assigns the UTC publication timestamp and the landing page reads only published records.</value>
+  </data>
+  <data name="PatchNotesAdmin_Success" xml:space="preserve">
+    <value>Patch note published successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_Error" xml:space="preserve">
+    <value>The patch note could not be published.</value>
+  </data>
+
+  <data name="Sidebar_PatchNotesCms" xml:space="preserve">
+    <value>Patch Notes CMS</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardPageTitle" xml:space="preserve">
+    <value>Patch Notes Dashboard</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardEyebrow" xml:space="preserve">
+    <value>SQLite transmission archive</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardTitle" xml:space="preserve">
+    <value>Patch Notes CMS</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardSubtitle" xml:space="preserve">
+    <value>Review every stored Cosmic Diner update, publish new transmissions and remove incorrect records from the local CMS.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateNew" xml:space="preserve">
+    <value>Create patch</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveBadge" xml:space="preserve">
+    <value>Database records</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveTitle" xml:space="preserve">
+    <value>Patch archive</value>
+  </data>
+  <data name="PatchNotesAdmin_TotalRecords" xml:space="preserve">
+    <value>Total records</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyTitle" xml:space="preserve">
+    <value>No patch transmissions found</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyDescription" xml:space="preserve">
+    <value>The SQLite archive is empty. Create the first patch note to populate the public landing page.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateFirst" xml:space="preserve">
+    <value>Create first patch</value>
+  </data>
+  <data name="PatchNotesAdmin_ColVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="PatchNotesAdmin_ColCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="PatchNotesAdmin_ColTitle" xml:space="preserve">
+    <value>Title and description</value>
+  </data>
+  <data name="PatchNotesAdmin_ColStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="PatchNotesAdmin_ColDate" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="PatchNotesAdmin_ColActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="PatchNotesAdmin_Published" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="PatchNotesAdmin_Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="PatchNotesAdmin_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteConfirm" xml:space="preserve">
+    <value>This operation permanently deletes the patch note. Continue?</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteSuccess" xml:space="preserve">
+    <value>Patch note deleted successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteError" xml:space="preserve">
+    <value>The patch note could not be deleted.</value>
+  </data>
+  <data name="PatchNotesAdmin_LoadError" xml:space="preserve">
+    <value>The Patch Notes dashboard could not be loaded.</value>
+  </data>
+  <data name="PatchNotesAdmin_InvalidId" xml:space="preserve">
+    <value>The patch note identifier is invalid.</value>
+  </data>
+  <data name="PatchNotesAdmin_BackToDashboard" xml:space="preserve">
+    <value>Back to dashboard</value>
+  </data>
+  <data name="PatchNotesAdmin_Hidden" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToHidden" xml:space="preserve">
+    <value>Hide from the public landing page</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToPublished" xml:space="preserve">
+    <value>Publish on the public landing page</value>
+  </data>
+  <data name="PatchNotesAdmin_TogglePublishedSuccess" xml:space="preserve">
+    <value>Patch note published successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleHiddenSuccess" xml:space="preserve">
+    <value>Patch note hidden successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleError" xml:space="preserve">
+    <value>The patch note visibility could not be changed.</value>
+  </data>
 </root>

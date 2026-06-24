@@ -292,71 +292,141 @@
             </article>
         </div>
     </section>
+    <style>
+        .patch-carousel-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #22c55e #000000;
+            overscroll-behavior-x: contain;
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar-track {
+            background: #000000;
+            border-top: 1px solid rgba(34, 197, 94, 0.10);
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border: 2px solid #000000;
+            border-radius: 999px;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar-thumb:hover {
+            background: #4ade80;
+            box-shadow: 0 0 14px rgba(74, 222, 128, 0.75);
+        }
+    </style>
 
     <section class="border-y border-green-500/15 bg-[#020502]">
         <div class="mx-auto max-w-[1600px] px-6 py-20 lg:px-10">
-            <div class="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
-                <div>
-                    <p class="terminal-kicker">@SharedLocalizer["Home_ChangelogEyebrow"]</p>
+            <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                <header class="max-w-3xl">
+                    <p class="terminal-kicker">
+                        @SharedLocalizer["Home_ChangelogEyebrow"]
+                    </p>
+
                     <h2 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-green-100 sm:text-5xl">
                         @SharedLocalizer["Home_ChangelogTitle"]
                     </h2>
-                    <p class="mt-5 text-sm leading-7 text-slate-500">
+
+                    <p class="mt-5 max-w-2xl text-sm leading-7 text-slate-500">
                         @SharedLocalizer["Home_ChangelogDescription"]
                     </p>
+                </header>
+
+                <div class="shrink-0 border-l border-green-500/20 pl-4 text-[10px] uppercase tracking-[0.20em] text-green-700">
+                    <div>ARCHIVE_MODE: HORIZONTAL</div>
+                    <div class="mt-2">SOURCE_TARGET: SQLITE_CMS</div>
+                    <div class="mt-2">INPUT: SHIFT + WHEEL / DRAG</div>
+                </div>
+            </div>
+
+            <div class="terminal-panel mt-10 overflow-hidden rounded-lg">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-green-500/15 bg-green-500/5 px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-green-400">
+                    <span>cosmic_diner_changelog.log</span>
+                    <span>SCROLL_X // READ_ONLY</span>
                 </div>
 
-                <div class="terminal-panel overflow-hidden rounded-lg">
-                    <div class="flex items-center justify-between border-b border-green-500/15 bg-green-500/5 px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-green-400">
-                        <span>cosmic_diner_changelog.log</span>
-                        <span>READ_ONLY</span>
-                    </div>
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-black via-black/65 to-transparent"></div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-black via-black/65 to-transparent"></div>
 
-                    <div class="divide-y divide-green-500/10">
-                        <article class="grid gap-4 p-5 sm:grid-cols-[7rem_1fr] sm:p-6">
-                            <div>
-                                <span class="inline-flex rounded border border-green-500/30 bg-green-500/10 px-2.5 py-1 text-xs font-bold text-green-300">v0.1</span>
-                                <div class="mt-2 text-[10px] uppercase tracking-[0.18em] text-slate-700">ALPHA</div>
-                            </div>
-                            <div>
-                                <h3 class="font-display text-lg uppercase tracking-[0.06em] text-green-100">
-                                    @SharedLocalizer["Home_ChangelogV01Title"]
-                                </h3>
-                                <p class="mt-2 text-sm leading-7 text-slate-400">
-                                    @SharedLocalizer["Home_ChangelogV01Description"]
-                                </p>
-                            </div>
-                        </article>
+                    <div class="patch-carousel-scroll flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 py-7 pb-8">
+                        @*
+                            Patch notes are loaded from EchoConsole.Api.
+                            Keep the article markup unchanged so every database
+                            record renders with the same card structure.
+                        *@
 
-                        <article class="grid gap-4 p-5 sm:grid-cols-[7rem_1fr] sm:p-6">
-                            <div>
-                                <span class="inline-flex rounded border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-300">v0.2</span>
-                                <div class="mt-2 text-[10px] uppercase tracking-[0.18em] text-slate-700">SYSTEMS</div>
-                            </div>
-                            <div>
-                                <h3 class="font-display text-lg uppercase tracking-[0.06em] text-amber-100">
-                                    @SharedLocalizer["Home_ChangelogV02Title"]
-                                </h3>
-                                <p class="mt-2 text-sm leading-7 text-slate-400">
-                                    @SharedLocalizer["Home_ChangelogV02Description"]
-                                </p>
-                            </div>
-                        </article>
+                        @foreach (var patch in Model.PatchNotes)
+                        {
+                            var borderClass = "border-green-500/30";
+                            var badgeClass = "border-green-500/35 bg-green-500/10 text-green-300";
+                            var titleClass = "text-green-100";
+                            var glowClass = "hover:shadow-[0_0_28px_rgba(34,197,94,0.12)]";
+                            var statusClass = "text-green-700";
 
-                        <article class="grid gap-4 p-5 sm:grid-cols-[7rem_1fr] sm:p-6">
-                            <div>
-                                <span class="inline-flex rounded border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-xs font-bold text-rose-300">v0.3</span>
-                                <div class="mt-2 text-[10px] uppercase tracking-[0.18em] text-slate-700">ENCOUNTER</div>
-                            </div>
-                            <div>
-                                <h3 class="font-display text-lg uppercase tracking-[0.06em] text-rose-100">
-                                    @SharedLocalizer["Home_ChangelogV03Title"]
+                            if (patch.Tone == "amber")
+                            {
+                                borderClass = "border-amber-500/30";
+                                badgeClass = "border-amber-500/35 bg-amber-500/10 text-amber-300";
+                                titleClass = "text-amber-100";
+                                glowClass = "hover:shadow-[0_0_28px_rgba(251,191,36,0.12)]";
+                                statusClass = "text-amber-700";
+                            }
+                            else if (patch.Tone == "rose")
+                            {
+                                borderClass = "border-rose-500/30";
+                                badgeClass = "border-rose-500/35 bg-rose-500/10 text-rose-300";
+                                titleClass = "text-rose-100";
+                                glowClass = "hover:shadow-[0_0_28px_rgba(251,113,133,0.12)]";
+                                statusClass = "text-rose-700";
+                            }
+
+                            <article class="group flex min-h-[320px] w-80 shrink-0 snap-start flex-col rounded border @borderClass bg-black p-6 shadow-[inset_0_0_32px_rgba(34,197,94,0.025)] transition duration-300 hover:-translate-y-1 @glowClass sm:w-96">
+                                <div class="flex items-start justify-between gap-4">
+                                    <span class="inline-flex rounded border px-3 py-1.5 text-xs font-bold @badgeClass">
+                                        @patch.Version
+                                    </span>
+
+                                    <span class="pt-1 text-[9px] uppercase tracking-[0.20em] @statusClass">
+                                        ARCHIVED
+                                    </span>
+                                </div>
+
+                                <div class="mt-6 text-[10px] uppercase tracking-[0.22em] text-slate-600">
+                                    @patch.Category
+                                </div>
+
+                                <h3 class="mt-4 font-display text-xl uppercase leading-snug tracking-[0.06em] @titleClass">
+                                    @patch.Title
                                 </h3>
-                                <p class="mt-2 text-sm leading-7 text-slate-400">
-                                    @SharedLocalizer["Home_ChangelogV03Description"]
+
+                                <p class="mt-5 flex-1 text-sm leading-7 text-slate-400">
+                                    @patch.Description
                                 </p>
-                            </div>
-                        </article>
+
+                                <div class="mt-8 border-t border-current/10 pt-4 text-[9px] uppercase tracking-[0.18em] text-slate-700">
+                                    RECORD_STATUS: VERIFIED
+                                </div>
+                            </article>
+                        }
+
+                        <aside class="flex min-h-[320px] w-72 shrink-0 snap-start flex-col items-center justify-center rounded border border-dashed border-green-500/20 bg-green-500/[0.025] px-6 text-center sm:w-80">
+                            <span class="h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_14px_rgba(34,197,94,0.80)] animate-pulse"></span>
+
+                            <p class="mt-5 font-mono text-xs uppercase tracking-[0.16em] text-green-600">
+                                &gt; AWAITING SQLITE TRANSMISSION...
+                            </p>
+
+                            <p class="mt-3 text-[9px] uppercase tracking-[0.18em] text-green-900">
+                                NEXT_RECORD_SLOT_READY
+                            </p>
+                        </aside>
                     </div>
                 </div>
             </div>
