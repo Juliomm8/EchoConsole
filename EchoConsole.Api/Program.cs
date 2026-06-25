@@ -27,11 +27,27 @@ builder.Services.AddResponseCompression(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddHttpClient();
 
-builder.Services.Configure<DiscordAlertOptions>(
-    builder.Configuration.GetSection(
-        DiscordAlertOptions.SectionName));
+builder.Services.AddHttpClient(
+    DiscordAlertDispatcher.HttpClientName,
+    httpClient =>
+    {
+        httpClient.Timeout = TimeSpan.FromSeconds(15);
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
+            "EchoConsole-DiscordDispatcher/1.0");
+    });
+
+builder.Services.AddOptions<DiscordOptions>()
+    .Bind(
+        builder.Configuration.GetSection(
+            DiscordOptions.SectionName))
+    .Validate(
+        options => options.PollIntervalSeconds is >= 1 and <= 60,
+        "DiscordAlerts:PollIntervalSeconds must be between 1 and 60.")
+    .Validate(
+        options => options.BatchSize is >= 1 and <= 50,
+        "DiscordAlerts:BatchSize must be between 1 and 50.")
+    .ValidateOnStart();
 
 // Server-to-server API key authentication
 builder.Services.AddAuthentication(AdminApiKeyAuthenticationOptions.SchemeName)
