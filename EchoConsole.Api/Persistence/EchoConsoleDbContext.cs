@@ -1,4 +1,4 @@
-﻿using EchoConsole.Api.Domain.Entities;
+using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -74,6 +74,8 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             installation.HasIndex(x => x.DeviceName);
             installation.HasIndex(x => x.LastUpdateUtc);
             installation.HasIndex(x => x.OwnerUserId);
+            installation.HasIndex(x => x.AdminAlias);
+            installation.HasIndex(x => x.AdminStatus);
 
             installation.HasIndex(x => new { x.OwnerUserId, x.LastUpdateUtc })
                 .IsDescending(false, true)
@@ -88,6 +90,11 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             installation.Property(x => x.Processor).HasMaxLength(128);
             installation.Property(x => x.Gpu).HasMaxLength(128);
             installation.Property(x => x.Status).HasMaxLength(24).IsRequired();
+            installation.Property(x => x.AdminAlias).HasMaxLength(128);
+            installation.Property(x => x.AdminStatus)
+                .HasMaxLength(24)
+                .HasDefaultValue("Active")
+                .IsRequired();
 
             installation.HasOne(x => x.OwnerUser)
                 .WithMany(x => x.Installations)
