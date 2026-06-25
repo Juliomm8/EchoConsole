@@ -2117,4 +2117,7 @@
   <data name="Analytics_ContextBanner" xml:space="preserve">
     <value>Intelligence Console: Agregaciones analíticas optimizadas en servidor. Las zonas calientes evalúan la estabilidad estructural del gameplay en Cosmic Diner.</value>
   </data>
+  <data name="SimulationOrchestrator_Events" xml:space="preserve">
+    <value>Eventos</value>
+  </data>
 </root>

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using EchoConsole.Api.Contracts.Admin.Simulation;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
@@ -20,12 +21,10 @@ public sealed class SimulationOrchestratorService
 
     private static readonly string[] SimulationScenes =
     {
-        "Menu",
-        "DiningRoom",
-        "Kitchen",
-        "Storage",
-        "Basement",
-        "Gameplay"
+        "Diner_Main",
+        "Level_01",
+        "Combat_Zone",
+        "Kitchen_Hideout"
     };
 
     private static readonly SimulationBuildSeed[] DefaultSimulationBuilds =
@@ -160,6 +159,7 @@ public sealed class SimulationOrchestratorService
         var target = Math.Max(0, request.TargetActiveSessions);
         var createdCount = 0;
         var endedCount = 0;
+        var simulatedEvents = new List<GameSessionEvent>();
 
         if (activeSessions.Count > target)
         {
@@ -180,9 +180,33 @@ public sealed class SimulationOrchestratorService
                 cancellationToken);
         }
 
+        if (ShouldSimulateEvents(request))
+        {
+            var createdSessions = GetAddedSimulatedSessions();
+
+            simulatedEvents.AddRange(
+                CreateInitialEventBursts(
+                    createdSessions,
+                    now));
+
+            var maintainedSessions = activeSessions
+                .Where(session =>
+                    session.Status == SessionStatus.Active &&
+                    session.EndedAtUtc == null)
+                .OrderBy(_ => Random.Shared.Next())
+                .Take(Math.Min(activeSessions.Count, 4))
+                .ToArray();
+
+            simulatedEvents.AddRange(
+                CreateOrganicEventBursts(
+                    maintainedSessions,
+                    now));
+        }
+
         if (createdCount > 0 ||
             endedCount > 0 ||
-            normalizedBuildAssignments > 0)
+            normalizedBuildAssignments > 0 ||
+            simulatedEvents.Count > 0)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -191,10 +215,14 @@ public sealed class SimulationOrchestratorService
                 createdCount,
                 endedCount,
                 cancellationToken);
+
+            await BroadcastSimulationEventsAsync(
+                simulatedEvents,
+                cancellationToken);
         }
 
         var message =
-            $"Target reconciled. Created {createdCount} session(s), ended {endedCount} session(s), and normalized {normalizedBuildAssignments} build assignment(s).";
+            $"Target reconciled. Created {createdCount} session(s), ended {endedCount} session(s), generated {simulatedEvents.Count} event(s), and normalized {normalizedBuildAssignments} build assignment(s).";
 
         if (activeSessions.Count < target &&
             createdCount < target - activeSessions.Count &&
@@ -245,6 +273,8 @@ public sealed class SimulationOrchestratorService
         var createdCount = 0;
         var endedCount = 0;
         var updatedCount = 0;
+        var updatedSessions = Array.Empty<GameSession>();
+        var simulatedEvents = new List<GameSessionEvent>();
 
         if (activeSessions.Count == 0 && target > 0)
         {
@@ -293,14 +323,19 @@ public sealed class SimulationOrchestratorService
         }
         else
         {
-            updatedCount = UpdateSessions(
-                activeSessions
-                    .OrderBy(_ => Random.Shared.Next())
-                    .Take(Math.Min(
-                        activeSessions.Count,
-                        Random.Shared.Next(1, 6))),
-                now,
-                request.Modules.Installations);
+            updatedSessions = activeSessions
+                .OrderBy(_ => Random.Shared.Next())
+                .Take(Math.Min(
+                    activeSessions.Count,
+                    Random.Shared.Next(1, 6)))
+                .ToArray();
+
+            updatedCount = ShouldSimulateEvents(request)
+                ? updatedSessions.Length
+                : UpdateSessions(
+                    updatedSessions,
+                    now,
+                    request.Modules.Installations);
         }
 
         if (request.Modules.Alerts &&
@@ -324,10 +359,41 @@ public sealed class SimulationOrchestratorService
                     now));
         }
 
+        if (ShouldSimulateEvents(request))
+        {
+            var createdSessions = GetAddedSimulatedSessions();
+
+            simulatedEvents.AddRange(
+                CreateInitialEventBursts(
+                    createdSessions,
+                    now));
+
+            var randomEventCandidates = activeSessions
+                .Where(session =>
+                    session.Status == SessionStatus.Active &&
+                    session.EndedAtUtc == null)
+                .OrderBy(_ => Random.Shared.Next())
+                .Take(Math.Min(
+                    activeSessions.Count,
+                    Random.Shared.Next(1, 7)));
+
+            var existingEventCandidates = updatedSessions
+                .Concat(randomEventCandidates)
+                .DistinctBy(session => session.SessionId)
+                .Take(6)
+                .ToArray();
+
+            simulatedEvents.AddRange(
+                CreateOrganicEventBursts(
+                    existingEventCandidates,
+                    now));
+        }
+
         if (createdCount > 0 ||
             endedCount > 0 ||
             updatedCount > 0 ||
             normalizedBuildAssignments > 0 ||
+            simulatedEvents.Count > 0 ||
             _dbContext.ChangeTracker.HasChanges())
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -337,10 +403,14 @@ public sealed class SimulationOrchestratorService
                 createdCount,
                 endedCount,
                 cancellationToken);
+
+            await BroadcastSimulationEventsAsync(
+                simulatedEvents,
+                cancellationToken);
         }
 
         return await CreateCommandResponseAsync(
-            $"Organic pulse complete. Created {createdCount}, updated {updatedCount}, ended {endedCount}, normalized {normalizedBuildAssignments} build assignment(s).",
+            $"Organic pulse complete. Created {createdCount}, updated {updatedCount}, ended {endedCount}, generated {simulatedEvents.Count} event(s), normalized {normalizedBuildAssignments} build assignment(s).",
             cancellationToken);
     }
 
@@ -769,32 +839,32 @@ public sealed class SimulationOrchestratorService
                         .VersionNumber;
             }
 
-            var scene =
-                SimulationScenes[
-                    Random.Shared.Next(
-                        SimulationScenes.Length)];
+            var scene = SimulationScenes[0];
+            var simulatedDurationMinutes =
+                Random.Shared.Next(10, 26);
+            var startedAtUtc =
+                now.AddMinutes(-simulatedDurationMinutes);
 
             var sessionToken =
                 _tokenService.GenerateToken();
 
-            _dbContext.GameSessions.Add(
-                new GameSession
-                {
-                    SessionId = Guid.NewGuid(),
-                    InstallationDbId = installation.Id,
-                    SessionTokenHash =
-                        _tokenService.HashToken(sessionToken),
-                    BuildVersion = installation.BuildVersion,
-                    CurrentScene = scene,
-                    CurrentGameState =
-                        scene == "Menu"
-                            ? "Menu"
-                            : "Playing",
-                    CurrentPhase = "Simulation",
-                    StartedAtUtc = now,
-                    LastHeartbeatUtc = now,
-                    Status = SessionStatus.Active
-                });
+            var session = new GameSession
+            {
+                SessionId = Guid.NewGuid(),
+                InstallationDbId = installation.Id,
+                Installation = installation,
+                SessionTokenHash =
+                    _tokenService.HashToken(sessionToken),
+                BuildVersion = installation.BuildVersion,
+                CurrentScene = scene,
+                CurrentGameState = ResolveGameState(scene),
+                CurrentPhase = ResolvePhase(scene),
+                StartedAtUtc = startedAtUtc,
+                LastHeartbeatUtc = now,
+                Status = SessionStatus.Active
+            };
+
+            _dbContext.GameSessions.Add(session);
 
             installation.LastUpdateUtc = now;
             installation.Status = "Active";
@@ -836,10 +906,9 @@ public sealed class SimulationOrchestratorService
 
             session.CurrentScene = scene;
             session.CurrentGameState =
-                scene == "Menu"
-                    ? "Menu"
-                    : "Playing";
-            session.CurrentPhase = "Simulation";
+                ResolveGameState(scene);
+            session.CurrentPhase =
+                ResolvePhase(scene);
             session.LastHeartbeatUtc = now;
 
             if (updateInstallations)
@@ -1016,6 +1085,304 @@ public sealed class SimulationOrchestratorService
         }
 
         return $"{SimulationDevicePrefix}{Guid.NewGuid():N}";
+    }
+
+    private static bool ShouldSimulateEvents(
+        SimulationTargetRequest request)
+    {
+        return request.SimulateEvents &&
+               request.Modules.Events;
+    }
+
+    private IReadOnlyList<GameSession> GetAddedSimulatedSessions()
+    {
+        return _dbContext.ChangeTracker
+            .Entries<GameSession>()
+            .Where(entry => entry.State == EntityState.Added)
+            .Select(entry => entry.Entity)
+            .Where(session =>
+                session.Installation.DeviceName.StartsWith(
+                    SimulationDevicePrefix,
+                    StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+    }
+
+    private IReadOnlyList<GameSessionEvent> CreateInitialEventBursts(
+        IEnumerable<GameSession> sessions,
+        DateTimeOffset now)
+    {
+        var createdEvents = new List<GameSessionEvent>();
+
+        foreach (var session in sessions)
+        {
+            var totalDuration = now - session.StartedAtUtc;
+            var firstTransitionUtc = session.StartedAtUtc.AddMinutes(1);
+            var midpointUtc = session.StartedAtUtc.AddTicks(
+                totalDuration.Ticks / 2);
+            var lateTransitionUtc = session.StartedAtUtc.AddTicks(
+                totalDuration.Ticks * 3 / 4);
+
+            AddSimulationEvent(
+                createdEvents,
+                session,
+                "SessionStart",
+                SimulationScenes[0],
+                "Loading",
+                "Bootstrap",
+                session.StartedAtUtc,
+                new
+                {
+                    source = SimulationSource,
+                    sessionId = session.SessionId,
+                    buildVersion = session.BuildVersion,
+                    simulatedDurationMinutes =
+                        Math.Max(1, (int)totalDuration.TotalMinutes)
+                });
+
+            AddSimulationEvent(
+                createdEvents,
+                session,
+                "SceneChanged",
+                SimulationScenes[1],
+                ResolveGameState(SimulationScenes[1]),
+                ResolvePhase(SimulationScenes[1]),
+                firstTransitionUtc,
+                new
+                {
+                    previousScene = SimulationScenes[0],
+                    currentScene = SimulationScenes[1],
+                    transitionReason = "InitialLoad"
+                });
+
+            AddSimulationEvent(
+                createdEvents,
+                session,
+                "TelemetryHeartbeat",
+                SimulationScenes[1],
+                ResolveGameState(SimulationScenes[1]),
+                ResolvePhase(SimulationScenes[1]),
+                midpointUtc,
+                new
+                {
+                    sequence = 1,
+                    latencyMs = Random.Shared.Next(18, 74),
+                    frameRate = Random.Shared.Next(55, 121)
+                });
+
+            var finalScene = SimulationScenes[
+                Random.Shared.Next(2, SimulationScenes.Length)];
+
+            AddSimulationEvent(
+                createdEvents,
+                session,
+                "SceneChanged",
+                finalScene,
+                ResolveGameState(finalScene),
+                ResolvePhase(finalScene),
+                lateTransitionUtc,
+                new
+                {
+                    previousScene = SimulationScenes[1],
+                    currentScene = finalScene,
+                    transitionReason = "GameplayProgression"
+                });
+
+            AddSimulationEvent(
+                createdEvents,
+                session,
+                "TelemetryHeartbeat",
+                finalScene,
+                ResolveGameState(finalScene),
+                ResolvePhase(finalScene),
+                now,
+                new
+                {
+                    sequence = 2,
+                    latencyMs = Random.Shared.Next(16, 68),
+                    frameRate = Random.Shared.Next(58, 121)
+                });
+
+            session.CurrentScene = finalScene;
+            session.CurrentGameState = ResolveGameState(finalScene);
+            session.CurrentPhase = ResolvePhase(finalScene);
+            session.LastHeartbeatUtc = now;
+        }
+
+        return createdEvents;
+    }
+
+    private IReadOnlyList<GameSessionEvent> CreateOrganicEventBursts(
+        IEnumerable<GameSession> sessions,
+        DateTimeOffset now)
+    {
+        var createdEvents = new List<GameSessionEvent>();
+
+        foreach (var session in sessions)
+        {
+            var previousScene = session.CurrentScene;
+            var shouldChangeScene = Random.Shared.Next(0, 100) < 62;
+            var currentScene = previousScene;
+
+            if (shouldChangeScene)
+            {
+                currentScene = SelectNextScene(previousScene);
+                var transitionUtc = now.AddSeconds(
+                    -Random.Shared.Next(2, 10));
+
+                AddSimulationEvent(
+                    createdEvents,
+                    session,
+                    "SceneChanged",
+                    currentScene,
+                    ResolveGameState(currentScene),
+                    ResolvePhase(currentScene),
+                    transitionUtc,
+                    new
+                    {
+                        previousScene,
+                        currentScene,
+                        transitionReason = "OrganicSimulation"
+                    });
+            }
+
+            AddSimulationEvent(
+                createdEvents,
+                session,
+                "TelemetryHeartbeat",
+                currentScene,
+                ResolveGameState(currentScene),
+                ResolvePhase(currentScene),
+                now,
+                new
+                {
+                    latencyMs = Random.Shared.Next(14, 92),
+                    frameRate = Random.Shared.Next(48, 121),
+                    memoryMb = Random.Shared.Next(3200, 7600),
+                    activeMinutes = Math.Max(
+                        1,
+                        (int)(now - session.StartedAtUtc)
+                            .TotalMinutes)
+                });
+
+            session.CurrentScene = currentScene;
+            session.CurrentGameState = ResolveGameState(currentScene);
+            session.CurrentPhase = ResolvePhase(currentScene);
+            session.LastHeartbeatUtc = now;
+            session.Installation.LastUpdateUtc = now;
+            session.Installation.Status = "Active";
+        }
+
+        return createdEvents;
+    }
+
+    private void AddSimulationEvent(
+        ICollection<GameSessionEvent> destination,
+        GameSession session,
+        string eventType,
+        string scene,
+        string gameState,
+        string phase,
+        DateTimeOffset eventTimeUtc,
+        object payload)
+    {
+        var simulationEvent = new GameSessionEvent
+        {
+            GameSession = session,
+            EventType = eventType,
+            Scene = scene,
+            GameState = gameState,
+            Phase = phase,
+            PayloadJson = JsonSerializer.Serialize(payload),
+            ClientTimeUtc = eventTimeUtc,
+            CreatedAtUtc = eventTimeUtc
+        };
+
+        _dbContext.GameSessionEvents.Add(simulationEvent);
+        destination.Add(simulationEvent);
+    }
+
+    private async Task BroadcastSimulationEventsAsync(
+        IEnumerable<GameSessionEvent> events,
+        CancellationToken cancellationToken)
+    {
+        var orderedEvents = events
+            .OrderBy(item => item.CreatedAtUtc)
+            .ThenBy(item => item.Id)
+            .ToArray();
+
+        foreach (var simulationEvent in orderedEvents)
+        {
+            var session = simulationEvent.GameSession;
+            var installation = session.Installation;
+
+            await _hubContext.Clients.All.SendAsync(
+                "sessionEventRecorded",
+                new
+                {
+                    sessionId = session.SessionId,
+                    installationId = installation.InstallationId,
+                    ownerUserId = installation.OwnerUserId,
+                    deviceName = installation.DeviceName,
+                    buildVersion = session.BuildVersion,
+                    eventId = simulationEvent.Id,
+                    eventType = simulationEvent.EventType,
+                    scene = simulationEvent.Scene,
+                    gameState = simulationEvent.GameState,
+                    phase = simulationEvent.Phase,
+                    payloadJson = simulationEvent.PayloadJson,
+                    clientTimeUtc = simulationEvent.ClientTimeUtc,
+                    createdAtUtc = simulationEvent.CreatedAtUtc
+                },
+                cancellationToken);
+        }
+
+        if (orderedEvents.Length > 0)
+        {
+            _logger.LogInformation(
+                "Simulation event burst persisted and broadcast. EventCount={EventCount}",
+                orderedEvents.Length);
+        }
+    }
+
+    private static string SelectNextScene(string currentScene)
+    {
+        var currentIndex = Array.FindIndex(
+            SimulationScenes,
+            scene => string.Equals(
+                scene,
+                currentScene,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (currentIndex < 0)
+        {
+            return SimulationScenes[0];
+        }
+
+        var nextOffset = Random.Shared.Next(1, SimulationScenes.Length);
+        return SimulationScenes[
+            (currentIndex + nextOffset) % SimulationScenes.Length];
+    }
+
+    private static string ResolveGameState(string scene)
+    {
+        return scene switch
+        {
+            "Combat_Zone" => "Combat",
+            "Kitchen_Hideout" => "Stealth",
+            "Level_01" => "Exploration",
+            _ => "DinerOperations"
+        };
+    }
+
+    private static string ResolvePhase(string scene)
+    {
+        return scene switch
+        {
+            "Combat_Zone" => "EnemyEncounter",
+            "Kitchen_Hideout" => "Investigation",
+            "Level_01" => "LevelProgression",
+            _ => "ServiceFloor"
+        };
     }
 
     private static SystemAlert CreateAlert(

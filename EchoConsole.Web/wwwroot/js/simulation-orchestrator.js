@@ -4,7 +4,7 @@
     const rootId = "simulation-orchestrator-root";
     const openSelector = "[data-sim-open]";
     const managerKey = "__echoConsoleSimulationManager";
-    const storageKey = "echo-console:simulation-orchestrator:v3";
+    const storageKey = "echo-console:simulation-orchestrator:v4";
 
     const statusPollIntervalMs = 10000;
     const statusUiThrottleMs = 1800;
@@ -334,7 +334,8 @@
                 {
                     sessions: false,
                     installations: false,
-                    alerts: false
+                    alerts: false,
+                    events: false
                 });
         }
 
@@ -382,6 +383,9 @@
                         !== false,
                     alerts:
                         stored?.modules?.alerts
+                        !== false,
+                    events:
+                        stored?.modules?.events
                         !== false
                 }
             };
@@ -1002,6 +1006,8 @@
                 this.endpoints.reconcile,
                 {
                     targetActiveSessions,
+                    simulateEvents:
+                        this.getModules().events,
                     modules: this.getModules()
                 });
         }
@@ -1057,6 +1063,8 @@
                                 {
                                     targetActiveSessions:
                                         this.getTarget(),
+                                    simulateEvents:
+                                        this.getModules().events,
                                     modules:
                                         this.getModules()
                                 });
@@ -1121,6 +1129,8 @@
                 this.endpoints.reconcile,
                 {
                     targetActiveSessions: 0,
+                    simulateEvents:
+                        this.getModules().events,
                     modules: {
                         ...this.getModules(),
                         sessions: true
@@ -1203,6 +1213,8 @@
                         "CRITICAL_ALARM",
                         this.endpoints.critical,
                         {
+                            simulateEvents:
+                                this.getModules().events,
                             modules:
                                 this.getModules()
                         });
@@ -1224,6 +1236,8 @@
                         "MASS_DROP",
                         this.endpoints.massDrop,
                         {
+                            simulateEvents:
+                                this.getModules().events,
                             modules:
                                 this.getModules()
                         });
