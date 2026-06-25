@@ -1,3 +1,4 @@
+using System.Globalization;
 using EchoConsole.Web.Models.Alerts;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
@@ -28,53 +29,35 @@ public sealed class AlertsController : Controller
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        pageNumber = Math.Max(1, pageNumber);
 
-        try
-        {
-            var response = await _alertsApiClient.GetAlertsAsync(
-                severity,
-                isResolved,
-                pageNumber,
-                DefaultPageSize,
-                cancellationToken);
+        var model = await LoadModelAsync(
+            severity,
+            isResolved,
+            pageNumber,
+            cancellationToken);
 
-            var model = new AlertsIndexViewModel
-            {
-                SeverityFilter = string.IsNullOrWhiteSpace(severity) ? null : severity.Trim(),
-                IsResolvedFilter = isResolved,
-                PageNumber = response.PageNumber > 0 ? response.PageNumber : pageNumber,
-                PageSize = response.PageSize > 0 ? response.PageSize : DefaultPageSize,
-                TotalCount = response.TotalCount,
-                TotalPages = response.TotalPages > 0 ? response.TotalPages : 1,
-                Items = response.Items ?? Array.Empty<SystemAlertApiDto>()
-            };
+        SetPageTitle();
+        return View(model);
+    }
 
-            ViewData["Title"] = "ALERTS AND REPORTS";
-            ViewData["TitleResourceKey"] = "Alerts_PageTitle";
+    [HttpGet]
+    public async Task<IActionResult> RealtimePage(
+        string? severity = null,
+        bool? isResolved = null,
+        int pageNumber = 1,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
 
-            return View(model);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load alerts page.");
+        var response = await _alertsApiClient.GetAlertsAsync(
+            severity,
+            isResolved,
+            pageNumber,
+            DefaultPageSize,
+            cancellationToken);
 
-            var fallbackModel = new AlertsIndexViewModel
-            {
-                SeverityFilter = string.IsNullOrWhiteSpace(severity) ? null : severity.Trim(),
-                IsResolvedFilter = isResolved,
-                PageNumber = pageNumber,
-                PageSize = DefaultPageSize,
-                TotalCount = 0,
-                TotalPages = 1,
-                Items = Array.Empty<SystemAlertApiDto>()
-            };
-
-            ViewData["Title"] = "ALERTS AND REPORTS";
-            ViewData["TitleResourceKey"] = "Alerts_PageTitle";
-
-            return View(fallbackModel);
-        }
+        return Json(response);
     }
 
     [HttpPost]
@@ -86,20 +69,153 @@ public sealed class AlertsController : Controller
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await _alertsApiClient.ResolveAlertAsync(id, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to resolve alert {AlertId}.", id);
-        }
+        await _alertsApiClient.ResolveAlertAsync(
+            id,
+            cancellationToken);
 
         return RedirectToAction(nameof(Index), new
         {
             severity,
             isResolved,
-            pageNumber
+            pageNumber = Math.Max(1, pageNumber)
         });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResolveRealtime(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _alertsApiClient.ResolveAlertAsync(
+            id,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new
+                {
+                    message = "The alert could not be resolved."
+                });
+        }
+
+        return Json(result);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RunAiTrendAnalysis(
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _alertsApiClient.RunAiTrendAnalysisAsync(
+            CultureInfo.CurrentUICulture.Name,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new
+                {
+                    message = "AI trend analysis could not be generated."
+                });
+        }
+
+        return Json(result);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BroadcastDiscord(
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _alertsApiClient.BroadcastDiscordAsync(
+            cancellationToken);
+
+        if (result is null)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new
+                {
+                    sent = false,
+                    message = "Discord broadcast could not be completed."
+                });
+        }
+
+        if (!result.Sent)
+        {
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                result);
+        }
+
+        return Json(result);
+    }
+
+    private async Task<AlertsIndexViewModel> LoadModelAsync(
+        string? severity,
+        bool? isResolved,
+        int pageNumber,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _alertsApiClient.GetAlertsAsync(
+                severity,
+                isResolved,
+                pageNumber,
+                DefaultPageSize,
+                cancellationToken);
+
+            return new AlertsIndexViewModel
+            {
+                SeverityFilter = string.IsNullOrWhiteSpace(severity)
+                    ? null
+                    : severity.Trim(),
+                IsResolvedFilter = isResolved,
+                PageNumber = response.PageNumber > 0
+                    ? response.PageNumber
+                    : pageNumber,
+                PageSize = response.PageSize > 0
+                    ? response.PageSize
+                    : DefaultPageSize,
+                TotalCount = response.TotalCount,
+                TotalPages = response.TotalPages > 0
+                    ? response.TotalPages
+                    : 1,
+                Items = response.Items
+                    ?? Array.Empty<SystemAlertApiDto>()
+            };
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to load alerts page.");
+
+            return new AlertsIndexViewModel
+            {
+                SeverityFilter = severity?.Trim(),
+                IsResolvedFilter = isResolved,
+                PageNumber = pageNumber,
+                PageSize = DefaultPageSize,
+                TotalPages = 1,
+                Items = Array.Empty<SystemAlertApiDto>()
+            };
+        }
+    }
+
+    private void SetPageTitle()
+    {
+        ViewData["Title"] = "ALERTS AND REPORTS";
+        ViewData["TitleResourceKey"] = "Alerts_PageTitle";
     }
 }

@@ -1958,4 +1958,28 @@
   <data name="Installations_DeleteError" xml:space="preserve">
     <value>Installation could not be deleted.</value>
   </data>
+  <data name="Alerts_AnalyticsTitle" xml:space="preserve">
+    <value>ANALYTICAL REPORTS &amp; INCIDENCES</value>
+  </data>
+  <data name="Alerts_AiDescription" xml:space="preserve">
+    <value>Runs a deterministic local analysis over recent alert telemetry without calling external AI services.</value>
+  </data>
+  <data name="Alerts_AiIdle" xml:space="preserve">
+    <value>&gt; AI analysis ready. Execute the trend engine to inspect the latest telemetry window.</value>
+  </data>
+  <data name="Alerts_AiProcessing" xml:space="preserve">
+    <value>&gt; Processing alert vectors and comparing telemetry windows...</value>
+  </data>
+  <data name="Alerts_DiscordDescription" xml:space="preserve">
+    <value>Broadcasts the latest unresolved critical and fatal incidents through the configured Discord webhook.</value>
+  </data>
+  <data name="Alerts_DiscordIdle" xml:space="preserve">
+    <value>WEBHOOK_STATUS: READY_FOR_CONFIGURATION</value>
+  </data>
+  <data name="Alerts_DiscordSending" xml:space="preserve">
+    <value>WEBHOOK_STATUS: TRANSMITTING_INCIDENTS</value>
+  </data>
+  <data name="Alerts_RequestFailed" xml:space="preserve">
+    <value>The operation could not be completed.</value>
+  </data>
 </root>

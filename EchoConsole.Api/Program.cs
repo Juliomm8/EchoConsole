@@ -27,6 +27,7 @@ builder.Services.AddResponseCompression(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 
 // Server-to-server API key authentication
 builder.Services.AddAuthentication(AdminApiKeyAuthenticationOptions.SchemeName)
