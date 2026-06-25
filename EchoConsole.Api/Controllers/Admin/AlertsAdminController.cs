@@ -21,7 +21,7 @@ namespace EchoConsole.Api.Controllers.Admin;
 public sealed class AlertsAdminController : ControllerBase
 {
     private const string DiscordWebhookUrl =
-        "https://discord.com/api/webhooks/1519515195498565633/EUAg5-yVIIqeL_tQ0Sp4EcU6F_7Zw9BSs5uxhvfcRJUB0jfePXaekGeTMMX3p_-6qzb7";
+        "https://discord.com/api/webhooks/1519668721822601342/BNA_JxgHEPpkfyDuHY08Ru9soqYrBPXs4ZafenKh2Zr_mQc9Nk7jzrTZokUq2ofVecSi";
 
     private readonly EchoConsoleDbContext _dbContext;
     private readonly IHttpClientFactory _httpClientFactory;
