@@ -4,6 +4,8 @@ public sealed class PatchNotesAdminIndexViewModel
 {
     public IReadOnlyList<PatchNotesAdminListItemViewModel> Items { get; set; } =
         Array.Empty<PatchNotesAdminListItemViewModel>();
+
+    public PatchNoteUpdateViewModel Edit { get; set; } = new();
 }
 
 public sealed class PatchNotesAdminListItemViewModel

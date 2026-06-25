@@ -176,6 +176,107 @@ public sealed class PatchNotesAdminController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost("update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(
+        [Bind(Prefix = "Edit")] PatchNoteUpdateViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        model.Version = model.Version?.Trim() ?? string.Empty;
+        model.Category = model.Category?.Trim() ?? string.Empty;
+        model.Tone = model.Tone?.Trim().ToLowerInvariant() ?? string.Empty;
+        model.Title = model.Title?.Trim() ?? string.Empty;
+        model.Description = model.Description?.Trim() ?? string.Empty;
+
+        if (model.Id <= 0)
+        {
+            ModelState.AddModelError(
+                nameof(model.Id),
+                "A valid patch note identifier is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Version))
+        {
+            ModelState.AddModelError(
+                nameof(model.Version),
+                "Version is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Category))
+        {
+            ModelState.AddModelError(
+                nameof(model.Category),
+                "Category is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+        {
+            ModelState.AddModelError(
+                nameof(model.Title),
+                "Title is required.");
+        }
+        else if (model.Title.Length < 5)
+        {
+            ModelState.AddModelError(
+                nameof(model.Title),
+                "Title must contain at least 5 characters.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Description))
+        {
+            ModelState.AddModelError(
+                nameof(model.Description),
+                "Description is required.");
+        }
+        else if (model.Description.Length < 10)
+        {
+            ModelState.AddModelError(
+                nameof(model.Description),
+                "Description must contain at least 10 characters.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            TempData["PatchNotesAdminError"] =
+                _localizer["PatchNotesAdmin_UpdateValidationError"].Value;
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var result = await _patchNotesApiClient.UpdateAsync(
+            model.Id,
+            new UpdatePatchNoteApiRequest
+            {
+                Version = model.Version,
+                Category = model.Category,
+                Tone = model.Tone,
+                Title = model.Title,
+                Description = model.Description,
+                IsPublished = model.IsPublished
+            },
+            cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            _logger.LogWarning(
+                "Patch note update failed. PatchNoteId: {PatchNoteId}, Error: {ErrorMessage}",
+                model.Id,
+                result.ErrorMessage);
+
+            TempData["PatchNotesAdminError"] =
+                string.IsNullOrWhiteSpace(result.ErrorMessage)
+                    ? _localizer["PatchNotesAdmin_UpdateError"].Value
+                    : result.ErrorMessage;
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        TempData["PatchNotesAdminSuccess"] =
+            _localizer["PatchNotesAdmin_UpdateSuccess"].Value;
+
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost("toggle")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TogglePublish(

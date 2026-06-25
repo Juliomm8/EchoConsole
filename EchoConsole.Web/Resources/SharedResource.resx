@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1867,5 +1867,32 @@
   </data>
   <data name="Builds_DeleteError" xml:space="preserve">
     <value>The build could not be deleted.</value>
+  </data>
+  <data name="PatchNotesAdmin_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="PatchNotesAdmin_EditTitle" xml:space="preserve">
+    <value>Edit patch note</value>
+  </data>
+  <data name="PatchNotesAdmin_EditSubtitle" xml:space="preserve">
+    <value>Load the current record, adjust its content, and save the transmission without leaving the archive.</value>
+  </data>
+  <data name="PatchNotesAdmin_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="PatchNotesAdmin_SaveChanges" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="PatchNotesAdmin_EditPublishLabel" xml:space="preserve">
+    <value>Keep this patch note visible on the public landing page</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateSuccess" xml:space="preserve">
+    <value>Patch note updated successfully.</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateError" xml:space="preserve">
+    <value>The patch note could not be updated.</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateValidationError" xml:space="preserve">
+    <value>The patch note contains invalid data and could not be updated.</value>
   </data>
 </root>
