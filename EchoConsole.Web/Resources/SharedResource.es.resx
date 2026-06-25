@@ -2015,4 +2015,16 @@
   <data name="Alerts_DiscordAutomaticDescription" xml:space="preserve">
     <value>Las alertas críticas y fatales se envían automáticamente mediante el outbox persistente de Discord con reintentos.</value>
   </data>
+  <data name="Alerts_ActionCancelUndo" xml:space="preserve">
+    <value>CANCELAR / DESHACER</value>
+  </data>
+  <data name="Alerts_ResolveCountdown" xml:space="preserve">
+    <value>Resolviendo en {0}s...</value>
+  </data>
+  <data name="Alerts_ResolvingNow" xml:space="preserve">
+    <value>Resolviendo...</value>
+  </data>
+  <data name="Alerts_LoadingState" xml:space="preserve">
+    <value>Sincronizando incidencias...</value>
+  </data>
 </root>

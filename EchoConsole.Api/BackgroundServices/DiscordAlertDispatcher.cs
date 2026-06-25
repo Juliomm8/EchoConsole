@@ -17,7 +17,7 @@ public sealed class DiscordAlertDispatcher : BackgroundService
     private readonly DiscordAlertOptions _options;
     private readonly ILogger<DiscordAlertDispatcher> _logger;
 
-    private bool _configurationWarningLogged;
+    private bool _configurationNoticeLogged;
     private bool _schemaWarningLogged;
 
     public DiscordAlertDispatcher(
@@ -44,17 +44,17 @@ public sealed class DiscordAlertDispatcher : BackgroundService
             {
                 if (!IsConfigured())
                 {
-                    if (!_configurationWarningLogged)
+                    if (!_configurationNoticeLogged)
                     {
-                        _logger.LogWarning(
+                        _logger.LogInformation(
                             "Automatic Discord alert relay is disabled or the webhook URL is not configured.");
 
-                        _configurationWarningLogged = true;
+                        _configurationNoticeLogged = true;
                     }
                 }
                 else
                 {
-                    _configurationWarningLogged = false;
+                    _configurationNoticeLogged = false;
                     await DispatchPendingMessagesAsync(stoppingToken);
                     _schemaWarningLogged = false;
                 }

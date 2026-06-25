@@ -334,66 +334,76 @@ public sealed class AlertsAdminController : ControllerBase
             CancellationToken cancellationToken = default)
     {
         var now = DateTimeOffset.UtcNow;
+        var recentStart = now.AddHours(-24);
+        var previousStart = now.AddHours(-48);
 
-        var physicalAlertCount = await _dbContext.SystemAlerts
+        var metrics = await _dbContext.SystemAlerts
             .AsNoTracking()
-            .CountAsync(cancellationToken);
+            .GroupBy(_ => 1)
+            .Select(group => new
+            {
+                PhysicalAlertCount = group.Count(),
+                OpenAlertCount = group.Count(
+                    alert => !alert.IsResolved),
+                RecentAlertCount = group.Count(
+                    alert => alert.CreatedAtUtc >= recentStart),
+                RecentCriticalCount = group.Count(
+                    alert =>
+                        alert.CreatedAtUtc >= recentStart &&
+                        (alert.Severity == AlertSeverity.Critical ||
+                         alert.Severity == AlertSeverity.Fatal)),
+                PreviousCriticalCount = group.Count(
+                    alert =>
+                        alert.CreatedAtUtc >= previousStart &&
+                        alert.CreatedAtUtc < recentStart &&
+                        (alert.Severity == AlertSeverity.Critical ||
+                         alert.Severity == AlertSeverity.Fatal))
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var physicalAlertCount = metrics?.PhysicalAlertCount ?? 0;
+        var openAlertCount = metrics?.OpenAlertCount ?? 0;
+        var recentAlertCount = metrics?.RecentAlertCount ?? 0;
+        var recentCriticalCount = metrics?.RecentCriticalCount ?? 0;
+        var previousCriticalCount = metrics?.PreviousCriticalCount ?? 0;
+
+        var activeBuildVersion = await _dbContext.GameBuilds
+            .AsNoTracking()
+            .Where(build => build.IsActive)
+            .OrderByDescending(build => build.ReleaseDateUtc)
+            .Select(build => build.VersionNumber)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? "NO_ACTIVE_BUILD";
 
         var isSpanish = culture?.StartsWith(
             "es",
             StringComparison.OrdinalIgnoreCase) == true;
 
-        if (physicalAlertCount == 0)
+        if (openAlertCount == 0)
         {
-            var emptyNarrative = isSpanish
-                ? "ESTACIÓN NOC INICIALIZADA: No se registran anomalías en el pipeline en las últimas 24 horas. Sistema operando de forma nominal."
-                : "NOC STATION INITIALIZED: No pipeline anomalies were registered during the last 24 hours. The system is operating nominally.";
+            var nominalNarrative = isSpanish
+                ? "ESTACIÓN NOC INICIALIZADA: Pipeline de telemetría libre de trazas de error. Todo el hardware del juego opera bajo parámetros nominales óptimos."
+                : "NOC STATION INITIALIZED: The telemetry pipeline is free of error traces. All game hardware is operating within optimal nominal parameters.";
 
             return Ok(new AlertAiTrendAnalysisDto
             {
-                Narrative = emptyNarrative,
-                ActiveBuildVersion = "NO_ACTIVE_BUILD",
-                DominantSource = "NOC_TELEMETRY_CORE",
-                RecentAlertCount = 0,
+                Narrative = nominalNarrative,
+                ActiveBuildVersion = activeBuildVersion,
+                DominantSource = physicalAlertCount == 0
+                    ? "NOC_TELEMETRY_CORE"
+                    : "RESOLVED_ARCHIVE",
+                RecentAlertCount = recentAlertCount,
                 OpenAlertCount = 0,
-                RecentCriticalCount = 0,
-                PreviousCriticalCount = 0,
+                RecentCriticalCount = recentCriticalCount,
+                PreviousCriticalCount = previousCriticalCount,
                 CriticalTrendPercent = 0m,
                 GeneratedAtUtc = now
             });
         }
 
-        var recentStart = now.AddHours(-24);
-        var previousStart = now.AddHours(-48);
-
-        var recentQuery = _dbContext.SystemAlerts
+        var dominantSource = await _dbContext.SystemAlerts
             .AsNoTracking()
-            .Where(alert => alert.CreatedAtUtc >= recentStart);
-
-        var recentAlertCount = await recentQuery.CountAsync(
-            cancellationToken);
-
-        var openAlertCount = await recentQuery.CountAsync(
-            alert => !alert.IsResolved,
-            cancellationToken);
-
-        var recentCriticalCount = await recentQuery.CountAsync(
-            alert =>
-                alert.Severity == AlertSeverity.Critical ||
-                alert.Severity == AlertSeverity.Fatal,
-            cancellationToken);
-
-        var previousCriticalCount = await _dbContext.SystemAlerts
-            .AsNoTracking()
-            .CountAsync(
-                alert =>
-                    alert.CreatedAtUtc >= previousStart &&
-                    alert.CreatedAtUtc < recentStart &&
-                    (alert.Severity == AlertSeverity.Critical ||
-                     alert.Severity == AlertSeverity.Fatal),
-                cancellationToken);
-
-        var dominantSource = await recentQuery
+            .Where(alert => !alert.IsResolved)
             .GroupBy(alert => alert.Source)
             .Select(group => new
             {
@@ -404,18 +414,12 @@ public sealed class AlertsAdminController : ControllerBase
             .ThenBy(item => item.Source)
             .Select(item => item.Source)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? "TelemetryCore";
-
-        var activeBuildVersion = await _dbContext.GameBuilds
-            .AsNoTracking()
-            .Where(build => build.IsActive)
-            .OrderByDescending(build => build.ReleaseDateUtc)
-            .Select(build => build.VersionNumber)
-            .FirstOrDefaultAsync(cancellationToken)
-            ?? "v2.0.0-RetroUI";
+            ?? "NOC_TELEMETRY_CORE";
 
         var criticalTrendPercent = previousCriticalCount == 0
-            ? recentCriticalCount > 0 ? 100m : 0m
+            ? recentCriticalCount > 0
+                ? 100m
+                : 0m
             : Math.Round(
                 (recentCriticalCount - previousCriticalCount) * 100m /
                 previousCriticalCount,

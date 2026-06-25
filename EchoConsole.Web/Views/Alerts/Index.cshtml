@@ -13,6 +13,12 @@
         resolved = SharedLocalizer["Alerts_StatusResolved"].Value,
         open = SharedLocalizer["Alerts_StatusOpen"].Value,
         empty = SharedLocalizer["Alerts_EmptyState"].Value,
+        loading = SharedLocalizer["Alerts_LoadingState"].Value,
+        cancelUndo = SharedLocalizer["Alerts_ActionCancelUndo"].Value,
+        resolveCountdown = SharedLocalizer["Alerts_ResolveCountdown"].Value,
+        resolving = SharedLocalizer["Alerts_ResolvingNow"].Value,
+        tabOpen = SharedLocalizer["Alerts_TabOpen"].Value,
+        tabResolved = SharedLocalizer["Alerts_TabResolved"].Value,
         aiProcessing = SharedLocalizer["Alerts_AiProcessing"].Value,
         requestFailed = SharedLocalizer["Alerts_RequestFailed"].Value,
         deleteTypeConfirm = SharedLocalizer["Alerts_TypeDeleteConfirm"].Value,
@@ -56,6 +62,9 @@
                        asp-action="Index"
                        asp-route-status="OPEN"
                        asp-route-severity="@Model.SeverityFilter"
+                       data-alert-tab
+                       data-status="OPEN"
+                       aria-pressed="@isOpenTab.ToString().ToLowerInvariant()"
                        class="inline-flex h-10 min-w-[210px] items-center justify-center whitespace-nowrap border px-4 text-[10px] font-semibold uppercase tracking-[0.15em] transition-colors @(isOpenTab ? "border-green-500/35 bg-green-500/10 text-green-400" : "border-slate-800 bg-slate-950 text-slate-500 hover:bg-slate-900 hover:text-slate-300")">
                         [ @SharedLocalizer["Alerts_TabOpen"] ]
                     </a>
@@ -63,15 +72,19 @@
                        asp-action="Index"
                        asp-route-status="RESOLVED"
                        asp-route-severity="@Model.SeverityFilter"
+                       data-alert-tab
+                       data-status="RESOLVED"
+                       aria-pressed="@(!isOpenTab).ToString().ToLowerInvariant()"
                        class="inline-flex h-10 min-w-[210px] items-center justify-center whitespace-nowrap border px-4 text-[10px] font-semibold uppercase tracking-[0.15em] transition-colors @(!isOpenTab ? "border-green-500/35 bg-green-500/10 text-green-400" : "border-slate-800 bg-slate-950 text-slate-500 hover:bg-slate-900 hover:text-slate-300")">
                         [ @SharedLocalizer["Alerts_TabResolved"] ]
                     </a>
                 </nav>
 
                 <div class="flex flex-col gap-2 sm:flex-row">
-                    <form method="get" asp-controller="Alerts" asp-action="Index" class="flex gap-2">
-                        <input type="hidden" name="status" value="@Model.StatusFilter" />
+                    <form method="get" asp-controller="Alerts" asp-action="Index" data-alert-filter-form class="flex gap-2">
+                        <input type="hidden" name="status" value="@Model.StatusFilter" data-alert-filter-status />
                         <select name="severity"
+                                data-alert-severity-filter
                                 class="h-10 min-w-[190px] border border-slate-800 bg-black px-3 text-[10px] uppercase tracking-[0.14em] text-slate-400 outline-none focus:border-green-500/40">
                             <option value="">@SharedLocalizer["Alerts_FilterAllSeverities"]</option>
                             @foreach (var severity in new[] { "Info", "Warning", "Critical", "Fatal" })
@@ -104,7 +117,7 @@
             <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
                 <div>
                     <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">&gt;_ INCIDENT_REGISTER</p>
-                    <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">
+                    <h2 id="alerts-register-title" class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">
                         @(isOpenTab ? SharedLocalizer["Alerts_TabOpen"].Value : SharedLocalizer["Alerts_TabResolved"].Value)
                     </h2>
                 </div>
@@ -142,11 +155,24 @@
                                 <td class="px-4 py-4 text-right">
                                     @if (!item.IsResolved)
                                     {
-                                        <button type="button" data-alert-resolve data-alert-id="@item.Id" class="inline-flex h-8 w-24 min-w-[96px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">[ @SharedLocalizer["Alerts_ActionResolve"] ]</button>
+                                        <div data-alert-action-group class="inline-flex min-w-[280px] items-center justify-end gap-2 whitespace-nowrap">
+                                            <button type="button"
+                                                    data-alert-resolve
+                                                    data-alert-id="@item.Id"
+                                                    class="inline-flex h-8 w-40 min-w-[160px] shrink-0 items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400 disabled:cursor-wait disabled:opacity-80">
+                                                [ @SharedLocalizer["Alerts_ActionResolve"] ]
+                                            </button>
+                                            <button type="button"
+                                                    data-alert-resolve-undo
+                                                    data-alert-id="@item.Id"
+                                                    class="pointer-events-none invisible inline-flex h-8 w-28 min-w-[112px] shrink-0 items-center justify-center whitespace-nowrap border border-amber-900/60 bg-amber-950/20 px-2 text-[9px] font-semibold uppercase tracking-[0.10em] text-amber-400 transition-colors hover:bg-amber-900/30 hover:text-amber-200">
+                                                [ @SharedLocalizer["Alerts_ActionCancelUndo"] ]
+                                            </button>
+                                        </div>
                                     }
                                     else
                                     {
-                                        <span class="inline-flex h-8 w-24 min-w-[96px] items-center justify-center whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-emerald-500">@SharedLocalizer["Alerts_StatusResolved"]</span>
+                                        <span class="inline-flex h-8 w-40 min-w-[160px] items-center justify-center whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-emerald-500">@SharedLocalizer["Alerts_StatusResolved"]</span>
                                     }
                                 </td>
                             </tr>
@@ -162,19 +188,25 @@
             <footer class="flex items-center justify-between border-t border-slate-800 px-5 py-4">
                 <div class="text-[10px] uppercase tracking-[0.15em] text-slate-600">
                     @SharedLocalizer["Common_Page"]
-                    <span class="text-green-400">@Model.PageNumber</span>
+                    <span id="alerts-page-current" class="text-green-400">@Model.PageNumber</span>
                     @SharedLocalizer["Common_Of"]
-                    <span class="text-green-400">@Math.Max(Model.TotalPages, 1)</span>
+                    <span id="alerts-page-total" class="text-green-400">@Math.Max(Model.TotalPages, 1)</span>
                 </div>
                 <div class="flex gap-2 whitespace-nowrap">
-                    @if (Model.HasPreviousPage)
-                    {
-                        <a asp-controller="Alerts" asp-action="Index" asp-route-status="@Model.StatusFilter" asp-route-severity="@Model.SeverityFilter" asp-route-pageNumber="@(Model.PageNumber - 1)" class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] uppercase text-slate-400 hover:bg-slate-900">[ @SharedLocalizer["Common_Previous"] ]</a>
-                    }
-                    @if (Model.HasNextPage)
-                    {
-                        <a asp-controller="Alerts" asp-action="Index" asp-route-status="@Model.StatusFilter" asp-route-severity="@Model.SeverityFilter" asp-route-pageNumber="@(Model.PageNumber + 1)" class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-700 bg-slate-900 px-4 text-[9px] uppercase text-slate-300 hover:bg-slate-800 hover:text-green-400">[ @SharedLocalizer["Common_Next"] ]</a>
-                    }
+                    <button type="button"
+                            data-alert-page
+                            data-page-delta="-1"
+                            disabled="@(!Model.HasPreviousPage)"
+                            class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] uppercase text-slate-400 transition-colors hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-30">
+                        [ @SharedLocalizer["Common_Previous"] ]
+                    </button>
+                    <button type="button"
+                            data-alert-page
+                            data-page-delta="1"
+                            disabled="@(!Model.HasNextPage)"
+                            class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-700 bg-slate-900 px-4 text-[9px] uppercase text-slate-300 transition-colors hover:bg-slate-800 hover:text-green-400 disabled:cursor-not-allowed disabled:opacity-30">
+                        [ @SharedLocalizer["Common_Next"] ]
+                    </button>
                 </div>
             </footer>
         </section>
@@ -241,6 +273,9 @@
             deleteTypeUrl: "@Url.Action("DeleteAlertType", "Alerts")",
             tableBodyId: "alerts-table-body",
             resultsCountId: "alerts-results-count",
+            statusTitleId: "alerts-register-title",
+            pageCurrentId: "alerts-page-current",
+            pageTotalId: "alerts-page-total",
             pageNumber: @Model.PageNumber,
             pageSize: @Model.PageSize,
             severity: @Html.Raw(JsonSerializer.Serialize(Model.SeverityFilter ?? string.Empty)),
