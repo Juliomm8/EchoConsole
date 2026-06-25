@@ -4,13 +4,11 @@
     const rootId = "simulation-orchestrator-root";
     const openSelector = "[data-sim-open]";
     const managerKey = "__echoConsoleSimulationManager";
-    const storageKey = "echo-console:simulation-orchestrator:v4";
+    const storageKey = "echo-console:simulation-orchestrator:v5";
 
     const statusPollIntervalMs = 10000;
     const statusUiThrottleMs = 1800;
     const logFlushIntervalMs = 300;
-    const organicMinimumDelayMs = 4000;
-    const organicMaximumDelayMs = 8000;
 
     function unlockDocumentScroll() {
         const body = document.body;
@@ -97,6 +95,7 @@
             target: "[data-sim-target]",
             applyTarget: "[data-sim-apply-target]",
             organic: "[data-sim-organic]",
+            volatility: "[data-sim-volatility]",
             terminate: "[data-sim-terminate]",
             critical: "[data-sim-critical]",
             massDrop: "[data-sim-mass-drop]",
@@ -180,7 +179,6 @@
             this.endpoints = {
                 status: root.dataset.statusUrl,
                 reconcile: root.dataset.reconcileUrl,
-                pulse: root.dataset.pulseUrl,
                 critical: root.dataset.criticalAlertUrl,
                 massDrop: root.dataset.massDropUrl,
                 purge: root.dataset.purgeUrl,
@@ -257,7 +255,6 @@
                 isOpen: false,
                 requestInFlight: false,
                 statusRequestInFlight: false,
-                organicTimerId: null,
                 statusTimerId: null,
                 uiFlushTimerId: null,
                 logFlushTimerId: null,
@@ -296,12 +293,6 @@
                 immediate: true
             });
 
-            if (this.elements.organic.checked) {
-                this.startOrganicMode({
-                    writeLog: false,
-                    immediate: true
-                });
-            }
         }
 
         isCurrent(root, openButton) {
@@ -359,8 +350,23 @@
                 Math.max(0, normalizedValue));
         }
 
+        getVolatility() {
+            const value =
+                this.elements.volatility.value;
+
+            return [
+                "Low",
+                "Medium",
+                "Chaotic"
+            ].includes(value)
+                ? value
+                : "Medium";
+        }
+
         readPersistentState() {
             const stored = readStoredState();
+            const storedVolatility =
+                String(stored?.volatility ?? "Medium");
 
             return {
                 target:
@@ -374,6 +380,13 @@
                         : this.getTarget(),
                 organicEnabled:
                     stored?.organicEnabled === true,
+                volatility: [
+                    "Low",
+                    "Medium",
+                    "Chaotic"
+                ].includes(storedVolatility)
+                    ? storedVolatility
+                    : "Medium",
                 modules: {
                     sessions:
                         stored?.modules?.sessions
@@ -401,6 +414,9 @@
             this.elements.organic.checked =
                 persisted.organicEnabled;
 
+            this.elements.volatility.value =
+                persisted.volatility;
+
             this.moduleInputs.forEach(input => {
                 const key =
                     input.dataset.simModule;
@@ -416,6 +432,8 @@
                 target: this.getTarget(),
                 organicEnabled:
                     this.elements.organic.checked,
+                volatility:
+                    this.getVolatility(),
                 modules: this.getModules()
             };
 
@@ -856,11 +874,18 @@
                                 hour12: false
                             }));
 
+                const serverIsRunning =
+                    status.isRunning === true;
+
+                const serverPhase =
+                    String(status.phase ?? "").trim();
+
                 this.setChannelState(
-                    activeSimulated > 0
-                        ? this.messages.stateActive
+                    serverIsRunning
+                        ? serverPhase ||
+                            this.messages.stateActive
                         : this.messages.stateIdle,
-                    activeSimulated > 0
+                    serverIsRunning
                         ? "active"
                         : "idle");
 
@@ -1002,77 +1027,18 @@
             });
 
             await this.runCommand(
-                "RECONCILE_TARGET",
+                "CONFIGURE_SANDBOX",
                 this.endpoints.reconcile,
                 {
                     targetActiveSessions,
                     simulateEvents:
                         this.getModules().events,
+                    enableStochasticFlow:
+                        this.elements.organic.checked,
+                    volatility:
+                        this.getVolatility(),
                     modules: this.getModules()
                 });
-        }
-
-        getOrganicDelay() {
-            return (
-                organicMinimumDelayMs
-                + Math.floor(
-                    Math.random()
-                    * (
-                        organicMaximumDelayMs
-                        - organicMinimumDelayMs
-                        + 1
-                    ))
-            );
-        }
-
-        scheduleOrganicPulse(options = {}) {
-            window.clearTimeout(
-                this.state.organicTimerId);
-
-            if (
-                this.state.destroyed
-                || !this.root.isConnected
-                || !this.elements.organic.checked
-            ) {
-                this.state.organicTimerId = null;
-                return;
-            }
-
-            const delay =
-                options.immediate === true
-                    ? 750
-                    : this.getOrganicDelay();
-
-            this.state.organicTimerId =
-                window.setTimeout(
-                    async () => {
-                        if (
-                            this.state.destroyed
-                            || !this.root.isConnected
-                            || !this.elements.organic.checked
-                        ) {
-                            return;
-                        }
-
-                        if (
-                            !this.state.requestInFlight
-                        ) {
-                            await this.runCommand(
-                                "ORGANIC_PULSE",
-                                this.endpoints.pulse,
-                                {
-                                    targetActiveSessions:
-                                        this.getTarget(),
-                                    simulateEvents:
-                                        this.getModules().events,
-                                    modules:
-                                        this.getModules()
-                                });
-                        }
-
-                        this.scheduleOrganicPulse();
-                    },
-                    delay);
         }
 
         startOrganicMode(options = {}) {
@@ -1087,18 +1053,9 @@
                     this.messages.organicEnabled,
                     "warning");
             }
-
-            this.scheduleOrganicPulse({
-                immediate:
-                    options.immediate === true
-            });
         }
 
         stopOrganicMode(options = {}) {
-            window.clearTimeout(
-                this.state.organicTimerId);
-
-            this.state.organicTimerId = null;
             this.elements.organic.checked = false;
 
             if (options.persist !== false) {
@@ -1123,6 +1080,12 @@
             }
 
             this.stopOrganicMode();
+            this.elements.target.value = "0";
+
+            this.persistState({
+                target: 0,
+                organicEnabled: false
+            });
 
             await this.runCommand(
                 "TERMINATE_SIMULATION",
@@ -1131,6 +1094,9 @@
                     targetActiveSessions: 0,
                     simulateEvents:
                         this.getModules().events,
+                    enableStochasticFlow: false,
+                    volatility:
+                        this.getVolatility(),
                     modules: {
                         ...this.getModules(),
                         sessions: true
@@ -1169,6 +1135,17 @@
                 () => this.persistState(),
                 { signal });
 
+            this.elements.volatility.addEventListener(
+                "change",
+                () => {
+                    this.persistState();
+
+                    if (this.getTarget() > 0) {
+                        void this.reconcileTarget();
+                    }
+                },
+                { signal });
+
             this.elements.target.addEventListener(
                 "keydown",
                 event => {
@@ -1188,6 +1165,10 @@
                         this.startOrganicMode();
                     } else {
                         this.stopOrganicMode();
+                    }
+
+                    if (this.getTarget() > 0) {
+                        void this.reconcileTarget();
                     }
                 },
                 { signal });
@@ -1343,12 +1324,6 @@
                     void this.refreshStatus({
                         immediate: true
                     });
-
-                    if (this.elements.organic.checked) {
-                        this.scheduleOrganicPulse({
-                            immediate: true
-                        });
-                    }
                 },
                 { signal });
         }
@@ -1361,9 +1336,6 @@
             this.persistState();
 
             this.state.destroyed = true;
-
-            window.clearTimeout(
-                this.state.organicTimerId);
 
             window.clearInterval(
                 this.state.statusTimerId);

@@ -15,7 +15,6 @@
 <div id="simulation-orchestrator-root"
      data-status-url="/admin/simulation/status"
      data-reconcile-url="/admin/simulation/reconcile"
-     data-pulse-url="/admin/simulation/pulse"
      data-critical-alert-url="/admin/simulation/alerts/critical"
      data-mass-drop-url="/admin/simulation/mass-drop"
      data-purge-url="/admin/simulation/purge-simulated"
@@ -142,6 +141,27 @@
                             @SharedLocalizer["SimulationOrchestrator_Apply"]
                         </button>
                     </div>
+                </label>
+
+                <label class="mt-4 block">
+                    <span class="text-[9px] uppercase tracking-[0.20em] text-slate-500">
+                        CHURN_INTENSITY / VOLATILITY
+                    </span>
+                    <select data-sim-volatility
+                            class="mt-2 w-full rounded border border-amber-500/25 bg-black px-3 py-3 font-mono text-xs uppercase tracking-[0.16em] text-amber-300 outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/10">
+                        <option value="Low">
+                            LOW // BAJA
+                        </option>
+                        <option value="Medium" selected>
+                            MEDIUM // MEDIA
+                        </option>
+                        <option value="Chaotic">
+                            CHAOTIC // CAÓTICA
+                        </option>
+                    </select>
+                    <span class="mt-2 block text-[8px] uppercase leading-4 tracking-[0.12em] text-slate-700">
+                        RAMP_SPEED // OSCILLATION // CHURN_RATE // HEARTBEAT_FAILURES
+                    </span>
                 </label>
 
                 <label class="mt-4 flex cursor-pointer items-center justify-between gap-4 border border-amber-500/20 bg-amber-500/[0.025] p-3">
