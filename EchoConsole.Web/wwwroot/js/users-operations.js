@@ -168,8 +168,75 @@ window.echoConsoleUsersOperations = (() => {
             createMetric("LAST_TELEMETRY", formatUtc(installation.lastUpdateUtc))
         );
 
-        card.append(header, grid);
+        const sessionSection = createSessionSection(installation);
+
+        card.append(header, grid, sessionSection);
         return card;
+    }
+
+    function createSessionSection(installation) {
+        const section = document.createElement("section");
+        section.className = "border-t border-slate-800 bg-[#020504] px-4 py-4";
+
+        const title = document.createElement("p");
+        title.className = "text-[9px] font-semibold uppercase tracking-[0.18em] text-green-400";
+        title.textContent = "> LAST GAMEPLAY SESSION METRICS";
+
+        const metrics = document.createElement("dl");
+        metrics.className = "mt-3 grid gap-px bg-slate-800 sm:grid-cols-3";
+
+        metrics.append(
+            createMetric(
+                "SESSION ID",
+                installation.lastSessionId || "NO_SESSIONS_RECORDED"),
+            createSessionStatusMetric(installation.lastSessionStatus),
+            createMetric(
+                "SESSION PLAYTIME",
+                formatSessionDuration(
+                    installation.lastSessionDurationMinutes))
+        );
+
+        section.append(title, metrics);
+        return section;
+    }
+
+    function createSessionStatusMetric(statusValue) {
+        const container = document.createElement("div");
+        container.className = "min-w-0 bg-[#030706] px-4 py-3";
+
+        const term = document.createElement("dt");
+        term.className = "text-[8px] uppercase tracking-[0.16em] text-slate-700";
+        term.textContent = "SESSION STATUS";
+
+        const description = document.createElement("dd");
+        description.className = "mt-2";
+
+        const normalizedStatus = statusValue || "NO_SESSION";
+        const badge = document.createElement("span");
+        badge.className = sessionStatusClass(normalizedStatus);
+        badge.textContent = normalizedStatus;
+
+        description.appendChild(badge);
+        container.append(term, description);
+        return container;
+    }
+
+    function sessionStatusClass(status) {
+        const base = "inline-flex min-w-[88px] items-center justify-center whitespace-nowrap border px-2.5 py-1 text-[8px] font-semibold uppercase tracking-[0.13em]";
+
+        if (status === "Active") {
+            return `${base} border-green-500/30 bg-green-500/10 text-green-400`;
+        }
+
+        if (status === "Ended" || status === "Closed") {
+            return `${base} border-amber-500/30 bg-amber-500/10 text-amber-400`;
+        }
+
+        if (status === "Expired" || status === "Aborted") {
+            return `${base} border-red-500/30 bg-red-500/10 text-red-400`;
+        }
+
+        return `${base} border-slate-700 bg-slate-900/70 text-slate-500`;
     }
 
     function createMetric(label, value) {
@@ -186,6 +253,16 @@ window.echoConsoleUsersOperations = (() => {
 
         container.append(term, description);
         return container;
+    }
+
+    function formatSessionDuration(durationMinutes) {
+        const numeric = Number(durationMinutes);
+
+        if (!Number.isFinite(numeric) || numeric < 0) {
+            return "NO_PLAYTIME_RECORDED";
+        }
+
+        return `${Math.round(numeric)} min`;
     }
 
     function formatRam(ramMb) {

@@ -21,4 +21,10 @@ public sealed class UserInstallationHardwareDto
     public string AdminStatus { get; set; } = string.Empty;
 
     public DateTimeOffset LastUpdateUtc { get; set; }
+
+    public Guid? LastSessionId { get; set; }
+
+    public string? LastSessionStatus { get; set; }
+
+    public int? LastSessionDurationMinutes { get; set; }
 }

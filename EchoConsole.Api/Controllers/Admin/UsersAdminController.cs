@@ -107,7 +107,19 @@ public sealed class UsersAdminController : ControllerBase
                     Platform = installation.Platform,
                     BuildVersion = installation.BuildVersion,
                     AdminStatus = installation.AdminStatus,
-                    LastUpdateUtc = installation.LastUpdateUtc
+                    LastUpdateUtc = installation.LastUpdateUtc,
+                    LastSession = installation.Sessions
+                        .OrderByDescending(session => session.LastHeartbeatUtc)
+                        .ThenByDescending(session => session.Id)
+                        .Select(session => new UserLastSessionProjection
+                        {
+                            SessionId = session.SessionId,
+                            Status = session.Status,
+                            DurationMinutes = EF.Functions.DateDiffMinute(
+                                session.StartedAtUtc,
+                                session.LastHeartbeatUtc)
+                        })
+                        .FirstOrDefault()
                 })
                 .ToListAsync(cancellationToken);
 
@@ -127,7 +139,12 @@ public sealed class UsersAdminController : ControllerBase
                         Platform = item.Platform,
                         BuildVersion = item.BuildVersion,
                         AdminStatus = item.AdminStatus,
-                        LastUpdateUtc = item.LastUpdateUtc
+                        LastUpdateUtc = item.LastUpdateUtc,
+                        LastSessionId = item.LastSession?.SessionId,
+                        LastSessionStatus = item.LastSession?.Status.ToString(),
+                        LastSessionDurationMinutes = item.LastSession is null
+                            ? null
+                            : Math.Max(0, item.LastSession.DurationMinutes)
                     })
                     .ToArray());
 
@@ -176,6 +193,13 @@ public sealed class UsersAdminController : ControllerBase
         public string BuildVersion { get; set; } = string.Empty;
         public string AdminStatus { get; set; } = string.Empty;
         public DateTimeOffset LastUpdateUtc { get; set; }
+        public UserLastSessionProjection? LastSession { get; set; }
     }
 
+    private sealed class UserLastSessionProjection
+    {
+        public Guid SessionId { get; set; }
+        public SessionStatus Status { get; set; }
+        public int DurationMinutes { get; set; }
+    }
 }
