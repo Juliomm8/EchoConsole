@@ -8,16 +8,16 @@
         "PatchNotesAdmin_PageTitle";
 }
 
-<div class="min-h-screen bg-black text-green-100">
+<div class="min-h-screen bg-black text-slate-200">
     <div class="mx-auto max-w-[1600px] px-6 py-10 lg:px-10">
-        <header class="terminal-panel rounded-lg p-6 shadow-phosphor lg:p-8">
+        <header class="rounded-lg border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.98))] p-6 shadow-[0_20px_55px_rgba(0,0,0,0.30)] lg:p-8">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <p class="terminal-kicker">
                         @SharedLocalizer["PatchNotesAdmin_Eyebrow"]
                     </p>
 
-                    <h1 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-green-100 sm:text-5xl">
+                    <h1 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-slate-100 sm:text-5xl">
                         @SharedLocalizer["PatchNotesAdmin_Title"]
                     </h1>
 
@@ -26,16 +26,16 @@
                     </p>
                 </div>
 
-                <div class="shrink-0 border-l border-green-500/20 pl-4 text-[10px] uppercase tracking-[0.20em] text-green-700">
+                <div class="shrink-0 border-l border-slate-800 pl-4 text-[10px] uppercase tracking-[0.20em] text-slate-600">
                     <div>DATABASE: COSMICDINERDB.DB</div>
                     <div class="mt-2">TRANSPORT: BFF_TO_API</div>
-                    <div class="mt-2">STATE: PUBLISH_READY</div>
+                    <div class="mt-2">STATE: <span class="text-green-500">PUBLISH_READY</span></div>
                 </div>
             </div>
         </header>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
-            <section class="terminal-panel rounded-lg p-6 shadow-phosphor lg:col-span-2 lg:p-8">
+            <section class="rounded-lg border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.98))] p-6 shadow-[0_20px_55px_rgba(0,0,0,0.30)] lg:col-span-2 lg:p-8">
                 @if (TempData["PatchNotesAdminSuccess"] is string successMessage)
                 {
                     <div class="mb-6 rounded border border-green-500/35 bg-green-500/10 px-4 py-3 text-sm text-green-200 shadow-phosphor"
@@ -58,9 +58,9 @@
                     }
 
                     <div class="grid gap-6 md:grid-cols-2">
-                        <div>
+                        <div class="group">
                             <label asp-for="Version"
-                                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-green-500">
+                                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-slate-500 transition-colors duration-150 group-focus-within:text-green-400">
                                 @SharedLocalizer["PatchNotesAdmin_Version"]
                             </label>
 
@@ -68,16 +68,16 @@
                                    autocomplete="off"
                                    maxlength="32"
                                    placeholder="v0.4"
-                                   class="w-full rounded border border-green-500/25 bg-black px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
+                                   class="w-full rounded border border-slate-800 bg-black px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-700 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
 
                             <span asp-validation-for="Version"
                                   class="mt-2 block text-xs text-rose-300">
                             </span>
                         </div>
 
-                        <div>
+                        <div class="group">
                             <label asp-for="Category"
-                                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-green-500">
+                                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-slate-500 transition-colors duration-150 group-focus-within:text-green-400">
                                 @SharedLocalizer["PatchNotesAdmin_Category"]
                             </label>
 
@@ -85,7 +85,7 @@
                                    autocomplete="off"
                                    maxlength="32"
                                    placeholder="SYSTEMS"
-                                   class="w-full rounded border border-green-500/25 bg-black px-4 py-3 text-sm uppercase text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
+                                   class="w-full rounded border border-slate-800 bg-black px-4 py-3 text-sm uppercase text-slate-100 outline-none transition placeholder:text-slate-700 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
 
                             <span asp-validation-for="Category"
                                   class="mt-2 block text-xs text-rose-300">
@@ -93,14 +93,14 @@
                         </div>
                     </div>
 
-                    <div>
+                    <div class="group">
                         <label asp-for="Tone"
-                               class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-green-500">
+                               class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-slate-500 transition-colors duration-150 group-focus-within:text-green-400">
                             @SharedLocalizer["PatchNotesAdmin_Tone"]
                         </label>
 
                         <select asp-for="Tone"
-                                class="w-full rounded border border-green-500/25 bg-black px-4 py-3 text-sm text-green-100 outline-none transition focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10">
+                                class="w-full rounded border border-slate-800 bg-black px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10">
                             <option value="green">
                                 @SharedLocalizer["PatchNotesAdmin_ToneGreen"]
                             </option>
@@ -117,9 +117,9 @@
                         </span>
                     </div>
 
-                    <div>
+                    <div class="group">
                         <label asp-for="Title"
-                               class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-green-500">
+                               class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-slate-500 transition-colors duration-150 group-focus-within:text-green-400">
                             @SharedLocalizer["PatchNotesAdmin_PatchTitle"]
                         </label>
 
@@ -128,16 +128,16 @@
                                minlength="5"
                                maxlength="160"
                                placeholder="@SharedLocalizer["PatchNotesAdmin_TitlePlaceholder"]"
-                               class="w-full rounded border border-green-500/25 bg-black px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
+                               class="w-full rounded border border-slate-800 bg-black px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-700 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10" />
 
                         <span asp-validation-for="Title"
                               class="mt-2 block text-xs text-rose-300">
                         </span>
                     </div>
 
-                    <div>
+                    <div class="group">
                         <label asp-for="Description"
-                               class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-green-500">
+                               class="mb-2 block text-[10px] font-bold uppercase tracking-[0.20em] text-slate-500 transition-colors duration-150 group-focus-within:text-green-400">
                             @SharedLocalizer["PatchNotesAdmin_Description"]
                         </label>
 
@@ -146,22 +146,22 @@
                                   minlength="10"
                                   maxlength="4000"
                                   placeholder="@SharedLocalizer["PatchNotesAdmin_DescriptionPlaceholder"]"
-                                  class="w-full resize-y rounded border border-green-500/25 bg-black px-4 py-3 text-sm leading-7 text-green-100 outline-none transition placeholder:text-green-900 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10"></textarea>
+                                  class="w-full resize-y rounded border border-slate-800 bg-black px-4 py-3 text-sm leading-7 text-slate-100 outline-none transition placeholder:text-slate-700 focus:border-green-400/60 focus:ring-2 focus:ring-green-400/10"></textarea>
 
                         <span asp-validation-for="Description"
                               class="mt-2 block text-xs text-rose-300">
                         </span>
                     </div>
 
-                    <div class="flex flex-col gap-3 border-t border-green-500/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                        <p class="text-[10px] uppercase tracking-[0.18em] text-green-800">
+                    <div class="flex flex-col gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-[10px] uppercase tracking-[0.18em] text-slate-600">
                             @SharedLocalizer["PatchNotesAdmin_PublishNotice"]
                         </p>
 
                         <div class="flex flex-wrap gap-3">
                             <a asp-controller="PatchNotesAdmin"
                                asp-action="Index"
-                               class="rounded border border-slate-700 bg-black px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400 transition hover:border-green-500/30 hover:text-green-200">
+                               class="rounded border border-slate-700 bg-black px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400 transition-colors duration-150 hover:bg-slate-900 hover:text-slate-200">
                                 @SharedLocalizer["PatchNotesAdmin_BackToDashboard"]
                             </a>
 
@@ -174,7 +174,7 @@
                 </form>
             </section>
 
-            <aside class="terminal-panel rounded-lg p-6 shadow-phosphor lg:p-8">
+            <aside class="rounded-lg border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.98))] p-6 shadow-[0_20px_55px_rgba(0,0,0,0.30)] lg:p-8">
                 <p class="terminal-kicker">
                     @SharedLocalizer["PatchNotesAdmin_ProtocolTitle"]
                 </p>
@@ -193,12 +193,12 @@
                     </p>
                 </div>
 
-                <div class="mt-8 rounded border border-green-500/20 bg-green-500/5 p-4">
-                    <div class="text-[9px] uppercase tracking-[0.20em] text-green-700">
+                <div class="mt-8 rounded border border-slate-800 bg-slate-950/70 p-4">
+                    <div class="text-[9px] uppercase tracking-[0.20em] text-slate-600">
                         API_ENDPOINT
                     </div>
 
-                    <code class="mt-2 block break-all text-xs text-green-300">
+                    <code class="mt-2 block break-all text-xs font-semibold text-green-300">
                         POST /api/patchnotes
                     </code>
                 </div>
