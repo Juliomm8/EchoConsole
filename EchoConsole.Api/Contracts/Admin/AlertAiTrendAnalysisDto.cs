@@ -12,6 +12,10 @@ public sealed class AlertAiTrendAnalysisDto
 
     public int OpenAlertCount { get; set; }
 
+    public int MitigatedLast24Hours { get; set; }
+
+    public int ActiveCriticalCount { get; set; }
+
     public int RecentCriticalCount { get; set; }
 
     public int PreviousCriticalCount { get; set; }

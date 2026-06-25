@@ -2027,4 +2027,16 @@
   <data name="Alerts_LoadingState" xml:space="preserve">
     <value>Sincronizando incidencias...</value>
   </data>
+  <data name="Alerts_MonitoringScopeHint" xml:space="preserve">
+    <value>Monitoreo en tiempo real. La consola principal filtra incidencias activas; el motor de IA evalúa el comportamiento acumulado de las últimas 24 horas.</value>
+  </data>
+  <data name="Alerts_KpiActive" xml:space="preserve">
+    <value>ACTIVAS_NOC</value>
+  </data>
+  <data name="Alerts_KpiMitigated" xml:space="preserve">
+    <value>MITIGADAS_24H</value>
+  </data>
+  <data name="Alerts_KpiDiscord" xml:space="preserve">
+    <value>RELÉ_DISCORD</value>
+  </data>
 </root>

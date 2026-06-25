@@ -42,6 +42,15 @@ public sealed class EchoConsoleAlertsApiClient
             cancellationToken);
     }
 
+    public Task<AlertOverviewMetricsApiDto> GetMetricsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return GetAsync(
+            "/api/admin/alerts/metrics",
+            new AlertOverviewMetricsApiDto(),
+            cancellationToken);
+    }
+
     public Task<IReadOnlyList<AlertTypeDefinitionApiDto>> GetAlertTypesAsync(
         CancellationToken cancellationToken = default)
     {
@@ -243,6 +252,13 @@ public sealed class UpdateAlertTypeApiRequest
     public bool IsActive { get; set; }
 }
 
+public sealed class AlertOverviewMetricsApiDto
+{
+    public int ActiveNocCount { get; set; }
+    public int MitigatedLast24Hours { get; set; }
+    public DateTimeOffset GeneratedAtUtc { get; set; }
+}
+
 public sealed class AlertAiTrendAnalysisApiDto
 {
     public string Narrative { get; set; } = string.Empty;
@@ -250,6 +266,8 @@ public sealed class AlertAiTrendAnalysisApiDto
     public string DominantSource { get; set; } = string.Empty;
     public int RecentAlertCount { get; set; }
     public int OpenAlertCount { get; set; }
+    public int MitigatedLast24Hours { get; set; }
+    public int ActiveCriticalCount { get; set; }
     public int RecentCriticalCount { get; set; }
     public int PreviousCriticalCount { get; set; }
     public decimal CriticalTrendPercent { get; set; }

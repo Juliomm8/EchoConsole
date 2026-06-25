@@ -327,6 +327,35 @@ public sealed class AlertsAdminController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("metrics")]
+    public async Task<ActionResult<AlertOverviewMetricsDto>> GetMetrics(
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var recentStart = now.AddHours(-24);
+
+        var metrics = await _dbContext.SystemAlerts
+            .AsNoTracking()
+            .GroupBy(_ => 1)
+            .Select(group => new AlertOverviewMetricsDto
+            {
+                ActiveNocCount = group.Count(
+                    alert => !alert.IsResolved),
+                MitigatedLast24Hours = group.Count(
+                    alert =>
+                        alert.IsResolved &&
+                        alert.ResolvedAtUtc >= recentStart),
+                GeneratedAtUtc = now
+            })
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? new AlertOverviewMetricsDto
+            {
+                GeneratedAtUtc = now
+            };
+
+        return Ok(metrics);
+    }
+
     [HttpPost("ai-trend-analysis")]
     public async Task<ActionResult<AlertAiTrendAnalysisDto>>
         RunAiTrendAnalysis(
@@ -345,6 +374,15 @@ public sealed class AlertsAdminController : ControllerBase
                 PhysicalAlertCount = group.Count(),
                 OpenAlertCount = group.Count(
                     alert => !alert.IsResolved),
+                MitigatedLast24Hours = group.Count(
+                    alert =>
+                        alert.IsResolved &&
+                        alert.ResolvedAtUtc >= recentStart),
+                ActiveCriticalCount = group.Count(
+                    alert =>
+                        !alert.IsResolved &&
+                        (alert.Severity == AlertSeverity.Critical ||
+                         alert.Severity == AlertSeverity.Fatal)),
                 RecentAlertCount = group.Count(
                     alert => alert.CreatedAtUtc >= recentStart),
                 RecentCriticalCount = group.Count(
@@ -363,6 +401,8 @@ public sealed class AlertsAdminController : ControllerBase
 
         var physicalAlertCount = metrics?.PhysicalAlertCount ?? 0;
         var openAlertCount = metrics?.OpenAlertCount ?? 0;
+        var mitigatedLast24Hours = metrics?.MitigatedLast24Hours ?? 0;
+        var activeCriticalCount = metrics?.ActiveCriticalCount ?? 0;
         var recentAlertCount = metrics?.RecentAlertCount ?? 0;
         var recentCriticalCount = metrics?.RecentCriticalCount ?? 0;
         var previousCriticalCount = metrics?.PreviousCriticalCount ?? 0;
@@ -379,7 +419,7 @@ public sealed class AlertsAdminController : ControllerBase
             "es",
             StringComparison.OrdinalIgnoreCase) == true;
 
-        if (openAlertCount == 0)
+        if (physicalAlertCount == 0)
         {
             var nominalNarrative = isSpanish
                 ? "ESTACIÓN NOC INICIALIZADA: Pipeline de telemetría libre de trazas de error. Todo el hardware del juego opera bajo parámetros nominales óptimos."
@@ -394,6 +434,8 @@ public sealed class AlertsAdminController : ControllerBase
                     : "RESOLVED_ARCHIVE",
                 RecentAlertCount = recentAlertCount,
                 OpenAlertCount = 0,
+                MitigatedLast24Hours = 0,
+                ActiveCriticalCount = 0,
                 RecentCriticalCount = recentCriticalCount,
                 PreviousCriticalCount = previousCriticalCount,
                 CriticalTrendPercent = 0m,
@@ -403,7 +445,7 @@ public sealed class AlertsAdminController : ControllerBase
 
         var dominantSource = await _dbContext.SystemAlerts
             .AsNoTracking()
-            .Where(alert => !alert.IsResolved)
+            .Where(alert => alert.CreatedAtUtc >= recentStart)
             .GroupBy(alert => alert.Source)
             .Select(group => new
             {
@@ -432,6 +474,8 @@ public sealed class AlertsAdminController : ControllerBase
                 dominantSource,
                 recentAlertCount,
                 openAlertCount,
+                mitigatedLast24Hours,
+                activeCriticalCount,
                 recentCriticalCount,
                 criticalTrendPercent)
             : BuildEnglishNarrative(
@@ -439,6 +483,8 @@ public sealed class AlertsAdminController : ControllerBase
                 dominantSource,
                 recentAlertCount,
                 openAlertCount,
+                mitigatedLast24Hours,
+                activeCriticalCount,
                 recentCriticalCount,
                 criticalTrendPercent);
 
@@ -449,6 +495,8 @@ public sealed class AlertsAdminController : ControllerBase
             DominantSource = dominantSource,
             RecentAlertCount = recentAlertCount,
             OpenAlertCount = openAlertCount,
+            MitigatedLast24Hours = mitigatedLast24Hours,
+            ActiveCriticalCount = activeCriticalCount,
             RecentCriticalCount = recentCriticalCount,
             PreviousCriticalCount = previousCriticalCount,
             CriticalTrendPercent = criticalTrendPercent,
@@ -558,11 +606,13 @@ public sealed class AlertsAdminController : ControllerBase
         string dominantSource,
         int recentAlertCount,
         int openAlertCount,
+        int mitigatedLast24Hours,
+        int activeCriticalCount,
         int recentCriticalCount,
         decimal criticalTrendPercent)
     {
         return
-            $"Análisis de Tendencias IA: la build activa {activeBuildVersion} registró {recentAlertCount} alertas durante las últimas 24 horas, con {openAlertCount} incidencias aún abiertas y {recentCriticalCount} anomalías críticas o fatales. La variación crítica es de {criticalTrendPercent.ToString("0.0", CultureInfo.InvariantCulture)}% respecto al periodo anterior. El origen dominante es {dominantSource}. El patrón estocástico sugiere revisar congestión del hilo principal, presión sobre el subsistema de telemetría local y ráfagas de procesamiento simultáneo antes del siguiente despliegue de Cosmic Diner.";
+            $"Análisis de Tendencias IA: Durante las últimas 24 horas se procesaron un total de {recentAlertCount} eventos de telemetría en la build {activeBuildVersion}. En ese ciclo, {mitigatedLast24Hours} incidencias fueron mitigadas o resueltas con éxito. La consola principal muestra {openAlertCount} incidencias abiertas actualmente; de ellas, {activeCriticalCount} corresponden a anomalías críticas o fatales activas. Esta diferencia es esperada: la tabla superior representa el estado operativo actual, mientras que el motor analítico evalúa el historial acumulado de las últimas 24 horas. Se registraron {recentCriticalCount} eventos críticos o fatales durante el ciclo, con una variación de {criticalTrendPercent.ToString("0.0", CultureInfo.InvariantCulture)}% respecto al periodo anterior. El origen dominante fue {dominantSource}.";
     }
 
     private static string BuildEnglishNarrative(
@@ -570,11 +620,13 @@ public sealed class AlertsAdminController : ControllerBase
         string dominantSource,
         int recentAlertCount,
         int openAlertCount,
+        int mitigatedLast24Hours,
+        int activeCriticalCount,
         int recentCriticalCount,
         decimal criticalTrendPercent)
     {
         return
-            $"AI Trend Analysis: active build {activeBuildVersion} produced {recentAlertCount} alerts during the last 24 hours, with {openAlertCount} incidents still open and {recentCriticalCount} critical or fatal anomalies. Critical volume changed by {criticalTrendPercent.ToString("0.0", CultureInfo.InvariantCulture)}% compared with the previous period. The dominant source is {dominantSource}. The stochastic pattern suggests investigating main-thread congestion, pressure in the local telemetry subsystem, and simultaneous workload bursts before the next Cosmic Diner deployment.";
+            $"AI Trend Analysis: During the last 24 hours, the active build {activeBuildVersion} processed {recentAlertCount} telemetry events. Within that cycle, {mitigatedLast24Hours} incidents were successfully mitigated or resolved. The primary console currently shows {openAlertCount} open incidents, including {activeCriticalCount} active critical or fatal anomalies. This difference is expected: the upper table represents the current operational state, while the analytics engine evaluates the accumulated 24-hour history. The cycle contained {recentCriticalCount} critical or fatal events, changing by {criticalTrendPercent.ToString("0.0", CultureInfo.InvariantCulture)}% compared with the previous period. The dominant source was {dominantSource}.";
     }
 
     private sealed record AlertTypeDeleteResult(

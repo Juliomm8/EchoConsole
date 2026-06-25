@@ -2027,4 +2027,16 @@
   <data name="Alerts_LoadingState" xml:space="preserve">
     <value>Synchronizing incidents...</value>
   </data>
+  <data name="Alerts_MonitoringScopeHint" xml:space="preserve">
+    <value>Real-time monitoring. The primary console filters active incidents; the AI engine evaluates accumulated behavior from the last 24 hours.</value>
+  </data>
+  <data name="Alerts_KpiActive" xml:space="preserve">
+    <value>ACTIVE_NOC</value>
+  </data>
+  <data name="Alerts_KpiMitigated" xml:space="preserve">
+    <value>MITIGATED_24H</value>
+  </data>
+  <data name="Alerts_KpiDiscord" xml:space="preserve">
+    <value>DISCORD_RELAY</value>
+  </data>
 </root>

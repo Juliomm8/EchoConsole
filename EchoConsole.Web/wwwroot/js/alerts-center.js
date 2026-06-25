@@ -375,6 +375,8 @@ window.echoConsoleAlertsCenter = (() => {
 
             window.requestAnimationFrame(
                 () => patchTable(page, replaceContents));
+
+            void refreshMetrics();
         } catch (error) {
             if (error.name !== "AbortError") {
                 console.error("Alerts refresh failed.", error);
@@ -1031,6 +1033,36 @@ window.echoConsoleAlertsCenter = (() => {
         const element = document.querySelector(selector);
         if (element) {
             element.value = value || "";
+        }
+    }
+
+    async function refreshMetrics() {
+        if (!options.metricsUrl) {
+            return;
+        }
+
+        try {
+            const response = await fetch(options.metricsUrl, {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" }
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Metrics refresh failed with status ${response.status}.`);
+            }
+
+            const metrics = await response.json();
+
+            updateCount(
+                options.activeKpiId,
+                metrics.activeNocCount);
+
+            updateCount(
+                options.mitigatedKpiId,
+                metrics.mitigatedLast24Hours);
+        } catch (error) {
+            console.error("Alert metrics refresh failed.", error);
         }
     }
 

@@ -57,6 +57,16 @@ public sealed class AlertsController : Controller
         return Json(response);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> RealtimeMetrics(
+        CancellationToken cancellationToken = default)
+    {
+        var metrics = await _alertsApiClient.GetMetricsAsync(
+            cancellationToken);
+
+        return Json(metrics);
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResolveRealtime(
@@ -145,9 +155,16 @@ public sealed class AlertsController : Controller
             var typesTask = _alertsApiClient.GetAlertTypesAsync(
                 cancellationToken);
 
-            await Task.WhenAll(alertsTask, typesTask);
+            var metricsTask = _alertsApiClient.GetMetricsAsync(
+                cancellationToken);
+
+            await Task.WhenAll(
+                alertsTask,
+                typesTask,
+                metricsTask);
 
             var response = await alertsTask;
+            var metrics = await metricsTask;
 
             return new AlertsIndexViewModel
             {
@@ -159,6 +176,8 @@ public sealed class AlertsController : Controller
                 PageSize = response.PageSize > 0 ? response.PageSize : DefaultPageSize,
                 TotalCount = response.TotalCount,
                 TotalPages = response.TotalPages > 0 ? response.TotalPages : 1,
+                ActiveNocCount = metrics.ActiveNocCount,
+                MitigatedLast24Hours = metrics.MitigatedLast24Hours,
                 Items = response.Items ?? Array.Empty<SystemAlertApiDto>(),
                 AlertTypes = await typesTask
             };
