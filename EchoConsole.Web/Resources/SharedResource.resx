@@ -2066,4 +2066,40 @@
   <data name="Users_NoLinkedStations" xml:space="preserve">
     <value>No linked hardware stations were found for this operator.</value>
   </data>
+  <data name="SessionEvents_RealtimeHint" xml:space="preserve">
+    <value>Reactive feed. New telemetry is inserted at the top and the browser retains a maximum of 50 visible rows.</value>
+  </data>
+  <data name="SessionEvents_StreamOnline" xml:space="preserve">
+    <value>STREAM ONLINE</value>
+  </data>
+  <data name="SessionEvents_TimelineTitle" xml:space="preserve">
+    <value>SESSION TIMELINE TRACE</value>
+  </data>
+  <data name="SessionEvents_TimelineLoading" xml:space="preserve">
+    <value>Loading chronological session trace...</value>
+  </data>
+  <data name="SessionEvents_TimelineEmpty" xml:space="preserve">
+    <value>No events were recorded for this session.</value>
+  </data>
+  <data name="SessionEvents_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="SessionEvents_Connection" xml:space="preserve">
+    <value>Connection established</value>
+  </data>
+  <data name="SessionEvents_Disconnection" xml:space="preserve">
+    <value>Session disconnected</value>
+  </data>
+  <data name="SessionEvents_LastHeartbeat" xml:space="preserve">
+    <value>Last heartbeat received</value>
+  </data>
+  <data name="SessionEvents_ServerTime" xml:space="preserve">
+    <value>Server UTC</value>
+  </data>
+  <data name="SessionEvents_ClientTime" xml:space="preserve">
+    <value>Client UTC</value>
+  </data>
+  <data name="SessionEvents_VisibleLimit" xml:space="preserve">
+    <value>Visible DOM limit: 50 rows</value>
+  </data>
 </root>

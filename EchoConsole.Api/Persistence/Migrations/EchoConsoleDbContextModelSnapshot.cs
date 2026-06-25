@@ -127,6 +127,9 @@ namespace EchoConsole.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BuildVersion")
+                        .HasDatabaseName("IX_GameSessions_BuildVersion");
+
                     b.HasIndex("LastHeartbeatUtc");
 
                     b.HasIndex("SessionId")
@@ -187,8 +190,16 @@ namespace EchoConsole.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAtUtc")
+                        .IsDescending(true)
+                        .HasDatabaseName("IX_GameSessionEvents_CreatedAtUtc");
+
                     b.HasIndex("EventType")
                         .HasDatabaseName("IX_GameSessionEvents_EventType");
+
+                    b.HasIndex("EventType", "CreatedAtUtc")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_GameSessionEvents_EventType_CreatedAtUtc");
 
                     b.HasIndex("GameSessionId", "CreatedAtUtc")
                         .IsDescending(false, true)

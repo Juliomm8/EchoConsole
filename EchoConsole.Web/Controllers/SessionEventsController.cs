@@ -1,4 +1,4 @@
-﻿using EchoConsole.Web.Models.SessionEvents;
+using EchoConsole.Web.Models.SessionEvents;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,11 +28,11 @@ public sealed class SessionEventsController : Controller
         DateTime? fromDate,
         DateTime? toDate,
         int page = 1,
-        int pageSize = 25,
+        int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
         page = page < 1 ? 1 : page;
-        pageSize = Math.Clamp(pageSize, 1, 100);
+        pageSize = Math.Clamp(pageSize, 1, 50);
 
         if (fromDate.HasValue &&
             toDate.HasValue &&
@@ -115,7 +115,7 @@ public sealed class SessionEventsController : Controller
                     Scene = NormalizeDisplayValue(x.Scene),
                     GameState = NormalizeDisplayValue(x.GameState),
                     Phase = NormalizeDisplayValue(x.Phase),
-                    PayloadJson = x.PayloadJson ?? string.Empty,
+                    PayloadJson = FormatPayloadJson(x.PayloadJson),
                     HasPayload = !string.IsNullOrWhiteSpace(x.PayloadJson),
                     ClientTimeLabel = x.ClientTimeUtc.HasValue
                         ? FormatUtc(x.ClientTimeUtc.Value)
@@ -128,6 +128,23 @@ public sealed class SessionEventsController : Controller
         ViewData["Title"] = "RECENT SESSION EVENTS";
 
         return View(model);
+    }
+
+    [HttpGet("Timeline/{sessionId:guid}")]
+    public async Task<IActionResult> TimelineJson(
+        Guid sessionId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _apiClient.GetSessionTimelineAsync(
+            sessionId,
+            cancellationToken);
+
+        return response is null
+            ? NotFound(new
+            {
+                message = "Session timeline was not found."
+            })
+            : Json(response);
     }
 
     [HttpGet("Details/{sessionId:guid}")]

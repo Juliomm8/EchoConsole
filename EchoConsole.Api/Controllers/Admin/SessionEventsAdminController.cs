@@ -1,4 +1,5 @@
-﻿using EchoConsole.Api.Security;
+using EchoConsole.Api.Contracts.Admin.SessionEvents;
+using EchoConsole.Api.Security;
 using EchoConsole.Api.Services.SessionEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +20,13 @@ public sealed class SessionEventsAdminController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetRecentEvents(
+    public async Task<ActionResult<AdminSessionEventsPageDto>> GetRecentEvents(
         [FromQuery] string? eventType,
         [FromQuery] string? buildVersion,
         [FromQuery] DateTimeOffset? fromUtc,
         [FromQuery] DateTimeOffset? toUtcExclusive,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 25,
+        [FromQuery] int pageSize = 50,
         CancellationToken cancellationToken = default)
     {
         if (fromUtc.HasValue &&
@@ -51,9 +52,10 @@ public sealed class SessionEventsAdminController : ControllerBase
     }
 
     [HttpGet("sessions/{sessionId:guid}/timeline")]
-    public async Task<IActionResult> GetSessionTimeline(
-    Guid sessionId,
-    CancellationToken cancellationToken = default)
+    public async Task<ActionResult<AdminSessionTimelineDetailDto>>
+        GetSessionTimeline(
+            Guid sessionId,
+            CancellationToken cancellationToken = default)
     {
         var result = await _sessionEventsService.GetSessionTimelineAsync(
             sessionId,

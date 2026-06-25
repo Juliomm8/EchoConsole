@@ -1,3 +1,5 @@
+@using System.Globalization
+@using System.Text.Json
 @model EchoConsole.Web.Models.SessionEvents.AdminSessionEventsIndexViewModel
 
 @{
@@ -6,297 +8,379 @@
 
     var previousPage = Math.Max(1, Model.Page - 1);
     var nextPage = Math.Min(Math.Max(1, Model.TotalPages), Model.Page + 1);
+
+    var eventTypeOptions = Model.AvailableEventTypes
+        .Concat(new[] { "SessionStarted", "TelemetryHeartbeat" })
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(value => value)
+        .ToArray();
+
+    var labelsJson = JsonSerializer.Serialize(new
+    {
+        viewJson = SharedLocalizer["Common_ViewJson"].Value,
+        noPayload = SharedLocalizer["Common_NoPayload"].Value,
+        openTimeline = SharedLocalizer["SessionEvents_OpenTimeline"].Value,
+        timelineTitle = SharedLocalizer["SessionEvents_TimelineTitle"].Value,
+        timelineLoading = SharedLocalizer["SessionEvents_TimelineLoading"].Value,
+        timelineEmpty = SharedLocalizer["SessionEvents_TimelineEmpty"].Value,
+        streamOnline = SharedLocalizer["SessionEvents_StreamOnline"].Value,
+        connection = SharedLocalizer["SessionEvents_Connection"].Value,
+        disconnection = SharedLocalizer["SessionEvents_Disconnection"].Value,
+        lastHeartbeat = SharedLocalizer["SessionEvents_LastHeartbeat"].Value,
+        serverTime = SharedLocalizer["SessionEvents_ServerTime"].Value,
+        clientTime = SharedLocalizer["SessionEvents_ClientTime"].Value,
+        unclaimed = "UNCLAIMED",
+        unknown = "-"
+    });
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1700px] px-6 py-8">
-        <section class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+<style>
+    @@keyframes session-event-crt-flash {
+        0% {
+            background-color: rgba(74, 222, 128, 0.30);
+            box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.70), 0 0 24px rgba(74, 222, 128, 0.28);
+        }
+        42% {
+            background-color: rgba(34, 211, 238, 0.12);
+        }
+        100% {
+            background-color: transparent;
+            box-shadow: none;
+        }
+    }
+
+    .session-event-crt-flash {
+        animation: session-event-crt-flash 900ms ease-out;
+    }
+</style>
+
+<section class="min-h-screen bg-[#020504] font-mono text-slate-100">
+    <div class="mx-auto w-full max-w-[1760px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="border border-slate-800 bg-[linear-gradient(135deg,rgba(15,23,42,0.62),rgba(2,6,8,0.98)_62%,rgba(22,101,52,0.08))] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.34)]">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                 <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        @SharedLocalizer["SessionEvents_Badge"]
+                    <p class="text-[9px] uppercase tracking-[0.30em] text-slate-600">
+                        MODULE_04 // GLOBAL_TELEMETRY_STREAM
                     </p>
-
-                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white">
-                        @SharedLocalizer["SessionEvents_HeroTitle"]
+                    <h1 class="mt-3 font-display text-2xl uppercase tracking-[0.14em] text-slate-100 sm:text-4xl">
+                        &gt; @SharedLocalizer["SessionEvents_HeroTitle"]
                     </h1>
-
-                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                    <p class="mt-3 max-w-4xl text-sm leading-6 text-slate-500">
                         @SharedLocalizer["SessionEvents_HeroSubtitle"]
+                    </p>
+                    <p class="mt-3 max-w-4xl border-l-2 border-slate-800 pl-3 text-[10px] leading-5 text-slate-600">
+                        &gt; @SharedLocalizer["SessionEvents_RealtimeHint"]
                     </p>
                 </div>
 
-                <div class="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-5 py-3">
-                    <div class="text-xs uppercase tracking-[0.20em] text-fuchsia-300">
-                        @SharedLocalizer["SessionEvents_MatchingEvents"]
+                <div class="grid grid-cols-2 gap-3 sm:min-w-[360px]">
+                    <div class="border border-slate-800 bg-black/50 px-4 py-3">
+                        <div class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                            @SharedLocalizer["SessionEvents_MatchingEvents"]
+                        </div>
+                        <div id="session-events-total-count" class="mt-2 font-display text-2xl text-green-400">
+                            @Model.TotalCount.ToString("N0")
+                        </div>
                     </div>
-                    <div class="mt-1 font-display text-2xl text-white">
-                        @Model.TotalCount.ToString("N0")
+                    <div class="border border-slate-800 bg-black/50 px-4 py-3">
+                        <div class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                            REALTIME_SIGNAL
+                        </div>
+                        <div id="session-events-stream-status" class="mt-3 inline-flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                            <span class="h-2 w-2 rounded-full bg-slate-700"></span>
+                            CONNECTING
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </header>
 
-        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
+        <section class="mt-5 border border-slate-800 bg-[#040807] p-4 sm:p-5">
             <form method="get"
                   asp-controller="SessionEvents"
                   asp-action="Index"
-                  class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                  class="grid gap-4 xl:grid-cols-[minmax(180px,1fr)_minmax(180px,1fr)_minmax(170px,0.8fr)_minmax(170px,0.8fr)_auto] xl:items-end">
                 <div>
-                    <label for="eventType"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="eventType" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["SessionEvents_EventType"]
                     </label>
-
                     <select id="eventType"
                             name="eventType"
-                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
+                            class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40">
                         <option value="">@SharedLocalizer["SessionEvents_AllEventTypes"]</option>
-
-                        @foreach (var option in Model.AvailableEventTypes)
+                        @foreach (var option in eventTypeOptions)
                         {
-                            <option value="@option"
-                                    selected="@(string.Equals(Model.EventType, option, StringComparison.OrdinalIgnoreCase))">
-                                @option
-                            </option>
+                            if (string.Equals(Model.EventType, option, StringComparison.OrdinalIgnoreCase))
+                            {
+                                <option value="@option" selected>@option</option>
+                            }
+                            else
+                            {
+                                <option value="@option">@option</option>
+                            }
                         }
                     </select>
                 </div>
 
                 <div>
-                    <label for="buildVersion"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="buildVersion" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["Common_Build"]
                     </label>
-
                     <select id="buildVersion"
                             name="buildVersion"
-                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
+                            class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40">
                         <option value="">@SharedLocalizer["Common_AllBuilds"]</option>
-
                         @foreach (var option in Model.AvailableBuildVersions)
                         {
-                            <option value="@option"
-                                    selected="@(string.Equals(Model.BuildVersion, option, StringComparison.OrdinalIgnoreCase))">
-                                @option
-                            </option>
+                            if (string.Equals(Model.BuildVersion, option, StringComparison.OrdinalIgnoreCase))
+                            {
+                                <option value="@option" selected>@option</option>
+                            }
+                            else
+                            {
+                                <option value="@option">@option</option>
+                            }
                         }
                     </select>
                 </div>
 
                 <div>
-                    <label for="fromDate"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="fromDate" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["Common_FromDateUtc"]
                     </label>
-
                     <input id="fromDate"
                            name="fromDate"
                            type="date"
                            value="@Model.FromDate?.ToString("yyyy-MM-dd")"
-                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40" />
+                           class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40" />
                 </div>
 
                 <div>
-                    <label for="toDate"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="toDate" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["Common_ToDateUtc"]
                     </label>
-
                     <input id="toDate"
                            name="toDate"
                            type="date"
                            value="@Model.ToDate?.ToString("yyyy-MM-dd")"
-                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40" />
+                           class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40" />
                 </div>
 
-                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                <input type="hidden" name="pageSize" value="50" />
 
-                <div class="flex items-end gap-3">
+                <div class="flex items-center gap-2 whitespace-nowrap">
                     <button type="submit"
-                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                        @SharedLocalizer["Common_Apply"]
+                            class="inline-flex h-10 min-w-[110px] items-center justify-center border border-green-500/30 bg-green-500/10 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-green-400 transition-colors hover:bg-green-500/15">
+                        [ @SharedLocalizer["Common_Apply"] ]
                     </button>
-
                     <a asp-controller="SessionEvents"
                        asp-action="Index"
-                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:text-white">
-                        @SharedLocalizer["Common_Reset"]
+                       class="inline-flex h-10 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-500 transition-colors hover:bg-slate-900 hover:text-slate-300">
+                        [ @SharedLocalizer["Common_Reset"] ]
                     </a>
                 </div>
             </form>
 
             @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
             {
-                <div class="mt-5 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                <div class="mt-4 border border-red-900/60 bg-red-950/20 px-4 py-3 text-xs text-red-400">
                     @Model.ErrorMessage
                 </div>
             }
         </section>
 
-        <section class="mt-6 rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
-            @if (Model.Items.Count == 0)
-            {
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-12 text-center">
-                    <p class="font-display text-sm uppercase tracking-[0.28em] text-slate-400">
-                        @SharedLocalizer["SessionEvents_NoEvents"]
-                    </p>
-
-                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                        @SharedLocalizer["SessionEvents_NoEventsDescription"]
-                    </p>
+        <section class="mt-5 border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.97),rgba(1,3,4,0.99))] shadow-[0_20px_55px_rgba(0,0,0,0.30)]">
+            <div class="flex flex-col gap-3 border-b border-slate-800 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">&gt;_ SESSION_EVENT_BUFFER</p>
+                    <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">
+                        @SharedLocalizer["SessionEvents_PageTitle"]
+                    </h2>
                 </div>
-            }
-            else
-            {
-                <div class="overflow-x-auto rounded-2xl border border-slate-800">
-                    <table class="min-w-[1500px] w-full divide-y divide-slate-800">
-                        <thead class="bg-slate-900/90">
-                            <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
-                                <th class="px-4 py-4">@SharedLocalizer["Common_Time"]</th>
-                                <th class="px-4 py-4">@SharedLocalizer["Common_Event"]</th>
-                                <th class="px-4 py-4">@SharedLocalizer["SessionEvents_ColSceneState"]</th>
-                                <th class="px-4 py-4">@SharedLocalizer["Common_Build"]</th>
-                                <th class="px-4 py-4">@SharedLocalizer["Common_Device"]</th>
-                                <th class="px-4 py-4">@SharedLocalizer["Common_Owner"]</th>
-                                <th class="px-4 py-4">@SharedLocalizer["Common_Session"]</th>
-                                <th class="px-4 py-4">@SharedLocalizer["Common_Payload"]</th>
+                <p class="text-[9px] uppercase tracking-[0.16em] text-slate-700">
+                    @SharedLocalizer["SessionEvents_VisibleLimit"]
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1540px] border-collapse text-left">
+                    <thead class="border-b border-slate-800 bg-slate-950/85">
+                        <tr class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                            <th class="px-4 py-3">@SharedLocalizer["Common_Time"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Common_Event"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["SessionEvents_ColSceneState"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Common_Build"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Common_Device"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Common_Owner"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Common_Session"]</th>
+                            <th class="px-4 py-3 text-right">@SharedLocalizer["Common_Payload"]</th>
+                        </tr>
+                    </thead>
+                    <tbody id="session-events-table-body" class="bg-slate-950/80">
+                        @foreach (var item in Model.Items)
+                        {
+                            var eventKey = $"db-{item.Id}";
+                            <tr data-session-event-row
+                                data-event-key="@eventKey"
+                                data-session-id="@item.SessionId"
+                                class="border-b border-slate-900/80 align-top text-xs text-slate-300 transition-colors hover:bg-slate-900/55">
+                                <td class="px-4 py-4">
+                                    <div class="font-medium text-green-400">@item.CreatedAtLabel</div>
+                                    <div class="mt-1 text-[9px] text-slate-700">@SharedLocalizer["Common_Client"]: @item.ClientTimeLabel</div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="inline-flex min-w-[150px] items-center justify-center whitespace-nowrap border border-cyan-900/60 bg-cyan-950/20 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.13em] text-cyan-400">
+                                        @item.EventType
+                                    </span>
+                                    <div class="mt-2 text-[9px] text-slate-700">ID: @item.Id</div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="font-medium text-slate-200">@item.Scene</div>
+                                    <div class="mt-1 text-[9px] text-slate-600">@item.GameState / @item.Phase</div>
+                                </td>
+                                <td class="px-4 py-4 text-slate-400">@item.BuildVersion</td>
+                                <td class="px-4 py-4">
+                                    <div class="font-medium text-slate-200">@item.DeviceName</div>
+                                    <div class="mt-1 max-w-[220px] truncate text-[9px] text-slate-700" title="@item.InstallationId">@item.InstallationId</div>
+                                </td>
+                                <td class="px-4 py-4 text-slate-400">@item.OwnerUserLabel</td>
+                                <td class="px-4 py-4">
+                                    <div class="max-w-[230px] truncate text-[9px] text-slate-500" title="@item.SessionId">@item.SessionId</div>
+                                    <button type="button"
+                                            data-open-timeline
+                                            data-session-id="@item.SessionId"
+                                            class="mt-3 inline-flex h-8 min-w-[150px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">
+                                        [ @SharedLocalizer["SessionEvents_OpenTimeline"] ]
+                                    </button>
+                                </td>
+                                <td class="px-4 py-4 text-right">
+                                    @if (item.HasPayload)
+                                    {
+                                        <button type="button"
+                                                data-view-json
+                                                data-event-key="@eventKey"
+                                                aria-expanded="false"
+                                                class="inline-flex h-8 min-w-[110px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">
+                                            [ @SharedLocalizer["Common_ViewJson"] ]
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-[9px] uppercase tracking-[0.14em] text-slate-700">@SharedLocalizer["Common_NoPayload"]</span>
+                                    }
+                                </td>
                             </tr>
-                        </thead>
-
-                        <tbody class="divide-y divide-slate-900 bg-slate-950/80">
-                            @foreach (var item in Model.Items)
+                            @if (item.HasPayload)
                             {
-                                <tr class="align-top text-sm text-slate-300 transition hover:bg-slate-900/70">
-                                    <td class="px-4 py-4">
-                                        <div class="font-medium text-cyan-300">
-                                            @item.CreatedAtLabel
-                                        </div>
-                                        <div class="mt-1 text-xs text-slate-600">
-                                            @SharedLocalizer["Common_Client"]: @item.ClientTimeLabel
-                                        </div>
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        <span class="inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-fuchsia-200">
-                                            @item.EventType
-                                        </span>
-
-                                        <div class="mt-2 text-xs text-slate-600">
-                                            @SharedLocalizer["SessionEvents_EventNumber", item.Id]
-                                        </div>
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        <div class="font-medium text-white">@item.Scene</div>
-                                        <div class="mt-1 text-xs text-slate-500">
-                                            @item.GameState / @item.Phase
-                                        </div>
-                                    </td>
-
-                                    <td class="px-4 py-4 text-slate-300">
-                                        @item.BuildVersion
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        <div class="font-medium text-white">@item.DeviceName</div>
-                                        <div class="mt-1 max-w-[220px] truncate text-xs text-slate-600"
-                                             title="@item.InstallationId">
-                                            @item.InstallationId
-                                        </div>
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        @item.OwnerUserLabel
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        <div class="max-w-[230px] truncate text-xs text-slate-400"
-                                             title="@item.SessionId">
-                                            @item.SessionId
-                                        </div>
-
-                                        <a asp-controller="SessionEvents"
-                                           asp-action="Details"
-                                           asp-route-sessionId="@item.SessionId"
-                                           class="mt-3 inline-flex rounded-lg border border-cyan-400/20 bg-cyan-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200 transition hover:bg-cyan-500/15">
-                                            @SharedLocalizer["SessionEvents_OpenTimeline"]
-                                        </a>
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        @if (item.HasPayload)
-                                        {
-                                            <details class="max-w-[360px]">
-                                                <summary class="cursor-pointer text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">
-                                                    @SharedLocalizer["Common_ViewJson"]
-                                                </summary>
-
-                                                <pre class="mt-3 max-h-[220px] overflow-auto whitespace-pre-wrap break-words rounded-xl border border-slate-800 bg-slate-950/90 p-3 text-xs leading-5 text-slate-300">@item.PayloadJson</pre>
-                                            </details>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-xs text-slate-600">@SharedLocalizer["Common_NoPayload"]</span>
-                                        }
+                                <tr data-json-row
+                                    data-json-for="@eventKey"
+                                    class="hidden border-b border-slate-900 bg-[#010302]">
+                                    <td colspan="8" class="px-4 py-4">
+                                        <pre class="max-h-[280px] overflow-auto border border-slate-800 bg-black p-4 text-[10px] leading-5 text-green-300"><code class="json">@item.PayloadJson</code></pre>
                                     </td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
+                        }
+
+                        @if (!Model.Items.Any())
+                        {
+                            <tr data-session-events-empty>
+                                <td colspan="8" class="px-5 py-14 text-center text-xs uppercase tracking-[0.18em] text-slate-600">
+                                    @SharedLocalizer["SessionEvents_NoEvents"]
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="flex flex-col gap-4 border-t border-slate-800 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="text-[10px] uppercase tracking-[0.15em] text-slate-600">
+                    @SharedLocalizer["Common_Page"] <span class="text-green-400">@Model.Page</span>
+                    @SharedLocalizer["Common_Of"] <span class="text-green-400">@Model.TotalPages</span>
                 </div>
-
-                <div class="mt-6 flex flex-col gap-4 border-t border-slate-800 pt-6 md:flex-row md:items-center md:justify-between">
-                    <div class="text-sm text-slate-400">
-                        @SharedLocalizer["Common_Page"] <span class="text-cyan-300">@Model.Page</span>
-                        @SharedLocalizer["Common_Of"] <span class="text-cyan-300">@Model.TotalPages</span>
-                    </div>
-
-                    <div class="flex gap-3">
-                        @if (Model.HasPreviousPage)
-                        {
-                            <a asp-controller="SessionEvents"
-                               asp-action="Index"
-                               asp-route-eventType="@Model.EventType"
-                               asp-route-buildVersion="@Model.BuildVersion"
-                               asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
-                               asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
-                               asp-route-page="@previousPage"
-                               asp-route-pageSize="@Model.PageSize"
-                               class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">
-                                @SharedLocalizer["Common_Previous"]
-                            </a>
-                        }
-                        else
-                        {
-                            <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
-                                @SharedLocalizer["Common_Previous"]
-                            </span>
-                        }
-
-                        @if (Model.HasNextPage)
-                        {
-                            <a asp-controller="SessionEvents"
-                               asp-action="Index"
-                               asp-route-eventType="@Model.EventType"
-                               asp-route-buildVersion="@Model.BuildVersion"
-                               asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
-                               asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
-                               asp-route-page="@nextPage"
-                               asp-route-pageSize="@Model.PageSize"
-                               class="rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">
-                                @SharedLocalizer["Common_Next"]
-                            </a>
-                        }
-                        else
-                        {
-                            <span class="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
-                                @SharedLocalizer["Common_Next"]
-                            </span>
-                        }
-                    </div>
+                <div class="flex gap-2 whitespace-nowrap">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a asp-controller="SessionEvents"
+                           asp-action="Index"
+                           asp-route-eventType="@Model.EventType"
+                           asp-route-buildVersion="@Model.BuildVersion"
+                           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                           asp-route-page="@previousPage"
+                           asp-route-pageSize="50"
+                           class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] uppercase text-slate-400 hover:bg-slate-900">
+                            [ @SharedLocalizer["Common_Previous"] ]
+                        </a>
+                    }
+                    @if (Model.HasNextPage)
+                    {
+                        <a asp-controller="SessionEvents"
+                           asp-action="Index"
+                           asp-route-eventType="@Model.EventType"
+                           asp-route-buildVersion="@Model.BuildVersion"
+                           asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                           asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                           asp-route-page="@nextPage"
+                           asp-route-pageSize="50"
+                           class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-700 bg-slate-900 px-4 text-[9px] uppercase text-slate-300 hover:bg-slate-800 hover:text-green-400">
+                            [ @SharedLocalizer["Common_Next"] ]
+                        </a>
+                    }
                 </div>
-            }
+            </footer>
         </section>
+
+        <dialog id="session-timeline-dialog"
+                class="m-auto h-[min(860px,calc(100vh-2rem))] w-[min(1120px,calc(100vw-2rem))] border border-slate-700 bg-[#020504] p-0 text-slate-200 shadow-[0_30px_90px_rgba(0,0,0,0.78)] backdrop:bg-black/85">
+            <div class="flex h-full flex-col">
+                <header class="flex items-center justify-between border-b border-slate-800 bg-slate-950/90 px-5 py-4">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.22em] text-slate-600">TACTICAL_SESSION_TRACE</p>
+                        <h2 class="mt-2 font-display text-lg uppercase tracking-[0.13em] text-green-400">
+                            &gt; @SharedLocalizer["SessionEvents_TimelineTitle"]
+                        </h2>
+                    </div>
+                    <button type="button"
+                            data-timeline-close
+                            class="inline-flex h-9 min-w-[100px] items-center justify-center border border-slate-700 bg-slate-900 px-3 text-[9px] uppercase tracking-[0.14em] text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                        [ @SharedLocalizer["SessionEvents_Close"] ]
+                    </button>
+                </header>
+
+                <div class="grid gap-px border-b border-slate-800 bg-slate-800 sm:grid-cols-4" data-timeline-summary></div>
+
+                <div class="flex-1 overflow-y-auto px-5 py-6">
+                    <div data-timeline-loading class="border border-slate-800 bg-black/50 px-5 py-10 text-center text-xs uppercase tracking-[0.16em] text-slate-600">
+                        @SharedLocalizer["SessionEvents_TimelineLoading"]
+                    </div>
+                    <div data-timeline-events class="hidden max-w-4xl"></div>
+                </div>
+            </div>
+        </dialog>
     </div>
-</div>
+</section>
+
+@section Scripts {
+    <script src="~/lib/signalr/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/js/session-events.js" asp-append-version="true"></script>
+    <script>
+        window.echoConsoleSessionEvents.init({
+            hubUrl: "@Url.Content("~/hubs/admin-telemetry")",
+            timelineUrl: "@Url.Content("~/Admin/SessionEvents/Timeline")",
+            tableBodyId: "session-events-table-body",
+            totalCountId: "session-events-total-count",
+            streamStatusId: "session-events-stream-status",
+            timelineDialogId: "session-timeline-dialog",
+            page: @Model.Page,
+            maxRows: 50,
+            eventType: @Html.Raw(JsonSerializer.Serialize(Model.EventType)),
+            buildVersion: @Html.Raw(JsonSerializer.Serialize(Model.BuildVersion)),
+            fromUtc: @Html.Raw(JsonSerializer.Serialize(Model.FromDate?.ToString("yyyy-MM-dd"))),
+            toUtc: @Html.Raw(JsonSerializer.Serialize(Model.ToDate?.ToString("yyyy-MM-dd"))),
+            culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
+            labels: @Html.Raw(labelsJson)
+        });
+    </script>
+}
