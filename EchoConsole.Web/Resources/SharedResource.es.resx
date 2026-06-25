@@ -1958,4 +1958,85 @@
   <data name="Installations_DeleteError" xml:space="preserve">
     <value>No se pudo eliminar la instalación.</value>
   </data>
+  <data name="Alerts_AnalyticsTitle" xml:space="preserve">
+    <value>REPORTES ANALÍTICOS E INCIDENCIAS</value>
+  </data>
+  <data name="Alerts_AiDescription" xml:space="preserve">
+    <value>Ejecuta un análisis local determinista sobre la telemetría reciente sin utilizar servicios externos de IA.</value>
+  </data>
+  <data name="Alerts_AiIdle" xml:space="preserve">
+    <value>&gt; Análisis IA listo. Ejecuta el motor de tendencias para inspeccionar la ventana de telemetría más reciente.</value>
+  </data>
+  <data name="Alerts_AiProcessing" xml:space="preserve">
+    <value>&gt; Procesando vectores de alertas y comparando ventanas de telemetría...</value>
+  </data>
+  <data name="Alerts_DiscordDescription" xml:space="preserve">
+    <value>Transmite las últimas incidencias críticas y fatales no resueltas mediante el webhook de Discord configurado.</value>
+  </data>
+  <data name="Alerts_DiscordIdle" xml:space="preserve">
+    <value>ESTADO_WEBHOOK: LISTO_PARA_CONFIGURACIÓN</value>
+  </data>
+  <data name="Alerts_DiscordSending" xml:space="preserve">
+    <value>ESTADO_WEBHOOK: TRANSMITIENDO_INCIDENCIAS</value>
+  </data>
+  <data name="Alerts_RequestFailed" xml:space="preserve">
+    <value>No se pudo completar la operación.</value>
+  </data>
+  <data name="Alerts_TabOpen" xml:space="preserve">
+    <value>INCIDENCIAS ABIERTAS</value>
+  </data>
+  <data name="Alerts_TabResolved" xml:space="preserve">
+    <value>HISTORIAL DE RESUELTAS</value>
+  </data>
+  <data name="Alerts_FilterAllSeverities" xml:space="preserve">
+    <value>TODAS LAS SEVERIDADES</value>
+  </data>
+  <data name="Alerts_ManageTypes" xml:space="preserve">
+    <value>GESTIONAR TIPOS DE ERROR</value>
+  </data>
+  <data name="Alerts_ColErrorType" xml:space="preserve">
+    <value>TIPO DE ERROR</value>
+  </data>
+  <data name="Alerts_ColBuild" xml:space="preserve">
+    <value>BUILD DEL JUEGO</value>
+  </data>
+  <data name="Alerts_TypeCatalogTitle" xml:space="preserve">
+    <value>CATÁLOGO DE TIPOS DE ERROR</value>
+  </data>
+  <data name="Alerts_TypeDeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar este tipo de error? Las alertas existentes pasarán a UNCLASSIFIED.</value>
+  </data>
+  <data name="Alerts_TypeUpdated" xml:space="preserve">
+    <value>Tipo de error actualizado.</value>
+  </data>
+  <data name="Alerts_TypeDeleted" xml:space="preserve">
+    <value>Tipo de error eliminado.</value>
+  </data>
+  <data name="Alerts_DiscordAutomaticDescription" xml:space="preserve">
+    <value>Las alertas críticas y fatales se envían automáticamente mediante el outbox persistente de Discord con reintentos.</value>
+  </data>
+  <data name="Alerts_ActionCancelUndo" xml:space="preserve">
+    <value>CANCELAR / DESHACER</value>
+  </data>
+  <data name="Alerts_ResolveCountdown" xml:space="preserve">
+    <value>Resolviendo en {0}s...</value>
+  </data>
+  <data name="Alerts_ResolvingNow" xml:space="preserve">
+    <value>Resolviendo...</value>
+  </data>
+  <data name="Alerts_LoadingState" xml:space="preserve">
+    <value>Sincronizando incidencias...</value>
+  </data>
+  <data name="Alerts_MonitoringScopeHint" xml:space="preserve">
+    <value>Monitoreo en tiempo real. La consola principal filtra incidencias activas; el motor de IA evalúa el comportamiento acumulado de las últimas 24 horas.</value>
+  </data>
+  <data name="Alerts_KpiActive" xml:space="preserve">
+    <value>ACTIVAS_NOC</value>
+  </data>
+  <data name="Alerts_KpiMitigated" xml:space="preserve">
+    <value>MITIGADAS_24H</value>
+  </data>
+  <data name="Alerts_KpiDiscord" xml:space="preserve">
+    <value>RELÉ_DISCORD</value>
+  </data>
 </root>

@@ -441,7 +441,7 @@ public enum DeleteGameBuildApiStatus
     HasLinkedTelemetry = 4
 }
 
-public sealed class PagedResponse<T>
+public sealed class DPagedResponse<T>
 {
     public IReadOnlyList<T> Items { get; set; } = Array.Empty<T>();
 
