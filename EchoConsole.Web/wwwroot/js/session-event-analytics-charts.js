@@ -1,21 +1,17 @@
-﻿window.echoConsoleAnalyticsCharts = (() => {
-    const chartInstances = [];
-    let runtimeOptions = {
-        culture: "en",
-        labels: {
-            events: "Events",
-            eventTypes: "Event Types"
-        }
-    };
+window.echoConsoleAnalyticsCharts = (() => {
+    "use strict";
+
+    const charts = [];
+    let runtimeOptions = null;
 
     const palette = [
-        "#22d3ee",
-        "#e879f9",
-        "#fbbf24",
-        "#34d399",
-        "#fb7185",
-        "#818cf8",
-        "#a3e635",
+        "#22c55e",
+        "#06b6d4",
+        "#f59e0b",
+        "#a855f7",
+        "#ef4444",
+        "#84cc16",
+        "#3b82f6",
         "#f97316"
     ];
 
@@ -28,209 +24,204 @@
             }
         };
 
+        destroyCharts();
+        animateCounters();
+
         if (!window.Chart) {
             console.error("Chart.js is not available.");
             return;
         }
 
         const dataElement = document.getElementById(options.dataElementId);
-
         if (!dataElement) {
             return;
         }
 
-        const payload = JSON.parse(dataElement.textContent || "{}");
+        let payload;
+        try {
+            payload = JSON.parse(dataElement.textContent || "{}");
+        } catch (error) {
+            console.error("Session event analytics payload is invalid.", error);
+            return;
+        }
 
         configureDefaults();
-        animateCounters();
-
-        createTrendChart(
-            options.trendCanvasId,
-            payload.timeSeries);
-
-        createEventTypeChart(
-            options.eventTypeCanvasId,
-            payload.eventTypes);
-
-        createSceneChart(
-            options.sceneCanvasId,
-            payload.scenes);
-
-        createBuildChart(
-            options.buildCanvasId,
-            payload.buildVersions);
+        createTrendChart(options.trendCanvasId, payload.timeSeries);
+        createEventTypeChart(options.eventTypeCanvasId, payload.eventTypes);
+        createSceneChart(options.sceneCanvasId, payload.scenes);
     }
 
     function configureDefaults() {
         Chart.defaults.color = "#94a3b8";
-        Chart.defaults.borderColor = "rgba(148, 163, 184, 0.12)";
-        Chart.defaults.font.family = "Inter, sans-serif";
-        Chart.defaults.animation.duration = 900;
+        Chart.defaults.borderColor = "rgba(51, 65, 85, 0.55)";
+        Chart.defaults.font.family = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+        Chart.defaults.animation.duration = 480;
         Chart.defaults.animation.easing = "easeOutQuart";
     }
 
     function createTrendChart(canvasId, data) {
         const canvas = document.getElementById(canvasId);
-
         if (!canvas || !data) {
             return;
         }
 
-        chartInstances.push(new Chart(canvas, {
+        charts.push(new Chart(canvas, {
             type: "line",
             data: {
                 labels: data.labels || [],
                 datasets: [{
                     label: runtimeOptions.labels.events,
                     data: data.values || [],
-                    borderColor: "#22d3ee",
-                    backgroundColor: "rgba(34, 211, 238, 0.15)",
-                    pointBackgroundColor: "#e879f9",
-                    pointBorderColor: "#070B12",
-                    pointRadius: 4,
-                    pointHoverRadius: 7,
-                    borderWidth: 3,
-                    tension: 0.32,
+                    borderColor: "#22c55e",
+                    backgroundColor: "rgba(34, 197, 94, 0.10)",
+                    pointBackgroundColor: "#d1fae5",
+                    pointBorderColor: "#020504",
+                    pointRadius: 2,
+                    pointHoverRadius: 5,
+                    borderWidth: 2,
+                    tension: 0.28,
                     fill: true
                 }]
             },
-            options: createCartesianOptions(false)
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                normalized: true,
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+                scales: {
+                    x: createAxisOptions(false),
+                    y: createAxisOptions(true)
+                },
+                plugins: createPluginOptions(false)
+            }
         }));
     }
 
     function createEventTypeChart(canvasId, data) {
         const canvas = document.getElementById(canvasId);
-
         if (!canvas || !data) {
             return;
         }
 
-        chartInstances.push(new Chart(canvas, {
+        charts.push(new Chart(canvas, {
             type: "doughnut",
             data: {
                 labels: data.labels || [],
                 datasets: [{
                     data: data.values || [],
                     backgroundColor: palette,
-                    borderColor: "#0f172a",
-                    borderWidth: 3,
-                    hoverOffset: 12
+                    borderColor: "#020504",
+                    borderWidth: 2,
+                    hoverOffset: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: "64%",
-                plugins: createPluginOptions(runtimeOptions.labels.eventTypes)
+                cutout: "66%",
+                plugins: createPluginOptions(true)
             }
         }));
     }
 
     function createSceneChart(canvasId, data) {
         const canvas = document.getElementById(canvasId);
-
         if (!canvas || !data) {
             return;
         }
 
-        chartInstances.push(new Chart(canvas, {
+        charts.push(new Chart(canvas, {
             type: "bar",
             data: {
                 labels: data.labels || [],
                 datasets: [{
                     label: runtimeOptions.labels.events,
                     data: data.values || [],
-                    backgroundColor: "rgba(232, 121, 249, 0.65)",
-                    borderColor: "#e879f9",
+                    backgroundColor: "rgba(6, 182, 212, 0.46)",
+                    borderColor: "#06b6d4",
                     borderWidth: 1,
-                    borderRadius: 8
+                    borderRadius: 2,
+                    barThickness: 12,
+                    maxBarThickness: 14
                 }]
             },
-            options: createCartesianOptions(true)
-        }));
-    }
-
-    function createBuildChart(canvasId, data) {
-        const canvas = document.getElementById(canvasId);
-
-        if (!canvas || !data) {
-            return;
-        }
-
-        chartInstances.push(new Chart(canvas, {
-            type: "bar",
-            data: {
-                labels: data.labels || [],
-                datasets: [{
-                    label: runtimeOptions.labels.events,
-                    data: data.values || [],
-                    backgroundColor: "rgba(251, 191, 36, 0.65)",
-                    borderColor: "#fbbf24",
-                    borderWidth: 1,
-                    borderRadius: 8
-                }]
-            },
-            options: createCartesianOptions(false)
-        }));
-    }
-
-    function createCartesianOptions(horizontal) {
-        return {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: horizontal ? "y" : "x",
-            interaction: {
-                mode: "index",
-                intersect: false
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: {
-                        color: "rgba(148, 163, 184, 0.08)"
-                    },
-                    ticks: {
-                        precision: 0
-                    }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                normalized: true,
+                indexAxis: "y",
+                interaction: {
+                    mode: "nearest",
+                    intersect: false
                 },
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: "rgba(148, 163, 184, 0.08)"
-                    },
-                    ticks: {
-                        precision: 0
-                    }
-                }
+                scales: {
+                    x: createAxisOptions(true),
+                    y: createCategoryAxisOptions()
+                },
+                plugins: createPluginOptions(false)
+            }
+        }));
+    }
+
+    function createAxisOptions(beginAtZero) {
+        return {
+            beginAtZero,
+            grid: {
+                color: "rgba(51, 65, 85, 0.35)",
+                drawBorder: false
             },
-            plugins: createPluginOptions()
+            ticks: {
+                color: "#64748b",
+                precision: 0,
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 10
+            }
         };
     }
 
-    function createPluginOptions(title) {
+    function createCategoryAxisOptions() {
+        return {
+            grid: {
+                display: false
+            },
+            ticks: {
+                color: "#94a3b8",
+                autoSkip: false,
+                font: {
+                    size: 9
+                }
+            }
+        };
+    }
+
+    function createPluginOptions(showLegend) {
         return {
             legend: {
-                display: true,
+                display: showLegend,
                 position: "bottom",
                 labels: {
                     usePointStyle: true,
-                    padding: 18
-                }
-            },
-            title: {
-                display: Boolean(title),
-                text: title || "",
-                color: "#e2e8f0",
-                font: {
-                    family: "Orbitron, sans-serif",
-                    size: 13
+                    pointStyle: "rect",
+                    boxWidth: 8,
+                    boxHeight: 8,
+                    padding: 10,
+                    color: "#94a3b8",
+                    font: {
+                        size: 9
+                    }
                 }
             },
             tooltip: {
-                backgroundColor: "rgba(2, 6, 23, 0.96)",
-                borderColor: "rgba(34, 211, 238, 0.25)",
+                backgroundColor: "rgba(2, 5, 4, 0.97)",
+                borderColor: "rgba(34, 197, 94, 0.30)",
                 borderWidth: 1,
-                padding: 12,
+                padding: 10,
+                titleColor: "#dcfce7",
+                bodyColor: "#cbd5e1",
                 displayColors: true
             }
         };
@@ -241,26 +232,29 @@
 
         for (const counter of counters) {
             const target = Number(counter.dataset.analyticsCounter || 0);
-            const duration = 700;
+            const duration = 520;
             const startedAt = performance.now();
 
             function update(now) {
-                const progress = Math.min(
-                    1,
-                    (now - startedAt) / duration);
+                const progress = Math.min(1, (now - startedAt) / duration);
+                const value = Math.floor(target * easeOut(progress));
 
-                const value = Math.floor(
-                    target * easeOut(progress));
-
-                counter.textContent =
-                    new Intl.NumberFormat(runtimeOptions.culture).format(value);
+                counter.textContent = new Intl.NumberFormat(
+                    runtimeOptions?.culture || document.documentElement.lang || "en")
+                    .format(value);
 
                 if (progress < 1) {
-                    requestAnimationFrame(update);
+                    window.requestAnimationFrame(update);
                 }
             }
 
-            requestAnimationFrame(update);
+            window.requestAnimationFrame(update);
+        }
+    }
+
+    function destroyCharts() {
+        while (charts.length > 0) {
+            charts.pop()?.destroy();
         }
     }
 
@@ -268,7 +262,5 @@
         return 1 - Math.pow(1 - value, 3);
     }
 
-    return {
-        init
-    };
+    return { init };
 })();

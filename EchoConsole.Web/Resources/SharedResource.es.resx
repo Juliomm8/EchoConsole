@@ -2114,4 +2114,7 @@
   <data name="SessionEvents_PurgeFailed" xml:space="preserve">
     <value>Error de purga</value>
   </data>
+  <data name="Analytics_ContextBanner" xml:space="preserve">
+    <value>Intelligence Console: Agregaciones analíticas optimizadas en servidor. Las zonas calientes evalúan la estabilidad estructural del gameplay en Cosmic Diner.</value>
+  </data>
 </root>
