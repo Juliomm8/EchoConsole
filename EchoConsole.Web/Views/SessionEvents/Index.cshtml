@@ -30,7 +30,12 @@
         serverTime = SharedLocalizer["SessionEvents_ServerTime"].Value,
         clientTime = SharedLocalizer["SessionEvents_ClientTime"].Value,
         unclaimed = "UNCLAIMED",
-        unknown = "-"
+        unknown = "-",
+        purge = SharedLocalizer["SessionEvents_Purge"].Value,
+        cancel = SharedLocalizer["SessionEvents_CancelPurge"].Value,
+        purgingIn = SharedLocalizer["SessionEvents_PurgingIn"].Value,
+        purgeFailed = SharedLocalizer["SessionEvents_PurgeFailed"].Value,
+        empty = SharedLocalizer["SessionEvents_NoEvents"].Value
     });
 }
 
@@ -223,7 +228,7 @@
                             <tr data-session-event-row
                                 data-event-key="@eventKey"
                                 data-session-id="@item.SessionId"
-                                class="border-b border-slate-900/80 align-top text-xs text-slate-300 transition-colors hover:bg-slate-900/55">
+                                class="border-b border-slate-900/80 align-top text-xs text-slate-300 transition-all duration-300 hover:bg-slate-900/55">
                                 <td class="px-4 py-4">
                                     <div class="font-medium text-green-400">@item.CreatedAtLabel</div>
                                     <div class="mt-1 text-[9px] text-slate-700">@SharedLocalizer["Common_Client"]: @item.ClientTimeLabel</div>
@@ -254,20 +259,36 @@
                                     </button>
                                 </td>
                                 <td class="px-4 py-4 text-right">
-                                    @if (item.HasPayload)
-                                    {
+                                    <div class="inline-flex min-w-[126px] flex-col items-end gap-2 whitespace-nowrap">
+                                        @if (item.HasPayload)
+                                        {
+                                            <button type="button"
+                                                    data-view-json
+                                                    data-event-key="@eventKey"
+                                                    aria-expanded="false"
+                                                    class="inline-flex h-8 min-w-[110px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">
+                                                [ @SharedLocalizer["Common_ViewJson"] ]
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-[9px] uppercase tracking-[0.14em] text-slate-700">@SharedLocalizer["Common_NoPayload"]</span>
+                                        }
+
                                         <button type="button"
-                                                data-view-json
-                                                data-event-key="@eventKey"
-                                                aria-expanded="false"
-                                                class="inline-flex h-8 min-w-[110px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">
-                                            [ @SharedLocalizer["Common_ViewJson"] ]
+                                                data-purge-session
+                                                data-session-id="@item.SessionId"
+                                                class="btn-purge inline-flex h-8 min-w-[110px] items-center justify-center whitespace-nowrap border border-red-900/60 bg-red-950/20 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-red-500 transition-colors hover:bg-red-900/30 hover:text-red-300 disabled:cursor-wait disabled:opacity-70">
+                                            [ @SharedLocalizer["SessionEvents_Purge"] ]
                                         </button>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-[9px] uppercase tracking-[0.14em] text-slate-700">@SharedLocalizer["Common_NoPayload"]</span>
-                                    }
+
+                                        <button type="button"
+                                                data-cancel-purge
+                                                data-session-id="@item.SessionId"
+                                                class="hidden h-7 min-w-[110px] items-center justify-center whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.13em] text-amber-400 hover:text-amber-300">
+                                            [ @SharedLocalizer["SessionEvents_CancelPurge"] ]
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             @if (item.HasPayload)
@@ -332,6 +353,10 @@
             </footer>
         </section>
 
+        <form id="session-events-antiforgery-form" class="hidden">
+            @Html.AntiForgeryToken()
+        </form>
+
         <dialog id="session-timeline-dialog"
                 class="m-auto h-[min(860px,calc(100vh-2rem))] w-[min(1120px,calc(100vw-2rem))] border border-slate-700 bg-[#020504] p-0 text-slate-200 shadow-[0_30px_90px_rgba(0,0,0,0.78)] backdrop:bg-black/85">
             <div class="flex h-full flex-col">
@@ -369,6 +394,7 @@
         window.echoConsoleSessionEvents.init({
             hubUrl: "@Url.Content("~/hubs/admin-telemetry")",
             timelineUrl: "@Url.Content("~/Admin/SessionEvents/Timeline")",
+            purgeUrl: "@Url.Content("~/Admin/SessionEvents/Purge")",
             tableBodyId: "session-events-table-body",
             totalCountId: "session-events-total-count",
             streamStatusId: "session-events-stream-status",
@@ -380,6 +406,7 @@
             fromUtc: @Html.Raw(JsonSerializer.Serialize(Model.FromDate?.ToString("yyyy-MM-dd"))),
             toUtc: @Html.Raw(JsonSerializer.Serialize(Model.ToDate?.ToString("yyyy-MM-dd"))),
             culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
+            antiForgeryToken: document.querySelector('#session-events-antiforgery-form input[name="__RequestVerificationToken"]')?.value || "",
             labels: @Html.Raw(labelsJson)
         });
     </script>

@@ -2102,4 +2102,16 @@
   <data name="SessionEvents_VisibleLimit" xml:space="preserve">
     <value>Límite visible del DOM: 50 filas</value>
   </data>
+  <data name="SessionEvents_Purge" xml:space="preserve">
+    <value>Purgar</value>
+  </data>
+  <data name="SessionEvents_CancelPurge" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="SessionEvents_PurgingIn" xml:space="preserve">
+    <value>Purgando en {0}s...</value>
+  </data>
+  <data name="SessionEvents_PurgeFailed" xml:space="preserve">
+    <value>Error de purga</value>
+  </data>
 </root>

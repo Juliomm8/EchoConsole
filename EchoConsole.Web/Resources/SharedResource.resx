@@ -2102,4 +2102,16 @@
   <data name="SessionEvents_VisibleLimit" xml:space="preserve">
     <value>Visible DOM limit: 50 rows</value>
   </data>
+  <data name="SessionEvents_Purge" xml:space="preserve">
+    <value>Purge</value>
+  </data>
+  <data name="SessionEvents_CancelPurge" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="SessionEvents_PurgingIn" xml:space="preserve">
+    <value>Purging in {0}s...</value>
+  </data>
+  <data name="SessionEvents_PurgeFailed" xml:space="preserve">
+    <value>Purge failed</value>
+  </data>
 </root>

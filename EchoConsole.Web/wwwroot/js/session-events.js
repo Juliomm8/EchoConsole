@@ -6,6 +6,7 @@ window.echoConsoleSessionEvents = (() => {
     let reconnectTimer = null;
     let flushTimer = null;
     let pendingEvents = new Map();
+    const purgeStates = new Map();
 
     const flushDelayMs = 120;
 
@@ -36,6 +37,18 @@ window.echoConsoleSessionEvents = (() => {
             const timelineButton = event.target.closest("[data-open-timeline]");
             if (timelineButton) {
                 void openTimeline(timelineButton.dataset.sessionId);
+                return;
+            }
+
+            const purgeButton = event.target.closest("[data-purge-session]");
+            if (purgeButton) {
+                startPurgeCountdown(purgeButton.dataset.sessionId);
+                return;
+            }
+
+            const cancelButton = event.target.closest("[data-cancel-purge]");
+            if (cancelButton) {
+                cancelPurge(cancelButton.dataset.sessionId);
                 return;
             }
 
@@ -309,7 +322,7 @@ window.echoConsoleSessionEvents = (() => {
         row.dataset.sessionEventRow = "true";
         row.dataset.eventKey = item.key;
         row.dataset.sessionId = item.sessionId || "";
-        row.className = "border-b border-slate-900/80 align-top text-xs text-slate-300 transition-colors hover:bg-slate-900/55";
+        row.className = "border-b border-slate-900/80 align-top text-xs text-slate-300 transition-all duration-300 hover:bg-slate-900/55";
 
         row.append(
             createTimeCell(item),
@@ -321,7 +334,7 @@ window.echoConsoleSessionEvents = (() => {
                 item.ownerUserId ? `USER #${item.ownerUserId}` : options.labels.unclaimed,
                 "text-slate-400"),
             createSessionCell(item),
-            createPayloadActionCell(item));
+            createActionsCell(item));
 
         let jsonRow = null;
         if (item.payloadJson) {
@@ -441,27 +454,265 @@ window.echoConsoleSessionEvents = (() => {
         return cell;
     }
 
-    function createPayloadActionCell(item) {
+    function createActionsCell(item) {
         const cell = document.createElement("td");
         cell.className = "px-4 py-4 text-right";
 
-        if (!item.payloadJson) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "inline-flex min-w-[126px] flex-col items-end gap-2 whitespace-nowrap";
+
+        if (item.payloadJson) {
+            const jsonButton = document.createElement("button");
+            jsonButton.type = "button";
+            jsonButton.dataset.viewJson = "true";
+            jsonButton.dataset.eventKey = item.key;
+            jsonButton.setAttribute("aria-expanded", "false");
+            jsonButton.className = "inline-flex h-8 min-w-[110px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400";
+            jsonButton.textContent = `[ ${options.labels.viewJson} ]`;
+            wrapper.appendChild(jsonButton);
+        } else {
             const empty = document.createElement("span");
             empty.className = "text-[9px] uppercase tracking-[0.14em] text-slate-700";
             empty.textContent = options.labels.noPayload;
-            cell.appendChild(empty);
-            return cell;
+            wrapper.appendChild(empty);
         }
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.dataset.viewJson = "true";
-        button.dataset.eventKey = item.key;
-        button.setAttribute("aria-expanded", "false");
-        button.className = "inline-flex h-8 min-w-[110px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400";
-        button.textContent = `[ ${options.labels.viewJson} ]`;
-        cell.appendChild(button);
+        const purgeButton = document.createElement("button");
+        purgeButton.type = "button";
+        purgeButton.dataset.purgeSession = "true";
+        purgeButton.dataset.sessionId = item.sessionId || "";
+        purgeButton.className = "btn-purge inline-flex h-8 min-w-[110px] items-center justify-center whitespace-nowrap border border-red-900/60 bg-red-950/20 px-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-red-500 transition-colors hover:bg-red-900/30 hover:text-red-300 disabled:cursor-wait disabled:opacity-70";
+        purgeButton.textContent = `[ ${options.labels.purge} ]`;
+
+        const cancelButton = document.createElement("button");
+        cancelButton.type = "button";
+        cancelButton.dataset.cancelPurge = "true";
+        cancelButton.dataset.sessionId = item.sessionId || "";
+        cancelButton.className = "hidden h-7 min-w-[110px] items-center justify-center whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.13em] text-amber-400 hover:text-amber-300";
+        cancelButton.textContent = `[ ${options.labels.cancel} ]`;
+
+        wrapper.append(purgeButton, cancelButton);
+        cell.appendChild(wrapper);
         return cell;
+    }
+
+    function startPurgeCountdown(sessionId) {
+        if (!sessionId || purgeStates.has(sessionId)) {
+            return;
+        }
+
+        const state = {
+            remainingSeconds: 3,
+            intervalId: null
+        };
+
+        purgeStates.set(sessionId, state);
+        renderPurgeState(sessionId, state.remainingSeconds);
+
+        state.intervalId = window.setInterval(() => {
+            state.remainingSeconds -= 1;
+
+            if (state.remainingSeconds <= 0) {
+                window.clearInterval(state.intervalId);
+                state.intervalId = null;
+                void dispatchPurge(sessionId);
+                return;
+            }
+
+            renderPurgeState(sessionId, state.remainingSeconds);
+        }, 1000);
+    }
+
+    function cancelPurge(sessionId) {
+        const state = purgeStates.get(sessionId);
+        if (!state) {
+            return;
+        }
+
+        if (state.intervalId) {
+            window.clearInterval(state.intervalId);
+        }
+
+        purgeStates.delete(sessionId);
+        resetPurgeControls(sessionId);
+    }
+
+    function renderPurgeState(sessionId, remainingSeconds) {
+        for (const button of getPurgeButtons(sessionId)) {
+            button.disabled = true;
+            button.setAttribute("aria-busy", "true");
+            button.textContent = formatPurgingLabel(remainingSeconds);
+        }
+
+        for (const button of getCancelButtons(sessionId)) {
+            button.classList.remove("hidden");
+            button.classList.add("inline-flex");
+        }
+    }
+
+    function resetPurgeControls(sessionId) {
+        for (const button of getPurgeButtons(sessionId)) {
+            button.disabled = false;
+            button.removeAttribute("aria-busy");
+            button.textContent = `[ ${options.labels.purge} ]`;
+        }
+
+        for (const button of getCancelButtons(sessionId)) {
+            button.classList.add("hidden");
+            button.classList.remove("inline-flex");
+        }
+    }
+
+    function formatPurgingLabel(remainingSeconds) {
+        const template = options.labels.purgingIn || "Purging in {0}s...";
+        return template.replace("{0}", String(remainingSeconds));
+    }
+
+    async function dispatchPurge(sessionId) {
+        const state = purgeStates.get(sessionId);
+        if (!state) {
+            return;
+        }
+
+        for (const button of getCancelButtons(sessionId)) {
+            button.disabled = true;
+        }
+
+        try {
+            const url = new URL(
+                `${options.purgeUrl}/${encodeURIComponent(sessionId)}`,
+                window.location.origin);
+
+            if (options.eventType) {
+                url.searchParams.set("eventType", options.eventType);
+            }
+
+            if (options.buildVersion) {
+                url.searchParams.set("buildVersion", options.buildVersion);
+            }
+
+            if (options.fromUtc) {
+                url.searchParams.set("fromDate", options.fromUtc);
+            }
+
+            if (options.toUtc) {
+                url.searchParams.set("toDate", options.toUtc);
+            }
+
+            const response = await fetch(url, {
+                method: "DELETE",
+                credentials: "same-origin",
+                headers: {
+                    Accept: "application/json",
+                    RequestVerificationToken: options.antiForgeryToken
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Session purge failed with status ${response.status}.`);
+            }
+
+            const result = await response.json();
+            purgeStates.delete(sessionId);
+
+            const removedVisibleRowCount =
+                removeSessionRows(sessionId);
+
+            const deletedMatchingEventCount = Number(
+                result.deletedMatchingEventCount);
+
+            const decrementAmount =
+                Number.isFinite(deletedMatchingEventCount) &&
+                deletedMatchingEventCount > 0
+                    ? deletedMatchingEventCount
+                    : removedVisibleRowCount;
+
+            incrementTotalCount(-decrementAmount);
+        } catch (error) {
+            console.error("Session purge failed.", error);
+            purgeStates.delete(sessionId);
+
+            for (const button of getPurgeButtons(sessionId)) {
+                button.disabled = false;
+                button.removeAttribute("aria-busy");
+                button.textContent = `[ ${options.labels.purgeFailed} ]`;
+            }
+
+            for (const button of getCancelButtons(sessionId)) {
+                button.disabled = false;
+                button.classList.add("hidden");
+                button.classList.remove("inline-flex");
+            }
+
+            window.setTimeout(
+                () => resetPurgeControls(sessionId),
+                1600);
+        }
+    }
+
+    function removeSessionRows(sessionId) {
+        const body = document.getElementById(options.tableBodyId);
+        if (!body) {
+            return 0;
+        }
+
+        const rows = Array.from(
+            body.querySelectorAll("[data-session-event-row]"))
+            .filter(row => row.dataset.sessionId === sessionId);
+
+        for (const row of rows) {
+            const eventKey = row.dataset.eventKey;
+            const jsonRow = eventKey
+                ? body.querySelector(
+                    `[data-json-row][data-json-for="${eventKey}"]`)
+                : null;
+
+            row.classList.add("opacity-0", "translate-x-2");
+            jsonRow?.classList.add("opacity-0");
+
+            window.setTimeout(() => {
+                jsonRow?.remove();
+                row.remove();
+                ensureEmptyState();
+            }, 300);
+        }
+
+        return rows.length;
+    }
+
+    function ensureEmptyState() {
+        const body = document.getElementById(options.tableBodyId);
+        if (!body || body.querySelector("[data-session-event-row]")) {
+            return;
+        }
+
+        if (body.querySelector("[data-session-events-empty]")) {
+            return;
+        }
+
+        const row = document.createElement("tr");
+        row.dataset.sessionEventsEmpty = "true";
+
+        const cell = document.createElement("td");
+        cell.colSpan = 8;
+        cell.className = "px-5 py-14 text-center text-xs uppercase tracking-[0.18em] text-slate-600";
+        cell.textContent = options.labels.empty || "No events found";
+
+        row.appendChild(cell);
+        body.appendChild(row);
+    }
+
+    function getPurgeButtons(sessionId) {
+        return Array.from(
+            document.querySelectorAll("[data-purge-session]"))
+            .filter(button => button.dataset.sessionId === sessionId);
+    }
+
+    function getCancelButtons(sessionId) {
+        return Array.from(
+            document.querySelectorAll("[data-cancel-purge]"))
+            .filter(button => button.dataset.sessionId === sessionId);
     }
 
     function toggleJson(button) {
@@ -703,8 +954,9 @@ window.echoConsoleSessionEvents = (() => {
         const current = Number(
             String(element.textContent || "0").replace(/[^0-9-]/g, ""));
         element.textContent = Number.isFinite(current)
-            ? (current + amount).toLocaleString(options.culture)
-            : String(amount);
+            ? Math.max(0, current + amount)
+                .toLocaleString(options.culture)
+            : String(Math.max(0, amount));
     }
 
     function formatPayload(value) {

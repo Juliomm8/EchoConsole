@@ -147,6 +147,45 @@ public sealed class SessionEventsController : Controller
             : Json(response);
     }
 
+    [HttpDelete("Purge/{sessionId:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PurgeSession(
+        Guid sessionId,
+        string? eventType,
+        string? buildVersion,
+        DateTime? fromDate,
+        DateTime? toDate,
+        CancellationToken cancellationToken = default)
+    {
+        DateTimeOffset? fromUtc = fromDate.HasValue
+            ? ToUtcStartOfDay(fromDate.Value)
+            : null;
+
+        DateTimeOffset? toUtcExclusive = toDate.HasValue
+            ? ToUtcStartOfDay(toDate.Value.Date.AddDays(1))
+            : null;
+
+        var result = await _apiClient.PurgeSessionAsync(
+            sessionId,
+            eventType,
+            buildVersion,
+            fromUtc,
+            toUtcExclusive,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new
+                {
+                    message = "The session could not be purged."
+                });
+        }
+
+        return Json(result);
+    }
+
     [HttpGet("Details/{sessionId:guid}")]
     public async Task<IActionResult> Details(
     Guid sessionId,
