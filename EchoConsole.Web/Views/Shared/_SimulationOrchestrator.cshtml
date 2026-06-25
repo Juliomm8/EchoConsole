@@ -15,7 +15,6 @@
 <div id="simulation-orchestrator-root"
      data-status-url="/admin/simulation/status"
      data-reconcile-url="/admin/simulation/reconcile"
-     data-pulse-url="/admin/simulation/pulse"
      data-critical-alert-url="/admin/simulation/alerts/critical"
      data-mass-drop-url="/admin/simulation/mass-drop"
      data-purge-url="/admin/simulation/purge-simulated"
@@ -144,6 +143,27 @@
                     </div>
                 </label>
 
+                <label class="mt-4 block">
+                    <span class="text-[9px] uppercase tracking-[0.20em] text-slate-500">
+                        CHURN_INTENSITY / VOLATILITY
+                    </span>
+                    <select data-sim-volatility
+                            class="mt-2 w-full rounded border border-amber-500/25 bg-black px-3 py-3 font-mono text-xs uppercase tracking-[0.16em] text-amber-300 outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/10">
+                        <option value="Low">
+                            LOW // BAJA
+                        </option>
+                        <option value="Medium" selected>
+                            MEDIUM // MEDIA
+                        </option>
+                        <option value="Chaotic">
+                            CHAOTIC // CAÓTICA
+                        </option>
+                    </select>
+                    <span class="mt-2 block text-[8px] uppercase leading-4 tracking-[0.12em] text-slate-700">
+                        RAMP_SPEED // OSCILLATION // CHURN_RATE // HEARTBEAT_FAILURES
+                    </span>
+                </label>
+
                 <label class="mt-4 flex cursor-pointer items-center justify-between gap-4 border border-amber-500/20 bg-amber-500/[0.025] p-3">
                     <span>
                         <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-amber-400">
@@ -176,7 +196,7 @@
                     @SharedLocalizer["SimulationOrchestrator_ComponentMatrix"]
                 </p>
 
-                <div class="mt-3 grid grid-cols-3 gap-2">
+                <div class="mt-3 grid grid-cols-2 gap-2">
                     <label class="flex cursor-pointer flex-col gap-2 border border-cyan-500/20 bg-cyan-500/[0.02] p-3 text-[9px] uppercase tracking-[0.14em] text-cyan-300">
                         <input data-sim-module="sessions"
                                type="checkbox"
@@ -197,6 +217,13 @@
                                checked
                                class="h-4 w-4 accent-amber-500" />
                         @SharedLocalizer["SimulationOrchestrator_Alerts"]
+                    </label>
+                    <label class="flex cursor-pointer flex-col gap-2 border border-slate-800 bg-slate-950/70 p-3 text-[9px] uppercase tracking-[0.14em] text-green-400 transition-colors hover:border-green-500/30 hover:bg-green-500/[0.03]">
+                        <input data-sim-module="events"
+                               type="checkbox"
+                               checked
+                               class="h-4 w-4 accent-green-400" />
+                        @SharedLocalizer["SimulationOrchestrator_Events"]
                     </label>
                 </div>
             </section>

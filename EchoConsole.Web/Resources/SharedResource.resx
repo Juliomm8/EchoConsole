@@ -2114,4 +2114,10 @@
   <data name="SessionEvents_PurgeFailed" xml:space="preserve">
     <value>Purge failed</value>
   </data>
+  <data name="Analytics_ContextBanner" xml:space="preserve">
+    <value>Intelligence Console: Server-optimized analytical aggregates. Hot zones evaluate the structural stability of Cosmic Diner gameplay.</value>
+  </data>
+  <data name="SimulationOrchestrator_Events" xml:space="preserve">
+    <value>Events</value>
+  </data>
 </root>
