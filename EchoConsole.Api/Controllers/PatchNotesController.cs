@@ -190,6 +190,135 @@ public sealed class PatchNotesController : ControllerBase
     }
 
     [Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<PatchNoteDto>> Update(
+        int id,
+        [FromBody] UpdatePatchNoteRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            return BadRequest(new
+            {
+                message = "A valid patch note identifier is required."
+            });
+        }
+
+        var normalizedVersion = request.Version.Trim();
+        var normalizedCategory = request.Category.Trim().ToUpperInvariant();
+        var normalizedTone = request.Tone.Trim().ToLowerInvariant();
+        var normalizedTitle = request.Title.Trim();
+        var normalizedDescription = request.Description.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalizedVersion))
+        {
+            ModelState.AddModelError(
+                nameof(request.Version),
+                "Version is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(normalizedCategory))
+        {
+            ModelState.AddModelError(
+                nameof(request.Category),
+                "Category is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(normalizedTitle))
+        {
+            ModelState.AddModelError(
+                nameof(request.Title),
+                "Title is required.");
+        }
+        else if (normalizedTitle.Length < 5)
+        {
+            ModelState.AddModelError(
+                nameof(request.Title),
+                "Title must contain at least 5 characters.");
+        }
+
+        if (string.IsNullOrWhiteSpace(normalizedDescription))
+        {
+            ModelState.AddModelError(
+                nameof(request.Description),
+                "Description is required.");
+        }
+        else if (normalizedDescription.Length < 10)
+        {
+            ModelState.AddModelError(
+                nameof(request.Description),
+                "Description must contain at least 10 characters.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var patchNote = await _dbContext.PatchNotes
+            .FirstOrDefaultAsync(
+                x => x.Id == id,
+                cancellationToken);
+
+        if (patchNote is null)
+        {
+            return NotFound(new
+            {
+                message = $"Patch note with id '{id}' was not found."
+            });
+        }
+
+        var versionExists = await _dbContext.PatchNotes
+            .AsNoTracking()
+            .AnyAsync(
+                x => x.Id != id &&
+                     x.Version == normalizedVersion,
+                cancellationToken);
+
+        if (versionExists)
+        {
+            return Conflict(new
+            {
+                message = $"A patch note with version '{normalizedVersion}' already exists."
+            });
+        }
+
+        patchNote.Version = normalizedVersion;
+        patchNote.Category = normalizedCategory;
+        patchNote.Tone = normalizedTone;
+        patchNote.Title = normalizedTitle;
+        patchNote.Description = normalizedDescription;
+        patchNote.IsPublished = request.IsPublished;
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            _memoryCache.Remove(PublishedCacheKey);
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Failed to update patch note {PatchNoteId} version {Version}.",
+                id,
+                normalizedVersion);
+
+            return Conflict(new
+            {
+                message = $"Patch note '{normalizedVersion}' could not be updated."
+            });
+        }
+
+        _logger.LogInformation(
+            "Patch note updated. Id: {PatchNoteId}, Version: {Version}, IsPublished: {IsPublished}",
+            patchNote.Id,
+            patchNote.Version,
+            patchNote.IsPublished);
+
+        return Ok(MapPatchNote(patchNote));
+    }
+
+    [Authorize(Policy = AdminApiKeyAuthenticationOptions.AdminPolicy)]
     [HttpPatch("{id:int}/toggle")]
     public async Task<ActionResult<PatchNoteDto>> TogglePublished(
         int id,

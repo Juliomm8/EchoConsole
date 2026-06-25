@@ -154,6 +154,62 @@ public sealed class EchoConsolePatchNotesApiClient
         }
     }
 
+    public async Task<UpdatePatchNoteApiResult> UpdateAsync(
+        int id,
+        UpdatePatchNoteApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient(
+                EchoConsoleApiClientNames.Admin);
+
+            using var response = await client.PutAsJsonAsync(
+                $"/api/patchnotes/{id}",
+                request,
+                cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var patchNote = await response.Content
+                    .ReadFromJsonAsync<PatchNoteApiDto>(
+                        cancellationToken: cancellationToken);
+
+                return UpdatePatchNoteApiResult.Success(
+                    patchNote);
+            }
+
+            var errorMessage = await ReadErrorMessageAsync(
+                response,
+                cancellationToken);
+
+            _logger.LogWarning(
+                "Update patch note request failed. PatchNoteId: {PatchNoteId}, StatusCode: {StatusCode}, Error: {ErrorMessage}",
+                id,
+                response.StatusCode,
+                errorMessage);
+
+            return UpdatePatchNoteApiResult.Failure(
+                errorMessage,
+                response.StatusCode);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unexpected error while updating patch note {PatchNoteId}.",
+                id);
+
+            return UpdatePatchNoteApiResult.Failure(
+                "The patch note service is currently unavailable.");
+        }
+    }
+
     public async Task<TogglePatchNotePublishApiResult> TogglePublishAsync(
         int id,
         CancellationToken cancellationToken = default)
@@ -376,6 +432,21 @@ public sealed class CreatePatchNoteApiRequest
     public bool IsPublished { get; set; } = true;
 }
 
+public sealed class UpdatePatchNoteApiRequest
+{
+    public string Version { get; set; } = string.Empty;
+
+    public string Category { get; set; } = string.Empty;
+
+    public string Tone { get; set; } = "green";
+
+    public string Title { get; set; } = string.Empty;
+
+    public string Description { get; set; } = string.Empty;
+
+    public bool IsPublished { get; set; }
+}
+
 public sealed class GetPatchNotesApiResult
 {
     private GetPatchNotesApiResult(
@@ -457,6 +528,50 @@ public sealed class CreatePatchNoteApiResult
         HttpStatusCode? statusCode = null)
     {
         return new CreatePatchNoteApiResult(
+            false,
+            null,
+            errorMessage,
+            statusCode);
+    }
+}
+
+public sealed class UpdatePatchNoteApiResult
+{
+    private UpdatePatchNoteApiResult(
+        bool succeeded,
+        PatchNoteApiDto? patchNote,
+        string? errorMessage,
+        HttpStatusCode? statusCode)
+    {
+        Succeeded = succeeded;
+        PatchNote = patchNote;
+        ErrorMessage = errorMessage;
+        StatusCode = statusCode;
+    }
+
+    public bool Succeeded { get; }
+
+    public PatchNoteApiDto? PatchNote { get; }
+
+    public string? ErrorMessage { get; }
+
+    public HttpStatusCode? StatusCode { get; }
+
+    public static UpdatePatchNoteApiResult Success(
+        PatchNoteApiDto? patchNote)
+    {
+        return new UpdatePatchNoteApiResult(
+            true,
+            patchNote,
+            null,
+            null);
+    }
+
+    public static UpdatePatchNoteApiResult Failure(
+        string errorMessage,
+        HttpStatusCode? statusCode = null)
+    {
+        return new UpdatePatchNoteApiResult(
             false,
             null,
             errorMessage,

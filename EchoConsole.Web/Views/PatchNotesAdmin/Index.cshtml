@@ -7,21 +7,18 @@
 
     ViewData["TitleResourceKey"] =
         "PatchNotesAdmin_DashboardPageTitle";
-
-    var deleteConfirmation = JsonSerializer.Serialize(
-        SharedLocalizer["PatchNotesAdmin_DeleteConfirm"].Value);
 }
 
 <div class="min-h-screen bg-black text-green-100">
     <div class="mx-auto max-w-[1600px] px-6 py-10 lg:px-10">
-        <header class="terminal-panel rounded-lg p-6 shadow-phosphor lg:p-8">
+        <header class="rounded-lg border border-slate-800 bg-[linear-gradient(180deg,rgba(15,23,42,0.38),rgba(2,6,8,0.96))] p-6 shadow-[0_20px_55px_rgba(0,0,0,0.35)] lg:p-8">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <p class="terminal-kicker">
                         @SharedLocalizer["PatchNotesAdmin_DashboardEyebrow"]
                     </p>
 
-                    <h1 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-green-100 sm:text-5xl">
+                    <h1 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-slate-100 sm:text-5xl">
                         @SharedLocalizer["PatchNotesAdmin_DashboardTitle"]
                     </h1>
 
@@ -32,7 +29,7 @@
 
                 <a asp-controller="PatchNotesAdmin"
                    asp-action="Create"
-                   class="inline-flex shrink-0 items-center justify-center rounded border border-green-400/40 bg-green-500/10 px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-green-200 shadow-phosphor transition hover:bg-green-500/20 hover:text-green-100">
+                   class="inline-flex h-11 shrink-0 items-center justify-center rounded border border-green-400/40 bg-green-500/10 px-6 text-xs font-bold uppercase tracking-[0.16em] text-green-200 transition-colors duration-150 hover:bg-green-500/20 hover:text-green-100">
                     @SharedLocalizer["PatchNotesAdmin_CreateNew"]
                 </a>
             </div>
@@ -40,7 +37,7 @@
 
         @if (TempData["PatchNotesAdminSuccess"] is string successMessage)
         {
-            <div class="mt-6 rounded border border-green-500/35 bg-green-500/10 px-4 py-3 text-sm text-green-200 shadow-phosphor"
+            <div class="mt-6 rounded border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-200"
                  role="status">
                 @successMessage
             </div>
@@ -48,25 +45,25 @@
 
         @if (TempData["PatchNotesAdminError"] is string errorMessage)
         {
-            <div class="mt-6 rounded border border-rose-500/35 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
+            <div class="mt-6 rounded border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
                  role="alert">
                 @errorMessage
             </div>
         }
 
-        <section class="terminal-panel mt-8 overflow-hidden rounded-lg shadow-phosphor">
-            <div class="flex flex-col gap-3 border-b border-green-500/15 bg-green-500/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <section class="mt-8 overflow-hidden rounded-lg border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.98))] shadow-[0_20px_55px_rgba(0,0,0,0.30)]">
+            <div class="flex flex-col gap-3 border-b border-slate-800 bg-slate-950/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-green-500">
                         @SharedLocalizer["PatchNotesAdmin_ArchiveBadge"]
                     </p>
 
-                    <h2 class="mt-2 font-display text-xl uppercase tracking-[0.08em] text-green-100">
+                    <h2 class="mt-2 font-display text-xl uppercase tracking-[0.08em] text-slate-100">
                         @SharedLocalizer["PatchNotesAdmin_ArchiveTitle"]
                     </h2>
                 </div>
 
-                <div class="text-[10px] uppercase tracking-[0.20em] text-green-700">
+                <div class="text-[10px] uppercase tracking-[0.20em] text-slate-600">
                     @SharedLocalizer["PatchNotesAdmin_TotalRecords"]:
                     <span class="text-green-300">
                         @Model.Items.Count
@@ -77,7 +74,7 @@
             @if (Model.Items.Count == 0)
             {
                 <div class="flex min-h-72 flex-col items-center justify-center px-6 py-16 text-center">
-                    <span class="h-3 w-3 rounded-full bg-green-400 shadow-[0_0_14px_rgba(34,197,94,0.80)] animate-pulse"></span>
+                    <span class="h-3 w-3 rounded-full bg-green-400 shadow-[0_0_14px_rgba(34,197,94,0.80)]"></span>
 
                     <h3 class="mt-6 font-display text-xl uppercase tracking-[0.08em] text-green-200">
                         @SharedLocalizer["PatchNotesAdmin_EmptyTitle"]
@@ -89,7 +86,7 @@
 
                     <a asp-controller="PatchNotesAdmin"
                        asp-action="Create"
-                       class="mt-7 rounded border border-green-400/40 bg-green-500/10 px-5 py-3 text-xs font-bold uppercase tracking-[0.16em] text-green-200 transition hover:bg-green-500/20">
+                       class="mt-7 inline-flex h-10 items-center justify-center rounded border border-green-400/40 bg-green-500/10 px-5 text-xs font-bold uppercase tracking-[0.16em] text-green-200 transition-colors duration-150 hover:bg-green-500/20">
                         @SharedLocalizer["PatchNotesAdmin_CreateFirst"]
                     </a>
                 </div>
@@ -97,31 +94,31 @@
             else
             {
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-green-500/10">
+                    <table class="min-w-[1120px] w-full border-collapse">
                         <thead class="bg-black">
-                            <tr class="text-left">
-                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-green-700">
+                            <tr class="border-b border-slate-800 text-left">
+                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-slate-600">
                                     @SharedLocalizer["PatchNotesAdmin_ColVersion"]
                                 </th>
-                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-green-700">
+                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-slate-600">
                                     @SharedLocalizer["PatchNotesAdmin_ColCategory"]
                                 </th>
-                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-green-700">
+                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-slate-600">
                                     @SharedLocalizer["PatchNotesAdmin_ColTitle"]
                                 </th>
-                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-green-700">
+                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-slate-600">
                                     @SharedLocalizer["PatchNotesAdmin_ColStatus"]
                                 </th>
-                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-green-700">
+                                <th class="px-5 py-4 text-[10px] font-bold uppercase tracking-[0.20em] text-slate-600">
                                     @SharedLocalizer["PatchNotesAdmin_ColDate"]
                                 </th>
-                                <th class="px-5 py-4 text-right text-[10px] font-bold uppercase tracking-[0.20em] text-green-700">
+                                <th class="px-5 py-4 text-right text-[10px] font-bold uppercase tracking-[0.20em] text-slate-600">
                                     @SharedLocalizer["PatchNotesAdmin_ColActions"]
                                 </th>
                             </tr>
                         </thead>
 
-                        <tbody class="divide-y divide-green-500/10 bg-black/70">
+                        <tbody class="divide-y divide-slate-900 bg-black/70">
                             @foreach (var patch in Model.Items)
                             {
                                 var toneClasses = patch.Tone switch
@@ -132,8 +129,8 @@
                                 };
 
                                 var visibilityButtonClasses = patch.IsPublished
-                                    ? "border-green-500/40 bg-green-500/10 text-green-300 hover:border-green-400/70 hover:bg-green-500/20 hover:text-green-100"
-                                    : "border-slate-600/50 bg-slate-800/40 text-slate-400 hover:border-slate-500/80 hover:bg-slate-800/70 hover:text-slate-200";
+                                    ? "border-green-500/35 bg-green-500/10 text-green-300 hover:bg-green-500/20 hover:text-green-100"
+                                    : "border-slate-700 bg-slate-900/70 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200";
 
                                 var visibilityLabel = patch.IsPublished
                                     ? SharedLocalizer["PatchNotesAdmin_Published"]
@@ -143,7 +140,7 @@
                                     ? SharedLocalizer["PatchNotesAdmin_ToggleToHidden"]
                                     : SharedLocalizer["PatchNotesAdmin_ToggleToPublished"];
 
-                                <tr class="transition hover:bg-green-500/[0.025]">
+                                <tr class="transition-colors duration-150 hover:bg-slate-900/35">
                                     <td class="whitespace-nowrap px-5 py-5 align-top">
                                         <span class="inline-flex rounded border px-3 py-1.5 text-xs font-bold @toneClasses">
                                             @patch.Version
@@ -155,7 +152,7 @@
                                     </td>
 
                                     <td class="min-w-80 px-5 py-5 align-top">
-                                        <div class="font-display text-sm uppercase tracking-[0.06em] text-green-100">
+                                        <div class="font-display text-sm uppercase tracking-[0.06em] text-slate-100">
                                             @patch.Title
                                         </div>
 
@@ -167,14 +164,14 @@
                                     <td class="whitespace-nowrap px-5 py-5 align-top">
                                         @if (patch.IsPublished)
                                         {
-                                            <span class="inline-flex items-center gap-2 rounded border border-green-500/30 bg-green-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-green-300">
-                                                <span class="h-1.5 w-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.75)]"></span>
+                                            <span class="inline-flex h-7 items-center gap-2 rounded border border-green-500/30 bg-green-500/10 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-green-300">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-green-400"></span>
                                                 @SharedLocalizer["PatchNotesAdmin_Published"]
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="inline-flex items-center gap-2 rounded border border-slate-600/40 bg-slate-800/30 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                                            <span class="inline-flex h-7 items-center gap-2 rounded border border-slate-700 bg-slate-900/60 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-slate-600"></span>
                                                 @SharedLocalizer["PatchNotesAdmin_Hidden"]
                                             </span>
@@ -187,9 +184,23 @@
 
                                     <td class="whitespace-nowrap px-5 py-5 text-right align-top">
                                         <div class="flex items-center justify-end gap-2">
+                                            <button type="button"
+                                                    data-patch-edit
+                                                    data-patch-id="@patch.Id"
+                                                    data-patch-version="@patch.Version"
+                                                    data-patch-category="@patch.Category"
+                                                    data-patch-tone="@patch.Tone"
+                                                    data-patch-title="@patch.Title"
+                                                    data-patch-description="@patch.Description"
+                                                    data-patch-published="@patch.IsPublished.ToString().ToLowerInvariant()"
+                                                    class="inline-flex h-8 w-20 shrink-0 items-center justify-center rounded border border-slate-700 bg-slate-900/70 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-300 transition-colors duration-150 hover:bg-slate-800/90 hover:text-slate-100">
+                                                [ @SharedLocalizer["PatchNotesAdmin_Edit"] ]
+                                            </button>
+
                                             <form asp-controller="PatchNotesAdmin"
                                                   asp-action="TogglePublish"
-                                                  method="post">
+                                                  method="post"
+                                                  data-patch-submit-form>
                                                 @Html.AntiForgeryToken()
 
                                                 <input type="hidden"
@@ -199,8 +210,8 @@
                                                 <button type="submit"
                                                         title="@visibilityTitle"
                                                         aria-pressed="@patch.IsPublished.ToString().ToLowerInvariant()"
-                                                        class="inline-flex items-center gap-2 rounded border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] transition @visibilityButtonClasses">
-                                                    <span class="h-1.5 w-1.5 rounded-full @(patch.IsPublished ? "bg-green-400" : "bg-slate-600")"></span>
+                                                        class="inline-flex h-8 w-28 shrink-0 items-center justify-center gap-2 rounded border px-3 text-[10px] font-bold uppercase tracking-[0.14em] transition-colors duration-150 @visibilityButtonClasses">
+                                                    <span class="h-1.5 w-1.5 shrink-0 rounded-full @(patch.IsPublished ? "bg-green-400" : "bg-slate-600")"></span>
                                                     @visibilityLabel
                                                 </button>
                                             </form>
@@ -208,7 +219,8 @@
                                             <form asp-controller="PatchNotesAdmin"
                                                   asp-action="Delete"
                                                   method="post"
-                                                  onsubmit='return confirm(@Html.Raw(deleteConfirmation));'>
+                                                  data-patch-delete-form
+                                                  data-confirm-message="@SharedLocalizer["PatchNotesAdmin_DeleteConfirm"]">
                                                 @Html.AntiForgeryToken()
 
                                                 <input type="hidden"
@@ -216,8 +228,8 @@
                                                        value="@patch.Id" />
 
                                                 <button type="submit"
-                                                        class="rounded border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-rose-300 transition hover:border-rose-400/70 hover:bg-rose-500/20 hover:text-rose-100">
-                                                    @SharedLocalizer["PatchNotesAdmin_Delete"]
+                                                        class="inline-flex h-8 w-20 shrink-0 items-center justify-center rounded border border-rose-500/35 bg-rose-500/10 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-rose-300 transition-colors duration-150 hover:bg-rose-500/20 hover:text-rose-100">
+                                                    [ @SharedLocalizer["PatchNotesAdmin_Delete"] ]
                                                 </button>
                                             </form>
                                         </div>
@@ -231,3 +243,144 @@
         </section>
     </div>
 </div>
+
+<dialog data-patch-edit-dialog
+        class="w-[min(42rem,calc(100vw-2rem))] max-w-none rounded-lg border border-slate-700 bg-[#020605] p-0 text-slate-200 shadow-[0_30px_100px_rgba(0,0,0,0.75)] backdrop:bg-black/80">
+    <div class="border-b border-slate-800 bg-slate-950/90 px-5 py-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                    &gt;_ PATCH_RECORD_EDITOR
+                </p>
+                <h2 class="mt-2 font-display text-xl uppercase tracking-[0.08em] text-slate-100">
+                    @SharedLocalizer["PatchNotesAdmin_EditTitle"]
+                </h2>
+                <p class="mt-2 text-xs leading-5 text-slate-500">
+                    @SharedLocalizer["PatchNotesAdmin_EditSubtitle"]
+                </p>
+            </div>
+
+            <button type="button"
+                    data-patch-edit-close
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded border border-slate-700 bg-black text-xs text-slate-400 transition-colors duration-150 hover:bg-slate-800 hover:text-slate-100"
+                    aria-label="@SharedLocalizer["PatchNotesAdmin_Cancel"]">
+                X
+            </button>
+        </div>
+    </div>
+
+    <form asp-controller="PatchNotesAdmin"
+          asp-action="Update"
+          method="post"
+          data-patch-edit-form
+          class="grid gap-4 p-5">
+        @Html.AntiForgeryToken()
+
+        <input asp-for="Edit.Id"
+               type="hidden"
+               data-edit-field="id" />
+
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+                <label asp-for="Edit.Version"
+                       class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    @SharedLocalizer["PatchNotesAdmin_Version"]
+                </label>
+                <input asp-for="Edit.Version"
+                       data-edit-field="version"
+                       maxlength="32"
+                       autocomplete="off"
+                       class="w-full rounded border border-slate-800 bg-black px-3 py-2.5 text-sm text-green-100 outline-none transition-colors duration-150 focus:border-green-500/45" />
+                <span asp-validation-for="Edit.Version"
+                      class="mt-1 block text-xs text-rose-300"></span>
+            </div>
+
+            <div>
+                <label asp-for="Edit.Category"
+                       class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    @SharedLocalizer["PatchNotesAdmin_Category"]
+                </label>
+                <input asp-for="Edit.Category"
+                       data-edit-field="category"
+                       maxlength="32"
+                       autocomplete="off"
+                       class="w-full rounded border border-slate-800 bg-black px-3 py-2.5 text-sm uppercase text-green-100 outline-none transition-colors duration-150 focus:border-green-500/45" />
+                <span asp-validation-for="Edit.Category"
+                      class="mt-1 block text-xs text-rose-300"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="Edit.Tone"
+                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                @SharedLocalizer["PatchNotesAdmin_Tone"]
+            </label>
+            <select asp-for="Edit.Tone"
+                    data-edit-field="tone"
+                    class="w-full rounded border border-slate-800 bg-black px-3 py-2.5 text-sm text-green-100 outline-none transition-colors duration-150 focus:border-green-500/45">
+                <option value="green">@SharedLocalizer["PatchNotesAdmin_ToneGreen"]</option>
+                <option value="amber">@SharedLocalizer["PatchNotesAdmin_ToneAmber"]</option>
+                <option value="rose">@SharedLocalizer["PatchNotesAdmin_ToneRose"]</option>
+            </select>
+        </div>
+
+        <div>
+            <label asp-for="Edit.Title"
+                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                @SharedLocalizer["PatchNotesAdmin_PatchTitle"]
+            </label>
+            <input asp-for="Edit.Title"
+                   data-edit-field="title"
+                   minlength="5"
+                   maxlength="160"
+                   autocomplete="off"
+                   class="w-full rounded border border-slate-800 bg-black px-3 py-2.5 text-sm text-green-100 outline-none transition-colors duration-150 focus:border-green-500/45" />
+            <span asp-validation-for="Edit.Title"
+                  class="mt-1 block text-xs text-rose-300"></span>
+        </div>
+
+        <div>
+            <label asp-for="Edit.Description"
+                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                @SharedLocalizer["PatchNotesAdmin_Description"]
+            </label>
+            <textarea asp-for="Edit.Description"
+                      data-edit-field="description"
+                      rows="7"
+                      minlength="10"
+                      maxlength="4000"
+                      class="w-full resize-y rounded border border-slate-800 bg-black px-3 py-2.5 text-sm leading-6 text-green-100 outline-none transition-colors duration-150 focus:border-green-500/45"></textarea>
+            <span asp-validation-for="Edit.Description"
+                  class="mt-1 block text-xs text-rose-300"></span>
+        </div>
+
+        <label class="flex cursor-pointer items-center gap-3 rounded border border-slate-800 bg-slate-950/70 px-3 py-3">
+            <input asp-for="Edit.IsPublished"
+                   data-edit-field="published"
+                   class="h-4 w-4 accent-green-500" />
+            <span class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                @SharedLocalizer["PatchNotesAdmin_EditPublishLabel"]
+            </span>
+        </label>
+
+        <div class="flex flex-col-reverse gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:justify-end">
+            <button type="button"
+                    data-patch-edit-close
+                    class="inline-flex h-10 min-w-28 items-center justify-center rounded border border-slate-700 bg-black px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 transition-colors duration-150 hover:bg-slate-800 hover:text-slate-100">
+                [ @SharedLocalizer["PatchNotesAdmin_Cancel"] ]
+            </button>
+
+            <button type="submit"
+                    class="inline-flex h-10 min-w-36 items-center justify-center rounded border border-green-500/35 bg-green-500/10 px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-green-300 transition-colors duration-150 hover:bg-green-500/20 hover:text-green-100">
+                [ @SharedLocalizer["PatchNotesAdmin_SaveChanges"] ]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/patch-notes-admin.js"
+            asp-append-version="true"
+            defer></script>
+}

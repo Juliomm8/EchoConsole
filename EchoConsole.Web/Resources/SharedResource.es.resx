@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1867,5 +1867,32 @@
   </data>
   <data name="Builds_DeleteError" xml:space="preserve">
     <value>No se pudo eliminar la build.</value>
+  </data>
+  <data name="PatchNotesAdmin_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="PatchNotesAdmin_EditTitle" xml:space="preserve">
+    <value>Editar nota de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_EditSubtitle" xml:space="preserve">
+    <value>Carga el registro actual, ajusta su contenido y guarda la transmisión sin abandonar el archivo.</value>
+  </data>
+  <data name="PatchNotesAdmin_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="PatchNotesAdmin_SaveChanges" xml:space="preserve">
+    <value>Guardar cambios</value>
+  </data>
+  <data name="PatchNotesAdmin_EditPublishLabel" xml:space="preserve">
+    <value>Mantener esta nota visible en la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateSuccess" xml:space="preserve">
+    <value>La nota de parche se actualizó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateError" xml:space="preserve">
+    <value>No se pudo actualizar la nota de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateValidationError" xml:space="preserve">
+    <value>La nota de parche contiene datos inválidos y no pudo actualizarse.</value>
   </data>
 </root>
