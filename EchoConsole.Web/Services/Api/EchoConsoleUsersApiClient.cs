@@ -12,11 +12,12 @@ public sealed class EchoConsoleUsersApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleUsersApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
+        _httpClient = httpClientFactory.CreateClient(
+            EchoConsoleApiClientNames.Admin);
         _logger = logger;
     }
 
-    public async Task<PagedResponse<UserApiDto>> GetUsersAsync(
+    public async Task<PagedUsersApiResponse> GetUsersAsync(
         string? searchTerm,
         int pageNumber,
         int pageSize,
@@ -35,25 +36,31 @@ public sealed class EchoConsoleUsersApiClient
                 query["searchTerm"] = searchTerm.Trim();
             }
 
-            var url = QueryHelpers.AddQueryString("/api/admin/users", query);
+            var url = QueryHelpers.AddQueryString(
+                "/api/admin/users",
+                query);
 
-            using var response = await _httpClient.GetAsync(url, cancellationToken);
+            using var response = await _httpClient.GetAsync(
+                url,
+                cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                var body = await response.Content.ReadAsStringAsync(
+                    cancellationToken);
+
                 _logger.LogWarning(
-                    "Users request failed. StatusCode: {StatusCode}. Body: {Body}",
+                    "Users request failed. StatusCode={StatusCode}, Body={Body}",
                     response.StatusCode,
                     body);
 
-                return new PagedResponse<UserApiDto>();
+                return new PagedUsersApiResponse();
             }
 
-            var data = await response.Content.ReadFromJsonAsync<PagedResponse<UserApiDto>>(
-                cancellationToken: cancellationToken);
-
-            return data ?? new PagedResponse<UserApiDto>();
+            return await response.Content
+                .ReadFromJsonAsync<PagedUsersApiResponse>(
+                    cancellationToken: cancellationToken)
+                ?? new PagedUsersApiResponse();
         }
         catch (OperationCanceledException)
             when (cancellationToken.IsCancellationRequested)
@@ -62,10 +69,31 @@ public sealed class EchoConsoleUsersApiClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error while reading users from EchoConsole.Api.");
-            return new PagedResponse<UserApiDto>();
+            _logger.LogError(
+                ex,
+                "Unexpected error while reading users from EchoConsole.Api.");
+
+            return new PagedUsersApiResponse();
         }
     }
+}
+
+public sealed class PagedUsersApiResponse
+{
+    public IReadOnlyList<UserApiDto> Items { get; set; } =
+        Array.Empty<UserApiDto>();
+
+    public int PageNumber { get; set; }
+
+    public int PageSize { get; set; }
+
+    public int TotalCount { get; set; }
+
+    public int TotalPages { get; set; }
+
+    public int AdminCount { get; set; }
+
+    public int ViewerCount { get; set; }
 }
 
 public sealed class UserApiDto
@@ -81,4 +109,40 @@ public sealed class UserApiDto
     public string Status { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public int InstallationCount { get; set; }
+
+    public DateTimeOffset? LastTelemetryUtc { get; set; }
+
+    public IReadOnlyList<UserInstallationHardwareApiDto> Installations { get; set; } =
+        Array.Empty<UserInstallationHardwareApiDto>();
+}
+
+public sealed class UserInstallationHardwareApiDto
+{
+    public Guid InstallationId { get; set; }
+
+    public string DeviceName { get; set; } = string.Empty;
+
+    public string? Cpu { get; set; }
+
+    public string? Gpu { get; set; }
+
+    public int? RamMb { get; set; }
+
+    public string OSVersion { get; set; } = string.Empty;
+
+    public string Platform { get; set; } = string.Empty;
+
+    public string BuildVersion { get; set; } = string.Empty;
+
+    public string AdminStatus { get; set; } = string.Empty;
+
+    public DateTimeOffset LastUpdateUtc { get; set; }
+
+    public Guid? LastSessionId { get; set; }
+
+    public string? LastSessionStatus { get; set; }
+
+    public int? LastSessionDurationMinutes { get; set; }
 }
