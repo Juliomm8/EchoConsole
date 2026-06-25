@@ -166,6 +166,8 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             session.HasKey(x => x.Id);
             session.HasIndex(x => x.SessionId).IsUnique();
             session.HasIndex(x => x.LastHeartbeatUtc);
+            session.HasIndex(x => x.BuildVersion)
+                .HasDatabaseName("IX_GameSessions_BuildVersion");
 
             session.HasIndex(x => new { x.InstallationDbId, x.StartedAtUtc })
                 .IsDescending(false, true)
@@ -210,6 +212,18 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             })
                 .IsDescending(false, true)
                 .HasDatabaseName("IX_GameSessionEvents_GameSessionId_CreatedAtUtc");
+
+            sessionEvent.HasIndex(x => x.CreatedAtUtc)
+                .IsDescending(true)
+                .HasDatabaseName("IX_GameSessionEvents_CreatedAtUtc");
+
+            sessionEvent.HasIndex(x => new
+            {
+                x.EventType,
+                x.CreatedAtUtc
+            })
+                .IsDescending(false, true)
+                .HasDatabaseName("IX_GameSessionEvents_EventType_CreatedAtUtc");
 
             sessionEvent.HasIndex(x => x.EventType)
                 .HasDatabaseName("IX_GameSessionEvents_EventType");

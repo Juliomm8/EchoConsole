@@ -1,4 +1,4 @@
-﻿using EchoConsole.Api.Contracts.Client;
+using EchoConsole.Api.Contracts.Client;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
 using EchoConsole.Api.Hubs;
@@ -84,6 +84,8 @@ public sealed class SessionsController : ControllerBase
         {
             sessionId = session.SessionId,
             installationId = installation.InstallationId,
+            ownerUserId = installation.OwnerUserId,
+            deviceName = installation.DeviceName,
             buildVersion = session.BuildVersion,
             currentScene = session.CurrentScene,
             currentGameState = session.CurrentGameState,
@@ -152,6 +154,9 @@ public sealed class SessionsController : ControllerBase
         {
             sessionId = session.SessionId,
             installationId = session.Installation.InstallationId,
+            ownerUserId = session.Installation.OwnerUserId,
+            deviceName = session.Installation.DeviceName,
+            buildVersion = session.BuildVersion,
             currentScene = session.CurrentScene,
             currentGameState = session.CurrentGameState,
             currentPhase = session.CurrentPhase,
@@ -302,11 +307,19 @@ public sealed class SessionsController : ControllerBase
                 sessionId = session.SessionId,
                 installationId =
                     session.Installation.InstallationId,
+                ownerUserId =
+                    session.Installation.OwnerUserId,
+                deviceName =
+                    session.Installation.DeviceName,
+                buildVersion =
+                    session.BuildVersion,
                 eventId = sessionEvent.Id,
                 eventType = sessionEvent.EventType,
                 scene = sessionEvent.Scene,
                 gameState = sessionEvent.GameState,
                 phase = sessionEvent.Phase,
+                payloadJson = sessionEvent.PayloadJson,
+                clientTimeUtc = sessionEvent.ClientTimeUtc,
                 createdAtUtc = sessionEvent.CreatedAtUtc
             },
             cancellationToken);

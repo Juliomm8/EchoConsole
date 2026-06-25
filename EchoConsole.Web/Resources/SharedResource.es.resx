@@ -2066,4 +2066,52 @@
   <data name="Users_NoLinkedStations" xml:space="preserve">
     <value>No se encontraron estaciones de hardware vinculadas a este operador.</value>
   </data>
+  <data name="SessionEvents_RealtimeHint" xml:space="preserve">
+    <value>Flujo reactivo. La telemetría nueva se inserta arriba y el navegador conserva un máximo de 50 filas visibles.</value>
+  </data>
+  <data name="SessionEvents_StreamOnline" xml:space="preserve">
+    <value>STREAM EN LÍNEA</value>
+  </data>
+  <data name="SessionEvents_TimelineTitle" xml:space="preserve">
+    <value>TRAZA DE LÍNEA DE TIEMPO</value>
+  </data>
+  <data name="SessionEvents_TimelineLoading" xml:space="preserve">
+    <value>Cargando traza cronológica de la sesión...</value>
+  </data>
+  <data name="SessionEvents_TimelineEmpty" xml:space="preserve">
+    <value>No se registraron eventos para esta sesión.</value>
+  </data>
+  <data name="SessionEvents_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="SessionEvents_Connection" xml:space="preserve">
+    <value>Conexión establecida</value>
+  </data>
+  <data name="SessionEvents_Disconnection" xml:space="preserve">
+    <value>Sesión desconectada</value>
+  </data>
+  <data name="SessionEvents_LastHeartbeat" xml:space="preserve">
+    <value>Último heartbeat recibido</value>
+  </data>
+  <data name="SessionEvents_ServerTime" xml:space="preserve">
+    <value>Servidor UTC</value>
+  </data>
+  <data name="SessionEvents_ClientTime" xml:space="preserve">
+    <value>Cliente UTC</value>
+  </data>
+  <data name="SessionEvents_VisibleLimit" xml:space="preserve">
+    <value>Límite visible del DOM: 50 filas</value>
+  </data>
+  <data name="SessionEvents_Purge" xml:space="preserve">
+    <value>Purgar</value>
+  </data>
+  <data name="SessionEvents_CancelPurge" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="SessionEvents_PurgingIn" xml:space="preserve">
+    <value>Purgando en {0}s...</value>
+  </data>
+  <data name="SessionEvents_PurgeFailed" xml:space="preserve">
+    <value>Error de purga</value>
+  </data>
 </root>
