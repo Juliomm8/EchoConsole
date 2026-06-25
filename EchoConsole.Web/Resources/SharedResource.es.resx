@@ -2039,4 +2039,31 @@
   <data name="Alerts_KpiDiscord" xml:space="preserve">
     <value>RELÉ_DISCORD</value>
   </data>
+  <data name="Users_StationInspectionHint" xml:space="preserve">
+    <value>Inspección de Estaciones Activas: Seleccione un operador para auditar las especificaciones de hardware enlazadas a sus sesiones de telemetría.</value>
+  </data>
+  <data name="Users_KpiAdmins" xml:space="preserve">
+    <value>ADMINISTRADORES</value>
+  </data>
+  <data name="Users_KpiViewers" xml:space="preserve">
+    <value>VISUALIZADORES</value>
+  </data>
+  <data name="Users_SearchLabel" xml:space="preserve">
+    <value>BÚSQUEDA DE OPERADORES</value>
+  </data>
+  <data name="Users_ColStations" xml:space="preserve">
+    <value>Estaciones vinculadas</value>
+  </data>
+  <data name="Users_ColLastTelemetry" xml:space="preserve">
+    <value>Última telemetría</value>
+  </data>
+  <data name="Users_Audit" xml:space="preserve">
+    <value>AUDITAR</value>
+  </data>
+  <data name="Users_AuditOperator" xml:space="preserve">
+    <value>Auditar operador</value>
+  </data>
+  <data name="Users_NoLinkedStations" xml:space="preserve">
+    <value>No se encontraron estaciones de hardware vinculadas a este operador.</value>
+  </data>
 </root>

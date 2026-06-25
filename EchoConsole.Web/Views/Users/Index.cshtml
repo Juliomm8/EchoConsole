@@ -1,179 +1,272 @@
+@using System.Text.Json
 @model EchoConsole.Web.Models.Users.UsersIndexViewModel
 
 @{
     ViewData["Title"] = SharedLocalizer["Users_PageTitle"].Value;
     ViewData["TitleResourceKey"] = "Users_PageTitle";
+
+    var jsonOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    var userHardwareJson = JsonSerializer.Serialize(
+        Model.Items,
+        jsonOptions);
+
+    var auditOperatorLabel =
+        SharedLocalizer["Users_AuditOperator"].Value;
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1600px] px-6 py-6">
-        <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
-            <div>
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">@SharedLocalizer["Users_ModuleBadge"]</p>
-                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">@SharedLocalizer["Users_HeroTitle"]</h1>
-                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base">@SharedLocalizer["Users_HeroSubtitle"]</p>
-            </div>
+<section class="min-h-screen bg-[#020504] font-mono text-slate-200">
+    <div class="mx-auto w-full max-w-[1720px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="border border-slate-800 bg-[linear-gradient(135deg,rgba(15,23,42,0.58),rgba(2,6,8,0.97)_62%,rgba(8,145,178,0.06))] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.32)]">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+                <div class="max-w-4xl">
+                    <p class="text-[9px] uppercase tracking-[0.28em] text-slate-600">
+                        MODULE_USERS // NOC_OPERATOR_DIRECTORY
+                    </p>
+                    <h1 class="mt-3 font-display text-2xl uppercase tracking-[0.13em] text-slate-100 sm:text-4xl">
+                        &gt; @SharedLocalizer["Users_HeroTitle"]
+                    </h1>
+                    <p class="mt-3 text-sm leading-6 text-slate-500">
+                        @SharedLocalizer["Users_HeroSubtitle"]
+                    </p>
+                    <p class="mt-3 max-w-4xl border-l-2 border-slate-800 pl-3 text-[10px] leading-5 text-slate-600">
+                        &gt; @SharedLocalizer["Users_StationInspectionHint"]
+                    </p>
+                </div>
 
-            <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/80 px-5 py-4">
-                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-500">@SharedLocalizer["Users_TotalLabel"]</div>
-                <div class="mt-2 font-display text-3xl uppercase tracking-[0.08em] text-cyan-300">
-                    @Model.TotalCount.ToString("N0")
+                <div class="flex items-center gap-3 border border-slate-800 bg-black/50 px-4 py-3">
+                    <span class="h-2 w-2 rounded-full bg-green-400 shadow-[0_0_12px_rgba(74,222,128,0.65)]"></span>
+                    <span class="text-[9px] font-semibold uppercase tracking-[0.18em] text-green-400">
+                        OPERATOR_DIRECTORY // ONLINE
+                    </span>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div class="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)] backdrop-blur">
-            <form method="get" asp-controller="Users" asp-action="Index" class="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+        <section class="mt-5 grid gap-3 md:grid-cols-2">
+            <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.99))] px-5 py-4">
+                <p class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                    PRIVILEGED_OPERATORS
+                </p>
+                <p class="mt-2 whitespace-nowrap font-display text-base uppercase tracking-[0.12em] text-green-400">
+                    [ @SharedLocalizer["Users_KpiAdmins"]: @Model.AdminCount.ToString("N0") ]
+                </p>
+            </article>
+
+            <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.99))] px-5 py-4">
+                <p class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                    READ_ONLY_OPERATORS
+                </p>
+                <p class="mt-2 whitespace-nowrap font-display text-base uppercase tracking-[0.12em] text-green-400">
+                    [ @SharedLocalizer["Users_KpiViewers"]: @Model.ViewerCount.ToString("N0") ]
+                </p>
+            </article>
+        </section>
+
+        <section class="mt-5 border border-slate-800 bg-[#040807] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.24)]">
+            <form method="get"
+                  asp-controller="Users"
+                  asp-action="Index"
+                  class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-end">
                 <div>
-                    <label for="searchTerm" class="mb-2 block font-display text-xs uppercase tracking-[0.25em] text-slate-400">@SharedLocalizer["Common_Search"]</label>
+                    <label for="searchTerm" class="mb-2 block text-[9px] uppercase tracking-[0.20em] text-slate-600">
+                        @SharedLocalizer["Users_SearchLabel"]
+                    </label>
                     <input id="searchTerm"
                            name="searchTerm"
                            value="@Model.SearchTerm"
-                           type="text"
-                           
+                           type="search"
+                           maxlength="100"
+                           autocomplete="off"
                            placeholder="@SharedLocalizer["Users_SearchPlaceholder"]"
-                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/10" />
+                           class="h-11 w-full border border-slate-800 bg-black px-4 text-xs text-slate-200 outline-none transition-colors placeholder:text-slate-700 focus:border-green-500/40" />
                 </div>
 
-                <div class="flex items-end gap-3">
-                    <button type="submit"
-                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">@SharedLocalizer["Common_Search"]</button>
+                <button type="submit"
+                        class="inline-flex h-11 min-w-[120px] items-center justify-center whitespace-nowrap border border-green-500/30 bg-green-500/10 px-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-green-400 transition-colors hover:bg-green-500/15">
+                    [ @SharedLocalizer["Common_Search"] ]
+                </button>
 
-                    <a asp-controller="Users"
-                       asp-action="Index"
-                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">@SharedLocalizer["Common_Reset"]</a>
-                </div>
+                <a asp-controller="Users"
+                   asp-action="Index"
+                   class="inline-flex h-11 min-w-[120px] items-center justify-center whitespace-nowrap border border-slate-800 bg-slate-950 px-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500 transition-colors hover:bg-slate-900 hover:text-slate-300">
+                    [ @SharedLocalizer["Common_Reset"] ]
+                </a>
             </form>
-        </div>
+        </section>
 
-        <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur">
-            <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <section class="mt-5 border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.97),rgba(1,3,4,0.99))] shadow-[0_20px_55px_rgba(0,0,0,0.30)]">
+            <div class="flex flex-col gap-3 border-b border-slate-800 px-5 py-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">@SharedLocalizer["Users_TableBadge"]</p>
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">@SharedLocalizer["Users_TableTitle"]</h2>
+                    <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">
+                        &gt;_ @SharedLocalizer["Users_TableBadge"]
+                    </p>
+                    <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">
+                        @SharedLocalizer["Users_TableTitle"]
+                    </h2>
                 </div>
-
-                <div class="text-sm text-slate-400">
-                    <span>@SharedLocalizer["Common_Results"]</span>
-                    <span class="font-semibold text-cyan-300">@Model.TotalCount.ToString("N0")</span>
+                <div class="text-[10px] uppercase tracking-[0.16em] text-slate-600">
+                    @SharedLocalizer["Common_Results"]
+                    <span class="text-green-400">@Model.TotalCount.ToString("N0")</span>
                 </div>
             </div>
 
-            <div class="overflow-hidden rounded-2xl border border-slate-800">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-800">
-                        <thead class="bg-slate-900/90">
-                            <tr class="text-left">
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Common_Name"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Common_Email"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Common_Role"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Common_Status"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Users_ColJoinedDate"]</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-900 bg-slate-950/80">
-                            @if (Model.Items != null && Model.Items.Any())
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1180px] border-collapse text-left">
+                    <thead class="border-b border-slate-800 bg-slate-950/85">
+                        <tr class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Common_Name"]</th>
+                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Common_Email"]</th>
+                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Common_Role"]</th>
+                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Common_Status"]</th>
+                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Users_ColStations"]</th>
+                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Users_ColLastTelemetry"]</th>
+                            <th class="px-5 py-3 text-right font-medium">@SharedLocalizer["Common_Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-900 bg-black/25">
+                        @if (Model.Items.Any())
+                        {
+                            @foreach (var item in Model.Items)
                             {
-                                @foreach (var item in Model.Items)
-                                {
-                                    <tr class="transition-colors duration-150 hover:bg-slate-900/70">
-                                        <td class="px-5 py-4 text-sm text-cyan-300">@item.Name</td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@item.Email</td>
-
-                                        <td class="px-5 py-4">
-                                            @switch (item.Role)
-                                            {
-                                                case "Admin":
-                                                    <span class="inline-flex items-center gap-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-300">
-                                                        <span class="h-2 w-2 rounded-full bg-fuchsia-300"></span>
-                                                        <span>@SharedLocalizer["Users_RoleAdmin"]</span>
-                                                    </span>
-                                                    break;
-                                                case "Moderator":
-                                                    <span class="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-400">
-                                                        <span class="h-2 w-2 rounded-full bg-amber-400"></span>
-                                                        <span>@SharedLocalizer["Users_RoleModerator"]</span>
-                                                    </span>
-                                                    break;
-                                                default:
-                                                    <span class="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
-                                                        <span class="h-2 w-2 rounded-full bg-cyan-300"></span>
-                                                        <span>@SharedLocalizer["Users_RoleViewer"]</span>
-                                                    </span>
-                                                    break;
-                                            }
-                                        </td>
-
-                                        <td class="px-5 py-4">
-                                            @if (item.Status == "Active")
-                                            {
-                                                <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-                                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                                                    <span>@SharedLocalizer["Users_StatusActive"]</span>
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-400">
-                                                    <span class="h-2 w-2 rounded-full bg-rose-400"></span>
-                                                    <span>@SharedLocalizer["Users_StatusSuspended"]</span>
-                                                </span>
-                                            }
-                                        </td>
-
-                                        <td class="px-5 py-4 text-sm text-slate-400">
-                                            @item.CreatedAtUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'")
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="px-5 py-6 text-center text-sm text-slate-400">@SharedLocalizer["Users_EmptyState"]</td>
+                                <tr data-user-row
+                                    data-user-id="@item.Id"
+                                    tabindex="0"
+                                    aria-label="@auditOperatorLabel @item.Name"
+                                    class="cursor-pointer transition-colors duration-150 hover:bg-slate-900/55 focus:bg-slate-900/55 focus:outline-none">
+                                    <td class="px-5 py-4">
+                                        <p class="font-display text-sm text-slate-100">@item.Name</p>
+                                        <p class="mt-1 text-[9px] uppercase tracking-[0.14em] text-slate-700">USER_ID: @item.Id</p>
+                                    </td>
+                                    <td class="px-5 py-4 text-xs text-slate-400">@item.Email</td>
+                                    <td class="px-5 py-4">
+                                        <span class="inline-flex min-w-[110px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+                                            @item.Role
+                                        </span>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <span class="inline-flex min-w-[100px] items-center justify-center whitespace-nowrap border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] @(item.Status == "Active" ? "border-green-500/25 bg-green-500/10 text-green-400" : "border-red-500/25 bg-red-500/10 text-red-400")">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <span class="font-display text-sm text-green-400">@item.InstallationCount</span>
+                                        <span class="ml-1 text-[9px] uppercase tracking-[0.12em] text-slate-700">NODES</span>
+                                    </td>
+                                    <td class="px-5 py-4 text-xs text-slate-500">
+                                        @(item.LastTelemetryUtc.HasValue
+                                            ? item.LastTelemetryUtc.Value.UtcDateTime.ToString("yyyy-MM-dd HH:mm") + " UTC"
+                                            : "NO_TELEMETRY")
+                                    </td>
+                                    <td class="px-5 py-4 text-right">
+                                        <button type="button"
+                                                data-user-audit
+                                                data-user-id="@item.Id"
+                                                class="inline-flex h-8 w-28 min-w-[112px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.13em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">
+                                            [ @SharedLocalizer["Users_Audit"] ]
+                                        </button>
+                                    </td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="px-5 py-12 text-center text-xs uppercase tracking-[0.18em] text-slate-600">
+                                    @SharedLocalizer["Users_EmptyState"]
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
 
-            <div class="mt-5 flex flex-col gap-4 border-t border-slate-800 pt-5 md:flex-row md:items-center md:justify-between">
-                <div class="text-sm text-slate-400">
-                    <span>@SharedLocalizer["Common_Page"]</span>
-                    <span class="font-semibold text-cyan-300">@Model.PageNumber</span>
-                    <span>@SharedLocalizer["Common_Of"]</span>
-                    <span class="font-semibold text-cyan-300">@Math.Max(Model.TotalPages, 1)</span>
+            <footer class="flex flex-col gap-4 border-t border-slate-800 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="text-[10px] uppercase tracking-[0.15em] text-slate-600">
+                    @SharedLocalizer["Common_Page"]
+                    <span class="text-green-400">@Model.PageNumber</span>
+                    @SharedLocalizer["Common_Of"]
+                    <span class="text-green-400">@Math.Max(Model.TotalPages, 1)</span>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 whitespace-nowrap">
                     @if (Model.HasPreviousPage)
                     {
                         <a asp-controller="Users"
                            asp-action="Index"
                            asp-route-searchTerm="@Model.SearchTerm"
                            asp-route-pageNumber="@(Model.PageNumber - 1)"
-                           class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">@SharedLocalizer["Common_Previous"]</a>
+                           class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-400 transition-colors hover:bg-slate-900 hover:text-slate-200">
+                            [ @SharedLocalizer["Common_Previous"] ]
+                        </a>
                     }
-                    else
-                    {
-                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">@SharedLocalizer["Common_Previous"]</span>
-                    }
-
                     @if (Model.HasNextPage)
                     {
                         <a asp-controller="Users"
                            asp-action="Index"
                            asp-route-searchTerm="@Model.SearchTerm"
                            asp-route-pageNumber="@(Model.PageNumber + 1)"
-                           class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">@SharedLocalizer["Common_Next"]</a>
+                           class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-700 bg-slate-900/70 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-300 transition-colors hover:bg-slate-800 hover:text-green-400">
+                            [ @SharedLocalizer["Common_Next"] ]
+                        </a>
                     }
-                    else
-                    {
-                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">@SharedLocalizer["Common_Next"]</span>
-                    }
+                </div>
+            </footer>
+        </section>
+    </div>
+
+    <div data-user-drawer-overlay
+         class="pointer-events-none fixed inset-0 z-40 bg-black/70 opacity-0 transition-opacity duration-200"></div>
+
+    <aside data-user-drawer
+           aria-hidden="true"
+           class="fixed inset-y-0 right-0 z-50 w-full max-w-2xl translate-x-full border-l border-slate-800 bg-[#020504] shadow-[-24px_0_70px_rgba(0,0,0,0.55)] transition-transform duration-200 ease-out">
+        <div class="flex h-full flex-col">
+            <header class="flex items-start justify-between border-b border-slate-800 px-5 py-5">
+                <div>
+                    <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">&gt;_ LINKED_STATION_AUDIT</p>
+                    <h2 data-drawer-user-name class="mt-2 font-display text-xl uppercase tracking-[0.12em] text-slate-100">-</h2>
+                    <p data-drawer-user-email class="mt-2 text-xs text-slate-500">-</p>
+                </div>
+                <button type="button"
+                        data-user-drawer-close
+                        class="inline-flex h-9 w-24 items-center justify-center border border-slate-700 bg-slate-900 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200">
+                    [ @SharedLocalizer["Common_Close"] ]
+                </button>
+            </header>
+
+            <div class="grid grid-cols-3 gap-px border-b border-slate-800 bg-slate-800">
+                <div class="bg-[#040807] px-4 py-3">
+                    <p class="text-[8px] uppercase tracking-[0.16em] text-slate-700">ROLE</p>
+                    <p data-drawer-user-role class="mt-2 text-[10px] uppercase text-green-400">-</p>
+                </div>
+                <div class="bg-[#040807] px-4 py-3">
+                    <p class="text-[8px] uppercase tracking-[0.16em] text-slate-700">STATUS</p>
+                    <p data-drawer-user-status class="mt-2 text-[10px] uppercase text-green-400">-</p>
+                </div>
+                <div class="bg-[#040807] px-4 py-3">
+                    <p class="text-[8px] uppercase tracking-[0.16em] text-slate-700">LINKED_NODES</p>
+                    <p data-drawer-node-count class="mt-2 text-[10px] uppercase text-green-400">0</p>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5">
+                <div data-drawer-stations class="space-y-4"></div>
+                <div data-drawer-empty class="hidden border border-slate-800 bg-black/40 px-5 py-12 text-center text-xs uppercase tracking-[0.16em] text-slate-600">
+                    @SharedLocalizer["Users_NoLinkedStations"]
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </aside>
+
+    <script id="users-hardware-data" type="application/json">
+        @Html.Raw(userHardwareJson)
+    </script>
+</section>
+
+@section Scripts {
+    <script src="~/js/users-operations.js" asp-append-version="true"></script>
+}
