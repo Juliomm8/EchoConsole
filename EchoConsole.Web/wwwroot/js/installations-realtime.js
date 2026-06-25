@@ -292,23 +292,36 @@ window.echoConsoleInstallationsRealtime = (() => {
     }
 
     function deleteInstallation(button) {
-        const confirmed =
-            window.confirm(
+        if (!window.confirm(
                 options.labels.deleteConfirm
-                || "Delete this installation and its related telemetry?");
-
-        if (!confirmed) {
+                || "Delete this installation and its related telemetry?")) {
             return;
         }
 
+        const installationId =
+            button.dataset.installationId;
+
+        if (!installationId) {
+            return;
+        }
+
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+
         setInputValue(
             options.deleteIdInputId,
-            button.dataset.installationId);
+            installationId);
 
-        document
-            .getElementById(
-                options.deleteFormId)
-            ?.requestSubmit();
+        const form = document.getElementById(
+            options.deleteFormId);
+
+        if (!form) {
+            button.disabled = false;
+            button.removeAttribute("aria-busy");
+            return;
+        }
+
+        form.requestSubmit();
     }
 
     function buildConnection() {
@@ -613,7 +626,7 @@ window.echoConsoleInstallationsRealtime = (() => {
                 </td>
                 <td class="px-4 py-4 text-xs text-slate-500">${escapeHtml(formatUtc(item.lastUpdateUtc))}</td>
                 <td class="px-4 py-4 text-right">
-                    <div class="inline-flex items-center gap-2">
+                    <div class="inline-flex items-center justify-end gap-2 whitespace-nowrap">
                         ${renderEditButton(item, installationId, adminAlias, adminStatus)}
                         ${renderDetailsButton(item, installationId, adminAlias, adminStatus, owner)}
                         ${renderDeleteButton(installationId)}
@@ -633,7 +646,7 @@ window.echoConsoleInstallationsRealtime = (() => {
                     data-installation-id="${escapeAttribute(installationId)}"
                     data-admin-alias="${escapeAttribute(adminAlias)}"
                     data-admin-status="${escapeAttribute(adminStatus)}"
-                    class="h-8 w-28 shrink-0 border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-cyan-300">
+                    class="inline-flex h-8 w-28 min-w-[112px] max-w-[112px] shrink-0 items-center justify-center border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 transition-colors duration-150 hover:bg-slate-800/90 hover:text-cyan-300 disabled:cursor-wait disabled:opacity-50">
                 [ ${escapeHtml(options.labels.editAlias || "EDIT ALIAS")} ]
             </button>`;
     }
@@ -663,7 +676,7 @@ window.echoConsoleInstallationsRealtime = (() => {
                     data-owner="${escapeAttribute(owner)}"
                     data-first-seen="${escapeAttribute(formatUtc(item.firstSeenUtc))}"
                     data-last-update="${escapeAttribute(formatUtc(item.lastUpdateUtc))}"
-                    class="h-8 w-24 shrink-0 border border-cyan-900/60 bg-cyan-950/20 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-400 transition-colors hover:bg-cyan-900/30 hover:text-cyan-200">
+                    class="inline-flex h-8 w-28 min-w-[112px] max-w-[112px] shrink-0 items-center justify-center border border-cyan-900/60 bg-cyan-950/20 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-400 transition-colors duration-150 hover:bg-cyan-900/30 hover:text-cyan-200">
                 [ ${escapeHtml(options.labels.details || "DETAILS")} ]
             </button>`;
     }
@@ -673,7 +686,7 @@ window.echoConsoleInstallationsRealtime = (() => {
             <button type="button"
                     data-installation-delete
                     data-installation-id="${escapeAttribute(installationId)}"
-                    class="h-8 w-20 shrink-0 border border-red-900/60 bg-red-950/20 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-red-500 transition-colors hover:bg-red-900/30 hover:text-red-300">
+                    class="inline-flex h-8 w-28 min-w-[112px] max-w-[112px] shrink-0 items-center justify-center border border-red-900/60 bg-red-950/20 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-red-500 transition-colors duration-150 hover:bg-red-900/30 hover:text-red-300 disabled:cursor-wait disabled:opacity-50">
                 [ ${escapeHtml(options.labels.delete || "DELETE")} ]
             </button>`;
     }

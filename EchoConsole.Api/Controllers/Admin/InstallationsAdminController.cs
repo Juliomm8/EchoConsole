@@ -213,11 +213,12 @@ public sealed class InstallationsAdminController : ControllerBase
         var executionStrategy =
             _dbContext.Database.CreateExecutionStrategy();
 
-        var deleted = await executionStrategy.ExecuteAsync(
+        var result = await executionStrategy.ExecuteAsync(
             async () =>
             {
                 await using var transaction =
                     await _dbContext.Database.BeginTransactionAsync(
+                        IsolationLevel.ReadCommitted,
                         cancellationToken);
 
                 try
@@ -229,7 +230,8 @@ public sealed class InstallationsAdminController : ControllerBase
                         .Select(item => new
                         {
                             item.Id,
-                            item.DeviceName
+                            item.DeviceName,
+                            item.InstallationId
                         })
                         .FirstOrDefaultAsync(cancellationToken);
 
@@ -238,7 +240,7 @@ public sealed class InstallationsAdminController : ControllerBase
                         await transaction.RollbackAsync(
                             cancellationToken);
 
-                        return false;
+                        return InstallationDeletionResult.NotFound;
                     }
 
                     var sessionIds = _dbContext.GameSessions
@@ -246,32 +248,53 @@ public sealed class InstallationsAdminController : ControllerBase
                             session.InstallationDbId == installation.Id)
                         .Select(session => session.Id);
 
-                    await _dbContext.GameSessionEvents
+                    var deletedEvents = await _dbContext.GameSessionEvents
                         .Where(sessionEvent =>
                             sessionIds.Contains(
                                 sessionEvent.GameSessionId))
                         .ExecuteDeleteAsync(cancellationToken);
 
-                    await _dbContext.GameSessions
+                    var deletedSessions = await _dbContext.GameSessions
                         .Where(session =>
                             session.InstallationDbId == installation.Id)
                         .ExecuteDeleteAsync(cancellationToken);
 
-                    await _dbContext.SystemAlerts
+                    var installationIdText =
+                        installation.InstallationId.ToString("D");
+
+                    var installationIdUpper =
+                        installationIdText.ToUpperInvariant();
+
+                    var deletedAlerts = await _dbContext.SystemAlerts
                         .Where(alert =>
                             alert.InstallationId ==
                                 installation.DeviceName ||
                             alert.InstallationId ==
-                                installationId.ToString())
+                                installationIdText ||
+                            alert.InstallationId ==
+                                installationIdUpper)
                         .ExecuteDeleteAsync(cancellationToken);
 
-                    var deletedRows = await _dbContext.Installations
-                        .Where(item => item.Id == installation.Id)
-                        .ExecuteDeleteAsync(cancellationToken);
+                    var deletedInstallations =
+                        await _dbContext.Installations
+                            .Where(item =>
+                                item.Id == installation.Id)
+                            .ExecuteDeleteAsync(cancellationToken);
 
-                    await transaction.CommitAsync(cancellationToken);
+                    if (deletedInstallations != 1)
+                    {
+                        throw new InvalidOperationException(
+                            "The installation could not be deleted consistently.");
+                    }
 
-                    return deletedRows > 0;
+                    await transaction.CommitAsync(
+                        cancellationToken);
+
+                    return new InstallationDeletionResult(
+                        true,
+                        deletedSessions,
+                        deletedEvents,
+                        deletedAlerts);
                 }
                 catch
                 {
@@ -282,14 +305,17 @@ public sealed class InstallationsAdminController : ControllerBase
                 }
             });
 
-        if (!deleted)
+        if (!result.Deleted)
         {
             return NotFound();
         }
 
         _logger.LogWarning(
-            "Installation and related telemetry deleted. InstallationId={InstallationId}",
-            installationId);
+            "Installation and related telemetry deleted. InstallationId={InstallationId}, Sessions={Sessions}, Events={Events}, Alerts={Alerts}",
+            installationId,
+            result.DeletedSessions,
+            result.DeletedEvents,
+            result.DeletedAlerts);
 
         return NoContent();
     }
@@ -388,5 +414,15 @@ public sealed class InstallationsAdminController : ControllerBase
             FirstSeenUtc = item.FirstSeenUtc,
             LastUpdateUtc = item.LastUpdateUtc
         });
+    }
+
+    private sealed record InstallationDeletionResult(
+        bool Deleted,
+        int DeletedSessions,
+        int DeletedEvents,
+        int DeletedAlerts)
+    {
+        public static InstallationDeletionResult NotFound { get; } =
+            new(false, 0, 0, 0);
     }
 }
