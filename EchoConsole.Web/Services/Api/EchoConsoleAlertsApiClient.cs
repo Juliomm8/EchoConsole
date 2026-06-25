@@ -19,34 +19,114 @@ public sealed class EchoConsoleAlertsApiClient
 
     public async Task<PagedResponse<SystemAlertApiDto>> GetAlertsAsync(
         string? severity,
-        bool? isResolved,
+        string status,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default)
     {
+        var query = new Dictionary<string, string?>
+        {
+            ["status"] = status,
+            ["pageNumber"] = pageNumber.ToString(),
+            ["pageSize"] = pageSize.ToString()
+        };
+
+        if (!string.IsNullOrWhiteSpace(severity))
+        {
+            query["severity"] = severity.Trim();
+        }
+
+        return await GetAsync(
+            QueryHelpers.AddQueryString("/api/admin/alerts", query),
+            new PagedResponse<SystemAlertApiDto>(),
+            cancellationToken);
+    }
+
+    public Task<IReadOnlyList<AlertTypeDefinitionApiDto>> GetAlertTypesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return GetAsync<IReadOnlyList<AlertTypeDefinitionApiDto>>(
+            "/api/admin/alerts/types",
+            Array.Empty<AlertTypeDefinitionApiDto>(),
+            cancellationToken);
+    }
+
+    public async Task<SystemAlertApiDto?> ResolveAlertAsync(
+        int alertId,
+        CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(
+            HttpMethod.Patch,
+            $"/api/admin/alerts/{alertId}/resolve");
+
+        return await SendAsync<SystemAlertApiDto>(
+            request,
+            cancellationToken);
+    }
+
+    public async Task<AlertTypeDefinitionApiDto?> UpdateAlertTypeAsync(
+        int id,
+        UpdateAlertTypeApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var message = new HttpRequestMessage(
+            HttpMethod.Put,
+            $"/api/admin/alerts/types/{id}")
+        {
+            Content = JsonContent.Create(request)
+        };
+
+        return await SendAsync<AlertTypeDefinitionApiDto>(
+            message,
+            cancellationToken);
+    }
+
+    public async Task<bool> DeleteAlertTypeAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await _httpClient.DeleteAsync(
+            $"/api/admin/alerts/types/{id}",
+            cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return true;
+        }
+
+        await LogFailureAsync(
+            $"Delete alert type {id}",
+            response,
+            cancellationToken);
+
+        return false;
+    }
+
+    public async Task<AlertAiTrendAnalysisApiDto?> RunAiTrendAnalysisAsync(
+        string culture,
+        CancellationToken cancellationToken = default)
+    {
+        var url = QueryHelpers.AddQueryString(
+            "/api/admin/alerts/ai-trend-analysis",
+            "culture",
+            culture);
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            url);
+
+        return await SendAsync<AlertAiTrendAnalysisApiDto>(
+            request,
+            cancellationToken);
+    }
+
+    private async Task<T> GetAsync<T>(
+        string url,
+        T fallback,
+        CancellationToken cancellationToken)
+    {
         try
         {
-            var query = new Dictionary<string, string?>
-            {
-                ["pageNumber"] = pageNumber.ToString(),
-                ["pageSize"] = pageSize.ToString()
-            };
-
-            if (!string.IsNullOrWhiteSpace(severity))
-            {
-                query["severity"] = severity.Trim();
-            }
-
-            if (isResolved.HasValue)
-            {
-                query["isResolved"] =
-                    isResolved.Value.ToString().ToLowerInvariant();
-            }
-
-            var url = QueryHelpers.AddQueryString(
-                "/api/admin/alerts",
-                query);
-
             using var response = await _httpClient.GetAsync(
                 url,
                 cancellationToken);
@@ -54,17 +134,16 @@ public sealed class EchoConsoleAlertsApiClient
             if (!response.IsSuccessStatusCode)
             {
                 await LogFailureAsync(
-                    "Alerts request",
+                    "GET " + url,
                     response,
                     cancellationToken);
 
-                return new PagedResponse<SystemAlertApiDto>();
+                return fallback;
             }
 
-            return await response.Content
-                .ReadFromJsonAsync<PagedResponse<SystemAlertApiDto>>(
-                    cancellationToken: cancellationToken)
-                ?? new PagedResponse<SystemAlertApiDto>();
+            return await response.Content.ReadFromJsonAsync<T>(
+                cancellationToken: cancellationToken)
+                ?? fallback;
         }
         catch (OperationCanceledException)
             when (cancellationToken.IsCancellationRequested)
@@ -73,24 +152,17 @@ public sealed class EchoConsoleAlertsApiClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Unexpected error while reading alerts from EchoConsole.Api.");
-
-            return new PagedResponse<SystemAlertApiDto>();
+            _logger.LogError(ex, "API read failed. Url={Url}", url);
+            return fallback;
         }
     }
 
-    public async Task<SystemAlertApiDto?> ResolveAlertAsync(
-        int alertId,
-        CancellationToken cancellationToken = default)
+    private async Task<T?> SendAsync<T>(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
     {
         try
         {
-            using var request = new HttpRequestMessage(
-                HttpMethod.Patch,
-                $"/api/admin/alerts/{alertId}/resolve");
-
             using var response = await _httpClient.SendAsync(
                 request,
                 cancellationToken);
@@ -98,16 +170,15 @@ public sealed class EchoConsoleAlertsApiClient
             if (!response.IsSuccessStatusCode)
             {
                 await LogFailureAsync(
-                    $"Resolve alert {alertId}",
+                    request.RequestUri?.ToString() ?? "Alerts API request",
                     response,
                     cancellationToken);
 
-                return null;
+                return default;
             }
 
-            return await response.Content
-                .ReadFromJsonAsync<SystemAlertApiDto>(
-                    cancellationToken: cancellationToken);
+            return await response.Content.ReadFromJsonAsync<T>(
+                cancellationToken: cancellationToken);
         }
         catch (OperationCanceledException)
             when (cancellationToken.IsCancellationRequested)
@@ -116,107 +187,8 @@ public sealed class EchoConsoleAlertsApiClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Unexpected error while resolving alert {AlertId}.",
-                alertId);
-
-            return null;
-        }
-    }
-
-    public async Task<AlertAiTrendAnalysisApiDto?>
-        RunAiTrendAnalysisAsync(
-            string culture,
-            CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var url = QueryHelpers.AddQueryString(
-                "/api/admin/alerts/ai-trend-analysis",
-                "culture",
-                culture);
-
-            using var response = await _httpClient.PostAsync(
-                url,
-                null,
-                cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                await LogFailureAsync(
-                    "AI trend analysis",
-                    response,
-                    cancellationToken);
-
-                return null;
-            }
-
-            return await response.Content
-                .ReadFromJsonAsync<AlertAiTrendAnalysisApiDto>(
-                    cancellationToken: cancellationToken);
-        }
-        catch (OperationCanceledException)
-            when (cancellationToken.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Unexpected error while running the simulated AI trend analysis.");
-
-            return null;
-        }
-    }
-
-    public async Task<AlertDiscordBroadcastApiDto?>
-        BroadcastDiscordAsync(
-            CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            using var response = await _httpClient.PostAsync(
-                "/api/admin/alerts/broadcast-discord",
-                null,
-                cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var failure = await response.Content
-                    .ReadFromJsonAsync<AlertDiscordBroadcastApiDto>(
-                        cancellationToken: cancellationToken);
-
-                if (failure is not null)
-                {
-                    return failure;
-                }
-
-                await LogFailureAsync(
-                    "Discord alert broadcast",
-                    response,
-                    cancellationToken);
-
-                return null;
-            }
-
-            return await response.Content
-                .ReadFromJsonAsync<AlertDiscordBroadcastApiDto>(
-                    cancellationToken: cancellationToken);
-        }
-        catch (OperationCanceledException)
-            when (cancellationToken.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Unexpected error while broadcasting alerts to Discord.");
-
-            return null;
+            _logger.LogError(ex, "Alerts API write failed.");
+            return default;
         }
     }
 
@@ -239,50 +211,56 @@ public sealed class EchoConsoleAlertsApiClient
 public sealed class SystemAlertApiDto
 {
     public int Id { get; set; }
-
     public string Severity { get; set; } = string.Empty;
-
+    public string Status { get; set; } = string.Empty;
+    public string ErrorTypeCode { get; set; } = string.Empty;
+    public string? BuildVersion { get; set; }
     public string Message { get; set; } = string.Empty;
-
     public string Source { get; set; } = string.Empty;
-
     public string? InstallationId { get; set; }
-
     public DateTimeOffset CreatedAtUtc { get; set; }
-
     public bool IsResolved { get; set; }
-
     public DateTimeOffset? ResolvedAtUtc { get; set; }
+}
+
+public sealed class AlertTypeDefinitionApiDto
+{
+    public int Id { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string DefaultSeverity { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+    public int AlertCount { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+public sealed class UpdateAlertTypeApiRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string DefaultSeverity { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
 }
 
 public sealed class AlertAiTrendAnalysisApiDto
 {
     public string Narrative { get; set; } = string.Empty;
-
     public string ActiveBuildVersion { get; set; } = string.Empty;
-
     public string DominantSource { get; set; } = string.Empty;
-
     public int RecentAlertCount { get; set; }
-
     public int OpenAlertCount { get; set; }
-
     public int RecentCriticalCount { get; set; }
-
     public int PreviousCriticalCount { get; set; }
-
     public decimal CriticalTrendPercent { get; set; }
-
     public DateTimeOffset GeneratedAtUtc { get; set; }
 }
 
-public sealed class AlertDiscordBroadcastApiDto
+public sealed class PagedResponse<T>
 {
-    public bool Sent { get; set; }
-
-    public int AlertCount { get; set; }
-
-    public string Message { get; set; } = string.Empty;
-
-    public DateTimeOffset ProcessedAtUtc { get; set; }
+    public IReadOnlyList<T> Items { get; set; } = Array.Empty<T>();
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
+    public int TotalCount { get; set; }
+    public int TotalPages { get; set; }
 }

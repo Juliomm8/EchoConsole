@@ -25,60 +25,36 @@ public sealed class AlertsController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(
         string? severity = null,
-        bool? isResolved = null,
+        string status = "OPEN",
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        pageNumber = Math.Max(1, pageNumber);
-
         var model = await LoadModelAsync(
             severity,
-            isResolved,
-            pageNumber,
+            NormalizeStatus(status),
+            Math.Max(1, pageNumber),
             cancellationToken);
 
-        SetPageTitle();
+        ViewData["Title"] = "ALERTS AND REPORTS";
+        ViewData["TitleResourceKey"] = "Alerts_PageTitle";
         return View(model);
     }
 
     [HttpGet]
     public async Task<IActionResult> RealtimePage(
         string? severity = null,
-        bool? isResolved = null,
+        string status = "OPEN",
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        pageNumber = Math.Max(1, pageNumber);
-
         var response = await _alertsApiClient.GetAlertsAsync(
             severity,
-            isResolved,
-            pageNumber,
+            NormalizeStatus(status),
+            Math.Max(1, pageNumber),
             DefaultPageSize,
             cancellationToken);
 
         return Json(response);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Resolve(
-        int id,
-        string? severity = null,
-        bool? isResolved = null,
-        int pageNumber = 1,
-        CancellationToken cancellationToken = default)
-    {
-        await _alertsApiClient.ResolveAlertAsync(
-            id,
-            cancellationToken);
-
-        return RedirectToAction(nameof(Index), new
-        {
-            severity,
-            isResolved,
-            pageNumber = Math.Max(1, pageNumber)
-        });
     }
 
     [HttpPost]
@@ -91,17 +67,9 @@ public sealed class AlertsController : Controller
             id,
             cancellationToken);
 
-        if (result is null)
-        {
-            return StatusCode(
-                StatusCodes.Status502BadGateway,
-                new
-                {
-                    message = "The alert could not be resolved."
-                });
-        }
-
-        return Json(result);
+        return result is null
+            ? StatusCode(502, new { message = "The alert could not be resolved." })
+            : Json(result);
     }
 
     [HttpPost]
@@ -113,81 +81,86 @@ public sealed class AlertsController : Controller
             CultureInfo.CurrentUICulture.Name,
             cancellationToken);
 
-        if (result is null)
-        {
-            return StatusCode(
-                StatusCodes.Status502BadGateway,
-                new
-                {
-                    message = "AI trend analysis could not be generated."
-                });
-        }
-
-        return Json(result);
+        return result is null
+            ? StatusCode(502, new { message = "AI trend analysis could not be generated." })
+            : Json(result);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> BroadcastDiscord(
+    public async Task<IActionResult> UpdateAlertType(
+        int id,
+        string name,
+        string description,
+        string defaultSeverity,
+        bool isActive,
         CancellationToken cancellationToken = default)
     {
-        var result = await _alertsApiClient.BroadcastDiscordAsync(
+        var result = await _alertsApiClient.UpdateAlertTypeAsync(
+            id,
+            new UpdateAlertTypeApiRequest
+            {
+                Name = name,
+                Description = description,
+                DefaultSeverity = defaultSeverity,
+                IsActive = isActive
+            },
             cancellationToken);
 
-        if (result is null)
-        {
-            return StatusCode(
-                StatusCodes.Status502BadGateway,
-                new
-                {
-                    sent = false,
-                    message = "Discord broadcast could not be completed."
-                });
-        }
+        return result is null
+            ? StatusCode(502, new { message = "The alert type could not be updated." })
+            : Json(result);
+    }
 
-        if (!result.Sent)
-        {
-            return StatusCode(
-                StatusCodes.Status503ServiceUnavailable,
-                result);
-        }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAlertType(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var deleted = await _alertsApiClient.DeleteAlertTypeAsync(
+            id,
+            cancellationToken);
 
-        return Json(result);
+        return deleted
+            ? NoContent()
+            : StatusCode(502, new { message = "The alert type could not be deleted." });
     }
 
     private async Task<AlertsIndexViewModel> LoadModelAsync(
         string? severity,
-        bool? isResolved,
+        string status,
         int pageNumber,
         CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _alertsApiClient.GetAlertsAsync(
+            var alertsTask = _alertsApiClient.GetAlertsAsync(
                 severity,
-                isResolved,
+                status,
                 pageNumber,
                 DefaultPageSize,
                 cancellationToken);
+
+            var typesTask = _alertsApiClient.GetAlertTypesAsync(
+                cancellationToken);
+
+            await Task.WhenAll(alertsTask, typesTask);
+
+            var response = await alertsTask;
 
             return new AlertsIndexViewModel
             {
                 SeverityFilter = string.IsNullOrWhiteSpace(severity)
                     ? null
                     : severity.Trim(),
-                IsResolvedFilter = isResolved,
-                PageNumber = response.PageNumber > 0
-                    ? response.PageNumber
-                    : pageNumber,
-                PageSize = response.PageSize > 0
-                    ? response.PageSize
-                    : DefaultPageSize,
+                StatusFilter = status,
+                PageNumber = response.PageNumber > 0 ? response.PageNumber : pageNumber,
+                PageSize = response.PageSize > 0 ? response.PageSize : DefaultPageSize,
                 TotalCount = response.TotalCount,
-                TotalPages = response.TotalPages > 0
-                    ? response.TotalPages
-                    : 1,
-                Items = response.Items
-                    ?? Array.Empty<SystemAlertApiDto>()
+                TotalPages = response.TotalPages > 0 ? response.TotalPages : 1,
+                Items = response.Items ?? Array.Empty<SystemAlertApiDto>(),
+                AlertTypes = await typesTask
             };
         }
         catch (OperationCanceledException)
@@ -197,25 +170,23 @@ public sealed class AlertsController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Failed to load alerts page.");
+            _logger.LogError(ex, "Failed to load alerts page.");
 
             return new AlertsIndexViewModel
             {
                 SeverityFilter = severity?.Trim(),
-                IsResolvedFilter = isResolved,
+                StatusFilter = status,
                 PageNumber = pageNumber,
                 PageSize = DefaultPageSize,
-                TotalPages = 1,
-                Items = Array.Empty<SystemAlertApiDto>()
+                TotalPages = 1
             };
         }
     }
 
-    private void SetPageTitle()
+    private static string NormalizeStatus(string? status)
     {
-        ViewData["Title"] = "ALERTS AND REPORTS";
-        ViewData["TitleResourceKey"] = "Alerts_PageTitle";
+        return string.Equals(status, "RESOLVED", StringComparison.OrdinalIgnoreCase)
+            ? "RESOLVED"
+            : "OPEN";
     }
 }

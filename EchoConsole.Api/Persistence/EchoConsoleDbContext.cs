@@ -18,6 +18,64 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
     public DbSet<GameSessionEvent> GameSessionEvents => Set<GameSessionEvent>();
     public DbSet<GameBuild> GameBuilds => Set<GameBuild>();
     public DbSet<SystemAlert> SystemAlerts => Set<SystemAlert>();
+    public DbSet<AlertTypeDefinition> AlertTypeDefinitions => Set<AlertTypeDefinition>();
+    public DbSet<AlertDiscordOutboxMessage> AlertDiscordOutboxMessages =>
+        Set<AlertDiscordOutboxMessage>();
+
+    public override int SaveChanges()
+    {
+        EnqueueCriticalAlertOutboxMessages();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        EnqueueCriticalAlertOutboxMessages();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void EnqueueCriticalAlertOutboxMessages()
+    {
+        var criticalAlerts = ChangeTracker
+            .Entries<SystemAlert>()
+            .Where(entry =>
+                entry.State == EntityState.Added &&
+                (entry.Entity.Severity == AlertSeverity.Critical ||
+                 entry.Entity.Severity == AlertSeverity.Fatal))
+            .Select(entry => entry.Entity)
+            .ToArray();
+
+        if (criticalAlerts.Length == 0)
+        {
+            return;
+        }
+
+        var alreadyQueued = ChangeTracker
+            .Entries<AlertDiscordOutboxMessage>()
+            .Where(entry => entry.State == EntityState.Added)
+            .Select(entry => entry.Entity.SystemAlert)
+            .Where(alert => alert is not null)
+            .ToHashSet(ReferenceEqualityComparer.Instance);
+
+        var now = DateTimeOffset.UtcNow;
+
+        foreach (var alert in criticalAlerts)
+        {
+            if (alreadyQueued.Contains(alert))
+            {
+                continue;
+            }
+
+            AlertDiscordOutboxMessages.Add(
+                new AlertDiscordOutboxMessage
+                {
+                    SystemAlert = alert,
+                    EnqueuedAtUtc = now,
+                    NextAttemptUtc = now
+                });
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -193,18 +251,92 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             build.Property(x => x.EngineVersion).HasMaxLength(64).IsRequired();
         });
 
+        // --- AlertTypeDefinition ---
+        modelBuilder.Entity<AlertTypeDefinition>(alertType =>
+        {
+            alertType.ToTable("AlertTypeDefinitions");
+
+            alertType.HasKey(x => x.Id);
+
+            alertType.HasIndex(x => x.Code)
+                .IsUnique()
+                .HasDatabaseName("IX_AlertTypeDefinitions_Code");
+
+            alertType.HasIndex(x => x.IsActive)
+                .HasDatabaseName("IX_AlertTypeDefinitions_IsActive");
+
+            alertType.Property(x => x.Id)
+                .ValueGeneratedOnAdd();
+
+            alertType.Property(x => x.Code)
+                .HasColumnType("nvarchar(64)")
+                .HasMaxLength(64)
+                .IsRequired();
+
+            alertType.Property(x => x.Name)
+                .HasColumnType("nvarchar(128)")
+                .HasMaxLength(128)
+                .IsRequired();
+
+            alertType.Property(x => x.Description)
+                .HasColumnType("nvarchar(500)")
+                .HasMaxLength(500)
+                .IsRequired();
+
+            alertType.Property(x => x.DefaultSeverity)
+                .HasConversion(
+                    value => value.ToString(),
+                    value => Enum.Parse<AlertSeverity>(value))
+                .HasColumnType("nvarchar(24)")
+                .HasMaxLength(24)
+                .IsRequired();
+
+            alertType.Property(x => x.IsActive)
+                .HasColumnType("bit")
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            alertType.Property(x => x.CreatedAtUtc)
+                .HasColumnType("datetimeoffset")
+                .IsRequired();
+
+            alertType.Property(x => x.UpdatedAtUtc)
+                .HasColumnType("datetimeoffset")
+                .IsRequired();
+        });
+
         // --- SystemAlert ---
         modelBuilder.Entity<SystemAlert>(alert =>
         {
             alert.HasKey(x => x.Id);
             alert.HasIndex(x => x.CreatedAtUtc);
             alert.HasIndex(x => x.IsResolved);
-            alert.HasIndex(x => new { x.IsResolved, x.CreatedAtUtc });
+            alert.HasIndex(x => x.ErrorTypeCode);
+            alert.HasIndex(x => x.BuildVersion);
+            alert.HasIndex(x => new
+            {
+                x.IsResolved,
+                x.Severity,
+                x.CreatedAtUtc
+            })
+                .IsDescending(false, false, true)
+                .HasDatabaseName(
+                    "IX_SystemAlerts_IsResolved_Severity_CreatedAtUtc");
 
             alert.Property(x => x.Severity)
-                .HasConversion(v => v.ToString(), v => Enum.Parse<AlertSeverity>(v))
+                .HasConversion(
+                    value => value.ToString(),
+                    value => Enum.Parse<AlertSeverity>(value))
                 .HasMaxLength(24)
                 .IsRequired();
+
+            alert.Property(x => x.ErrorTypeCode)
+                .HasMaxLength(64)
+                .HasDefaultValue("UNCLASSIFIED")
+                .IsRequired();
+
+            alert.Property(x => x.BuildVersion)
+                .HasMaxLength(64);
 
             alert.Property(x => x.Message).HasMaxLength(500).IsRequired();
             alert.Property(x => x.Source).HasMaxLength(128).IsRequired();
@@ -212,6 +344,26 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             alert.Property(x => x.CreatedAtUtc).IsRequired();
             alert.Property(x => x.IsResolved).IsRequired();
             alert.Property(x => x.ResolvedAtUtc);
+        });
+
+        // --- AlertDiscordOutboxMessage ---
+        modelBuilder.Entity<AlertDiscordOutboxMessage>(outbox =>
+        {
+            outbox.HasKey(x => x.Id);
+            outbox.HasIndex(x => new
+            {
+                x.SentAtUtc,
+                x.NextAttemptUtc
+            });
+
+            outbox.Property(x => x.EnqueuedAtUtc).IsRequired();
+            outbox.Property(x => x.NextAttemptUtc).IsRequired();
+            outbox.Property(x => x.LastError).HasMaxLength(1000);
+
+            outbox.HasOne(x => x.SystemAlert)
+                .WithMany(x => x.DiscordOutboxMessages)
+                .HasForeignKey(x => x.SystemAlertId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

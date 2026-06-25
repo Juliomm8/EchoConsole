@@ -1,6 +1,5 @@
+using System.Data;
 using System.Globalization;
-using System.Net.Http.Json;
-using System.Text;
 using EchoConsole.Api.Contracts.Admin;
 using EchoConsole.Api.Contracts.Common;
 using EchoConsole.Api.Domain.Entities;
@@ -20,22 +19,20 @@ namespace EchoConsole.Api.Controllers.Admin;
 [Route("api/admin/alerts")]
 public sealed class AlertsAdminController : ControllerBase
 {
-    private const string DiscordWebhookUrl =
-        "https://discord.com/api/webhooks/1519668721822601342/BNA_JxgHEPpkfyDuHY08Ru9soqYrBPXs4ZafenKh2Zr_mQc9Nk7jzrTZokUq2ofVecSi";
+    private const string OpenStatus = "OPEN";
+    private const string ResolvedStatus = "RESOLVED";
+    private const string FallbackErrorTypeCode = "UNCLASSIFIED";
 
     private readonly EchoConsoleDbContext _dbContext;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IHubContext<TelemetryHub> _hubContext;
     private readonly ILogger<AlertsAdminController> _logger;
 
     public AlertsAdminController(
         EchoConsoleDbContext dbContext,
-        IHttpClientFactory httpClientFactory,
         IHubContext<TelemetryHub> hubContext,
         ILogger<AlertsAdminController> logger)
     {
         _dbContext = dbContext;
-        _httpClientFactory = httpClientFactory;
         _hubContext = hubContext;
         _logger = logger;
     }
@@ -43,47 +40,41 @@ public sealed class AlertsAdminController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<PagedResponse<SystemAlertDto>>> GetAll(
         [FromQuery] string? severity,
-        [FromQuery] bool? isResolved,
+        [FromQuery] string? status = OpenStatus,
+        [FromQuery] bool? isResolved = null,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        pageNumber = pageNumber < 1 ? 1 : pageNumber;
-        pageSize = pageSize < 1 ? 20 : Math.Min(pageSize, 100);
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
 
-        AlertSeverity? parsedSeverity = null;
-
-        if (!string.IsNullOrWhiteSpace(severity))
+        if (!TryParseSeverity(severity, out var parsedSeverity))
         {
-            if (!Enum.TryParse<AlertSeverity>(
-                    severity.Trim(),
-                    true,
-                    out var severityValue))
+            return BadRequest(new
             {
-                return BadRequest(new
-                {
-                    message =
-                        $"Invalid severity value '{severity}'. Allowed values: {string.Join(", ", Enum.GetNames<AlertSeverity>())}"
-                });
-            }
+                message =
+                    $"Invalid severity value '{severity}'. Allowed values: {string.Join(", ", Enum.GetNames<AlertSeverity>())}"
+            });
+        }
 
-            parsedSeverity = severityValue;
+        if (!TryResolveStatus(status, isResolved, out var resolvedFilter))
+        {
+            return BadRequest(new
+            {
+                message =
+                    $"Invalid status value '{status}'. Allowed values: {OpenStatus}, {ResolvedStatus}."
+            });
         }
 
         var query = _dbContext.SystemAlerts
             .AsNoTracking()
-            .AsQueryable();
+            .Where(alert => alert.IsResolved == resolvedFilter);
 
         if (parsedSeverity.HasValue)
         {
             query = query.Where(
                 alert => alert.Severity == parsedSeverity.Value);
-        }
-
-        if (isResolved.HasValue)
-        {
-            query = query.Where(
-                alert => alert.IsResolved == isResolved.Value);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -97,6 +88,11 @@ public sealed class AlertsAdminController : ControllerBase
             {
                 Id = alert.Id,
                 Severity = alert.Severity.ToString(),
+                Status = alert.IsResolved
+                    ? ResolvedStatus
+                    : OpenStatus,
+                ErrorTypeCode = alert.ErrorTypeCode,
+                BuildVersion = alert.BuildVersion,
                 Message = alert.Message,
                 Source = alert.Source,
                 InstallationId = alert.InstallationId,
@@ -142,24 +138,193 @@ public sealed class AlertsAdminController : ControllerBase
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
+            var updatedAlert = MapAlert(entity);
+
             await _hubContext.Clients.All.SendAsync(
                 "alertUpdated",
-                new
-                {
-                    alertId = entity.Id,
-                    isResolved = entity.IsResolved,
-                    resolvedAtUtc = entity.ResolvedAtUtc
-                },
+                updatedAlert,
                 cancellationToken);
 
             _logger.LogInformation(
-                "System alert resolved. AlertId={AlertId}, Severity={Severity}, Source={Source}",
+                "System alert resolved. AlertId={AlertId}, Severity={Severity}, ErrorType={ErrorTypeCode}, Source={Source}",
                 entity.Id,
                 entity.Severity,
+                entity.ErrorTypeCode,
                 entity.Source);
         }
 
         return Ok(MapAlert(entity));
+    }
+
+    [HttpGet("types")]
+    public async Task<ActionResult<IReadOnlyList<AlertTypeDefinitionDto>>>
+        GetAlertTypes(
+            CancellationToken cancellationToken = default)
+    {
+        var items = await _dbContext.AlertTypeDefinitions
+            .AsNoTracking()
+            .OrderByDescending(item => item.IsActive)
+            .ThenBy(item => item.Code)
+            .Select(item => new AlertTypeDefinitionDto
+            {
+                Id = item.Id,
+                Code = item.Code,
+                Name = item.Name,
+                Description = item.Description,
+                DefaultSeverity = item.DefaultSeverity.ToString(),
+                IsActive = item.IsActive,
+                AlertCount = _dbContext.SystemAlerts.Count(
+                    alert => alert.ErrorTypeCode == item.Code),
+                UpdatedAtUtc = item.UpdatedAtUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(items);
+    }
+
+    [HttpPut("types/{id:int}")]
+    public async Task<ActionResult<AlertTypeDefinitionDto>> UpdateAlertType(
+        int id,
+        [FromBody] UpdateAlertTypeDefinitionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!Enum.TryParse<AlertSeverity>(
+                request.DefaultSeverity,
+                true,
+                out var defaultSeverity))
+        {
+            return BadRequest(new
+            {
+                message =
+                    $"Invalid default severity '{request.DefaultSeverity}'."
+            });
+        }
+
+        var normalizedName = request.Name.Trim();
+        var normalizedDescription = request.Description.Trim();
+
+        if (normalizedName.Length == 0 ||
+            normalizedDescription.Length == 0)
+        {
+            return BadRequest(new
+            {
+                message = "Name and description are required."
+            });
+        }
+
+        var entity = await _dbContext.AlertTypeDefinitions
+            .FirstOrDefaultAsync(
+                item => item.Id == id,
+                cancellationToken);
+
+        if (entity is null)
+        {
+            return NotFound();
+        }
+
+        entity.Name = normalizedName;
+        entity.Description = normalizedDescription;
+        entity.DefaultSeverity = defaultSeverity;
+        entity.IsActive = entity.Code == FallbackErrorTypeCode
+            ? true
+            : request.IsActive;
+        entity.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(await CreateAlertTypeDtoAsync(
+            entity,
+            cancellationToken));
+    }
+
+    [HttpDelete("types/{id:int}")]
+    public async Task<IActionResult> DeleteAlertType(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var executionStrategy =
+            _dbContext.Database.CreateExecutionStrategy();
+
+        var result = await executionStrategy.ExecuteAsync(
+            async () =>
+            {
+                await using var transaction =
+                    await _dbContext.Database.BeginTransactionAsync(
+                        IsolationLevel.ReadCommitted,
+                        cancellationToken);
+
+                try
+                {
+                    var entity = await _dbContext.AlertTypeDefinitions
+                        .FirstOrDefaultAsync(
+                            item => item.Id == id,
+                            cancellationToken);
+
+                    if (entity is null)
+                    {
+                        await transaction.RollbackAsync(
+                            cancellationToken);
+
+                        return AlertTypeDeleteResult.NotFound;
+                    }
+
+                    if (entity.Code == FallbackErrorTypeCode)
+                    {
+                        await transaction.RollbackAsync(
+                            cancellationToken);
+
+                        return AlertTypeDeleteResult.Protected;
+                    }
+
+                    var reassignedAlerts = await _dbContext.SystemAlerts
+                        .Where(alert =>
+                            alert.ErrorTypeCode == entity.Code)
+                        .ExecuteUpdateAsync(
+                            setters => setters.SetProperty(
+                                alert => alert.ErrorTypeCode,
+                                FallbackErrorTypeCode),
+                            cancellationToken);
+
+                    _dbContext.AlertTypeDefinitions.Remove(entity);
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+
+                    return new AlertTypeDeleteResult(
+                        true,
+                        false,
+                        false,
+                        reassignedAlerts,
+                        entity.Code);
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(
+                        cancellationToken);
+
+                    throw;
+                }
+            });
+
+        if (result.WasNotFound)
+        {
+            return NotFound();
+        }
+
+        if (result.WasProtected)
+        {
+            return Conflict(new
+            {
+                message =
+                    "The UNCLASSIFIED fallback category cannot be deleted."
+            });
+        }
+
+        _logger.LogWarning(
+            "Alert type deleted. Code={Code}, ReassignedAlerts={ReassignedAlerts}",
+            result.Code,
+            result.ReassignedAlerts);
+
+        return NoContent();
     }
 
     [HttpPost("ai-trend-analysis")]
@@ -169,6 +334,35 @@ public sealed class AlertsAdminController : ControllerBase
             CancellationToken cancellationToken = default)
     {
         var now = DateTimeOffset.UtcNow;
+
+        var physicalAlertCount = await _dbContext.SystemAlerts
+            .AsNoTracking()
+            .CountAsync(cancellationToken);
+
+        var isSpanish = culture?.StartsWith(
+            "es",
+            StringComparison.OrdinalIgnoreCase) == true;
+
+        if (physicalAlertCount == 0)
+        {
+            var emptyNarrative = isSpanish
+                ? "ESTACIÓN NOC INICIALIZADA: No se registran anomalías en el pipeline en las últimas 24 horas. Sistema operando de forma nominal."
+                : "NOC STATION INITIALIZED: No pipeline anomalies were registered during the last 24 hours. The system is operating nominally.";
+
+            return Ok(new AlertAiTrendAnalysisDto
+            {
+                Narrative = emptyNarrative,
+                ActiveBuildVersion = "NO_ACTIVE_BUILD",
+                DominantSource = "NOC_TELEMETRY_CORE",
+                RecentAlertCount = 0,
+                OpenAlertCount = 0,
+                RecentCriticalCount = 0,
+                PreviousCriticalCount = 0,
+                CriticalTrendPercent = 0m,
+                GeneratedAtUtc = now
+            });
+        }
+
         var recentStart = now.AddHours(-24);
         var previousStart = now.AddHours(-48);
 
@@ -228,10 +422,6 @@ public sealed class AlertsAdminController : ControllerBase
                 1,
                 MidpointRounding.AwayFromZero);
 
-        var isSpanish = culture?.StartsWith(
-            "es",
-            StringComparison.OrdinalIgnoreCase) == true;
-
         var narrative = isSpanish
             ? BuildSpanishNarrative(
                 activeBuildVersion,
@@ -262,126 +452,94 @@ public sealed class AlertsAdminController : ControllerBase
         });
     }
 
-    [HttpPost("broadcast-discord")]
-    public async Task<ActionResult<AlertDiscordBroadcastDto>>
-        BroadcastDiscord(
-            CancellationToken cancellationToken = default)
+    private async Task<AlertTypeDefinitionDto> CreateAlertTypeDtoAsync(
+        AlertTypeDefinition entity,
+        CancellationToken cancellationToken)
     {
-        if (DiscordWebhookUrl.Contains(
-                "REPLACE_WITH_REAL_WEBHOOK_URL",
-                StringComparison.Ordinal))
-        {
-            return StatusCode(
-                StatusCodes.Status503ServiceUnavailable,
-                new AlertDiscordBroadcastDto
-                {
-                    Sent = false,
-                    Message =
-                        "Discord webhook is not configured. Replace DiscordWebhookUrl in AlertsAdminController.",
-                    ProcessedAtUtc = DateTimeOffset.UtcNow
-                });
-        }
-
-        var alerts = await _dbContext.SystemAlerts
+        var alertCount = await _dbContext.SystemAlerts
             .AsNoTracking()
-            .Where(alert =>
-                !alert.IsResolved &&
-                (alert.Severity == AlertSeverity.Critical ||
-                 alert.Severity == AlertSeverity.Fatal))
-            .OrderByDescending(alert => alert.CreatedAtUtc)
-            .Take(10)
-            .Select(alert => new
-            {
-                alert.Id,
-                Severity = alert.Severity.ToString(),
-                alert.Source,
-                alert.Message,
-                alert.CreatedAtUtc
-            })
-            .ToListAsync(cancellationToken);
-
-        if (alerts.Count == 0)
-        {
-            return Ok(new AlertDiscordBroadcastDto
-            {
-                Sent = false,
-                AlertCount = 0,
-                Message = "No unresolved critical alerts are available for broadcast.",
-                ProcessedAtUtc = DateTimeOffset.UtcNow
-            });
-        }
-
-        var builder = new StringBuilder();
-        builder.AppendLine("**Echo Console Critical Alert Broadcast**");
-        builder.AppendLine("Cosmic Diner telemetry incident summary:");
-
-        foreach (var alert in alerts)
-        {
-            builder.Append("• #")
-                .Append(alert.Id)
-                .Append(" [")
-                .Append(alert.Severity)
-                .Append("] ")
-                .Append(alert.Source)
-                .Append(" — ")
-                .AppendLine(alert.Message);
-        }
-
-        var content = builder.ToString();
-
-        if (content.Length > 1900)
-        {
-            content = content[..1900] + "\n[TRUNCATED]";
-        }
-
-        var httpClient = _httpClientFactory.CreateClient();
-
-        using var response = await httpClient.PostAsJsonAsync(
-            DiscordWebhookUrl,
-            new { content },
-            cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var responseBody = await response.Content.ReadAsStringAsync(
+            .CountAsync(
+                alert => alert.ErrorTypeCode == entity.Code,
                 cancellationToken);
 
-            _logger.LogWarning(
-                "Discord broadcast failed. StatusCode={StatusCode}, Body={Body}",
-                response.StatusCode,
-                responseBody);
-
-            return StatusCode(
-                StatusCodes.Status502BadGateway,
-                new AlertDiscordBroadcastDto
-                {
-                    Sent = false,
-                    AlertCount = alerts.Count,
-                    Message = "Discord rejected the webhook request.",
-                    ProcessedAtUtc = DateTimeOffset.UtcNow
-                });
-        }
-
-        _logger.LogInformation(
-            "Discord alert broadcast completed. AlertCount={AlertCount}",
-            alerts.Count);
-
-        return Ok(new AlertDiscordBroadcastDto
+        return new AlertTypeDefinitionDto
         {
-            Sent = true,
-            AlertCount = alerts.Count,
-            Message = "Critical alert broadcast completed successfully.",
-            ProcessedAtUtc = DateTimeOffset.UtcNow
-        });
+            Id = entity.Id,
+            Code = entity.Code,
+            Name = entity.Name,
+            Description = entity.Description,
+            DefaultSeverity = entity.DefaultSeverity.ToString(),
+            IsActive = entity.IsActive,
+            AlertCount = alertCount,
+            UpdatedAtUtc = entity.UpdatedAtUtc
+        };
     }
 
-    private static SystemAlertDto MapAlert(
-        SystemAlert entity)
+    private static bool TryParseSeverity(
+        string? severity,
+        out AlertSeverity? parsedSeverity)
+    {
+        parsedSeverity = null;
+
+        if (string.IsNullOrWhiteSpace(severity))
+        {
+            return true;
+        }
+
+        if (!Enum.TryParse<AlertSeverity>(
+                severity.Trim(),
+                true,
+                out var value))
+        {
+            return false;
+        }
+
+        parsedSeverity = value;
+        return true;
+    }
+
+    private static bool TryResolveStatus(
+        string? status,
+        bool? isResolved,
+        out bool resolved)
+    {
+        if (isResolved.HasValue)
+        {
+            resolved = isResolved.Value;
+            return true;
+        }
+
+        var normalizedStatus = string.IsNullOrWhiteSpace(status)
+            ? OpenStatus
+            : status.Trim().ToUpperInvariant();
+
+        if (normalizedStatus == OpenStatus)
+        {
+            resolved = false;
+            return true;
+        }
+
+        if (normalizedStatus == ResolvedStatus)
+        {
+            resolved = true;
+            return true;
+        }
+
+        resolved = false;
+        return false;
+    }
+
+    private static SystemAlertDto MapAlert(SystemAlert entity)
     {
         return new SystemAlertDto
         {
             Id = entity.Id,
             Severity = entity.Severity.ToString(),
+            Status = entity.IsResolved
+                ? ResolvedStatus
+                : OpenStatus,
+            ErrorTypeCode = entity.ErrorTypeCode,
+            BuildVersion = entity.BuildVersion,
             Message = entity.Message,
             Source = entity.Source,
             InstallationId = entity.InstallationId,
@@ -413,5 +571,19 @@ public sealed class AlertsAdminController : ControllerBase
     {
         return
             $"AI Trend Analysis: active build {activeBuildVersion} produced {recentAlertCount} alerts during the last 24 hours, with {openAlertCount} incidents still open and {recentCriticalCount} critical or fatal anomalies. Critical volume changed by {criticalTrendPercent.ToString("0.0", CultureInfo.InvariantCulture)}% compared with the previous period. The dominant source is {dominantSource}. The stochastic pattern suggests investigating main-thread congestion, pressure in the local telemetry subsystem, and simultaneous workload bursts before the next Cosmic Diner deployment.";
+    }
+
+    private sealed record AlertTypeDeleteResult(
+        bool Deleted,
+        bool WasNotFound,
+        bool WasProtected,
+        int ReassignedAlerts,
+        string Code)
+    {
+        public static AlertTypeDeleteResult NotFound { get; } =
+            new(false, true, false, 0, string.Empty);
+
+        public static AlertTypeDeleteResult Protected { get; } =
+            new(false, false, true, 0, FallbackErrorTypeCode);
     }
 }

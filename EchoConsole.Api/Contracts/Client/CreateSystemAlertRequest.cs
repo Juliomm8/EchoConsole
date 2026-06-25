@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace EchoConsole.Api.Contracts.Client;
 
@@ -8,9 +8,14 @@ public sealed class CreateSystemAlertRequest
     [MaxLength(64)]
     public string GameCode { get; set; } = null!;
 
-    [Required]
     [MaxLength(32)]
-    public string Severity { get; set; } = null!;
+    public string? Severity { get; set; }
+
+    [MaxLength(64)]
+    public string? ErrorTypeCode { get; set; }
+
+    [MaxLength(64)]
+    public string? BuildVersion { get; set; }
 
     [Required]
     [MaxLength(500)]

@@ -6,10 +6,7 @@
     ViewData["Title"] = SharedLocalizer["Alerts_PageTitle"].Value;
     ViewData["TitleResourceKey"] = "Alerts_PageTitle";
 
-    var isResolvedValue = Model.IsResolvedFilter.HasValue
-        ? Model.IsResolvedFilter.Value.ToString().ToLowerInvariant()
-        : string.Empty;
-
+    var isOpenTab = Model.StatusFilter == "OPEN";
     var labelsJson = JsonSerializer.Serialize(new
     {
         resolve = SharedLocalizer["Alerts_ActionResolve"].Value,
@@ -17,8 +14,10 @@
         open = SharedLocalizer["Alerts_StatusOpen"].Value,
         empty = SharedLocalizer["Alerts_EmptyState"].Value,
         aiProcessing = SharedLocalizer["Alerts_AiProcessing"].Value,
-        discordSending = SharedLocalizer["Alerts_DiscordSending"].Value,
         requestFailed = SharedLocalizer["Alerts_RequestFailed"].Value,
+        deleteTypeConfirm = SharedLocalizer["Alerts_TypeDeleteConfirm"].Value,
+        typeUpdated = SharedLocalizer["Alerts_TypeUpdated"].Value,
+        typeDeleted = SharedLocalizer["Alerts_TypeDeleted"].Value,
         severities = new
         {
             Info = SharedLocalizer["Alerts_SeverityInfo"].Value,
@@ -29,100 +28,84 @@
     });
 }
 
-<section class="min-h-screen bg-[#020504] font-mono text-slate-100">
-    <div class="mx-auto w-full max-w-[1680px] px-4 py-6 sm:px-6 lg:px-8">
-        <header class="border border-slate-800 bg-[linear-gradient(135deg,rgba(15,23,42,0.62),rgba(2,6,8,0.97)_58%,rgba(22,101,52,0.08))] p-5 shadow-[0_20px_55px_rgba(0,0,0,0.32)] sm:p-7">
-            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                <div class="max-w-4xl">
-                    <p class="text-[10px] uppercase tracking-[0.30em] text-slate-500">
-                        &gt;_ @SharedLocalizer["Alerts_ModuleBadge"] // INCIDENT_STREAM
-                    </p>
+<section class="min-h-screen bg-[#020504] font-mono text-slate-200">
+    <div class="mx-auto w-full max-w-[1720px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="border border-slate-800 bg-[linear-gradient(135deg,rgba(15,23,42,0.58),rgba(2,6,8,0.97)_62%,rgba(6,78,59,0.07))] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.32)]">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+                <div>
+                    <p class="text-[9px] uppercase tracking-[0.28em] text-slate-600">MODULE_05 // AUTOMATED_INCIDENT_PIPELINE</p>
                     <h1 class="mt-3 font-display text-2xl uppercase tracking-[0.13em] text-slate-100 sm:text-4xl">
-                        &gt; @SharedLocalizer["Alerts_HeroTitle"]
+                        &gt; @SharedLocalizer["Alerts_PageTitle"]
                     </h1>
                     <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
                         @SharedLocalizer["Alerts_HeroSubtitle"]
                     </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 sm:min-w-[320px]">
-                    <div class="border border-slate-800 bg-black/50 px-4 py-3">
-                        <div class="text-[9px] uppercase tracking-[0.20em] text-slate-600">
-                            @SharedLocalizer["Alerts_TotalLabel"]
-                        </div>
-                        <div id="alerts-total-count"
-                             class="mt-2 font-display text-2xl text-green-400">
-                            @Model.TotalCount.ToString("N0")
-                        </div>
-                    </div>
-                    <div class="border border-slate-800 bg-black/50 px-4 py-3">
-                        <div class="text-[9px] uppercase tracking-[0.20em] text-slate-600">
-                            PLATFORM_STATUS
-                        </div>
-                        <div class="mt-3 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-green-400">
-                            <span class="h-2 w-2 rounded-full bg-green-400"></span>
-                            LIVE
-                        </div>
-                    </div>
+                <div class="flex items-center gap-3 border border-slate-800 bg-black/50 px-4 py-3">
+                    <span class="h-2 w-2 rounded-full bg-green-400 shadow-[0_0_12px_rgba(74,222,128,0.65)]"></span>
+                    <span class="text-[9px] font-semibold uppercase tracking-[0.18em] text-green-400">LIVE // AUTO_INGEST</span>
                 </div>
             </div>
         </header>
 
-        <section class="mt-5 border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.99))] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] sm:p-5">
-            <form method="get"
-                  asp-controller="Alerts"
-                  asp-action="Index"
-                  class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-                <div>
-                    <label for="severity" class="mb-2 block text-[9px] uppercase tracking-[0.20em] text-slate-500">
-                        @SharedLocalizer["Alerts_FilterSeverity"]
-                    </label>
-                    <select id="severity"
-                            name="severity"
-                            class="w-full border border-slate-800 bg-black px-4 py-3 text-xs text-slate-200 outline-none transition-colors focus:border-green-500/40">
-                        <option value="" selected="@(string.IsNullOrWhiteSpace(Model.SeverityFilter))">@SharedLocalizer["Alerts_AllSeverities"]</option>
-                        <option value="Info" selected="@(Model.SeverityFilter == "Info")">@SharedLocalizer["Alerts_SeverityInfo"]</option>
-                        <option value="Warning" selected="@(Model.SeverityFilter == "Warning")">@SharedLocalizer["Alerts_SeverityWarning"]</option>
-                        <option value="Critical" selected="@(Model.SeverityFilter == "Critical")">@SharedLocalizer["Alerts_SeverityCritical"]</option>
-                        <option value="Fatal" selected="@(Model.SeverityFilter == "Fatal")">@SharedLocalizer["Alerts_SeverityFatal"]</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="isResolved" class="mb-2 block text-[9px] uppercase tracking-[0.20em] text-slate-500">
-                        @SharedLocalizer["Alerts_FilterStatus"]
-                    </label>
-                    <select id="isResolved"
-                            name="isResolved"
-                            class="w-full border border-slate-800 bg-black px-4 py-3 text-xs text-slate-200 outline-none transition-colors focus:border-green-500/40">
-                        <option value="" selected="@(Model.IsResolvedFilter is null)">@SharedLocalizer["Alerts_AllStatuses"]</option>
-                        <option value="false" selected="@(Model.IsResolvedFilter == false)">@SharedLocalizer["Alerts_StatusOpen"]</option>
-                        <option value="true" selected="@(Model.IsResolvedFilter == true)">@SharedLocalizer["Alerts_StatusResolved"]</option>
-                    </select>
-                </div>
-
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                    <button type="submit"
-                            class="inline-flex h-10 min-w-[110px] items-center justify-center border border-green-500/30 bg-green-500/10 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-green-400 transition-colors hover:bg-green-500/15 hover:text-green-300">
-                        [ @SharedLocalizer["Common_Filter"] ]
-                    </button>
+        <section class="mt-5 border border-slate-800 bg-[#040807] p-4">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                <nav class="flex flex-wrap gap-2" aria-label="Alert status tabs">
                     <a asp-controller="Alerts"
                        asp-action="Index"
-                       class="inline-flex h-10 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-colors hover:bg-slate-900 hover:text-slate-300">
-                        [ @SharedLocalizer["Common_Reset"] ]
+                       asp-route-status="OPEN"
+                       asp-route-severity="@Model.SeverityFilter"
+                       class="inline-flex h-10 min-w-[210px] items-center justify-center whitespace-nowrap border px-4 text-[10px] font-semibold uppercase tracking-[0.15em] transition-colors @(isOpenTab ? "border-green-500/35 bg-green-500/10 text-green-400" : "border-slate-800 bg-slate-950 text-slate-500 hover:bg-slate-900 hover:text-slate-300")">
+                        [ @SharedLocalizer["Alerts_TabOpen"] ]
                     </a>
+                    <a asp-controller="Alerts"
+                       asp-action="Index"
+                       asp-route-status="RESOLVED"
+                       asp-route-severity="@Model.SeverityFilter"
+                       class="inline-flex h-10 min-w-[210px] items-center justify-center whitespace-nowrap border px-4 text-[10px] font-semibold uppercase tracking-[0.15em] transition-colors @(!isOpenTab ? "border-green-500/35 bg-green-500/10 text-green-400" : "border-slate-800 bg-slate-950 text-slate-500 hover:bg-slate-900 hover:text-slate-300")">
+                        [ @SharedLocalizer["Alerts_TabResolved"] ]
+                    </a>
+                </nav>
+
+                <div class="flex flex-col gap-2 sm:flex-row">
+                    <form method="get" asp-controller="Alerts" asp-action="Index" class="flex gap-2">
+                        <input type="hidden" name="status" value="@Model.StatusFilter" />
+                        <select name="severity"
+                                class="h-10 min-w-[190px] border border-slate-800 bg-black px-3 text-[10px] uppercase tracking-[0.14em] text-slate-400 outline-none focus:border-green-500/40">
+                            <option value="">@SharedLocalizer["Alerts_FilterAllSeverities"]</option>
+                            @foreach (var severity in new[] { "Info", "Warning", "Critical", "Fatal" })
+                            {
+                                if (Model.SeverityFilter == severity)
+                                {
+                                    <option value="@severity" selected>@severity.ToUpperInvariant()</option>
+                                }
+                                else
+                                {
+                                    <option value="@severity">@severity.ToUpperInvariant()</option>
+                                }
+                            }
+                        </select>
+                        <button type="submit" class="inline-flex h-10 min-w-[110px] items-center justify-center whitespace-nowrap border border-green-500/30 bg-green-500/10 px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-green-400 hover:bg-green-500/15">
+                            [ FILTER ]
+                        </button>
+                    </form>
+
+                    <button type="button"
+                            data-alert-types-open
+                            class="inline-flex h-10 min-w-[220px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">
+                        [ @SharedLocalizer["Alerts_ManageTypes"] ]
+                    </button>
                 </div>
-            </form>
+            </div>
         </section>
 
         <section class="mt-5 border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.97),rgba(1,3,4,0.99))] shadow-[0_20px_55px_rgba(0,0,0,0.30)]">
-            <div class="flex flex-col gap-3 border-b border-slate-800 px-5 py-4 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
                 <div>
-                    <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">
-                        &gt;_ @SharedLocalizer["Alerts_TableBadge"]
-                    </p>
+                    <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">&gt;_ INCIDENT_REGISTER</p>
                     <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">
-                        @SharedLocalizer["Alerts_TableTitle"]
+                        @(isOpenTab ? SharedLocalizer["Alerts_TabOpen"].Value : SharedLocalizer["Alerts_TabResolved"].Value)
                     </h2>
                 </div>
                 <div class="text-[10px] uppercase tracking-[0.16em] text-slate-600">
@@ -132,192 +115,116 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-[1180px] w-full border-collapse text-left">
+                <table class="w-full min-w-[1450px] border-collapse text-left">
                     <thead class="border-b border-slate-800 bg-slate-950/85">
                         <tr class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
-                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Alerts_ColDate"]</th>
-                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Alerts_ColSource"]</th>
-                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Alerts_ColMessage"]</th>
-                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Alerts_ColSeverity"]</th>
-                            <th class="px-5 py-3 font-medium">@SharedLocalizer["Alerts_ColStatus"]</th>
-                            <th class="px-5 py-3 text-right font-medium">@SharedLocalizer["Alerts_ColActions"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Alerts_ColDate"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Alerts_ColSource"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Alerts_ColErrorType"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Alerts_ColBuild"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Alerts_ColMessage"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Alerts_ColSeverity"]</th>
+                            <th class="px-4 py-3">@SharedLocalizer["Alerts_ColStatus"]</th>
+                            <th class="px-4 py-3 text-right">@SharedLocalizer["Alerts_ColActions"]</th>
                         </tr>
                     </thead>
                     <tbody id="alerts-table-body">
-                        @if (Model.Items.Any())
+                        @foreach (var item in Model.Items)
                         {
-                            @foreach (var item in Model.Items)
-                            {
-                                var severityClass = item.Severity switch
-                                {
-                                    "Fatal" => "border-red-500/30 bg-red-500/10 text-red-400",
-                                    "Critical" => "border-orange-500/30 bg-orange-500/10 text-orange-400",
-                                    "Warning" => "border-amber-500/30 bg-amber-500/10 text-amber-400",
-                                    _ => "border-slate-700 bg-slate-900/70 text-slate-300"
-                                };
-
-                                var severityLabel = item.Severity switch
-                                {
-                                    "Fatal" => SharedLocalizer["Alerts_SeverityFatal"].Value,
-                                    "Critical" => SharedLocalizer["Alerts_SeverityCritical"].Value,
-                                    "Warning" => SharedLocalizer["Alerts_SeverityWarning"].Value,
-                                    _ => SharedLocalizer["Alerts_SeverityInfo"].Value
-                                };
-
-                                <tr data-alert-row="true"
-                                    data-alert-id="@item.Id"
-                                    class="border-b border-slate-900/80 transition-colors hover:bg-slate-900/35">
-                                    <td class="px-5 py-4 align-middle text-xs text-slate-500">
-                                        @item.CreatedAtUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm") UTC
-                                    </td>
-                                    <td class="px-5 py-4 align-middle text-xs text-slate-300">
-                                        @item.Source
-                                    </td>
-                                    <td class="px-5 py-4 align-middle">
-                                        <p class="max-w-xl text-xs leading-5 text-slate-300">@item.Message</p>
-                                        <p class="mt-1 text-[9px] uppercase tracking-[0.14em] text-slate-700">
-                                            NODE: @(string.IsNullOrWhiteSpace(item.InstallationId) ? "SYSTEM" : item.InstallationId)
-                                        </p>
-                                    </td>
-                                    <td class="px-5 py-4 align-middle">
-                                        <span class="inline-flex min-w-[92px] items-center justify-center whitespace-nowrap border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] @severityClass">
-                                            @severityLabel
-                                        </span>
-                                    </td>
-                                    <td class="px-5 py-4 align-middle">
-                                        <span class="inline-flex min-w-[88px] items-center justify-center whitespace-nowrap border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] @(item.IsResolved ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-400" : "border-slate-700 bg-slate-900/70 text-slate-400")">
-                                            @(item.IsResolved ? SharedLocalizer["Alerts_StatusResolved"].Value : SharedLocalizer["Alerts_StatusOpen"].Value)
-                                        </span>
-                                    </td>
-                                    <td class="px-5 py-4 text-right align-middle">
-                                        @if (!item.IsResolved)
-                                        {
-                                            <button type="button"
-                                                    data-alert-resolve="true"
-                                                    data-alert-id="@item.Id"
-                                                    class="inline-flex h-8 w-24 min-w-[96px] shrink-0 items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors duration-150 hover:bg-slate-800/90 hover:text-green-400">
-                                                [ @SharedLocalizer["Alerts_ActionResolve"] ]
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <span class="inline-flex h-8 w-24 min-w-[96px] items-center justify-center whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-emerald-500">
-                                                @SharedLocalizer["Alerts_StatusResolved"]
-                                            </span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr data-alert-empty="true">
-                                <td colspan="6" class="px-5 py-12 text-center text-xs uppercase tracking-[0.18em] text-slate-600">
-                                    @SharedLocalizer["Alerts_EmptyState"]
+                            <tr data-alert-row data-alert-id="@item.Id" class="border-b border-slate-900/80 transition-colors hover:bg-slate-900/35">
+                                <td class="px-4 py-4 text-xs text-slate-500">@item.CreatedAtUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm") UTC</td>
+                                <td class="px-4 py-4 text-xs text-slate-300">@item.Source</td>
+                                <td class="px-4 py-4"><span class="inline-flex min-w-[180px] border border-cyan-900/50 bg-cyan-950/20 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-400">@item.ErrorTypeCode</span></td>
+                                <td class="px-4 py-4 text-xs text-cyan-600">@(item.BuildVersion ?? "UNKNOWN_BUILD")</td>
+                                <td class="px-4 py-4"><p class="max-w-xl text-xs leading-5 text-slate-300">@item.Message</p><p class="mt-1 text-[9px] uppercase tracking-[0.14em] text-slate-700">NODE: @(item.InstallationId ?? "SYSTEM")</p></td>
+                                <td class="px-4 py-4 text-xs uppercase text-slate-300">@item.Severity</td>
+                                <td class="px-4 py-4 text-xs uppercase @(item.IsResolved ? "text-emerald-400" : "text-slate-400")">@item.Status</td>
+                                <td class="px-4 py-4 text-right">
+                                    @if (!item.IsResolved)
+                                    {
+                                        <button type="button" data-alert-resolve data-alert-id="@item.Id" class="inline-flex h-8 w-24 min-w-[96px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400">[ @SharedLocalizer["Alerts_ActionResolve"] ]</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex h-8 w-24 min-w-[96px] items-center justify-center whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-emerald-500">@SharedLocalizer["Alerts_StatusResolved"]</span>
+                                    }
                                 </td>
                             </tr>
+                        }
+                        @if (!Model.Items.Any())
+                        {
+                            <tr data-alert-empty><td colspan="8" class="px-5 py-12 text-center text-xs uppercase tracking-[0.18em] text-slate-600">@SharedLocalizer["Alerts_EmptyState"]</td></tr>
                         }
                     </tbody>
                 </table>
             </div>
 
-            <footer class="flex flex-col gap-4 border-t border-slate-800 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <footer class="flex items-center justify-between border-t border-slate-800 px-5 py-4">
                 <div class="text-[10px] uppercase tracking-[0.15em] text-slate-600">
                     @SharedLocalizer["Common_Page"]
                     <span class="text-green-400">@Model.PageNumber</span>
                     @SharedLocalizer["Common_Of"]
                     <span class="text-green-400">@Math.Max(Model.TotalPages, 1)</span>
                 </div>
-
-                <div class="flex items-center gap-2 whitespace-nowrap">
+                <div class="flex gap-2 whitespace-nowrap">
                     @if (Model.HasPreviousPage)
                     {
-                        <a asp-controller="Alerts"
-                           asp-action="Index"
-                           asp-route-severity="@Model.SeverityFilter"
-                           asp-route-isResolved="@Model.IsResolvedFilter"
-                           asp-route-pageNumber="@(Model.PageNumber - 1)"
-                           class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-400 transition-colors hover:bg-slate-900 hover:text-slate-200">
-                            [ @SharedLocalizer["Common_Previous"] ]
-                        </a>
+                        <a asp-controller="Alerts" asp-action="Index" asp-route-status="@Model.StatusFilter" asp-route-severity="@Model.SeverityFilter" asp-route-pageNumber="@(Model.PageNumber - 1)" class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] uppercase text-slate-400 hover:bg-slate-900">[ @SharedLocalizer["Common_Previous"] ]</a>
                     }
-                    else
-                    {
-                        <span class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-900 bg-black px-4 text-[9px] uppercase tracking-[0.15em] text-slate-800">
-                            [ @SharedLocalizer["Common_Previous"] ]
-                        </span>
-                    }
-
                     @if (Model.HasNextPage)
                     {
-                        <a asp-controller="Alerts"
-                           asp-action="Index"
-                           asp-route-severity="@Model.SeverityFilter"
-                           asp-route-isResolved="@Model.IsResolvedFilter"
-                           asp-route-pageNumber="@(Model.PageNumber + 1)"
-                           class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-700 bg-slate-900/70 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-300 transition-colors hover:bg-slate-800 hover:text-green-400">
-                            [ @SharedLocalizer["Common_Next"] ]
-                        </a>
-                    }
-                    else
-                    {
-                        <span class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-900 bg-black px-4 text-[9px] uppercase tracking-[0.15em] text-slate-800">
-                            [ @SharedLocalizer["Common_Next"] ]
-                        </span>
+                        <a asp-controller="Alerts" asp-action="Index" asp-route-status="@Model.StatusFilter" asp-route-severity="@Model.SeverityFilter" asp-route-pageNumber="@(Model.PageNumber + 1)" class="inline-flex h-9 min-w-[110px] items-center justify-center border border-slate-700 bg-slate-900 px-4 text-[9px] uppercase text-slate-300 hover:bg-slate-800 hover:text-green-400">[ @SharedLocalizer["Common_Next"] ]</a>
                     }
                 </div>
             </footer>
         </section>
 
-        <section class="mt-5 border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.97),rgba(1,3,4,0.99))] p-5 shadow-[0_20px_55px_rgba(0,0,0,0.28)]">
-            <div class="flex flex-col gap-3 border-b border-slate-800 pb-4 md:flex-row md:items-end md:justify-between">
+        <section class="mt-5 border border-slate-800 bg-[#040807] p-5">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">MODULE_05 // ANALYTICS</p>
-                    <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">
-                        &gt; @SharedLocalizer["Alerts_AnalyticsTitle"]
-                    </h2>
+                    <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">&gt; @SharedLocalizer["Alerts_AnalyticsTitle"]</h2>
                 </div>
-                <span class="text-[9px] uppercase tracking-[0.16em] text-slate-700">SIMULATED_INTELLIGENCE // NO_EXTERNAL_COST</span>
+                <span class="text-[9px] uppercase tracking-[0.14em] text-slate-600">AUTO_DISCORD_RELAY // CRITICAL + FATAL // OUTBOX_RETRY</span>
             </div>
-
-            <div class="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.8fr)]">
+            <div class="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.7fr)]">
                 <article class="border border-slate-800 bg-black/45 p-4">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h3 class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">AI_TREND_ENGINE</h3>
-                            <p class="mt-1 text-[9px] leading-5 text-slate-600">@SharedLocalizer["Alerts_AiDescription"]</p>
-                        </div>
-                        <button type="button"
-                                data-alert-ai-run
-                                class="inline-flex h-10 min-w-[230px] shrink-0 items-center justify-center gap-2 whitespace-nowrap border border-slate-700 bg-slate-900/70 px-4 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400 disabled:cursor-wait disabled:opacity-60">
-                            <span data-alert-ai-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-slate-600 border-t-green-400"></span>
-                            [ RUN_AI_TREND_ANALYSIS ]
-                        </button>
-                    </div>
-                    <div data-alert-ai-output
-                         class="mt-4 min-h-28 border-l-2 border-green-500/30 bg-[#030706] px-4 py-3 text-xs leading-6 text-slate-400">
-                        @SharedLocalizer["Alerts_AiIdle"]
-                    </div>
+                    <button type="button" data-alert-ai-run class="inline-flex h-10 min-w-[230px] items-center justify-center gap-2 whitespace-nowrap border border-slate-700 bg-slate-900/70 px-4 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300 hover:bg-slate-800/90 hover:text-green-400"><span data-alert-ai-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-slate-600 border-t-green-400"></span>[ RUN_AI_TREND_ANALYSIS ]</button>
+                    <div data-alert-ai-output class="mt-4 min-h-28 border-l-2 border-green-500/30 bg-[#030706] px-4 py-3 text-xs leading-6 text-slate-400">@SharedLocalizer["Alerts_AiIdle"]</div>
                 </article>
-
                 <article class="border border-slate-800 bg-black/45 p-4">
-                    <h3 class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">DISCORD_INCIDENT_RELAY</h3>
-                    <p class="mt-2 text-[9px] leading-5 text-slate-600">@SharedLocalizer["Alerts_DiscordDescription"]</p>
-                    <button type="button"
-                            data-alert-discord
-                            class="mt-5 inline-flex h-10 w-full items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-4 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-green-400 disabled:cursor-wait disabled:opacity-60">
-                        [ BROADCAST_TO_DISCORD ]
-                    </button>
-                    <p data-alert-discord-output class="mt-3 min-h-5 text-[10px] leading-5 text-slate-600">
-                        @SharedLocalizer["Alerts_DiscordIdle"]
-                    </p>
+                    <h3 class="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">DISCORD_AUTOMATION</h3>
+                    <p class="mt-3 text-[10px] leading-5 text-slate-500">@SharedLocalizer["Alerts_DiscordAutomaticDescription"]</p>
                 </article>
             </div>
         </section>
 
-        <form id="alerts-antiforgery-form" class="hidden">
-            @Html.AntiForgeryToken()
-        </form>
+        <dialog data-alert-types-dialog class="m-auto w-[min(960px,calc(100vw-2rem))] border border-slate-800 bg-[#030706] p-0 text-slate-200 backdrop:bg-black/80">
+            <div class="border-b border-slate-800 px-5 py-4"><div class="flex items-center justify-between"><h2 class="font-display text-lg uppercase tracking-[0.12em]">&gt; @SharedLocalizer["Alerts_TypeCatalogTitle"]</h2><button type="button" data-alert-types-close class="h-8 w-20 border border-slate-700 bg-slate-900 text-[9px] uppercase text-slate-400 hover:bg-slate-800">[ CLOSE ]</button></div></div>
+            <div class="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+                <div class="max-h-[520px] overflow-y-auto border border-slate-800">
+                    @foreach (var type in Model.AlertTypes)
+                    {
+                        <div data-alert-type-row data-alert-type-id="@type.Id" class="border-b border-slate-800 p-4 last:border-b-0">
+                            <div class="flex items-start justify-between gap-3"><div><p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-400">@type.Code</p><p class="mt-1 text-xs text-slate-300">@type.Name</p><p class="mt-2 text-[10px] leading-5 text-slate-600">@type.Description</p></div><span class="text-[9px] uppercase text-slate-600">@type.AlertCount alerts</span></div>
+                            <div class="mt-3 flex gap-2 whitespace-nowrap"><button type="button" data-alert-type-edit data-id="@type.Id" data-code="@type.Code" data-name="@type.Name" data-description="@type.Description" data-severity="@type.DefaultSeverity" data-active="@type.IsActive.ToString().ToLowerInvariant()" class="inline-flex h-8 w-24 items-center justify-center border border-slate-700 bg-slate-900 text-[9px] uppercase text-slate-300 hover:bg-slate-800">[ EDIT ]</button>@if (type.Code != "UNCLASSIFIED") {<button type="button" data-alert-type-delete data-id="@type.Id" class="inline-flex h-8 w-24 items-center justify-center border border-red-900/60 bg-red-950/20 text-[9px] uppercase text-red-500 hover:bg-red-900/30">[ DELETE ]</button>}</div>
+                        </div>
+                    }
+                </div>
+                <form data-alert-type-form class="border border-slate-800 bg-black/50 p-4">
+                    <input type="hidden" data-type-id />
+                    <label class="block text-[9px] uppercase text-slate-600">CODE<input data-type-code readonly class="mt-2 w-full border border-slate-800 bg-black px-3 py-2 text-xs text-cyan-500" /></label>
+                    <label class="mt-4 block text-[9px] uppercase text-slate-600">NAME<input data-type-name maxlength="128" required class="mt-2 w-full border border-slate-800 bg-black px-3 py-2 text-xs text-slate-200 focus:border-green-500/40" /></label>
+                    <label class="mt-4 block text-[9px] uppercase text-slate-600">DESCRIPTION<textarea data-type-description maxlength="500" required rows="5" class="mt-2 w-full resize-none border border-slate-800 bg-black px-3 py-2 text-xs text-slate-200 focus:border-green-500/40"></textarea></label>
+                    <label class="mt-4 block text-[9px] uppercase text-slate-600">DEFAULT SEVERITY<select data-type-severity class="mt-2 w-full border border-slate-800 bg-black px-3 py-2 text-xs text-slate-200"><option>Info</option><option>Warning</option><option>Critical</option><option>Fatal</option></select></label>
+                    <label class="mt-4 flex items-center gap-3 text-[9px] uppercase text-slate-500"><input data-type-active type="checkbox" /> ACTIVE</label>
+                    <button type="submit" class="mt-5 h-10 w-full border border-green-500/30 bg-green-500/10 text-[9px] font-semibold uppercase text-green-400 hover:bg-green-500/15">[ SAVE_TYPE ]</button>
+                    <p data-type-feedback class="mt-3 min-h-5 text-[10px] text-slate-600"></p>
+                </form>
+            </div>
+        </dialog>
+
+        <form id="alerts-antiforgery-form" class="hidden">@Html.AntiForgeryToken()</form>
     </div>
 </section>
 
@@ -330,14 +237,14 @@
             pageUrl: "@Url.Action("RealtimePage", "Alerts")",
             resolveUrl: "@Url.Action("ResolveRealtime", "Alerts")",
             aiUrl: "@Url.Action("RunAiTrendAnalysis", "Alerts")",
-            discordUrl: "@Url.Action("BroadcastDiscord", "Alerts")",
+            updateTypeUrl: "@Url.Action("UpdateAlertType", "Alerts")",
+            deleteTypeUrl: "@Url.Action("DeleteAlertType", "Alerts")",
             tableBodyId: "alerts-table-body",
-            totalCountId: "alerts-total-count",
             resultsCountId: "alerts-results-count",
             pageNumber: @Model.PageNumber,
             pageSize: @Model.PageSize,
             severity: @Html.Raw(JsonSerializer.Serialize(Model.SeverityFilter ?? string.Empty)),
-            isResolved: @Html.Raw(JsonSerializer.Serialize(isResolvedValue)),
+            status: @Html.Raw(JsonSerializer.Serialize(Model.StatusFilter)),
             antiForgeryToken: document.querySelector('#alerts-antiforgery-form input[name="__RequestVerificationToken"]')?.value || "",
             culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
             labels: @Html.Raw(labelsJson)

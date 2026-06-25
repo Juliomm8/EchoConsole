@@ -1982,4 +1982,37 @@
   <data name="Alerts_RequestFailed" xml:space="preserve">
     <value>The operation could not be completed.</value>
   </data>
+  <data name="Alerts_TabOpen" xml:space="preserve">
+    <value>OPEN INCIDENTS</value>
+  </data>
+  <data name="Alerts_TabResolved" xml:space="preserve">
+    <value>RESOLVED HISTORY</value>
+  </data>
+  <data name="Alerts_FilterAllSeverities" xml:space="preserve">
+    <value>ALL SEVERITIES</value>
+  </data>
+  <data name="Alerts_ManageTypes" xml:space="preserve">
+    <value>MANAGE ERROR TYPES</value>
+  </data>
+  <data name="Alerts_ColErrorType" xml:space="preserve">
+    <value>ERROR TYPE</value>
+  </data>
+  <data name="Alerts_ColBuild" xml:space="preserve">
+    <value>GAME BUILD</value>
+  </data>
+  <data name="Alerts_TypeCatalogTitle" xml:space="preserve">
+    <value>ERROR TYPE CATALOG</value>
+  </data>
+  <data name="Alerts_TypeDeleteConfirm" xml:space="preserve">
+    <value>Delete this error type? Existing alerts will be reassigned to UNCLASSIFIED.</value>
+  </data>
+  <data name="Alerts_TypeUpdated" xml:space="preserve">
+    <value>Error type updated.</value>
+  </data>
+  <data name="Alerts_TypeDeleted" xml:space="preserve">
+    <value>Error type deleted.</value>
+  </data>
+  <data name="Alerts_DiscordAutomaticDescription" xml:space="preserve">
+    <value>Critical and fatal alerts are delivered automatically through the persistent Discord outbox with retry support.</value>
+  </data>
 </root>

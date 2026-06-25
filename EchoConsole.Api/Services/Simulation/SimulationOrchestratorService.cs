@@ -317,6 +317,8 @@ public sealed class SimulationOrchestratorService
             _dbContext.SystemAlerts.Add(
                 CreateAlert(
                     AlertSeverity.Warning,
+                    "NETWORK_DISCONNECT",
+                    alertBuildVersion,
                     $"Organic simulation detected a transient telemetry spike on build {alertBuildVersion}.",
                     alertSession?.Installation.DeviceName,
                     now));
@@ -389,6 +391,8 @@ public sealed class SimulationOrchestratorService
 
         var alert = CreateAlert(
             AlertSeverity.Critical,
+            "RENDER_PIPELINE_FAULT",
+            alertBuildVersion,
             $"Injected critical network and software anomaly for administrative load testing on build {alertBuildVersion}.",
             installationContext?.DeviceName,
             now);
@@ -425,7 +429,8 @@ public sealed class SimulationOrchestratorService
                 cancellationToken);
         }
 
-        await EnsureSimulationBuildCatalogAsync(cancellationToken);
+        var buildCatalog =
+            await EnsureSimulationBuildCatalogAsync(cancellationToken);
 
         var now = _timeProvider.GetUtcNow();
 
@@ -448,6 +453,8 @@ public sealed class SimulationOrchestratorService
             _dbContext.SystemAlerts.Add(
                 CreateAlert(
                     AlertSeverity.Critical,
+                    "NETWORK_DISCONNECT",
+                    buildCatalog[0].VersionNumber,
                     $"Injected LAN mass drop ended {droppedCount} simulated session(s).",
                     null,
                     now));
@@ -1013,6 +1020,8 @@ public sealed class SimulationOrchestratorService
 
     private static SystemAlert CreateAlert(
         AlertSeverity severity,
+        string errorTypeCode,
+        string? buildVersion,
         string message,
         string? installationName,
         DateTimeOffset now)
@@ -1020,6 +1029,8 @@ public sealed class SimulationOrchestratorService
         return new SystemAlert
         {
             Severity = severity,
+            ErrorTypeCode = errorTypeCode,
+            BuildVersion = buildVersion,
             Message = message,
             Source = SimulationSource,
             InstallationId = installationName,

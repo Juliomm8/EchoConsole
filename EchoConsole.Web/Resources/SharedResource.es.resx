@@ -1982,4 +1982,37 @@
   <data name="Alerts_RequestFailed" xml:space="preserve">
     <value>No se pudo completar la operación.</value>
   </data>
+  <data name="Alerts_TabOpen" xml:space="preserve">
+    <value>INCIDENCIAS ABIERTAS</value>
+  </data>
+  <data name="Alerts_TabResolved" xml:space="preserve">
+    <value>HISTORIAL DE RESUELTAS</value>
+  </data>
+  <data name="Alerts_FilterAllSeverities" xml:space="preserve">
+    <value>TODAS LAS SEVERIDADES</value>
+  </data>
+  <data name="Alerts_ManageTypes" xml:space="preserve">
+    <value>GESTIONAR TIPOS DE ERROR</value>
+  </data>
+  <data name="Alerts_ColErrorType" xml:space="preserve">
+    <value>TIPO DE ERROR</value>
+  </data>
+  <data name="Alerts_ColBuild" xml:space="preserve">
+    <value>BUILD DEL JUEGO</value>
+  </data>
+  <data name="Alerts_TypeCatalogTitle" xml:space="preserve">
+    <value>CATÁLOGO DE TIPOS DE ERROR</value>
+  </data>
+  <data name="Alerts_TypeDeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar este tipo de error? Las alertas existentes pasarán a UNCLASSIFIED.</value>
+  </data>
+  <data name="Alerts_TypeUpdated" xml:space="preserve">
+    <value>Tipo de error actualizado.</value>
+  </data>
+  <data name="Alerts_TypeDeleted" xml:space="preserve">
+    <value>Tipo de error eliminado.</value>
+  </data>
+  <data name="Alerts_DiscordAutomaticDescription" xml:space="preserve">
+    <value>Las alertas críticas y fatales se envían automáticamente mediante el outbox persistente de Discord con reintentos.</value>
+  </data>
 </root>

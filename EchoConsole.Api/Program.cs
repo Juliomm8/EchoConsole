@@ -29,6 +29,10 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
+builder.Services.Configure<DiscordAlertOptions>(
+    builder.Configuration.GetSection(
+        DiscordAlertOptions.SectionName));
+
 // Server-to-server API key authentication
 builder.Services.AddAuthentication(AdminApiKeyAuthenticationOptions.SchemeName)
     .AddScheme<AdminApiKeyAuthenticationOptions, AdminApiKeyAuthenticationHandler>(
@@ -78,6 +82,7 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
 builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
+builder.Services.AddHostedService<DiscordAlertDispatcher>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddScoped<IUserSessionTimelineService, UserSessionTimelineService>();

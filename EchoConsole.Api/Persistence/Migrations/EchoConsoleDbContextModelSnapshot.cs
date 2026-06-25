@@ -36,7 +36,9 @@ namespace EchoConsole.Api.Persistence.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<DateTimeOffset>("ReleaseDateUtc")
                         .HasColumnType("datetimeoffset");
@@ -58,6 +60,17 @@ namespace EchoConsole.Api.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("GameBuilds");
+                });
+
+            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.AlertDiscordOutboxMessage", b =>
+                {
+                    b.HasOne("EchoConsole.Api.Domain.Entities.SystemAlert", "SystemAlert")
+                        .WithMany("DiscordOutboxMessages")
+                        .HasForeignKey("SystemAlertId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SystemAlert");
                 });
 
             modelBuilder.Entity("EchoConsole.Api.Domain.Entities.GameSession", b =>
@@ -283,6 +296,89 @@ namespace EchoConsole.Api.Persistence.Migrations
                     b.ToTable("Installations");
                 });
 
+            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.AlertDiscordOutboxMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("EnqueuedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("NextAttemptUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("SentAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("SystemAlertId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SystemAlertId");
+
+                    b.HasIndex("SentAtUtc", "NextAttemptUtc");
+
+                    b.ToTable("AlertDiscordOutboxMessages");
+                });
+
+            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.AlertTypeDefinition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DefaultSeverity")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("AlertTypeDefinitions");
+                });
+
             modelBuilder.Entity("EchoConsole.Api.Domain.Entities.SystemAlert", b =>
                 {
                     b.Property<int>("Id")
@@ -291,8 +387,19 @@ namespace EchoConsole.Api.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BuildVersion")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ErrorTypeCode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)")
+                        .HasDefaultValue("UNCLASSIFIED");
 
                     b.Property<string>("InstallationId")
                         .HasMaxLength(64)
@@ -321,11 +428,17 @@ namespace EchoConsole.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BuildVersion");
+
                     b.HasIndex("CreatedAtUtc");
+
+                    b.HasIndex("ErrorTypeCode");
 
                     b.HasIndex("IsResolved");
 
-                    b.HasIndex("IsResolved", "CreatedAtUtc");
+                    b.HasIndex("IsResolved", "Severity", "CreatedAtUtc")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("IX_SystemAlerts_IsResolved_Severity_CreatedAtUtc");
 
                     b.ToTable("SystemAlerts");
                 });
@@ -574,6 +687,11 @@ namespace EchoConsole.Api.Persistence.Migrations
             modelBuilder.Entity("EchoConsole.Api.Domain.Entities.Installation", b =>
                 {
                     b.Navigation("Sessions");
+                });
+
+            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.SystemAlert", b =>
+                {
+                    b.Navigation("DiscordOutboxMessages");
                 });
 
             modelBuilder.Entity("EchoConsole.Api.Domain.Entities.User", b =>
