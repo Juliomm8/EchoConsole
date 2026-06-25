@@ -1895,4 +1895,67 @@
   <data name="PatchNotesAdmin_UpdateValidationError" xml:space="preserve">
     <value>The patch note contains invalid data and could not be updated.</value>
   </data>
+  <data name="Installations_ReadOnlyNotice" xml:space="preserve">
+    <value>Hardware telemetry is read-only. Only administrative alias and status can be modified.</value>
+  </data>
+  <data name="Installations_ColAliasDevice" xml:space="preserve">
+    <value>Alias / Device</value>
+  </data>
+  <data name="Installations_ColBuild" xml:space="preserve">
+    <value>Associated Build</value>
+  </data>
+  <data name="Installations_ColOwner" xml:space="preserve">
+    <value>Linked User</value>
+  </data>
+  <data name="Installations_ColAdminStatus" xml:space="preserve">
+    <value>Admin Status</value>
+  </data>
+  <data name="Installations_EditAlias" xml:space="preserve">
+    <value>EDIT ALIAS</value>
+  </data>
+  <data name="Installations_Details" xml:space="preserve">
+    <value>DETAILS</value>
+  </data>
+  <data name="Installations_Delete" xml:space="preserve">
+    <value>DELETE</value>
+  </data>
+  <data name="Installations_DeleteConfirm" xml:space="preserve">
+    <value>Delete this installation and all related telemetry records?</value>
+  </data>
+  <data name="Installations_OwnerUnassigned" xml:space="preserve">
+    <value>UNASSIGNED</value>
+  </data>
+  <data name="Installations_AdminAlias" xml:space="preserve">
+    <value>Administrative Alias</value>
+  </data>
+  <data name="Installations_AdminStatus" xml:space="preserve">
+    <value>Administrative Status</value>
+  </data>
+  <data name="Installations_StatusActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Installations_StatusInactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Installations_StatusBanned" xml:space="preserve">
+    <value>Banned</value>
+  </data>
+  <data name="Installations_SaveMetadata" xml:space="preserve">
+    <value>SAVE METADATA</value>
+  </data>
+  <data name="Installations_UpdateSuccess" xml:space="preserve">
+    <value>Installation metadata updated successfully.</value>
+  </data>
+  <data name="Installations_UpdateError" xml:space="preserve">
+    <value>Installation metadata could not be updated.</value>
+  </data>
+  <data name="Installations_UpdateValidationError" xml:space="preserve">
+    <value>Alias or administrative status is invalid.</value>
+  </data>
+  <data name="Installations_DeleteSuccess" xml:space="preserve">
+    <value>Installation and related telemetry were deleted.</value>
+  </data>
+  <data name="Installations_DeleteError" xml:space="preserve">
+    <value>Installation could not be deleted.</value>
+  </data>
 </root>

@@ -1895,4 +1895,67 @@
   <data name="PatchNotesAdmin_UpdateValidationError" xml:space="preserve">
     <value>La nota de parche contiene datos inválidos y no pudo actualizarse.</value>
   </data>
+  <data name="Installations_ReadOnlyNotice" xml:space="preserve">
+    <value>La telemetría de hardware es de solo lectura. Solo se pueden modificar el alias y estado administrativos.</value>
+  </data>
+  <data name="Installations_ColAliasDevice" xml:space="preserve">
+    <value>Alias / Dispositivo</value>
+  </data>
+  <data name="Installations_ColBuild" xml:space="preserve">
+    <value>Build asociada</value>
+  </data>
+  <data name="Installations_ColOwner" xml:space="preserve">
+    <value>Usuario vinculado</value>
+  </data>
+  <data name="Installations_ColAdminStatus" xml:space="preserve">
+    <value>Estado administrativo</value>
+  </data>
+  <data name="Installations_EditAlias" xml:space="preserve">
+    <value>EDITAR ALIAS</value>
+  </data>
+  <data name="Installations_Details" xml:space="preserve">
+    <value>DETALLES</value>
+  </data>
+  <data name="Installations_Delete" xml:space="preserve">
+    <value>ELIMINAR</value>
+  </data>
+  <data name="Installations_DeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar esta instalación y todos sus registros de telemetría relacionados?</value>
+  </data>
+  <data name="Installations_OwnerUnassigned" xml:space="preserve">
+    <value>SIN ASIGNAR</value>
+  </data>
+  <data name="Installations_AdminAlias" xml:space="preserve">
+    <value>Alias administrativo</value>
+  </data>
+  <data name="Installations_AdminStatus" xml:space="preserve">
+    <value>Estado administrativo</value>
+  </data>
+  <data name="Installations_StatusActive" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="Installations_StatusInactive" xml:space="preserve">
+    <value>Inactivo</value>
+  </data>
+  <data name="Installations_StatusBanned" xml:space="preserve">
+    <value>Baneado</value>
+  </data>
+  <data name="Installations_SaveMetadata" xml:space="preserve">
+    <value>GUARDAR METADATOS</value>
+  </data>
+  <data name="Installations_UpdateSuccess" xml:space="preserve">
+    <value>Los metadatos de la instalación se actualizaron correctamente.</value>
+  </data>
+  <data name="Installations_UpdateError" xml:space="preserve">
+    <value>No se pudieron actualizar los metadatos de la instalación.</value>
+  </data>
+  <data name="Installations_UpdateValidationError" xml:space="preserve">
+    <value>El alias o estado administrativo no es válido.</value>
+  </data>
+  <data name="Installations_DeleteSuccess" xml:space="preserve">
+    <value>La instalación y su telemetría relacionada fueron eliminadas.</value>
+  </data>
+  <data name="Installations_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la instalación.</value>
+  </data>
 </root>

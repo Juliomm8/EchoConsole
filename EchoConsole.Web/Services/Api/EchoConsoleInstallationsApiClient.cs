@@ -12,7 +12,9 @@ public sealed class EchoConsoleInstallationsApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleInstallationsApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
+        _httpClient = httpClientFactory.CreateClient(
+            EchoConsoleApiClientNames.Admin);
+
         _logger = logger;
     }
 
@@ -24,7 +26,7 @@ public sealed class EchoConsoleInstallationsApiClient
     {
         try
         {
-            var query = new Dictionary<string, string?>()
+            var query = new Dictionary<string, string?>
             {
                 ["page"] = pageNumber.ToString(),
                 ["pageSize"] = pageSize.ToString()
@@ -35,25 +37,31 @@ public sealed class EchoConsoleInstallationsApiClient
                 query["search"] = searchTerm.Trim();
             }
 
-            var url = QueryHelpers.AddQueryString("/api/admin/installations", query);
+            var url = QueryHelpers.AddQueryString(
+                "/api/admin/installations",
+                query);
 
-            using var response = await _httpClient.GetAsync(url, cancellationToken);
+            using var response = await _httpClient.GetAsync(
+                url,
+                cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                var body = await response.Content.ReadAsStringAsync(
+                    cancellationToken);
+
                 _logger.LogWarning(
-                    "Installations request failed. StatusCode: {StatusCode}. Body: {Body}",
+                    "Installations request failed. StatusCode={StatusCode}, Body={Body}",
                     response.StatusCode,
                     body);
 
                 return new PagedInstallationsApiResponse();
             }
 
-            var data = await response.Content.ReadFromJsonAsync<PagedInstallationsApiResponse>(
-                cancellationToken: cancellationToken);
-
-            return data ?? new PagedInstallationsApiResponse();
+            return await response.Content
+                .ReadFromJsonAsync<PagedInstallationsApiResponse>(
+                    cancellationToken: cancellationToken)
+                ?? new PagedInstallationsApiResponse();
         }
         catch (OperationCanceledException)
             when (cancellationToken.IsCancellationRequested)
@@ -62,8 +70,103 @@ public sealed class EchoConsoleInstallationsApiClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error while reading installations from EchoConsole.Api.");
+            _logger.LogError(
+                ex,
+                "Unexpected error while reading installations.");
+
             return new PagedInstallationsApiResponse();
+        }
+    }
+
+    public async Task<bool> UpdateMetadataAsync(
+        Guid installationId,
+        UpdateInstallationMetadataApiRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var message = new HttpRequestMessage(
+                HttpMethod.Patch,
+                $"/api/admin/installations/{installationId:D}/metadata")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            using var response = await _httpClient.SendAsync(
+                message,
+                cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+
+            var body = await response.Content.ReadAsStringAsync(
+                cancellationToken);
+
+            _logger.LogWarning(
+                "Installation metadata update failed. InstallationId={InstallationId}, StatusCode={StatusCode}, Body={Body}",
+                installationId,
+                response.StatusCode,
+                body);
+
+            return false;
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unexpected error while updating installation metadata. InstallationId={InstallationId}",
+                installationId);
+
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteAsync(
+        Guid installationId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var response = await _httpClient.DeleteAsync(
+                $"/api/admin/installations/{installationId:D}",
+                cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+
+            var body = await response.Content.ReadAsStringAsync(
+                cancellationToken);
+
+            _logger.LogWarning(
+                "Installation delete failed. InstallationId={InstallationId}, StatusCode={StatusCode}, Body={Body}",
+                installationId,
+                response.StatusCode,
+                body);
+
+            return false;
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unexpected error while deleting installation. InstallationId={InstallationId}",
+                installationId);
+
+            return false;
         }
     }
 }
@@ -78,12 +181,21 @@ public sealed class PagedInstallationsApiResponse
 
     public int TotalPages { get; set; }
 
-    public IReadOnlyList<InstallationListItemApiDto> Items { get; set; } = Array.Empty<InstallationListItemApiDto>();
+    public IReadOnlyList<InstallationListItemApiDto> Items { get; set; } =
+        Array.Empty<InstallationListItemApiDto>();
 }
 
 public sealed class InstallationListItemApiDto
 {
+    public int DatabaseId { get; set; }
+
     public Guid InstallationId { get; set; }
+
+    public string GameCode { get; set; } = string.Empty;
+
+    public string BuildVersion { get; set; } = string.Empty;
+
+    public string Platform { get; set; } = string.Empty;
 
     public string DeviceName { get; set; } = string.Empty;
 
@@ -97,13 +209,24 @@ public sealed class InstallationListItemApiDto
 
     public int? RamMb { get; set; }
 
-    public string Platform { get; set; } = string.Empty;
+    public string TelemetryStatus { get; set; } = string.Empty;
 
-    public string BuildVersion { get; set; } = string.Empty;
+    public string? AdminAlias { get; set; }
 
-    public string Status { get; set; } = string.Empty;
+    public string AdminStatus { get; set; } = string.Empty;
+
+    public int? OwnerUserId { get; set; }
+
+    public string? OwnerAlias { get; set; }
 
     public DateTimeOffset FirstSeenUtc { get; set; }
 
     public DateTimeOffset LastUpdateUtc { get; set; }
+}
+
+public sealed class UpdateInstallationMetadataApiRequest
+{
+    public string? AdminAlias { get; set; }
+
+    public string AdminStatus { get; set; } = "Active";
 }

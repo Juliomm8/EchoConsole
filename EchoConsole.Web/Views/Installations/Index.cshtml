@@ -8,128 +8,257 @@
 
     var realtimeLabels = new
     {
-        emptyState = SharedLocalizer["Installations_EmptyState"].Value
+        emptyState = SharedLocalizer["Installations_EmptyState"].Value,
+        editAlias = SharedLocalizer["Installations_EditAlias"].Value,
+        details = SharedLocalizer["Installations_Details"].Value,
+        delete = SharedLocalizer["Installations_Delete"].Value,
+        deleteConfirm = SharedLocalizer["Installations_DeleteConfirm"].Value,
+        ownerUnassigned = SharedLocalizer["Installations_OwnerUnassigned"].Value,
+        statusActive = SharedLocalizer["Installations_StatusActive"].Value,
+        statusInactive = SharedLocalizer["Installations_StatusInactive"].Value,
+        statusBanned = SharedLocalizer["Installations_StatusBanned"].Value
     };
 
     var realtimeLabelsJson = JsonSerializer.Serialize(realtimeLabels);
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1600px] px-6 py-6">
-        <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
-            <div>
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">@SharedLocalizer["Installations_ModuleBadge"]</p>
-                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">@SharedLocalizer["Installations_HeroTitle"]</h1>
-                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base">@SharedLocalizer["Installations_HeroSubtitle"]</p>
-            </div>
+<section class="min-h-screen bg-[#050807] text-slate-100">
+    <div class="mx-auto max-w-[1680px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="border border-slate-800 bg-[linear-gradient(145deg,rgba(15,23,42,0.50),rgba(2,6,8,0.97))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.30)] sm:p-7">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-4xl">
+                    <p class="font-display text-[10px] uppercase tracking-[0.30em] text-cyan-500">
+                        &gt;_ @SharedLocalizer["Installations_ModuleBadge"] // READ_ONLY_TELEMETRY
+                    </p>
+                    <h1 class="mt-3 font-display text-2xl uppercase tracking-[0.14em] text-slate-100 sm:text-4xl">
+                        @SharedLocalizer["Installations_HeroTitle"]
+                    </h1>
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
+                        @SharedLocalizer["Installations_HeroSubtitle"]
+                    </p>
+                </div>
 
-            <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/80 px-5 py-4">
-                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-500">@SharedLocalizer["Installations_TotalLabel"]</div>
-                <div id="installations-total-count" class="mt-2 font-display text-3xl uppercase tracking-[0.08em] text-cyan-300">
-                    @Model.TotalCount.ToString("N0")
+                <div class="min-w-48 border border-slate-800 bg-black/50 px-5 py-4">
+                    <p class="text-[9px] uppercase tracking-[0.22em] text-slate-600">
+                        @SharedLocalizer["Installations_TotalLabel"]
+                    </p>
+                    <p id="installations-total-count"
+                       class="mt-2 font-display text-3xl text-cyan-300">
+                        @Model.TotalCount.ToString("N0")
+                    </p>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div class="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)] backdrop-blur">
-            <form method="get" asp-controller="Installations" asp-action="Index" class="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+        @if (TempData["InstallationsSuccess"] is string successKey)
+        {
+            <div class="mt-4 border border-green-500/25 bg-green-500/5 px-4 py-3 text-xs uppercase tracking-[0.14em] text-green-400">
+                [ OK ] @SharedLocalizer[successKey]
+            </div>
+        }
+
+        @if (TempData["InstallationsError"] is string errorKey)
+        {
+            <div class="mt-4 border border-red-500/25 bg-red-500/5 px-4 py-3 text-xs uppercase tracking-[0.14em] text-red-400">
+                [ ERROR ] @SharedLocalizer[errorKey]
+            </div>
+        }
+
+        <section class="mt-5 border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.96),rgba(1,3,4,0.99))]">
+            <div class="flex flex-col gap-4 border-b border-slate-800 p-4 lg:flex-row lg:items-end lg:justify-between lg:p-5">
                 <div>
-                    <label for="installations-search-term" class="mb-2 block font-display text-xs uppercase tracking-[0.25em] text-slate-400">@SharedLocalizer["Common_Search"]</label>
+                    <p class="text-[9px] uppercase tracking-[0.25em] text-cyan-700">
+                        &gt;_ @SharedLocalizer["Installations_TableBadge"]
+                    </p>
+                    <h2 class="mt-2 font-display text-lg uppercase tracking-[0.13em] text-slate-200">
+                        @SharedLocalizer["Installations_TableTitle"]
+                    </h2>
+                </div>
+
+                <form id="installations-search-form"
+                      method="get"
+                      asp-controller="Installations"
+                      asp-action="Index"
+                      class="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+                    <label for="installations-search-term" class="sr-only">
+                        @SharedLocalizer["Common_Search"]
+                    </label>
                     <input id="installations-search-term"
                            name="searchTerm"
                            value="@Model.SearchTerm"
-                           type="text"
-                           
+                           type="search"
+                           autocomplete="off"
                            placeholder="@SharedLocalizer["Installations_SearchPlaceholder"]"
-                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/10" />
-                </div>
+                           class="min-w-0 flex-1 border border-slate-800 bg-black/60 px-4 py-2.5 text-xs text-slate-200 outline-none transition-colors placeholder:text-slate-700 focus:border-cyan-500/40 sm:min-w-[360px]" />
 
-                <input id="installations-page-size" type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input id="installations-page-size"
+                           type="hidden"
+                           name="pageSize"
+                           value="@Model.PageSize" />
 
-                <div class="flex items-end gap-3">
                     <button type="submit"
-                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">@SharedLocalizer["Common_Search"]</button>
+                            class="h-10 w-28 shrink-0 border border-cyan-500/25 bg-cyan-500/5 px-4 text-[10px] font-semibold uppercase tracking-[0.17em] text-cyan-400 transition-colors hover:bg-cyan-500/10">
+                        [ @SharedLocalizer["Common_Search"] ]
+                    </button>
 
                     <a asp-controller="Installations"
                        asp-action="Index"
-                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">@SharedLocalizer["Common_Reset"]</a>
-                </div>
-            </form>
-        </div>
-
-        <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur">
-            <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">@SharedLocalizer["Installations_TableBadge"]</p>
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">@SharedLocalizer["Installations_TableTitle"]</h2>
-                </div>
-
-                <div class="text-sm text-slate-400">
-                    <span>@SharedLocalizer["Common_Results"]</span>
-                    <span id="installations-results-count" class="font-semibold text-cyan-300">@Model.TotalCount.ToString("N0")</span>
-                </div>
+                       class="inline-flex h-10 w-28 shrink-0 items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[10px] font-semibold uppercase tracking-[0.17em] text-slate-500 transition-colors hover:bg-slate-900 hover:text-slate-300">
+                        [ @SharedLocalizer["Common_Reset"] ]
+                    </a>
+                </form>
             </div>
 
-            <span id="installations-empty-text" class="hidden">@SharedLocalizer["Installations_EmptyState"]</span>
+            <div class="flex items-center justify-between border-b border-slate-900 px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-slate-600 lg:px-5">
+                <span>
+                    @SharedLocalizer["Installations_ReadOnlyNotice"]
+                </span>
+                <span>
+                    @SharedLocalizer["Common_Results"]
+                    <strong id="installations-results-count" class="text-cyan-400">
+                        @Model.TotalCount.ToString("N0")
+                    </strong>
+                </span>
+            </div>
 
-            <div class="overflow-hidden rounded-2xl border border-slate-800">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-800">
-                        <thead class="bg-slate-900/90">
-                            <tr class="text-left">
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Common_InstallationId"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Installations_ColDeviceName"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Common_OperatingSystem"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Installations_ColProcessor"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Installations_ColGpu"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Installations_ColRam"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Installations_ColLastUpdate"]</th>
-                            </tr>
-                        </thead>
-                        <tbody id="installations-table-body" class="divide-y divide-slate-900 bg-slate-950/80">
-                            @if (Model.Items != null && Model.Items.Any())
+            <span id="installations-empty-text" class="hidden">
+                @SharedLocalizer["Installations_EmptyState"]
+            </span>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-[1180px] w-full border-collapse text-left">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-slate-950/90 text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Installations_ColAliasDevice"]</th>
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Installations_ColBuild"]</th>
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Installations_ColOwner"]</th>
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Installations_ColAdminStatus"]</th>
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Installations_ColLastUpdate"]</th>
+                            <th class="px-4 py-3 text-right font-medium">@SharedLocalizer["Common_Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody id="installations-table-body"
+                           class="divide-y divide-slate-900 bg-black/20">
+                        @if (Model.Items.Any())
+                        {
+                            @foreach (var item in Model.Items)
                             {
-                                @foreach (var item in Model.Items)
+                                var statusClass = item.AdminStatus switch
                                 {
-                                    <tr class="transition-colors duration-150 hover:bg-slate-900/70">
-                                        <td class="px-5 py-4 text-sm text-cyan-300">@item.InstallationId</td>
-                                        <td class="px-5 py-4 text-sm text-slate-200">@item.DeviceName</td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@item.OSVersion</td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@item.Processor</td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@item.Gpu</td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@item.RamLabel</td>
-                                        <td class="px-5 py-4 text-sm text-slate-400">@item.LastUpdateUtcLabel</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="7" class="px-5 py-6 text-center text-sm text-slate-400">@SharedLocalizer["Installations_EmptyState"]</td>
+                                    "Banned" => "border-red-500/30 bg-red-500/5 text-red-400",
+                                    "Inactive" => "border-amber-500/30 bg-amber-500/5 text-amber-400",
+                                    _ => "border-green-500/30 bg-green-500/5 text-green-400"
+                                };
+
+                                var statusLabel = item.AdminStatus switch
+                                {
+                                    "Banned" => SharedLocalizer["Installations_StatusBanned"].Value,
+                                    "Inactive" => SharedLocalizer["Installations_StatusInactive"].Value,
+                                    _ => SharedLocalizer["Installations_StatusActive"].Value
+                                };
+
+                                <tr class="transition-colors hover:bg-slate-900/40">
+                                    <td class="px-4 py-4">
+                                        <p class="font-display text-sm text-slate-100">
+                                            @(item.AdminAlias == "-" ? item.DeviceName : item.AdminAlias)
+                                        </p>
+                                        <p class="mt-1 text-[9px] uppercase tracking-[0.13em] text-slate-700">
+                                            @item.DeviceName // @item.InstallationId
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        <span class="border border-cyan-900/60 bg-cyan-950/20 px-2.5 py-1 text-xs text-cyan-400">
+                                            @item.BuildVersion
+                                        </span>
+                                        <p class="mt-2 text-[9px] uppercase tracking-[0.14em] text-slate-700">
+                                            @item.Platform
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-4 text-xs text-slate-400">
+                                        @item.OwnerLabel
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        <span class="inline-flex h-7 min-w-24 items-center justify-center border px-3 text-[9px] font-semibold uppercase tracking-[0.15em] @statusClass">
+                                            @statusLabel
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 text-xs text-slate-500">
+                                        @item.LastUpdateUtcLabel
+                                    </td>
+                                    <td class="px-4 py-4 text-right">
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button"
+                                                    data-installation-edit
+                                                    data-installation-id="@item.InstallationId"
+                                                    data-admin-alias="@(item.AdminAlias == "-" ? string.Empty : item.AdminAlias)"
+                                                    data-admin-status="@item.AdminStatus"
+                                                    class="h-8 w-28 shrink-0 border border-slate-700 bg-slate-900/70 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 transition-colors hover:bg-slate-800/90 hover:text-cyan-300">
+                                                [ @SharedLocalizer["Installations_EditAlias"] ]
+                                            </button>
+
+                                            <button type="button"
+                                                    data-installation-details
+                                                    data-installation-id="@item.InstallationId"
+                                                    data-game-code="@item.GameCode"
+                                                    data-build-version="@item.BuildVersion"
+                                                    data-platform="@item.Platform"
+                                                    data-device-name="@item.DeviceName"
+                                                    data-device-model="@item.DeviceModel"
+                                                    data-os-version="@item.OSVersion"
+                                                    data-processor="@item.Processor"
+                                                    data-gpu="@item.Gpu"
+                                                    data-ram="@item.RamLabel"
+                                                    data-telemetry-status="@item.TelemetryStatus"
+                                                    data-admin-alias="@(item.AdminAlias == "-" ? string.Empty : item.AdminAlias)"
+                                                    data-admin-status="@item.AdminStatus"
+                                                    data-owner="@item.OwnerLabel"
+                                                    data-first-seen="@item.FirstSeenUtcLabel"
+                                                    data-last-update="@item.LastUpdateUtcLabel"
+                                                    class="h-8 w-24 shrink-0 border border-cyan-900/60 bg-cyan-950/20 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-400 transition-colors hover:bg-cyan-900/30 hover:text-cyan-200">
+                                                [ @SharedLocalizer["Installations_Details"] ]
+                                            </button>
+
+                                            <button type="button"
+                                                    data-installation-delete
+                                                    data-installation-id="@item.InstallationId"
+                                                    class="h-8 w-20 shrink-0 border border-red-900/60 bg-red-950/20 px-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-red-500 transition-colors hover:bg-red-900/30 hover:text-red-300">
+                                                [ @SharedLocalizer["Installations_Delete"] ]
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="px-5 py-14 text-center text-xs uppercase tracking-[0.18em] text-slate-600">
+                                    [ @SharedLocalizer["Installations_EmptyState"] ]
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
 
-            <div class="mt-5 flex flex-col gap-4 border-t border-slate-800 pt-5 md:flex-row md:items-center md:justify-between">
-                <div class="text-sm text-slate-400">
-                    <span>@SharedLocalizer["Common_Page"]</span>
-                    <span id="installations-page-number" class="font-semibold text-cyan-300">@Model.PageNumber</span>
-                    <span>@SharedLocalizer["Common_Of"]</span>
-                    <span id="installations-total-pages" class="font-semibold text-cyan-300">@Math.Max(Model.TotalPages, 1)</span>
+            <footer class="flex flex-col gap-4 border-t border-slate-800 px-4 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-5">
+                <div class="text-[10px] uppercase tracking-[0.15em] text-slate-600">
+                    @SharedLocalizer["Common_Page"]
+                    <span id="installations-page-number" class="text-cyan-400">@Model.PageNumber</span>
+                    @SharedLocalizer["Common_Of"]
+                    <span id="installations-total-pages" class="text-cyan-400">@Math.Max(Model.TotalPages, 1)</span>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <a id="installations-prev-link"
                        asp-controller="Installations"
                        asp-action="Index"
                        asp-route-searchTerm="@Model.SearchTerm"
                        asp-route-pageNumber="@(Math.Max(1, Model.PageNumber - 1))"
                        asp-route-pageSize="@Model.PageSize"
-                       aria-disabled="@(!Model.HasPreviousPage).ToString().ToLowerInvariant()"
-                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white @(Model.HasPreviousPage ? "" : "pointer-events-none opacity-40")">@SharedLocalizer["Common_Previous"]</a>
+                       class="inline-flex h-9 w-28 items-center justify-center border border-slate-800 bg-slate-950 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-400 transition-colors hover:bg-slate-900 @(Model.HasPreviousPage ? "" : "pointer-events-none opacity-40")">
+                        [ @SharedLocalizer["Common_Previous"] ]
+                    </a>
 
                     <a id="installations-next-link"
                        asp-controller="Installations"
@@ -137,13 +266,121 @@
                        asp-route-searchTerm="@Model.SearchTerm"
                        asp-route-pageNumber="@(Math.Min(Math.Max(Model.TotalPages, 1), Model.PageNumber + 1))"
                        asp-route-pageSize="@Model.PageSize"
-                       aria-disabled="@(!Model.HasNextPage).ToString().ToLowerInvariant()"
-                       class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15 @(Model.HasNextPage ? "" : "pointer-events-none opacity-40")">@SharedLocalizer["Common_Next"]</a>
+                       class="inline-flex h-9 w-28 items-center justify-center border border-cyan-500/25 bg-cyan-500/5 text-[9px] font-semibold uppercase tracking-[0.16em] text-cyan-400 transition-colors hover:bg-cyan-500/10 @(Model.HasNextPage ? "" : "pointer-events-none opacity-40")">
+                        [ @SharedLocalizer["Common_Next"] ]
+                    </a>
                 </div>
-            </div>
-        </div>
+            </footer>
+        </section>
     </div>
-</div>
+</section>
+
+<dialog id="installation-edit-dialog"
+        class="w-[min(92vw,460px)] border border-slate-800 bg-[#050807] p-0 text-slate-100 shadow-[0_25px_80px_rgba(0,0,0,0.75)] backdrop:bg-black/75">
+    <form method="post"
+          asp-controller="Installations"
+          asp-action="UpdateMetadata"
+          asp-antiforgery="true">
+        <header class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+            <div>
+                <p class="text-[9px] uppercase tracking-[0.22em] text-cyan-700">ADMIN_METADATA</p>
+                <h2 class="mt-1 font-display text-lg uppercase tracking-[0.12em] text-slate-100">
+                    @SharedLocalizer["Installations_EditAlias"]
+                </h2>
+            </div>
+            <button type="button"
+                    data-dialog-close
+                    class="h-8 w-8 border border-slate-700 bg-slate-900 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white">
+                X
+            </button>
+        </header>
+
+        <div class="grid gap-4 p-5">
+            <input id="installation-edit-id" type="hidden" name="InstallationId" />
+            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+            <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+            <label>
+                <span class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    @SharedLocalizer["Installations_AdminAlias"]
+                </span>
+                <input id="installation-edit-alias"
+                       name="AdminAlias"
+                       maxlength="128"
+                       autocomplete="off"
+                       placeholder="PC-QA-Tester"
+                       class="w-full border border-slate-800 bg-black px-3 py-3 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-700 focus:border-cyan-500/50" />
+            </label>
+
+            <label>
+                <span class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    @SharedLocalizer["Installations_AdminStatus"]
+                </span>
+                <select id="installation-edit-status"
+                        name="AdminStatus"
+                        class="w-full border border-slate-800 bg-black px-3 py-3 text-sm text-slate-100 outline-none transition-colors focus:border-cyan-500/50">
+                    <option value="Active">@SharedLocalizer["Installations_StatusActive"]</option>
+                    <option value="Inactive">@SharedLocalizer["Installations_StatusInactive"]</option>
+                    <option value="Banned">@SharedLocalizer["Installations_StatusBanned"]</option>
+                </select>
+            </label>
+        </div>
+
+        <footer class="flex justify-end gap-2 border-t border-slate-800 px-5 py-4">
+            <button type="button"
+                    data-dialog-close
+                    class="h-9 w-28 border border-slate-800 bg-slate-950 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-400 transition-colors hover:bg-slate-900">
+                [ @SharedLocalizer["Common_Cancel"] ]
+            </button>
+            <button type="submit"
+                    class="h-9 w-32 border border-cyan-500/30 bg-cyan-500/10 text-[9px] font-semibold uppercase tracking-[0.16em] text-cyan-300 transition-colors hover:bg-cyan-500/15">
+                [ @SharedLocalizer["Installations_SaveMetadata"] ]
+            </button>
+        </footer>
+    </form>
+</dialog>
+
+<dialog id="installation-details-dialog"
+        class="w-[min(94vw,760px)] border border-slate-800 bg-[#050807] p-0 text-slate-100 shadow-[0_25px_80px_rgba(0,0,0,0.75)] backdrop:bg-black/75">
+    <header class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+        <div>
+            <p class="text-[9px] uppercase tracking-[0.22em] text-cyan-700">READ_ONLY_HARDWARE</p>
+            <h2 class="mt-1 font-display text-lg uppercase tracking-[0.12em] text-slate-100">
+                @SharedLocalizer["Installations_Details"]
+            </h2>
+        </div>
+        <button type="button"
+                data-dialog-close
+                class="h-8 w-8 border border-slate-700 bg-slate-900 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white">
+            X
+        </button>
+    </header>
+
+    <dl id="installation-details-grid"
+        class="grid gap-px bg-slate-800 sm:grid-cols-2">
+    </dl>
+
+    <footer class="flex justify-end border-t border-slate-800 px-5 py-4">
+        <button type="button"
+                data-dialog-close
+                class="h-9 w-28 border border-slate-800 bg-slate-950 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-400 transition-colors hover:bg-slate-900">
+            [ @SharedLocalizer["Common_Close"] ]
+        </button>
+    </footer>
+</dialog>
+
+<form id="installation-delete-form"
+      method="post"
+      asp-controller="Installations"
+      asp-action="Delete"
+      asp-antiforgery="true"
+      class="hidden">
+    <input id="installation-delete-id" type="hidden" name="installationId" />
+    <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+    <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+</form>
 
 @section Scripts {
     <script src="~/lib/signalr/signalr.min.js"></script>
@@ -158,9 +395,18 @@
             totalPagesValueId: "installations-total-pages",
             prevPageLinkId: "installations-prev-link",
             nextPageLinkId: "installations-next-link",
+            searchFormId: "installations-search-form",
             searchInputId: "installations-search-term",
             pageSizeInputId: "installations-page-size",
             emptyTextElementId: "installations-empty-text",
+            editDialogId: "installation-edit-dialog",
+            editIdInputId: "installation-edit-id",
+            editAliasInputId: "installation-edit-alias",
+            editStatusInputId: "installation-edit-status",
+            detailsDialogId: "installation-details-dialog",
+            detailsGridId: "installation-details-grid",
+            deleteFormId: "installation-delete-form",
+            deleteIdInputId: "installation-delete-id",
             culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
             labels: @Html.Raw(realtimeLabelsJson)
         });
