@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
 using EchoConsole.Web.Models.Auth;
 using EchoConsole.Web.Security;
+using EchoConsole.Web.Services.Accounts;
 using EchoConsole.Web.Services.Profile;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -17,15 +19,24 @@ namespace EchoConsole.Web.Controllers;
 
 public sealed class AuthController : Controller
 {
-    private const string DevelopmentOtpCode = "123456";
-    private const string OtpEmailTempDataKey = "Auth:OtpEmail";
-    private const string OtpCodeTempDataKey = "Auth:OtpCode";
+    private static readonly TimeSpan OtpLifetime =
+        TimeSpan.FromMinutes(5);
+
+    private const string OtpEmailTempDataKey =
+        "Auth:OtpEmail";
+
+    private const string OtpCodeTempDataKey =
+        "Auth:OtpCode";
+
+    private const string OtpExpiresAtTempDataKey =
+        "Auth:OtpExpiresAtUtc";
 
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IUserSessionService _userSessionService;
     private readonly IAuthenticationSchemeProvider _schemeProvider;
-    private readonly IWebHostEnvironment _environment;
+    private readonly IOtpEmailSender _otpEmailSender;
+    private readonly TimeProvider _timeProvider;
     private readonly ILogger<AuthController> _logger;
     private readonly IStringLocalizer<SharedResource> _localizer;
 
@@ -34,7 +45,8 @@ public sealed class AuthController : Controller
         SignInManager<User> signInManager,
         IUserSessionService userSessionService,
         IAuthenticationSchemeProvider schemeProvider,
-        IWebHostEnvironment environment,
+        IOtpEmailSender otpEmailSender,
+        TimeProvider timeProvider,
         ILogger<AuthController> logger,
         IStringLocalizer<SharedResource> localizer)
     {
@@ -42,7 +54,8 @@ public sealed class AuthController : Controller
         _signInManager = signInManager;
         _userSessionService = userSessionService;
         _schemeProvider = schemeProvider;
-        _environment = environment;
+        _otpEmailSender = otpEmailSender;
+        _timeProvider = timeProvider;
         _logger = logger;
         _localizer = localizer;
     }
@@ -110,13 +123,25 @@ public sealed class AuthController : Controller
 
         if (result.IsNotAllowed && !user.EmailConfirmed)
         {
-            QueueDevelopmentOtp(user.Email ?? normalizedEmail);
+            var otpEmail = user.Email ?? normalizedEmail;
+
+            var otpDispatched = await TryIssueOtpAsync(
+                user,
+                cancellationToken);
+
+            TempData["OtpStatusType"] =
+                otpDispatched ? "success" : "error";
+
+            TempData["OtpStatusMessage"] =
+                otpDispatched
+                    ? "NUEVA SECUENCIA DESPACHADA"
+                    : "NO FUE POSIBLE DESPACHAR LA SECUENCIA. SOLICITE UN REENVÍO.";
 
             return RedirectToAction(
                 nameof(VerifyOtp),
                 new
                 {
-                    email = user.Email ?? normalizedEmail
+                    email = otpEmail
                 });
         }
 
@@ -437,13 +462,24 @@ public sealed class AuthController : Controller
             return View(model);
         }
 
-        QueueDevelopmentOtp(email);
+        var otpDispatched = await TryIssueOtpAsync(
+            user,
+            cancellationToken);
+
+        TempData["OtpStatusType"] =
+            otpDispatched ? "success" : "error";
+
+        TempData["OtpStatusMessage"] =
+            otpDispatched
+                ? "SECUENCIA DE AUTORIZACIÓN DESPACHADA"
+                : "LA CUENTA FUE CREADA, PERO EL CORREO NO PUDO SER ENVIADO. SOLICITE UNA NUEVA SECUENCIA.";
 
         _logger.LogInformation(
-            "User registered and awaits OTP verification. UserId={UserId}, Email={Email}, Alias={Alias}.",
+            "User registered and awaits OTP verification. UserId={UserId}, Email={Email}, Alias={Alias}, OtpDispatched={OtpDispatched}.",
             user.Id,
             user.Email,
-            user.Alias);
+            user.Alias,
+            otpDispatched);
 
         return RedirectToAction(
             nameof(VerifyOtp),
@@ -457,7 +493,9 @@ public sealed class AuthController : Controller
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction("Index", "Profile");
+            return RedirectToAction(
+                "Index",
+                "Profile");
         }
 
         SetAuthTitle("VERIFY TERMINAL");
@@ -466,7 +504,8 @@ public sealed class AuthController : Controller
 
         if (string.IsNullOrWhiteSpace(normalizedEmail))
         {
-            return RedirectToAction(nameof(Register));
+            return RedirectToAction(
+                nameof(Register));
         }
 
         var user = await _userManager.FindByEmailAsync(
@@ -474,7 +513,8 @@ public sealed class AuthController : Controller
 
         if (user is null)
         {
-            return RedirectToAction(nameof(Register));
+            return RedirectToAction(
+                nameof(Register));
         }
 
         if (user.EmailConfirmed)
@@ -483,13 +523,37 @@ public sealed class AuthController : Controller
             TempData["AuthStatusMessage"] =
                 "The account is already verified. You can sign in.";
 
-            return RedirectToAction(nameof(Login));
+            return RedirectToAction(
+                nameof(Login));
         }
 
-        return View(new VerifyOtpViewModel
+        var otpState = ReadOtpState();
+
+        if (otpState is not null &&
+            !string.Equals(
+                otpState.Email,
+                user.Email ?? normalizedEmail,
+                StringComparison.OrdinalIgnoreCase))
         {
-            Email = user.Email ?? normalizedEmail
-        });
+            otpState = null;
+        }
+
+        if (otpState is not null &&
+            _timeProvider.GetUtcNow() >=
+            otpState.ExpiresAtUtc)
+        {
+            ClearOtpState();
+            otpState = null;
+
+            TempData["OtpStatusType"] = "error";
+            TempData["OtpStatusMessage"] =
+                "CÓDIGO EXPIRADO. EL LLAVERO DE ACCESO CADUCÓ.";
+        }
+
+        return View(
+            CreateVerifyOtpViewModel(
+                user.Email ?? normalizedEmail,
+                otpState?.ExpiresAtUtc));
     }
 
     [HttpPost]
@@ -501,12 +565,27 @@ public sealed class AuthController : Controller
     {
         SetAuthTitle("VERIFY TERMINAL");
 
+        var otpState = ReadOtpState();
+
+        model.ExpiresAtUtc =
+            otpState?.ExpiresAtUtc;
+
+        model.ServerTimeUtc =
+            _timeProvider.GetUtcNow();
+
         if (!ModelState.IsValid)
         {
             return View(model);
         }
 
-        if (!_environment.IsDevelopment())
+        var normalizedEmail = model.Email.Trim();
+        var submittedCode = model.Code.Trim();
+
+        if (otpState is null ||
+            !string.Equals(
+                otpState.Email,
+                normalizedEmail,
+                StringComparison.OrdinalIgnoreCase))
         {
             ModelState.AddModelError(
                 nameof(model.Code),
@@ -515,28 +594,23 @@ public sealed class AuthController : Controller
             return View(model);
         }
 
-        var normalizedEmail = model.Email.Trim();
-        var submittedCode = model.Code.Trim();
+        var now = _timeProvider.GetUtcNow();
 
-        var expectedEmail = TempData
-            .Peek(OtpEmailTempDataKey)
-            ?.ToString();
+        if (now >= otpState.ExpiresAtUtc)
+        {
+            ClearOtpState();
+            model.ExpiresAtUtc = null;
 
-        var expectedCode = TempData
-            .Peek(OtpCodeTempDataKey)
-            ?.ToString();
+            ModelState.AddModelError(
+                nameof(model.Code),
+                "CÓDIGO EXPIRADO. EL LLAVERO DE ACCESO CADUCÓ.");
 
-        var emailMatches = string.Equals(
-            expectedEmail,
-            normalizedEmail,
-            StringComparison.OrdinalIgnoreCase);
+            return View(model);
+        }
 
-        var codeMatches = string.Equals(
-            expectedCode,
-            submittedCode,
-            StringComparison.Ordinal);
-
-        if (!emailMatches || !codeMatches)
+        if (!OtpCodesMatch(
+            otpState.Code,
+            submittedCode))
         {
             ModelState.AddModelError(
                 nameof(model.Code),
@@ -548,8 +622,11 @@ public sealed class AuthController : Controller
         var user = await _userManager.FindByEmailAsync(
             normalizedEmail);
 
-        if (user is null || user.Status == UserStatus.Suspended)
+        if (user is null ||
+            user.Status == UserStatus.Suspended)
         {
+            ClearOtpState();
+
             ModelState.AddModelError(
                 nameof(model.Code),
                 "CÓDIGO INVÁLIDO O EXPIRADO");
@@ -561,7 +638,8 @@ public sealed class AuthController : Controller
         {
             user.EmailConfirmed = true;
 
-            var updateResult = await _userManager.UpdateAsync(user);
+            var updateResult =
+                await _userManager.UpdateAsync(user);
 
             if (!updateResult.Succeeded)
             {
@@ -576,8 +654,7 @@ public sealed class AuthController : Controller
             }
         }
 
-        TempData.Remove(OtpEmailTempDataKey);
-        TempData.Remove(OtpCodeTempDataKey);
+        ClearOtpState();
 
         await _userSessionService.SignInAsync(
             HttpContext,
@@ -586,11 +663,92 @@ public sealed class AuthController : Controller
             cancellationToken);
 
         _logger.LogInformation(
-            "Local account verified by development OTP. UserId={UserId}, Email={Email}.",
+            "Local account verified by OTP. UserId={UserId}, Email={Email}.",
             user.Id,
             user.Email);
 
-        return RedirectToAction("Index", "Profile");
+        return RedirectToAction(
+            "Index",
+            "Profile");
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResendOtp(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        SetAuthTitle("VERIFY TERMINAL");
+
+        var normalizedEmail = email?.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalizedEmail))
+        {
+            return RedirectToAction(
+                nameof(Register));
+        }
+
+        var user = await _userManager.FindByEmailAsync(
+            normalizedEmail);
+
+        if (user is null)
+        {
+            ClearOtpState();
+
+            TempData["OtpStatusType"] = "error";
+            TempData["OtpStatusMessage"] =
+                "NO FUE POSIBLE DESPACHAR LA SECUENCIA.";
+
+            return RedirectToAction(
+                nameof(VerifyOtp),
+                new { email = normalizedEmail });
+        }
+
+        if (user.EmailConfirmed)
+        {
+            ClearOtpState();
+
+            TempData["AuthStatusType"] = "success";
+            TempData["AuthStatusMessage"] =
+                "The account is already verified. You can sign in.";
+
+            return RedirectToAction(
+                nameof(Login));
+        }
+
+        if (user.Status == UserStatus.Suspended)
+        {
+            ClearOtpState();
+
+            TempData["OtpStatusType"] = "error";
+            TempData["OtpStatusMessage"] =
+                "LA CUENTA NO ESTÁ DISPONIBLE PARA VERIFICACIÓN.";
+
+            return RedirectToAction(
+                nameof(VerifyOtp),
+                new { email = normalizedEmail });
+        }
+
+        var otpDispatched = await TryIssueOtpAsync(
+            user,
+            cancellationToken);
+
+        TempData["OtpStatusType"] =
+            otpDispatched ? "success" : "error";
+
+        TempData["OtpStatusMessage"] =
+            otpDispatched
+                ? "NUEVA SECUENCIA DESPACHADA"
+                : "NO FUE POSIBLE DESPACHAR LA SECUENCIA.";
+
+        return RedirectToAction(
+            nameof(VerifyOtp),
+            new
+            {
+                email = user.Email ??
+                    normalizedEmail
+            });
     }
 
     [HttpPost]
@@ -704,16 +862,170 @@ public sealed class AuthController : Controller
         return candidate;
     }
 
-    private void QueueDevelopmentOtp(string email)
+    private VerifyOtpViewModel CreateVerifyOtpViewModel(
+        string email,
+        DateTimeOffset? expiresAtUtc)
     {
-        TempData[OtpEmailTempDataKey] = email.Trim();
-        TempData[OtpCodeTempDataKey] = DevelopmentOtpCode;
-
-        _logger.LogInformation(
-            "Development OTP generated. Email={Email}, Code={Code}.",
-            email,
-            DevelopmentOtpCode);
+        return new VerifyOtpViewModel
+        {
+            Email = email,
+            ExpiresAtUtc = expiresAtUtc,
+            ServerTimeUtc =
+                _timeProvider.GetUtcNow()
+        };
     }
+
+    private async Task<bool> TryIssueOtpAsync(
+        User user,
+        CancellationToken cancellationToken)
+    {
+        var email = user.Email?.Trim();
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            ClearOtpState();
+            return false;
+        }
+
+        var code = CreateOtpCode();
+        var expiresAtUtc =
+            _timeProvider.GetUtcNow().Add(OtpLifetime);
+
+        try
+        {
+            await _otpEmailSender.SendOtpAsync(
+                user,
+                code,
+                expiresAtUtc,
+                cancellationToken);
+
+            StoreOtpState(
+                email,
+                code,
+                expiresAtUtc);
+
+            _logger.LogInformation(
+                "OTP dispatched. UserId={UserId}, Email={Email}, ExpiresAtUtc={ExpiresAtUtc}.",
+                user.Id,
+                email,
+                expiresAtUtc);
+
+            return true;
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            ClearOtpState();
+            throw;
+        }
+        catch (Exception exception)
+        {
+            ClearOtpState();
+
+            _logger.LogError(
+                exception,
+                "OTP dispatch failed. UserId={UserId}, Email={Email}.",
+                user.Id,
+                email);
+
+            return false;
+        }
+    }
+
+    private static string CreateOtpCode()
+    {
+        return RandomNumberGenerator
+            .GetInt32(0, 1_000_000)
+            .ToString(
+                "D6",
+                CultureInfo.InvariantCulture);
+    }
+
+    private void StoreOtpState(
+        string email,
+        string code,
+        DateTimeOffset expiresAtUtc)
+    {
+        TempData[OtpEmailTempDataKey] =
+            email.Trim();
+
+        TempData[OtpCodeTempDataKey] =
+            code;
+
+        TempData[OtpExpiresAtTempDataKey] =
+            expiresAtUtc
+                .ToUnixTimeSeconds()
+                .ToString(
+                    CultureInfo.InvariantCulture);
+    }
+
+    private OtpState? ReadOtpState()
+    {
+        var email = TempData
+            .Peek(OtpEmailTempDataKey)
+            ?.ToString();
+
+        var code = TempData
+            .Peek(OtpCodeTempDataKey)
+            ?.ToString();
+
+        var expiresAtText = TempData
+            .Peek(OtpExpiresAtTempDataKey)
+            ?.ToString();
+
+        if (string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(code) ||
+            !long.TryParse(
+                expiresAtText,
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture,
+                out var expiresAtUnixSeconds))
+        {
+            return null;
+        }
+
+        return new OtpState(
+            email,
+            code,
+            DateTimeOffset.FromUnixTimeSeconds(
+                expiresAtUnixSeconds));
+    }
+
+    private void ClearOtpState()
+    {
+        TempData.Remove(
+            OtpEmailTempDataKey);
+
+        TempData.Remove(
+            OtpCodeTempDataKey);
+
+        TempData.Remove(
+            OtpExpiresAtTempDataKey);
+    }
+
+    private static bool OtpCodesMatch(
+        string expectedCode,
+        string submittedCode)
+    {
+        var expectedBytes =
+            System.Text.Encoding.UTF8.GetBytes(
+                expectedCode);
+
+        var submittedBytes =
+            System.Text.Encoding.UTF8.GetBytes(
+                submittedCode);
+
+        return expectedBytes.Length ==
+                submittedBytes.Length &&
+            CryptographicOperations.FixedTimeEquals(
+                expectedBytes,
+                submittedBytes);
+    }
+
+    private sealed record OtpState(
+        string Email,
+        string Code,
+        DateTimeOffset ExpiresAtUtc);
 
     private async Task<bool> IsGoogleAuthenticationAvailableAsync()
     {

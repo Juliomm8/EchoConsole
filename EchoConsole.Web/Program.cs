@@ -180,7 +180,7 @@ builder.Services.AddScoped<
 
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 builder.Services.AddScoped<EchoConsoleCookieAuthenticationEvents>();
-builder.Services.AddScoped<IAccountEmailSender, DevelopmentAccountEmailSender>();
+builder.Services.AddScoped<IOtpEmailSender, SmtpEmailSender>();
 
 builder.Services.AddTransient<AdminApiKeyHandler>();
 
