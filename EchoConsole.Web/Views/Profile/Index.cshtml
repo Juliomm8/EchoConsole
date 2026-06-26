@@ -1,4 +1,5 @@
 @model EchoConsole.Web.Models.Profile.ProfileDashboardViewModel
+@using EchoConsole.Web.Services.Profile
 
 @{
     ViewData["Title"] = SharedLocalizer["Profile_DashboardPageTitle"].Value;
@@ -8,18 +9,17 @@
         ? "PLAYER"
         : Model.Alias.Trim();
 
-    var initials = alias
-        .Split(
-            ' ',
-            StringSplitOptions.RemoveEmptyEntries)
-        .Take(2)
-        .Select(part =>
-            char.ToUpperInvariant(part[0]))
-        .ToArray();
+    var avatarKey =
+        ProfileCatalog.NormalizeStoredAvatarKey(
+            Model.AvatarKey);
 
-    var initialsLabel = initials.Length == 0
-        ? "CD"
-        : new string(initials);
+    var avatarUrl =
+        Url.Content(
+            $"~/images/avatars/{avatarKey}.png");
+
+    var fallbackAvatarUrl =
+        Url.Content(
+            "~/images/avatars/avatar_01.png");
 }
 
 <div data-profile-dashboard
@@ -84,8 +84,14 @@
                     <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
 
                     <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
-                        <div class="flex h-28 w-28 shrink-0 items-center justify-center border border-green-400/40 bg-green-500/10 font-display text-3xl tracking-[0.12em] text-green-200 shadow-[inset_0_0_24px_rgba(57,255,20,0.08)]">
-                            @initialsLabel
+                        <div class="h-28 w-28 shrink-0 overflow-hidden border border-green-400/40 bg-green-500/10 shadow-[inset_0_0_24px_rgba(57,255,20,0.08)]">
+                            <img src="@avatarUrl"
+                                 alt="@alias"
+                                 data-user-avatar-image
+                                 class="h-full w-full object-cover"
+                                 width="112"
+                                 height="112"
+                                 onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
                         </div>
 
                         <div class="min-w-0 flex-1">

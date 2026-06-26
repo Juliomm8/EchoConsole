@@ -1,4 +1,5 @@
 @using System.Security.Claims
+@using EchoConsole.Web.Services.Profile
 
 @{
     var fallbackTitle =
@@ -39,6 +40,19 @@
         "Viewer" => SharedLocalizer["Role_Viewer"].Value,
         _ => SharedLocalizer["Role_User"].Value
     };
+
+    var avatarKey = isAuthenticated
+        ? ProfileCatalog.NormalizeStoredAvatarKey(
+            User.FindFirst("avatar")?.Value)
+        : ProfileCatalog.DefaultAvatarKey;
+
+    var avatarUrl =
+        Url.Content(
+            $"~/images/avatars/{avatarKey}.png");
+
+    var fallbackAvatarUrl =
+        Url.Content(
+            "~/images/avatars/avatar_01.png");
 }
 
 <header class="sticky top-0 z-40 border-b border-green-500/15 bg-black/90 backdrop-blur-xl">
@@ -89,10 +103,14 @@
                     <details data-echo-dropdown
                              class="group relative">
                         <summary class="flex cursor-pointer items-center gap-3 rounded-lg border border-green-500/20 bg-green-500/5 px-3 py-2 transition hover:border-green-400/40 hover:bg-green-500/10">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-md border border-green-400/30 bg-black font-display text-xs uppercase tracking-[0.18em] text-green-200 shadow-phosphor">
-                                @(alias.Length >= 2
-                                    ? alias[..2].ToUpperInvariant()
-                                    : alias.ToUpperInvariant())
+                            <span class="h-10 w-10 shrink-0 overflow-hidden rounded-md border border-green-400/30 bg-black shadow-phosphor">
+                                <img src="@avatarUrl"
+                                     alt="@alias"
+                                     data-user-avatar-image
+                                     class="h-full w-full object-cover"
+                                     width="40"
+                                     height="40"
+                                     onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
                             </span>
 
                             <span class="hidden min-w-0 sm:block">

@@ -373,15 +373,16 @@
                     const avatarImageUrl =
                         response.data?.avatarImageUrl;
 
-                    if (avatarImageUrl) {
-                        for (
-                            const image of root.querySelectorAll(
-                                "[data-avatar-preview-image]"
-                            )
-                        ) {
-                            image.src = avatarImageUrl;
-                        }
-                    }
+                    const selectedAvatar =
+                        root.querySelector(
+                            "[data-avatar-radio]:checked"
+                        );
+
+                    updateAvatarImages(
+                        avatarImageUrl,
+                        selectedAvatar?.dataset
+                            .avatarNameValue
+                    );
 
                     showToast(
                         response.message,
@@ -722,6 +723,13 @@
                 )
             );
 
+        const avatarCards =
+            Array.from(
+                root.querySelectorAll(
+                    "[data-avatar-card]"
+                )
+            );
+
         openButton?.addEventListener(
             "click",
             () => {
@@ -761,21 +769,49 @@
                             .avatarNameValue
                     );
 
-                    const imageUrl =
-                        radio.dataset.avatarImage;
-
-                    if (imageUrl) {
-                        for (
-                            const image of
-                            root.querySelectorAll(
-                                "[data-avatar-preview-image]"
-                            )
-                        ) {
-                            image.src = imageUrl;
-                        }
-                    }
+                    updateAvatarImages(
+                        radio.dataset.avatarImage,
+                        radio.dataset.avatarNameValue
+                    );
 
                     closeAvatarModal();
+                }
+            );
+        }
+
+        for (const card of avatarCards) {
+            card.addEventListener(
+                "click",
+                event => {
+                    if (
+                        event.target.closest(
+                            "[data-avatar-radio]"
+                        )
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    const radio =
+                        card.querySelector(
+                            "[data-avatar-radio]"
+                        );
+
+                    if (!radio) {
+                        return;
+                    }
+
+                    radio.checked = true;
+
+                    radio.dispatchEvent(
+                        new Event(
+                            "change",
+                            {
+                                bubbles: true
+                            }
+                        )
+                    );
                 }
             );
         }
@@ -1115,6 +1151,33 @@
                 `;
             })
             .join("");
+    }
+
+    function updateAvatarImages(
+        imageUrl,
+        altText
+    ) {
+        if (!imageUrl) {
+            return;
+        }
+
+        const images =
+            new Set([
+                ...document.querySelectorAll(
+                    "[data-user-avatar-image]"
+                ),
+                ...root.querySelectorAll(
+                    "[data-avatar-preview-image]"
+                )
+            ]);
+
+        for (const image of images) {
+            image.src = imageUrl;
+
+            if (altText) {
+                image.alt = altText;
+            }
+        }
     }
 
     function applyTerminalTheme(theme) {

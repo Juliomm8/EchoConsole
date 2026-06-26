@@ -19,6 +19,10 @@
     var selectedAvatarName =
         selectedAvatar?.DisplayName
         ?? identity.AvatarKey;
+
+    var fallbackAvatarUrl =
+        Url.Content(
+            "~/images/avatars/avatar_01.png");
 }
 
 <div data-profile-settings
@@ -137,9 +141,11 @@
                                 <img src="@selectedAvatarImage"
                                      alt="@selectedAvatarName"
                                      data-avatar-preview-image
+                                     data-user-avatar-image
                                      class="h-full w-full object-cover"
                                      width="96"
-                                     height="96" />
+                                     height="96"
+                                     onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
                             </div>
 
                             <div class="min-w-0">
@@ -187,11 +193,12 @@
                                     class="flex w-full items-center justify-between border border-green-500/20 bg-green-950/30 px-4 py-4 text-left transition hover:border-green-400">
                                 <span class="flex min-w-0 items-center gap-4">
                                     <img src="@selectedAvatarImage"
-                                         alt=""
+                                         alt="@selectedAvatarName"
                                          data-avatar-preview-image
                                          class="h-14 w-14 shrink-0 border border-green-500/25 object-cover"
                                          width="56"
-                                         height="56" />
+                                         height="56"
+                                         onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
 
                                     <span class="min-w-0">
                                         <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">
@@ -538,7 +545,8 @@
                                  class="h-full w-full object-cover transition duration-200 group-hover:scale-[1.03]"
                                  width="256"
                                  height="256"
-                                 loading="lazy" />
+                                 loading="lazy"
+                                 onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
                         </span>
 
                         <span class="mt-3 block text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500 group-has-[:checked]:text-green-300">

@@ -8,7 +8,7 @@ public sealed class ProfileDashboardViewModel
 
     public string Name { get; set; } = string.Empty;
 
-    public string AvatarKey { get; set; } = "operator-01";
+    public string AvatarKey { get; set; } = "avatar_01";
 
     public string RoleDisplayName { get; set; } = "Operador/Jugador";
 
