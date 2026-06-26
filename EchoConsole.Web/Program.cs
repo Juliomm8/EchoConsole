@@ -285,6 +285,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<AdminTelemetryHub>("/hubs/admin-telemetry");
+app.MapHub<ProfileTelemetryHub>("/hubs/profile-telemetry");
 
 app.MapControllerRoute(
     name: "default",

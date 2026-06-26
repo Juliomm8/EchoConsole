@@ -2648,4 +2648,28 @@
   <data name="Profile_GenericError" xml:space="preserve">
     <value>No se pudo completar la operación.</value>
   </data>
+  <data name="Profile_EventLogEmpty" xml:space="preserve">
+    <value>NO HAY EVENTOS DE TELEMETRÍA RECIENTES</value>
+  </data>
+  <data name="Profile_Event_SessionStarted" xml:space="preserve">
+    <value>SESIÓN INICIADA</value>
+  </data>
+  <data name="Profile_Event_SessionEnded" xml:space="preserve">
+    <value>SESIÓN FINALIZADA</value>
+  </data>
+  <data name="Profile_Event_SessionExpired" xml:space="preserve">
+    <value>HEARTBEAT DE SESIÓN EXPIRADO</value>
+  </data>
+  <data name="Profile_LastSevenDays" xml:space="preserve">
+    <value>ÚLTIMOS 7 DÍAS</value>
+  </data>
+  <data name="Profile_ActivityTrend" xml:space="preserve">
+    <value>TENDENCIA DE ACTIVIDAD</value>
+  </data>
+  <data name="Profile_LiveFeed" xml:space="preserve">
+    <value>TELEMETRÍA RECIENTE</value>
+  </data>
+  <data name="Profile_LastFiveEvents" xml:space="preserve">
+    <value>ÚLTIMOS 5 EVENTOS</value>
+  </data>
 </root>

@@ -1,4 +1,5 @@
-﻿using EchoConsole.Web.Hubs;
+using System.Text.Json;
+using EchoConsole.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -6,46 +7,74 @@ namespace EchoConsole.Web.BackgroundServices;
 
 public sealed class TelemetryRelayService : BackgroundService
 {
-    private const string AdminApiKeyHeaderName = "X-Admin-Api-Key";
+    private const string AdminApiKeyHeaderName =
+        "X-Admin-Api-Key";
+
+    private static readonly HashSet<string>
+        ProfileEventNames =
+            new(StringComparer.Ordinal)
+            {
+                "sessionStarted",
+                "sessionHeartbeat",
+                "sessionEventRecorded",
+                "sessionEnded",
+                "sessionExpired"
+            };
 
     private readonly IConfiguration _configuration;
-    private readonly IHubContext<AdminTelemetryHub> _hubContext;
+    private readonly IHubContext<AdminTelemetryHub>
+        _adminHubContext;
+    private readonly IHubContext<ProfileTelemetryHub>
+        _profileHubContext;
     private readonly ILogger<TelemetryRelayService> _logger;
 
     private HubConnection? _connection;
 
     public TelemetryRelayService(
         IConfiguration configuration,
-        IHubContext<AdminTelemetryHub> hubContext,
+        IHubContext<AdminTelemetryHub> adminHubContext,
+        IHubContext<ProfileTelemetryHub> profileHubContext,
         ILogger<TelemetryRelayService> logger)
     {
         _configuration = configuration;
-        _hubContext = hubContext;
+        _adminHubContext = adminHubContext;
+        _profileHubContext = profileHubContext;
         _logger = logger;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(
+        CancellationToken stoppingToken)
     {
-        var apiBaseUrl = _configuration["ApiSettings:BaseUrl"];
-        var apiKey = _configuration["AdminApiSecurity:ApiKey"];
+        var apiBaseUrl =
+            _configuration["ApiSettings:BaseUrl"];
+
+        var apiKey =
+            _configuration["AdminApiSecurity:ApiKey"];
 
         if (string.IsNullOrWhiteSpace(apiBaseUrl))
         {
-            throw new InvalidOperationException("ApiSettings:BaseUrl is not configured in EchoConsole.Web.");
+            throw new InvalidOperationException(
+                "ApiSettings:BaseUrl is not configured in EchoConsole.Web.");
         }
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            throw new InvalidOperationException("AdminApiSecurity:ApiKey is not configured in EchoConsole.Web.");
+            throw new InvalidOperationException(
+                "AdminApiSecurity:ApiKey is not configured in EchoConsole.Web.");
         }
 
-        var hubUrl = $"{apiBaseUrl.TrimEnd('/')}/hubs/telemetry";
+        var hubUrl =
+            $"{apiBaseUrl.TrimEnd('/')}/hubs/telemetry";
 
         _connection = new HubConnectionBuilder()
-            .WithUrl(hubUrl, options =>
-            {
-                options.Headers[AdminApiKeyHeaderName] = apiKey;
-            })
+            .WithUrl(
+                hubUrl,
+                options =>
+                {
+                    options.Headers[
+                        AdminApiKeyHeaderName] =
+                            apiKey;
+                })
             .WithAutomaticReconnect()
             .Build();
 
@@ -53,11 +82,15 @@ public sealed class TelemetryRelayService : BackgroundService
 
         _connection.Closed += async ex =>
         {
-            _logger.LogWarning(ex, "Telemetry relay connection closed. Retrying soon.");
+            _logger.LogWarning(
+                ex,
+                "Telemetry relay connection closed. Retrying soon.");
 
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await Task.Delay(
+                    TimeSpan.FromSeconds(5),
+                    stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -66,13 +99,19 @@ public sealed class TelemetryRelayService : BackgroundService
 
         _connection.Reconnecting += ex =>
         {
-            _logger.LogWarning(ex, "Telemetry relay reconnecting...");
+            _logger.LogWarning(
+                ex,
+                "Telemetry relay reconnecting...");
+
             return Task.CompletedTask;
         };
 
         _connection.Reconnected += connectionId =>
         {
-            _logger.LogInformation("Telemetry relay reconnected. ConnectionId: {ConnectionId}", connectionId);
+            _logger.LogInformation(
+                "Telemetry relay reconnected. ConnectionId: {ConnectionId}",
+                connectionId);
+
             return Task.CompletedTask;
         };
 
@@ -80,16 +119,22 @@ public sealed class TelemetryRelayService : BackgroundService
         {
             try
             {
-                if (_connection.State == HubConnectionState.Disconnected)
+                if (_connection.State ==
+                    HubConnectionState.Disconnected)
                 {
-                    _logger.LogInformation("Connecting telemetry relay to API hub using server-to-server header authentication.");
+                    _logger.LogInformation(
+                        "Connecting telemetry relay to API hub using server-to-server header authentication.");
 
-                    await _connection.StartAsync(stoppingToken);
+                    await _connection.StartAsync(
+                        stoppingToken);
 
-                    _logger.LogInformation("Telemetry relay connected successfully.");
+                    _logger.LogInformation(
+                        "Telemetry relay connected successfully.");
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await Task.Delay(
+                    TimeSpan.FromSeconds(5),
+                    stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -97,13 +142,19 @@ public sealed class TelemetryRelayService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Telemetry relay failed to connect. Retrying...");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                _logger.LogError(
+                    ex,
+                    "Telemetry relay failed to connect. Retrying...");
+
+                await Task.Delay(
+                    TimeSpan.FromSeconds(5),
+                    stoppingToken);
             }
         }
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(
+        CancellationToken cancellationToken)
     {
         if (_connection is not null)
         {
@@ -113,21 +164,23 @@ public sealed class TelemetryRelayService : BackgroundService
         await base.StopAsync(cancellationToken);
     }
 
-    private void RegisterRelayHandlers(HubConnection connection)
+    private void RegisterRelayHandlers(
+        HubConnection connection)
     {
-        connection.On<object>(
+        connection.On<JsonElement>(
             "ReceiveTelemetryUpdate",
             async payload =>
             {
-                await BroadcastAsync(
+                await BroadcastAdminAsync(
                     "ReceiveTelemetryUpdate",
                     payload);
 
-                await BroadcastAsync(
+                await BroadcastAdminAsync(
                     "LiveOperationsRefresh",
                     new
                     {
-                        eventType = "telemetryUpdate"
+                        eventType =
+                            "telemetryUpdate"
                     });
             });
 
@@ -173,10 +226,10 @@ public sealed class TelemetryRelayService : BackgroundService
     }
 
     private void RegisterOperationalHandler(
-    HubConnection connection,
-    string sourceEventName)
+        HubConnection connection,
+        string sourceEventName)
     {
-        connection.On<object>(
+        connection.On<JsonElement>(
             sourceEventName,
             async payload =>
             {
@@ -186,27 +239,110 @@ public sealed class TelemetryRelayService : BackgroundService
                     payload
                 };
 
-                await BroadcastAsync(
+                await BroadcastAdminAsync(
                     "ReceiveTelemetryUpdate",
                     envelope);
 
-                await BroadcastAsync(
+                await BroadcastAdminAsync(
                     "LiveOperationsRefresh",
                     new
                     {
-                        eventType = sourceEventName
+                        eventType =
+                            sourceEventName
                     });
+
+                if (!ProfileEventNames.Contains(
+                    sourceEventName))
+                {
+                    return;
+                }
+
+                if (!TryGetOwnerUserId(
+                    payload,
+                    out var ownerUserId))
+                {
+                    _logger.LogDebug(
+                        "Profile telemetry event {EventType} did not contain OwnerUserId and was not forwarded to a player group.",
+                        sourceEventName);
+
+                    return;
+                }
+
+                await _profileHubContext.Clients
+                    .Group(
+                        ProfileTelemetryHub
+                            .GetUserGroupName(
+                                ownerUserId))
+                    .SendAsync(
+                        "ProfileTelemetryUpdate",
+                        new
+                        {
+                            eventType =
+                                sourceEventName,
+                            serverTimeUtc =
+                                DateTimeOffset.UtcNow,
+                            payload
+                        });
             });
     }
 
-    private async Task BroadcastAsync(string eventName, object? payload)
+    private async Task BroadcastAdminAsync(
+        string eventName,
+        object? payload)
     {
-        await _hubContext.Clients.All.SendAsync(
+        await _adminHubContext.Clients.All.SendAsync(
             eventName,
             new
             {
-                serverTimeUtc = DateTimeOffset.UtcNow,
+                serverTimeUtc =
+                    DateTimeOffset.UtcNow,
                 payload
             });
+    }
+
+    private static bool TryGetOwnerUserId(
+        JsonElement payload,
+        out int ownerUserId)
+    {
+        ownerUserId = default;
+
+        if (payload.ValueKind !=
+            JsonValueKind.Object)
+        {
+            return false;
+        }
+
+        foreach (var property in
+                 payload.EnumerateObject())
+        {
+            if (!string.Equals(
+                property.Name,
+                "ownerUserId",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (property.Value.ValueKind ==
+                JsonValueKind.Number &&
+                property.Value.TryGetInt32(
+                    out ownerUserId))
+            {
+                return ownerUserId > 0;
+            }
+
+            if (property.Value.ValueKind ==
+                JsonValueKind.String &&
+                int.TryParse(
+                    property.Value.GetString(),
+                    out ownerUserId))
+            {
+                return ownerUserId > 0;
+            }
+
+            return false;
+        }
+
+        return false;
     }
 }

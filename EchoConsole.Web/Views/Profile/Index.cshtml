@@ -25,6 +25,7 @@
 <div data-profile-dashboard
      data-live-url="@Url.Action("GetLiveSnapshot", "Profile")"
      data-statistics-url="@Url.Action("GetStatisticsSnapshot", "Profile")"
+     data-hub-url="@Url.Content("~/hubs/profile-telemetry")"
      data-label-online="@SharedLocalizer["Profile_Status_Online"]"
      data-label-degraded="@SharedLocalizer["Profile_Status_Degraded"]"
      data-label-offline="@SharedLocalizer["Profile_Status_Offline"]"
@@ -33,10 +34,14 @@
      data-label-minutes="@SharedLocalizer["Common_MinutesShort"]"
      data-label-hours="@SharedLocalizer["Common_HoursShort"]"
      data-label-retrying="@SharedLocalizer["Profile_Retrying"]"
+     data-label-event-log-empty="@SharedLocalizer["Profile_EventLogEmpty"]"
+     data-label-session-started="@SharedLocalizer["Profile_Event_SessionStarted"]"
+     data-label-session-ended="@SharedLocalizer["Profile_Event_SessionEnded"]"
+     data-label-session-expired="@SharedLocalizer["Profile_Event_SessionExpired"]"
      class="min-h-screen bg-black text-green-100">
 
     <div class="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
-        <header class="relative overflow-hidden border border-green-500/20 bg-black px-5 py-6 shadow-[0_0_36px_rgba(57,255,20,0.06)] sm:px-8">
+        <header class="profile-crt-panel relative overflow-hidden border border-green-500/20 bg-black px-5 py-6 shadow-[0_0_36px_rgba(57,255,20,0.06)] sm:px-8">
             <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(57,255,20,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,20,0.025)_1px,transparent_1px)] bg-[size:28px_28px]"></div>
 
             <div class="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
@@ -75,7 +80,7 @@
 
         <main class="mt-5 grid gap-5">
             <section class="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-                <article class="relative overflow-hidden border border-green-500/25 bg-green-950/30 p-6 sm:p-8">
+                <article class="profile-crt-panel relative overflow-hidden border border-green-500/25 bg-green-950/30 p-6 sm:p-8">
                     <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
 
                     <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
@@ -128,13 +133,20 @@
                             </div>
 
                             <span data-connection-indicator
-                                  class="h-3 w-3 rounded-full bg-slate-600 shadow-[0_0_14px_rgba(100,116,139,0.7)]">
+                                  class="relative flex h-3 w-3"
+                                  aria-hidden="true">
+                                <span data-heartbeat-wave
+                                      class="absolute inset-0 rounded-full bg-green-400 opacity-0">
+                                </span>
+                                <span data-heartbeat-core
+                                      class="relative h-3 w-3 rounded-full bg-slate-600 shadow-[0_0_14px_rgba(100,116,139,0.7)]">
+                                </span>
                             </span>
                         </div>
                     </div>
                 </article>
 
-                <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                <section class="profile-crt-panel border border-slate-800 bg-[#020402] p-5 sm:p-8">
                     <div class="flex items-end justify-between gap-4">
                         <div>
                             <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
@@ -198,47 +210,124 @@
             </section>
 
             <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <article class="border border-green-500/20 bg-green-950/30 p-5 sm:col-span-2 xl:col-span-1">
-                    <span class="text-[10px] uppercase tracking-[0.22em] text-green-600">
-                        @SharedLocalizer["Profile_TotalPlayTime"]
-                    </span>
-                    <strong data-total-play-time class="mt-3 block font-display text-4xl tracking-[0.08em] text-green-200">0h 0m</strong>
+                <article class="profile-crt-panel border border-green-500/20 bg-green-950/30 p-5 sm:col-span-2 xl:col-span-1">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-[0.22em] text-green-600">
+                                @SharedLocalizer["Profile_TotalPlayTime"]
+                            </span>
+                            <strong data-total-play-time
+                                    class="mt-3 block font-display text-4xl tracking-[0.08em] text-green-200">
+                                0h 0m
+                            </strong>
+                        </div>
+
+                        <span class="text-[9px] uppercase tracking-[0.16em] text-slate-600">
+                            @SharedLocalizer["Profile_LastSevenDays"]
+                        </span>
+                    </div>
+
+                    <div class="mt-5 border-t border-green-500/10 pt-4">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-green-700">
+                                @SharedLocalizer["Profile_ActivityTrend"]
+                            </span>
+                            <span data-activity-total
+                                  class="text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                                0m
+                            </span>
+                        </div>
+
+                        <svg data-activity-chart
+                             class="mt-3 h-20 w-full overflow-visible"
+                             viewBox="0 0 280 72"
+                             preserveAspectRatio="none"
+                             role="img"
+                             aria-label="@SharedLocalizer["Profile_ActivityTrend"]">
+                            <line x1="0"
+                                  y1="68"
+                                  x2="280"
+                                  y2="68"
+                                  stroke="rgba(57,255,20,0.12)"
+                                  stroke-width="1" />
+                            <polyline data-activity-area
+                                      points=""
+                                      fill="rgba(57,255,20,0.08)"
+                                      stroke="none" />
+                            <polyline data-activity-line
+                                      points=""
+                                      fill="none"
+                                      stroke="rgba(140,255,114,0.9)"
+                                      stroke-width="2"
+                                      vector-effect="non-scaling-stroke" />
+                        </svg>
+
+                        <div data-activity-labels
+                             class="mt-2 grid grid-cols-7 gap-1 text-center text-[8px] uppercase tracking-[0.08em] text-slate-700">
+                        </div>
+                    </div>
                 </article>
 
-                <article class="border border-slate-800 bg-black p-5">
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
                     <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
                         @SharedLocalizer["Profile_TotalSessions"]
                     </span>
                     <strong data-total-sessions class="mt-3 block font-display text-3xl text-green-300">0</strong>
                 </article>
 
-                <article class="border border-slate-800 bg-black p-5">
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
                     <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
                         @SharedLocalizer["Profile_LinkedNodes"]
                     </span>
                     <strong data-linked-nodes class="mt-3 block font-display text-3xl text-green-300">0</strong>
                 </article>
 
-                <article class="border border-slate-800 bg-black p-5">
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
                     <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
                         @SharedLocalizer["Profile_LongestSession"]
                     </span>
                     <strong data-longest-session class="mt-3 block font-display text-3xl text-green-300">@($"0{SharedLocalizer["Common_MinutesShort"]}")</strong>
                 </article>
 
-                <article class="border border-slate-800 bg-black p-5">
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
                     <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
                         @SharedLocalizer["Profile_FavoriteBuild"]
                     </span>
                     <strong data-favorite-build class="mt-3 block truncate font-display text-2xl text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
                 </article>
 
-                <article class="border border-slate-800 bg-black p-5">
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
                     <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
                         @SharedLocalizer["Profile_LastActivity"]
                     </span>
                     <strong data-last-activity class="mt-3 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
                 </article>
+            </section>
+
+            <section class="profile-crt-panel border border-green-500/20 bg-[#020402] p-5 sm:p-7">
+                <div class="flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
+                            @SharedLocalizer["Profile_LiveFeed"]
+                        </p>
+
+                        <h2 class="mt-2 font-display text-xl uppercase tracking-[0.12em] text-green-100">
+                            &gt; EVENT_LOG
+                        </h2>
+                    </div>
+
+                    <span class="text-[9px] uppercase tracking-[0.16em] text-slate-600">
+                        @SharedLocalizer["Profile_LastFiveEvents"]
+                    </span>
+                </div>
+
+                <ol data-event-log
+                    aria-live="polite"
+                    class="mt-5 space-y-2 font-mono text-xs text-green-300/70">
+                    <li class="border-l border-green-500/20 pl-4 text-slate-600">
+                        @SharedLocalizer["Profile_EventLogEmpty"]
+                    </li>
+                </ol>
             </section>
 
             <a asp-controller="Profile"
@@ -251,6 +340,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/lib/signalr/signalr.min.js"></script>
     <script src="~/js/profile-dashboard.js"
             asp-append-version="true"
             defer></script>

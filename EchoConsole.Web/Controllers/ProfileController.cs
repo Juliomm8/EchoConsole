@@ -215,12 +215,18 @@ public sealed class ProfileController : Controller
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
+        var now = _timeProvider.GetUtcNow();
+        var activityPoints = CreateEmptyActivityPoints(now);
+
         if (installationIds.Count == 0)
         {
             return Json(new
             {
                 success = true,
-                data = new ProfileStatisticsSnapshotViewModel()
+                data = new ProfileStatisticsSnapshotViewModel
+                {
+                    ActivityLastSevenDays = activityPoints
+                }
             });
         }
 
@@ -271,6 +277,90 @@ public sealed class ProfileController : Controller
             .FirstOrDefaultAsync(cancellationToken)
             ?? "N/A";
 
+        var todayUtc = now.UtcDateTime.Date;
+        var trendStartUtc = new DateTimeOffset(
+            todayUtc.AddDays(-6),
+            TimeSpan.Zero);
+
+        var trendEndUtc = new DateTimeOffset(
+            todayUtc.AddDays(1),
+            TimeSpan.Zero);
+
+        var trendSessions = await sessionQuery
+            .Where(x =>
+                x.LastHeartbeatUtc >= trendStartUtc &&
+                x.StartedAtUtc < trendEndUtc)
+            .Select(x => new
+            {
+                x.StartedAtUtc,
+                EndedAtUtc =
+                    x.EndedAtUtc ??
+                    x.LastHeartbeatUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        activityPoints = Enumerable
+            .Range(0, 7)
+            .Select(index =>
+            {
+                var dayStart = new DateTimeOffset(
+                    todayUtc.AddDays(index - 6),
+                    TimeSpan.Zero);
+
+                var dayEnd = dayStart.AddDays(1);
+
+                var totalMinutes = trendSessions.Sum(
+                    session =>
+                    {
+                        var overlapStart =
+                            session.StartedAtUtc > dayStart
+                                ? session.StartedAtUtc
+                                : dayStart;
+
+                        var overlapEnd =
+                            session.EndedAtUtc < dayEnd
+                                ? session.EndedAtUtc
+                                : dayEnd;
+
+                        if (overlapEnd <= overlapStart)
+                        {
+                            return 0L;
+                        }
+
+                        return Math.Max(
+                            0L,
+                            (long)Math.Floor(
+                                (overlapEnd - overlapStart)
+                                .TotalMinutes));
+                    });
+
+                return new ProfileDailyActivityPointViewModel
+                {
+                    Date = DateOnly.FromDateTime(
+                        dayStart.UtcDateTime),
+                    Minutes = totalMinutes
+                };
+            })
+            .ToArray();
+
+        var recentEvents = await _dbContext
+            .GameSessionEvents
+            .AsNoTracking()
+            .Where(x =>
+                installationIds.Contains(
+                    x.GameSession.InstallationDbId))
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ThenByDescending(x => x.Id)
+            .Take(5)
+            .Select(x => new ProfileRecentEventViewModel
+            {
+                Id = x.Id,
+                EventType = x.EventType,
+                Scene = x.Scene ?? "N/A",
+                OccurredAtUtc = x.CreatedAtUtc
+            })
+            .ToListAsync(cancellationToken);
+
         var snapshot =
             new ProfileStatisticsSnapshotViewModel
             {
@@ -289,7 +379,11 @@ public sealed class ProfileController : Controller
                 FavoriteBuild =
                     favoriteBuild,
                 LastActivityUtc =
-                    lastActivityUtc
+                    lastActivityUtc,
+                ActivityLastSevenDays =
+                    activityPoints,
+                RecentEvents =
+                    recentEvents
             };
 
         return Json(new
@@ -469,6 +563,23 @@ public sealed class ProfileController : Controller
     }
 
 
+
+    private static IReadOnlyList<ProfileDailyActivityPointViewModel>
+        CreateEmptyActivityPoints(DateTimeOffset now)
+    {
+        var todayUtc = now.UtcDateTime.Date;
+
+        return Enumerable
+            .Range(0, 7)
+            .Select(index =>
+                new ProfileDailyActivityPointViewModel
+                {
+                    Date = DateOnly.FromDateTime(
+                        todayUtc.AddDays(index - 6)),
+                    Minutes = 0
+                })
+            .ToArray();
+    }
 
     private int? GetCurrentUserId()
     {
