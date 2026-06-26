@@ -263,18 +263,17 @@
 
             <div class="mt-6 rounded-2xl border border-slate-800 bg-black/30 p-3">
                 <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                    <label for="nodeSearch"
-                           class="relative block flex-1">
-                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 font-mono text-xs text-cyan-500">
-                            &gt;_
-                        </span>
+                    <label for="nodeSearch" class="relative flex flex-1">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-6" aria-hidden="true">
+                            <span class="font-mono text-sm font-bold text-green-500">&gt;</span>
+                        </div>
 
                         <input type="text"
                                id="nodeSearch"
                                autocomplete="off"
                                spellcheck="false"
                                placeholder="SEARCH NODE OR CURRENT SCENE..."
-                               class="w-full rounded-xl border border-cyan-500/20 bg-slate-950 px-11 py-3 font-mono text-xs uppercase tracking-[0.14em] text-cyan-100 outline-none transition placeholder:text-slate-700 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/10" />
+                               class="block w-full rounded-xl border border-slate-800 bg-black py-5 pl-14 pr-4 font-mono text-sm tracking-wider text-green-400 outline-none transition placeholder:text-slate-600 focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10" />
                     </label>
 
                     <div class="flex min-w-0 gap-2 overflow-x-auto"
