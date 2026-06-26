@@ -1,467 +1,257 @@
-@model EchoConsole.Web.Models.Profile.ProfileViewModel
+@model EchoConsole.Web.Models.Profile.ProfileDashboardViewModel
 
 @{
-    ViewData["Title"] = "PLAYER DOSSIER";
-    ViewData["TitleResourceKey"] = "Profile_PageTitle";
+    ViewData["Title"] = SharedLocalizer["Profile_DashboardPageTitle"].Value;
+    ViewData["TitleResourceKey"] = "Profile_DashboardPageTitle";
 
-    var initialSection = Model.InitialSection switch
-    {
-        "security" => "security",
-        "fleet" => "fleet",
-        _ => "identity"
-    };
-
-    var identity = Model.IdentityPreview;
-    var alias = string.IsNullOrWhiteSpace(identity.Alias)
+    var alias = string.IsNullOrWhiteSpace(Model.Alias)
         ? "PLAYER"
-        : identity.Alias.Trim();
+        : Model.Alias.Trim();
 
-    var initials = alias.Length >= 2
-        ? alias[..2].ToUpperInvariant()
-        : alias.ToUpperInvariant();
+    var initials = alias
+        .Split(
+            ' ',
+            StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(part =>
+            char.ToUpperInvariant(part[0]))
+        .ToArray();
 
-    var selectedAvatarKey = identity.AvatarKey?.ToLowerInvariant() switch
-    {
-        "operator-01" or "operator-02" or "operator-03" or
-        "operator-04" or "operator-05" or "operator-06" => identity.AvatarKey.ToLowerInvariant(),
-        "avatar-01" => "operator-01",
-        "avatar-02" => "operator-02",
-        "avatar-03" => "operator-03",
-        "avatar-04" => "operator-04",
-        "avatar-05" => "operator-05",
-        "avatar-06" => "operator-06",
-        _ => "operator-01"
-    };
-
-    var selectedTheme = identity.Theme?.ToLowerInvariant() switch
-    {
-        "phosphor-green" or "amber-monitor" or
-        "cold-cyan" or "monochrome-crt" => identity.Theme.ToLowerInvariant(),
-        "amber" => "amber-monitor",
-        "cyan" => "cold-cyan",
-        _ => "phosphor-green"
-    };
-
-    var selectedLanguage = string.Equals(
-        identity.PreferredLanguage,
-        "es",
-        StringComparison.OrdinalIgnoreCase)
-            ? "es"
-            : "en";
+    var initialsLabel = initials.Length == 0
+        ? "CD"
+        : new string(initials);
 }
 
-<div data-profile-root
-     data-initial-section="@initialSection"
-     data-identity-url="@Url.Action("GetIdentity", "Profile")"
-     data-security-url="@Url.Action("GetActiveSessions", "Profile")"
-     data-fleet-url="@Url.Action("GetFleet", "Profile")"
-     data-update-identity-url="@Url.Action("UpdateIdentity", "Profile")"
-     data-change-password-url="@Url.Action("ChangePassword", "Profile")"
-     data-terminate-sessions-url="@Url.Action("TerminateAllOtherSessions", "Profile")"
-     data-unlink-device-url="@Url.Action("UnlinkDevice", "Profile")"
+<div data-profile-dashboard
+     data-live-url="@Url.Action("GetLiveSnapshot", "Profile")"
+     data-statistics-url="@Url.Action("GetStatisticsSnapshot", "Profile")"
+     data-label-online="@SharedLocalizer["Profile_Status_Online"]"
+     data-label-degraded="@SharedLocalizer["Profile_Status_Degraded"]"
+     data-label-offline="@SharedLocalizer["Profile_Status_Offline"]"
+     data-label-no-active-session="@SharedLocalizer["Profile_NoActiveSession"]"
+     data-label-not-available="@SharedLocalizer["Common_NotAvailable"]"
+     data-label-minutes="@SharedLocalizer["Common_MinutesShort"]"
+     data-label-hours="@SharedLocalizer["Common_HoursShort"]"
+     data-label-retrying="@SharedLocalizer["Profile_Retrying"]"
      class="min-h-screen bg-black text-green-100">
 
-    <form data-antiforgery-form class="hidden">
-        @Html.AntiForgeryToken()
-    </form>
-
-    <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
         <header class="relative overflow-hidden border border-green-500/20 bg-black px-5 py-6 shadow-[0_0_36px_rgba(57,255,20,0.06)] sm:px-8">
             <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(57,255,20,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,20,0.025)_1px,transparent_1px)] bg-[size:28px_28px]"></div>
 
             <div class="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
                 <div>
                     <p class="text-[10px] font-bold uppercase tracking-[0.38em] text-green-500">
-                        DARK SKY STUDIOS // PLAYER TELEMETRY
+                        @SharedLocalizer["Profile_DashboardKicker"]
                     </p>
+
                     <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.12em] text-green-100 text-glow-cyan sm:text-5xl">
-                        PLAYER DOSSIER
+                        @SharedLocalizer["Profile_DashboardTitle"]
                     </h1>
+
                     <p class="mt-4 max-w-3xl text-sm leading-7 text-slate-500">
-                        Personal telemetry record, linked hardware inventory and access security channel.
+                        @SharedLocalizer["Profile_DashboardDescription"]
                     </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-[0.18em] sm:grid-cols-4">
-                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
-                        <span class="block text-slate-600">RECORD</span>
-                        <span class="mt-1 block text-green-300">DS-@identity.UserId.ToString("D5")</span>
-                    </div>
-                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
-                        <span class="block text-slate-600">CLEARANCE</span>
-                        <span data-profile-role class="mt-1 block text-green-300">@identity.RoleDisplayName</span>
-                    </div>
-                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
-                        <span class="block text-slate-600">STATUS</span>
-                        <span data-profile-status class="mt-1 block text-green-300">@identity.Status</span>
-                    </div>
-                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
-                        <span class="block text-slate-600">NAVIGATION</span>
-                        <span class="mt-1 block text-green-300">ALT 1-3</span>
-                    </div>
-                </div>
+                <a asp-controller="ProfileSettings"
+                   asp-action="Index"
+                   class="group inline-flex items-center justify-center gap-3 border border-green-500/25 bg-green-500/[0.05] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-green-300 transition hover:border-green-300 hover:bg-green-500/10 hover:text-green-100"
+                   aria-label="@SharedLocalizer["Profile_OpenSettings"]">
+                    <svg class="h-5 w-5 transition group-hover:rotate-45"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.7"
+                         aria-hidden="true">
+                        <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+                        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.16.36.37.7.6 1 .3.33.7.54 1.1.6H21v4h-.09a1.7 1.7 0 0 0-1.51.4Z" />
+                    </svg>
+
+                    <span>@SharedLocalizer["Profile_OpenSettings"]</span>
+                </a>
             </div>
         </header>
 
-        <nav data-profile-anchor-bar
-             aria-label="Player dossier navigation"
-             class="sticky z-30 mt-4 border border-green-500/20 bg-black/95 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.72)] backdrop-blur-xl">
-            <div class="flex gap-2 overflow-x-auto">
-                <a href="#profile-section"
-                   data-profile-anchor="identity"
-                   class="shrink-0 border border-green-500/30 bg-green-500/10 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-green-200 transition hover:border-green-300 hover:bg-green-500/15 sm:flex-1 sm:text-center">
-                    [ PERFIL ]
-                    <span class="ml-2 text-[8px] text-slate-600">ALT+1</span>
-                </a>
-                <a href="#security-section"
-                   data-profile-anchor="security"
-                   class="shrink-0 border border-slate-800 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-green-500/40 hover:text-green-200 sm:flex-1 sm:text-center">
-                    [ ACCESO &amp; SEGURIDAD ]
-                    <span class="ml-2 text-[8px] text-slate-600">ALT+2</span>
-                </a>
-                <a href="#devices-section"
-                   data-profile-anchor="fleet"
-                   class="shrink-0 border border-slate-800 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-green-500/40 hover:text-green-200 sm:flex-1 sm:text-center">
-                    [ MIS DISPOSITIVOS ]
-                    <span class="ml-2 text-[8px] text-slate-600">ALT+3</span>
-                </a>
-            </div>
-        </nav>
+        <main class="mt-5 grid gap-5">
+            <section class="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+                <article class="relative overflow-hidden border border-green-500/25 bg-green-950/30 p-6 sm:p-8">
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
 
-        <main class="mt-8 space-y-16 pb-16">
-            <section id="profile-section"
-                     data-profile-section="identity"
-                     class="scroll-mt-40">
-                <div class="mb-5 flex flex-col gap-3 border-b border-green-500/20 pb-5 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">[ PERFIL ]</p>
-                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
-                            IDENTIDAD DEL JUGADOR
-                        </h2>
-                    </div>
-                    <span data-identity-loading class="text-[9px] uppercase tracking-[0.18em] text-amber-400">
-                        SYNCHRONIZING
-                    </span>
-                </div>
-
-                <div class="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-                    <article class="relative overflow-hidden border border-green-500/25 bg-green-950/30 p-6 shadow-[0_0_32px_rgba(57,255,20,0.07)] sm:p-8">
-                        <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
-
-                        <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
-                            <div data-player-avatar
-                                 class="flex h-28 w-28 shrink-0 items-center justify-center border border-green-400/40 bg-green-500/10 font-display text-3xl tracking-[0.12em] text-green-200 shadow-[inset_0_0_24px_rgba(57,255,20,0.08)]">
-                                <span data-player-initials>@initials</span>
-                            </div>
-
-                            <div class="min-w-0 flex-1">
-                                <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER IDENTIFICATION</p>
-                                <h3 data-player-alias class="mt-2 truncate font-display text-3xl uppercase tracking-[0.1em] text-green-100">
-                                    @identity.Alias
-                                </h3>
-                                <p data-player-name class="mt-2 text-sm text-slate-400">@identity.Name</p>
-
-                                <div class="mt-5 flex flex-wrap gap-2">
-                                    <span data-player-role class="border border-green-500/25 bg-green-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-green-300">
-                                        @identity.RoleDisplayName
-                                    </span>
-                                    <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
-                                        AVATAR: <span data-player-avatar-key>@selectedAvatarKey</span>
-                                    </span>
-                                    <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
-                                        THEME: <span data-player-theme>@selectedTheme</span>
-                                    </span>
-                                </div>
-                            </div>
+                    <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+                        <div class="flex h-28 w-28 shrink-0 items-center justify-center border border-green-400/40 bg-green-500/10 font-display text-3xl tracking-[0.12em] text-green-200 shadow-[inset_0_0_24px_rgba(57,255,20,0.08)]">
+                            @initialsLabel
                         </div>
 
-                        <div class="mt-8 grid gap-3 border-t border-green-500/15 pt-5 text-[10px] uppercase tracking-[0.18em] sm:grid-cols-2">
-                            <div class="border border-green-500/15 bg-black/80 p-4">
-                                <span class="block text-slate-600">EMAIL CHANNEL</span>
-                                <span data-player-email class="mt-2 block truncate text-slate-300">@identity.Email</span>
-                            </div>
-                            <div class="border border-green-500/15 bg-black/80 p-4">
-                                <span class="block text-slate-600">EMAIL STATUS</span>
-                                <span data-email-confirmed class="mt-2 block @(identity.EmailConfirmed ? "text-green-300" : "text-amber-300")">
-                                    @(identity.EmailConfirmed ? "VERIFIED" : "PENDING")
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
+                                @SharedLocalizer["Profile_PlayerIdentification"]
+                            </p>
+
+                            <h2 class="mt-2 truncate font-display text-3xl uppercase tracking-[0.1em] text-green-100">
+                                @Model.Alias
+                            </h2>
+
+                            <p class="mt-2 text-sm text-slate-400">
+                                @Model.Name
+                            </p>
+
+                            <div class="mt-5 flex flex-wrap gap-2">
+                                <span class="border border-green-500/25 bg-green-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-green-300">
+                                    @Model.RoleDisplayName
+                                </span>
+
+                                <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                                    @SharedLocalizer["Profile_RecordLabel"]:
+                                    DS-@Model.UserId.ToString("D5")
+                                </span>
+
+                                <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                                    @SharedLocalizer["Profile_StatusLabel"]:
+                                    @Model.Status
                                 </span>
                             </div>
-                            <div class="border border-green-500/15 bg-black/80 p-4">
-                                <span class="block text-slate-600">ENROLLED</span>
-                                <span data-created-at class="mt-2 block text-slate-300">@identity.CreatedAtUtc.ToString("yyyy-MM-dd")</span>
-                            </div>
-                            <div class="border border-green-500/15 bg-black/80 p-4">
-                                <span class="block text-slate-600">LANGUAGE</span>
-                                <span data-player-language class="mt-2 block text-slate-300">@selectedLanguage.ToUpperInvariant()</span>
-                            </div>
                         </div>
-                    </article>
+                    </div>
 
-                    <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
+                    <div class="mt-8 border-t border-green-500/15 pt-5">
+                        <div class="flex items-center justify-between gap-4 border border-slate-800 bg-black/80 p-4">
+                            <div>
+                                <span class="block text-[9px] uppercase tracking-[0.2em] text-slate-600">
+                                    @SharedLocalizer["Profile_ConnectionStatus"]
+                                </span>
+
+                                <strong data-connection-status
+                                        class="mt-2 block text-sm uppercase tracking-[0.16em] text-slate-400">
+                                    @SharedLocalizer["Profile_Status_Offline"]
+                                </strong>
+                            </div>
+
+                            <span data-connection-indicator
+                                  class="h-3 w-3 rounded-full bg-slate-600 shadow-[0_0_14px_rgba(100,116,139,0.7)]">
+                            </span>
+                        </div>
+                    </div>
+                </article>
+
+                <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                    <div class="flex items-end justify-between gap-4">
                         <div>
-                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">COSMIC DINER TELEMETRY</p>
-                            <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVITY SUMMARY</h3>
-                        </div>
-
-                        <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                            <div class="border border-green-500/20 bg-black/70 p-5 sm:col-span-2">
-                                <span class="text-[10px] uppercase tracking-[0.22em] text-green-600">TOTAL PLAY TIME</span>
-                                <div class="mt-3 flex items-end gap-3">
-                                    <strong data-total-play-time class="font-display text-5xl tracking-[0.08em] text-green-200 sm:text-7xl">--</strong>
-                                    <span class="pb-2 text-xs uppercase tracking-[0.2em] text-slate-600">HOURS</span>
-                                </div>
-                            </div>
-                            <div class="border border-green-500/15 bg-black/70 p-5">
-                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">COMPLETED SESSIONS</span>
-                                <strong data-total-sessions class="mt-3 block font-display text-3xl text-green-300">--</strong>
-                            </div>
-                            <div class="border border-green-500/15 bg-black/70 p-5">
-                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LINKED NODES</span>
-                                <strong data-linked-nodes class="mt-3 block font-display text-3xl text-green-300">--</strong>
-                            </div>
-                            <div class="border border-green-500/15 bg-black/70 p-5">
-                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LONGEST SESSION</span>
-                                <strong data-longest-session class="mt-3 block font-display text-3xl text-green-300">--</strong>
-                            </div>
-                            <div class="border border-green-500/15 bg-black/70 p-5">
-                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">FAVORITE BUILD</span>
-                                <strong data-favorite-build class="mt-3 block truncate font-display text-2xl text-green-300">--</strong>
-                            </div>
-                            <div class="border border-green-500/15 bg-black/70 p-5 sm:col-span-2">
-                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LAST ACTIVITY</span>
-                                <strong data-last-activity class="mt-3 block text-sm uppercase tracking-[0.12em] text-green-300">--</strong>
-                            </div>
-                        </div>
-
-                        <a asp-controller="Profile"
-                           asp-action="Sessions"
-                           class="mt-5 inline-flex w-full items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15">
-                            [ OPEN COMPLETE SESSION ARCHIVE ]
-                        </a>
-                    </section>
-                </div>
-
-                <section class="mt-4 border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
-                    <div class="grid gap-8 xl:grid-cols-[0.65fr_1.35fr]">
-                        <div>
-                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER CONFIGURATION</p>
-                            <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">IDENTITY CHANNEL</h3>
-                            <p class="mt-4 text-sm leading-7 text-slate-500">
-                                Configure your public alias, operator portrait, terminal palette and interface language.
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
+                                @SharedLocalizer["Profile_LiveSessionKicker"]
                             </p>
-                            <div class="mt-5 border border-amber-500/20 bg-amber-500/[0.04] p-4 text-xs leading-6 text-amber-200/70">
-                                Email changes require a separate verification channel and remain locked in this frontend phase.
-                            </div>
+
+                            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">
+                                @SharedLocalizer["Profile_LiveSessionTitle"]
+                            </h2>
                         </div>
 
-                        <form data-identity-form class="space-y-6">
-                            <div>
-                                <label for="profileAlias" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">PLAYER ALIAS</label>
-                                <input id="profileAlias"
-                                       name="Alias"
-                                       type="text"
-                                       minlength="3"
-                                       maxlength="32"
-                                       autocomplete="nickname"
-                                       value="@identity.Alias"
-                                       class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-slate-700 focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20" />
-                            </div>
+                        <span data-dashboard-sync
+                              class="text-[9px] uppercase tracking-[0.18em] text-amber-400">
+                            @SharedLocalizer["Profile_Synchronizing"]
+                        </span>
+                    </div>
 
-                            <fieldset>
-                                <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">AVATAR CATALOG</legend>
-                                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                    @for (var index = 1; index <= 6; index++)
-                                    {
-                                        var avatarKey = $"operator-{index:D2}";
-                                        <label class="cursor-pointer border border-green-500/15 bg-green-950/30 p-4 transition hover:border-green-500/40 has-[:checked]:border-green-400 has-[:checked]:bg-green-500/10">
-                                            <input type="radio"
-                                                   name="AvatarKey"
-                                                   value="@avatarKey"
-                                                   checked="@(selectedAvatarKey == avatarKey)"
-                                                   class="sr-only" />
-                                            <span class="flex h-12 items-center justify-center border border-green-500/15 bg-black/60 font-display text-sm tracking-[0.15em] text-green-300">OP-@index.ToString("D2")</span>
-                                            <span class="mt-3 block text-center text-[9px] uppercase tracking-[0.15em] text-slate-500">@avatarKey</span>
-                                        </label>
-                                    }
-                                </div>
-                            </fieldset>
+                    <div data-active-session
+                         class="mt-6 grid gap-3 sm:grid-cols-2">
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_CurrentScene"]
+                            </span>
+                            <strong data-current-scene class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                        </div>
 
-                            <fieldset>
-                                <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">TERMINAL THEME</legend>
-                                <div class="grid gap-3 sm:grid-cols-2">
-                                    <label class="cursor-pointer border border-green-500/20 bg-green-950/30 p-4 transition has-[:checked]:border-green-300 has-[:checked]:bg-green-500/10">
-                                        <input type="radio" name="Theme" value="phosphor-green" checked="@(selectedTheme == "phosphor-green")" class="sr-only" />
-                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-green-300">PHOSPHOR GREEN</span>
-                                    </label>
-                                    <label class="cursor-pointer border border-amber-500/20 bg-green-950/30 p-4 transition has-[:checked]:border-amber-300 has-[:checked]:bg-amber-500/10">
-                                        <input type="radio" name="Theme" value="amber-monitor" checked="@(selectedTheme == "amber-monitor")" class="sr-only" />
-                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-amber-300">AMBER MONITOR</span>
-                                    </label>
-                                    <label class="cursor-pointer border border-cyan-500/20 bg-green-950/30 p-4 transition has-[:checked]:border-cyan-300 has-[:checked]:bg-cyan-500/10">
-                                        <input type="radio" name="Theme" value="cold-cyan" checked="@(selectedTheme == "cold-cyan")" class="sr-only" />
-                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">COLD CYAN</span>
-                                    </label>
-                                    <label class="cursor-pointer border border-slate-500/30 bg-green-950/30 p-4 transition has-[:checked]:border-slate-200 has-[:checked]:bg-slate-500/10">
-                                        <input type="radio" name="Theme" value="monochrome-crt" checked="@(selectedTheme == "monochrome-crt")" class="sr-only" />
-                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-300">MONOCHROME CRT</span>
-                                    </label>
-                                </div>
-                            </fieldset>
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_CurrentPhase"]
+                            </span>
+                            <strong data-current-phase class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                        </div>
 
-                            <div>
-                                <label for="profileLanguage" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">INTERFACE LANGUAGE</label>
-                                <select id="profileLanguage"
-                                        name="PreferredLanguage"
-                                        class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60">
-                                    <option value="en" selected="@(selectedLanguage == "en")">ENGLISH</option>
-                                    <option value="es" selected="@(selectedLanguage == "es")">ESPAÑOL</option>
-                                </select>
-                            </div>
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_CurrentState"]
+                            </span>
+                            <strong data-current-state class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                        </div>
 
-                            <button type="submit"
-                                    data-identity-submit
-                                    class="inline-flex w-full items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15 disabled:cursor-wait disabled:opacity-50">
-                                [ APPLY TERMINAL PROFILE ]
-                            </button>
-                        </form>
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_SessionDuration"]
+                            </span>
+                            <strong data-session-duration class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@($"0{SharedLocalizer["Common_MinutesShort"]}")</strong>
+                        </div>
+
+                        <div class="border border-slate-800 bg-black p-4 sm:col-span-2">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_LastHeartbeat"]
+                            </span>
+                            <strong data-last-heartbeat class="mt-2 block text-sm uppercase tracking-[0.12em] text-slate-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                        </div>
+                    </div>
+
+                    <div data-no-active-session
+                         class="mt-6 hidden border border-slate-800 bg-black p-8 text-center text-xs uppercase tracking-[0.18em] text-slate-600">
+                        @SharedLocalizer["Profile_NoActiveSession"]
                     </div>
                 </section>
             </section>
 
-            <section id="security-section"
-                     data-profile-section="security"
-                     class="scroll-mt-40">
-                <div class="mb-5 border-b border-green-500/20 pb-5">
-                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">[ ACCESO &amp; SEGURIDAD ]</p>
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
-                        CONTROL DE CREDENCIALES
-                    </h2>
-                    <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-                        Rotate local credentials and inspect every authenticated terminal connected to your account.
-                    </p>
-                </div>
+            <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <article class="border border-green-500/20 bg-green-950/30 p-5 sm:col-span-2 xl:col-span-1">
+                    <span class="text-[10px] uppercase tracking-[0.22em] text-green-600">
+                        @SharedLocalizer["Profile_TotalPlayTime"]
+                    </span>
+                    <strong data-total-play-time class="mt-3 block font-display text-4xl tracking-[0.08em] text-green-200">0h 0m</strong>
+                </article>
 
-                <div class="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
-                    <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
-                        <p class="text-[10px] uppercase tracking-[0.3em] text-amber-500">CREDENTIAL ROTATION</p>
-                        <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">SECURITY CHANNEL</h3>
+                <article class="border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_TotalSessions"]
+                    </span>
+                    <strong data-total-sessions class="mt-3 block font-display text-3xl text-green-300">0</strong>
+                </article>
 
-                        <div data-password-unavailable class="mt-6 hidden border border-amber-500/20 bg-amber-500/[0.04] p-4 text-sm leading-6 text-amber-200">
-                            This account currently authenticates through an external provider and has no local password.
-                        </div>
+                <article class="border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_LinkedNodes"]
+                    </span>
+                    <strong data-linked-nodes class="mt-3 block font-display text-3xl text-green-300">0</strong>
+                </article>
 
-                        <form data-password-form class="mt-6 space-y-4">
-                            <div>
-                                <label for="currentPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">CURRENT PASSWORD</label>
-                                <input id="currentPassword" name="CurrentPassword" type="password" autocomplete="current-password" class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
-                            </div>
-                            <div>
-                                <label for="newPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">NEW PASSWORD</label>
-                                <input id="newPassword" name="NewPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
-                            </div>
-                            <div>
-                                <label for="confirmPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">CONFIRM PASSWORD</label>
-                                <input id="confirmPassword" name="ConfirmPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
-                            </div>
-                            <button type="submit"
-                                    data-password-submit
-                                    class="w-full border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-amber-200 transition hover:border-amber-400 hover:bg-amber-500/15 disabled:cursor-wait disabled:opacity-50">
-                                [ ROTATE CREDENTIALS ]
-                            </button>
-                        </form>
-                    </section>
+                <article class="border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_LongestSession"]
+                    </span>
+                    <strong data-longest-session class="mt-3 block font-display text-3xl text-green-300">@($"0{SharedLocalizer["Common_MinutesShort"]}")</strong>
+                </article>
 
-                    <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
-                        <div>
-                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">AUTHENTICATED TERMINALS</p>
-                            <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVE SESSIONS</h3>
-                        </div>
+                <article class="border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_FavoriteBuild"]
+                    </span>
+                    <strong data-favorite-build class="mt-3 block truncate font-display text-2xl text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                </article>
 
-                        <div data-security-loading class="mt-6 border border-green-500/15 bg-black/70 p-6 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
-                            QUERYING AUTHENTICATION MATRIX
-                        </div>
-                        <div data-session-list class="mt-6 space-y-3"></div>
-                    </section>
-                </div>
+                <article class="border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_LastActivity"]
+                    </span>
+                    <strong data-last-activity class="mt-3 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                </article>
             </section>
 
-            <section id="devices-section"
-                     data-profile-section="fleet"
-                     class="scroll-mt-40">
-                <div class="mb-5 flex flex-col gap-4 border-b border-green-500/20 pb-5 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">[ MIS DISPOSITIVOS ]</p>
-                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
-                            INVENTARIO DE HARDWARE
-                        </h2>
-                        <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-                            Telemetry status is controlled by the server. Players can only remove nodes from their account.
-                        </p>
-                    </div>
-                    <div class="border border-green-500/20 bg-green-950/30 px-5 py-4 text-center">
-                        <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">LINKED NODES</span>
-                        <strong data-fleet-count class="mt-1 block font-display text-2xl text-green-300">--</strong>
-                    </div>
-                </div>
-
-                <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
-                    <div data-fleet-loading class="border border-green-500/15 bg-black/70 p-8 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
-                        SCANNING OWNED HARDWARE
-                    </div>
-                    <div data-fleet-empty class="hidden border border-green-500/15 bg-black/70 p-10 text-center">
-                        <p class="font-display text-lg uppercase tracking-[0.12em] text-slate-400">NO LINKED HARDWARE</p>
-                        <p class="mt-3 text-sm text-slate-600">No Cosmic Diner installations are currently assigned to this player.</p>
-                    </div>
-                    <div data-fleet-list class="grid gap-3 xl:grid-cols-2"></div>
-                </section>
-            </section>
-
-            <section id="danger-zone"
-                     class="scroll-mt-40 border border-rose-500/25 bg-rose-500/[0.03] p-5 shadow-[0_0_32px_rgba(244,63,94,0.05)] sm:p-8">
-                <div class="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-rose-500">[ DANGER ZONE ]</p>
-                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-rose-100">REMOTE SESSION TERMINATION</h2>
-                        <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
-                            Revoke every authenticated browser session except the terminal currently in use. This command cannot be undone.
-                        </p>
-                    </div>
-                    <button type="button"
-                            data-terminate-sessions
-                            disabled
-                            class="border border-rose-500/40 bg-rose-500/10 px-5 py-4 text-[10px] font-bold uppercase tracking-[0.17em] text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-40">
-                        [ TERMINATE ALL OTHER SESSIONS ]
-                    </button>
-                </div>
-            </section>
+            <a asp-controller="Profile"
+               asp-action="Sessions"
+               class="inline-flex items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15">
+                @SharedLocalizer["Profile_OpenSessionArchive"]
+            </a>
         </main>
-    </div>
-
-    <div data-toast-host
-         aria-live="polite"
-         aria-atomic="true"
-         class="pointer-events-none fixed bottom-5 right-5 z-[100] flex w-[min(26rem,calc(100vw-2.5rem))] flex-col gap-3">
-    </div>
-
-    <div data-confirm-modal
-         class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/80 px-4"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="profile-confirm-title">
-        <div class="w-full max-w-lg border border-rose-500/30 bg-black p-6 shadow-[0_0_40px_rgba(244,63,94,0.12)]">
-            <p class="text-[10px] uppercase tracking-[0.3em] text-rose-500">CONFIRM COMMAND</p>
-            <h2 id="profile-confirm-title" data-confirm-title class="mt-3 font-display text-2xl uppercase tracking-[0.1em] text-rose-100">CONFIRM ACTION</h2>
-            <p data-confirm-message class="mt-4 text-sm leading-7 text-slate-400"></p>
-            <div class="mt-7 grid grid-cols-2 gap-3">
-                <button type="button" data-confirm-cancel class="border border-slate-700 bg-black px-4 py-3 text-xs uppercase tracking-[0.18em] text-slate-400">CANCEL</button>
-                <button type="button" data-confirm-accept class="border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-rose-200">EXECUTE</button>
-            </div>
-        </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/profile.js"
+    <script src="~/js/profile-dashboard.js"
             asp-append-version="true"
             defer></script>
 }

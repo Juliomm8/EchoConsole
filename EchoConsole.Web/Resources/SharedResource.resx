@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -879,7 +879,7 @@
     <value>{0} device(s)</value>
   </data>
   <data name="Profile_FavoriteBuild" xml:space="preserve">
-    <value>Favorite Build</value>
+    <value>FAVORITE BUILD</value>
   </data>
   <data name="Profile_FirstSeen" xml:space="preserve">
     <value>First Seen</value>
@@ -891,7 +891,7 @@
     <value>Installations</value>
   </data>
   <data name="Profile_LastActivity" xml:space="preserve">
-    <value>Last Activity</value>
+    <value>LAST ACTIVITY</value>
   </data>
   <data name="Profile_LastUpdate" xml:space="preserve">
     <value>Last Update</value>
@@ -912,7 +912,7 @@
     <value>Name</value>
   </data>
   <data name="Profile_NoLinkedDevices" xml:space="preserve">
-    <value>No linked devices</value>
+    <value>NO LINKED DEVICES</value>
   </data>
   <data name="Profile_NoLinkedDevicesDescription" xml:space="preserve">
     <value>Paste the Installation ID from Cosmic Diner in the ownership panel above to link your first device.</value>
@@ -957,13 +957,13 @@
     <value>Update your public operator identity. Role and account status are protected system fields and cannot be modified here.</value>
   </data>
   <data name="Profile_SettingsTitle" xml:space="preserve">
-    <value>Customize Operator Identity</value>
+    <value>SETTINGS CENTRAL</value>
   </data>
   <data name="Profile_StatusLabel" xml:space="preserve">
-    <value>Status</value>
+    <value>STATUS</value>
   </data>
   <data name="Profile_ThemeLabel" xml:space="preserve">
-    <value>Theme</value>
+    <value>TERMINAL THEME</value>
   </data>
   <data name="Profile_Unlink" xml:space="preserve">
     <value>Unlink</value>
@@ -1818,7 +1818,7 @@
     <value>Close</value>
   </data>
   <data name="Common_Cancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>CANCEL</value>
   </data>
   <data name="Builds_ColActions" xml:space="preserve">
     <value>Actions</value>
@@ -2269,5 +2269,383 @@
   </data>
   <data name="Auth_HidePassword" xml:space="preserve">
     <value>[ HIDE ]</value>
+  </data>
+  <data name="Common_NotAvailable" xml:space="preserve">
+    <value>N/A</value>
+  </data>
+  <data name="Common_MinutesShort" xml:space="preserve">
+    <value>m</value>
+  </data>
+  <data name="Common_HoursShort" xml:space="preserve">
+    <value>h</value>
+  </data>
+  <data name="Profile_DashboardPageTitle" xml:space="preserve">
+    <value>Player Dashboard</value>
+  </data>
+  <data name="Profile_DashboardKicker" xml:space="preserve">
+    <value>DARK SKY STUDIOS // PLAYER TELEMETRY</value>
+  </data>
+  <data name="Profile_DashboardTitle" xml:space="preserve">
+    <value>PLAYER DASHBOARD</value>
+  </data>
+  <data name="Profile_DashboardDescription" xml:space="preserve">
+    <value>Live gameplay telemetry, current connection state and your Cosmic Diner activity summary.</value>
+  </data>
+  <data name="Profile_OpenSettings" xml:space="preserve">
+    <value>[ SETTINGS ]</value>
+  </data>
+  <data name="Profile_PlayerIdentification" xml:space="preserve">
+    <value>PLAYER IDENTIFICATION</value>
+  </data>
+  <data name="Profile_RecordLabel" xml:space="preserve">
+    <value>RECORD</value>
+  </data>
+  <data name="Profile_ConnectionStatus" xml:space="preserve">
+    <value>CONNECTION STATUS</value>
+  </data>
+  <data name="Profile_Status_Online" xml:space="preserve">
+    <value>ONLINE</value>
+  </data>
+  <data name="Profile_Status_Degraded" xml:space="preserve">
+    <value>DEGRADED</value>
+  </data>
+  <data name="Profile_Status_Offline" xml:space="preserve">
+    <value>OFFLINE</value>
+  </data>
+  <data name="Profile_LiveSessionKicker" xml:space="preserve">
+    <value>REAL-TIME SESSION CHANNEL</value>
+  </data>
+  <data name="Profile_LiveSessionTitle" xml:space="preserve">
+    <value>ACTIVE GAME SESSION</value>
+  </data>
+  <data name="Profile_Synchronizing" xml:space="preserve">
+    <value>SYNCHRONIZING</value>
+  </data>
+  <data name="Profile_CurrentScene" xml:space="preserve">
+    <value>CURRENT SCENE</value>
+  </data>
+  <data name="Profile_CurrentPhase" xml:space="preserve">
+    <value>CURRENT PHASE</value>
+  </data>
+  <data name="Profile_CurrentState" xml:space="preserve">
+    <value>GAME STATE</value>
+  </data>
+  <data name="Profile_SessionDuration" xml:space="preserve">
+    <value>SESSION DURATION</value>
+  </data>
+  <data name="Profile_LastHeartbeat" xml:space="preserve">
+    <value>LAST HEARTBEAT</value>
+  </data>
+  <data name="Profile_NoActiveSession" xml:space="preserve">
+    <value>NO ACTIVE GAME SESSION</value>
+  </data>
+  <data name="Profile_TotalPlayTime" xml:space="preserve">
+    <value>TOTAL PLAY TIME</value>
+  </data>
+  <data name="Profile_TotalSessions" xml:space="preserve">
+    <value>TOTAL SESSIONS</value>
+  </data>
+  <data name="Profile_LinkedNodes" xml:space="preserve">
+    <value>LINKED NODES</value>
+  </data>
+  <data name="Profile_LongestSession" xml:space="preserve">
+    <value>LONGEST SESSION</value>
+  </data>
+  <data name="Profile_OpenSessionArchive" xml:space="preserve">
+    <value>[ OPEN COMPLETE SESSION ARCHIVE ]</value>
+  </data>
+  <data name="Profile_SettingsPageTitle" xml:space="preserve">
+    <value>Profile Settings</value>
+  </data>
+  <data name="Profile_SettingsKicker" xml:space="preserve">
+    <value>PLAYER CONFIGURATION // SECURE COMMAND CHANNEL</value>
+  </data>
+  <data name="Profile_SettingsDescription" xml:space="preserve">
+    <value>Manage your identity, credentials, authenticated sessions and linked Cosmic Diner hardware.</value>
+  </data>
+  <data name="Profile_BackToDashboard" xml:space="preserve">
+    <value>BACK TO DASHBOARD</value>
+  </data>
+  <data name="Profile_SettingsNavigation" xml:space="preserve">
+    <value>Profile settings sections</value>
+  </data>
+  <data name="Profile_AnchorIdentity" xml:space="preserve">
+    <value>[ IDENTITY ]</value>
+  </data>
+  <data name="Profile_AnchorSecurity" xml:space="preserve">
+    <value>[ ACCESS &amp; SECURITY ]</value>
+  </data>
+  <data name="Profile_AnchorDevices" xml:space="preserve">
+    <value>[ DEVICES ]</value>
+  </data>
+  <data name="Profile_AnchorDanger" xml:space="preserve">
+    <value>[ DANGER ZONE ]</value>
+  </data>
+  <data name="Profile_IdentitySectionLabel" xml:space="preserve">
+    <value>[ IDENTITY ]</value>
+  </data>
+  <data name="Profile_IdentitySectionTitle" xml:space="preserve">
+    <value>PLAYER IDENTITY</value>
+  </data>
+  <data name="Profile_CurrentIdentity" xml:space="preserve">
+    <value>CURRENT PLAYER RECORD</value>
+  </data>
+  <data name="Profile_AliasLabel" xml:space="preserve">
+    <value>PLAYER ALIAS</value>
+  </data>
+  <data name="Profile_AvatarLabel" xml:space="preserve">
+    <value>OPERATOR AVATAR</value>
+  </data>
+  <data name="Profile_SelectedAvatar" xml:space="preserve">
+    <value>SELECTED AVATAR</value>
+  </data>
+  <data name="Profile_SelectAvatar" xml:space="preserve">
+    <value>[ SELECT AVATAR ]</value>
+  </data>
+  <data name="Profile_LanguageLabel" xml:space="preserve">
+    <value>INTERFACE LANGUAGE</value>
+  </data>
+  <data name="Profile_SaveIdentity" xml:space="preserve">
+    <value>[ SAVE IDENTITY ]</value>
+  </data>
+  <data name="Profile_AvatarModalTitle" xml:space="preserve">
+    <value>SELECT OPERATOR AVATAR</value>
+  </data>
+  <data name="Profile_Avatar_01" xml:space="preserve">
+    <value>Operator 01</value>
+  </data>
+  <data name="Profile_Avatar_02" xml:space="preserve">
+    <value>Operator 02</value>
+  </data>
+  <data name="Profile_Avatar_03" xml:space="preserve">
+    <value>Operator 03</value>
+  </data>
+  <data name="Profile_Avatar_04" xml:space="preserve">
+    <value>Operator 04</value>
+  </data>
+  <data name="Profile_Avatar_05" xml:space="preserve">
+    <value>Operator 05</value>
+  </data>
+  <data name="Profile_Avatar_06" xml:space="preserve">
+    <value>Operator 06</value>
+  </data>
+  <data name="Profile_Theme_Green" xml:space="preserve">
+    <value>PHOSPHOR GREEN</value>
+  </data>
+  <data name="Profile_Theme_Amber" xml:space="preserve">
+    <value>AMBER MONITOR</value>
+  </data>
+  <data name="Profile_Theme_Cyan" xml:space="preserve">
+    <value>COLD CYAN</value>
+  </data>
+  <data name="Profile_Theme_Monochrome" xml:space="preserve">
+    <value>MONOCHROME CRT</value>
+  </data>
+  <data name="Profile_SecuritySectionLabel" xml:space="preserve">
+    <value>[ ACCESS &amp; SECURITY ]</value>
+  </data>
+  <data name="Profile_SecuritySectionTitle" xml:space="preserve">
+    <value>CREDENTIALS AND ACTIVE SESSIONS</value>
+  </data>
+  <data name="Profile_ChangePasswordTitle" xml:space="preserve">
+    <value>CHANGE PASSWORD</value>
+  </data>
+  <data name="Profile_NoLocalPassword" xml:space="preserve">
+    <value>This account uses an external provider and does not have a local password.</value>
+  </data>
+  <data name="Profile_ChangePasswordAction" xml:space="preserve">
+    <value>[ ROTATE CREDENTIALS ]</value>
+  </data>
+  <data name="Profile_ActiveSessionsKicker" xml:space="preserve">
+    <value>AUTHENTICATED TERMINALS</value>
+  </data>
+  <data name="Profile_ActiveSessionsTitle" xml:space="preserve">
+    <value>ACTIVE SESSIONS</value>
+  </data>
+  <data name="Profile_TerminateOtherSessions" xml:space="preserve">
+    <value>[ TERMINATE ALL OTHER SESSIONS ]</value>
+  </data>
+  <data name="Profile_LoadingSessions" xml:space="preserve">
+    <value>QUERYING AUTHENTICATION MATRIX</value>
+  </data>
+  <data name="Profile_CurrentTerminal" xml:space="preserve">
+    <value>CURRENT TERMINAL</value>
+  </data>
+  <data name="Profile_RevokeSession" xml:space="preserve">
+    <value>[ REVOKE SESSION ]</value>
+  </data>
+  <data name="Profile_NoActiveAuthSessions" xml:space="preserve">
+    <value>NO ACTIVE AUTHENTICATION SESSIONS</value>
+  </data>
+  <data name="Profile_ConfirmRevokeSession" xml:space="preserve">
+    <value>Revoke this authenticated browser session?</value>
+  </data>
+  <data name="Profile_ConfirmTerminateOthers" xml:space="preserve">
+    <value>Terminate every other authenticated browser session?</value>
+  </data>
+  <data name="Profile_DevicesSectionLabel" xml:space="preserve">
+    <value>[ DEVICES ]</value>
+  </data>
+  <data name="Profile_DevicesSectionTitle" xml:space="preserve">
+    <value>LINKED HARDWARE INVENTORY</value>
+  </data>
+  <data name="Profile_InstallationIdLabel" xml:space="preserve">
+    <value>INSTALLATION ID</value>
+  </data>
+  <data name="Profile_VerifyHardware" xml:space="preserve">
+    <value>[ VERIFY AND LINK HARDWARE ]</value>
+  </data>
+  <data name="Profile_LoadingDevices" xml:space="preserve">
+    <value>SCANNING LINKED HARDWARE</value>
+  </data>
+  <data name="Profile_UnlinkDevice" xml:space="preserve">
+    <value>[ UNLINK DEVICE ]</value>
+  </data>
+  <data name="Profile_ConfirmUnlinkDevice" xml:space="preserve">
+    <value>Remove this device from your player inventory?</value>
+  </data>
+  <data name="Profile_DangerSectionLabel" xml:space="preserve">
+    <value>[ DANGER ZONE ]</value>
+  </data>
+  <data name="Profile_DangerSectionTitle" xml:space="preserve">
+    <value>PERMANENT PROFILE DELETION</value>
+  </data>
+  <data name="Profile_DangerDescription" xml:space="preserve">
+    <value>Deleting your profile removes the account and authentication sessions permanently. Historical game telemetry remains detached from the deleted account.</value>
+  </data>
+  <data name="Profile_DeleteProfileAction" xml:space="preserve">
+    <value>[ DELETE PROFILE PERMANENTLY ]</value>
+  </data>
+  <data name="Profile_DeleteModalTitle" xml:space="preserve">
+    <value>DELETE PLAYER PROFILE</value>
+  </data>
+  <data name="Profile_DeleteModalDescription" xml:space="preserve">
+    <value>Complete both confirmation steps. Enter your current password and type DELETE MY PROFILE exactly.</value>
+  </data>
+  <data name="Profile_DeletePasswordLabel" xml:space="preserve">
+    <value>CURRENT PASSWORD</value>
+  </data>
+  <data name="Profile_DeletePhraseLabel" xml:space="preserve">
+    <value>CONFIRMATION PHRASE</value>
+  </data>
+  <data name="Profile_DeleteAcknowledgement" xml:space="preserve">
+    <value>I understand that this action permanently deletes my Echo Console account.</value>
+  </data>
+  <data name="Profile_DeleteFinalAction" xml:space="preserve">
+    <value>[ PERMANENTLY DELETE ]</value>
+  </data>
+  <data name="Profile_DeleteFirstConfirmation" xml:space="preserve">
+    <value>Open the permanent account deletion protocol?</value>
+  </data>
+  <data name="Profile_DeleteSecondConfirmation" xml:space="preserve">
+    <value>Final confirmation: permanently delete this player profile?</value>
+  </data>
+  <data name="Profile_ToastSuccessPrefix" xml:space="preserve">
+    <value>[ SYSTEM ACKNOWLEDGED ]</value>
+  </data>
+  <data name="Profile_ToastErrorPrefix" xml:space="preserve">
+    <value>[ COMMAND REJECTED ]</value>
+  </data>
+  <data name="Profile_Error_InvalidAlias" xml:space="preserve">
+    <value>Alias must contain 3 to 32 letters, numbers, spaces, hyphens or underscores.</value>
+  </data>
+  <data name="Profile_Error_InvalidAvatar" xml:space="preserve">
+    <value>The selected avatar does not belong to the approved catalog.</value>
+  </data>
+  <data name="Profile_Error_InvalidTheme" xml:space="preserve">
+    <value>The selected terminal theme does not belong to the approved catalog.</value>
+  </data>
+  <data name="Profile_Error_InvalidLanguage" xml:space="preserve">
+    <value>The selected language is not supported.</value>
+  </data>
+  <data name="Profile_Error_AliasUsed" xml:space="preserve">
+    <value>The selected alias is already assigned to another player.</value>
+  </data>
+  <data name="Profile_Error_UpdateFailed" xml:space="preserve">
+    <value>The player identity could not be updated.</value>
+  </data>
+  <data name="Profile_IdentitySaved" xml:space="preserve">
+    <value>Player identity synchronized.</value>
+  </data>
+  <data name="Profile_Error_NoLocalPassword" xml:space="preserve">
+    <value>This account does not have a local password.</value>
+  </data>
+  <data name="Profile_Error_PasswordChange" xml:space="preserve">
+    <value>The password could not be changed.</value>
+  </data>
+  <data name="Profile_PasswordChanged" xml:space="preserve">
+    <value>Credentials rotated successfully.</value>
+  </data>
+  <data name="Profile_Error_SessionNotFound" xml:space="preserve">
+    <value>The requested session was not found.</value>
+  </data>
+  <data name="Profile_Error_CurrentSession" xml:space="preserve">
+    <value>The current browser session cannot be revoked from this command.</value>
+  </data>
+  <data name="Profile_SessionRevoked" xml:space="preserve">
+    <value>The selected session was revoked.</value>
+  </data>
+  <data name="Profile_RemoteSessionsTerminated" xml:space="preserve">
+    <value>All other authenticated sessions were terminated.</value>
+  </data>
+  <data name="Profile_Error_InvalidInstallation" xml:space="preserve">
+    <value>A valid installation identifier is required.</value>
+  </data>
+  <data name="Profile_Error_ClaimFailed" xml:space="preserve">
+    <value>The hardware could not be linked.</value>
+  </data>
+  <data name="Profile_Error_InstallationNotFound" xml:space="preserve">
+    <value>The requested installation was not found.</value>
+  </data>
+  <data name="Profile_Error_InstallationNotOwned" xml:space="preserve">
+    <value>This installation is not linked to the current player.</value>
+  </data>
+  <data name="Profile_DeviceUnlinked" xml:space="preserve">
+    <value>The device was removed from the player inventory.</value>
+  </data>
+  <data name="Profile_Error_DeletePhrase" xml:space="preserve">
+    <value>The deletion confirmation phrase does not match.</value>
+  </data>
+  <data name="Profile_Error_DeleteRequiresPassword" xml:space="preserve">
+    <value>A local password is required to delete this profile.</value>
+  </data>
+  <data name="Profile_Error_InvalidPassword" xml:space="preserve">
+    <value>The current password is incorrect.</value>
+  </data>
+  <data name="Profile_Error_DeleteFailed" xml:space="preserve">
+    <value>The player profile could not be deleted.</value>
+  </data>
+  <data name="Profile_Error_Validation" xml:space="preserve">
+    <value>One or more fields are invalid.</value>
+  </data>
+  <data name="Profile_Role_Admin" xml:space="preserve">
+    <value>Administrator</value>
+  </data>
+  <data name="Profile_Role_Supervisor" xml:space="preserve">
+    <value>Technical Supervisor</value>
+  </data>
+  <data name="Profile_Role_Player" xml:space="preserve">
+    <value>Operator / Player</value>
+  </data>
+  <data name="Profile_AccountStatus_Active" xml:space="preserve">
+    <value>ACTIVE</value>
+  </data>
+  <data name="Profile_AccountStatus_Suspended" xml:space="preserve">
+    <value>SUSPENDED</value>
+  </data>
+  <data name="Auth_CurrentPasswordLabel" xml:space="preserve">
+    <value>CURRENT PASSWORD</value>
+  </data>
+  <data name="Common_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Common_Spanish" xml:space="preserve">
+    <value>Spanish</value>
+  </data>
+  <data name="Profile_Retrying" xml:space="preserve">
+    <value>RETRYING</value>
+  </data>
+  <data name="Profile_GenericError" xml:space="preserve">
+    <value>The operation could not be completed.</value>
   </data>
 </root>
