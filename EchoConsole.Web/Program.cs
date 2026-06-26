@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Web;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -53,6 +55,29 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     {
         new CookieRequestCultureProvider()
     };
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy(
+        "FixedWindow_Auth",
+        httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey:
+                    httpContext.Connection.RemoteIpAddress?.ToString()
+                    ?? "unknown",
+                factory: _ =>
+                    new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueProcessingOrder =
+                            QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    }));
 });
 
 var connectionString = builder.Configuration.GetConnectionString(
@@ -255,6 +280,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

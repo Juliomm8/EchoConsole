@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -89,6 +90,7 @@ public sealed class AuthController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("FixedWindow_Auth")]
     public async Task<IActionResult> Login(
         LoginViewModel model,
         string? returnUrl = null,
@@ -812,6 +814,7 @@ public sealed class AuthController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("FixedWindow_Auth")]
     public async Task<IActionResult> VerifyOtp(
         VerifyOtpViewModel model,
         CancellationToken cancellationToken = default)

@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Mail;
-using System.Net.Mime;
 using System.Text;
 using EchoConsole.Api.Domain.Entities;
 
@@ -167,8 +166,6 @@ public sealed class SmtpEmailSender : IOtpEmailSender
                     SmtpDeliveryMethod.Network
             };
 
-        message.IsBodyHtml = true;
-
         await smtpClient.SendMailAsync(
             message,
             cancellationToken);
@@ -240,23 +237,11 @@ public sealed class SmtpEmailSender : IOtpEmailSender
             </html>
             """;
 
-        var plainTextBody = $"""
-            DARK SKY STUDIOS // SECURE ENROLLMENT CHANNEL
-
-            ECHO CONSOLE AUTHORIZATION
-
-            OPERATOR: {NormalizeAlias(alias)}
-            SIX-DIGIT ACCESS KEY: {otpCode}
-
-            This sequence expires at {expirationText}.
-            If you did not request this code, ignore this transmission.
-            """;
 
         return BuildMessage(
             recipientEmail,
             "[ECHO CONSOLE] OTP AUTHORIZATION SEQUENCE",
-            htmlBody,
-            plainTextBody);
+            htmlBody);
     }
 
     private MailMessage BuildPasswordResetMessage(
@@ -324,30 +309,17 @@ public sealed class SmtpEmailSender : IOtpEmailSender
             </html>
             """;
 
-        var plainTextBody = $"""
-            DARK SKY STUDIOS // CREDENTIAL RECOVERY CHANNEL
-
-            PASSWORD RESET AUTHORIZATION
-
-            OPERATOR: {NormalizeAlias(alias)}
-            RESET LINK: {resetUri.AbsoluteUri}
-
-            This authorization expires at {expirationText}.
-            If you did not request a password reset, ignore this transmission.
-            """;
 
         return BuildMessage(
             recipientEmail,
             "[ECHO CONSOLE] PASSWORD RESET AUTHORIZATION",
-            htmlBody,
-            plainTextBody);
+            htmlBody);
     }
 
     private MailMessage BuildMessage(
         string recipientEmail,
         string subject,
-        string htmlBody,
-        string plainTextBody)
+        string htmlBody)
     {
         var message =
             new MailMessage
@@ -360,8 +332,12 @@ public sealed class SmtpEmailSender : IOtpEmailSender
                 Subject = subject,
                 SubjectEncoding =
                     Encoding.UTF8,
+                HeadersEncoding =
+                    Encoding.UTF8,
                 BodyEncoding =
                     Encoding.UTF8,
+                BodyTransferEncoding =
+                    System.Net.Mime.TransferEncoding.QuotedPrintable,
                 IsBodyHtml = true,
                 Body = htmlBody
             };
@@ -369,12 +345,6 @@ public sealed class SmtpEmailSender : IOtpEmailSender
         message.To.Add(
             new MailAddress(
                 recipientEmail));
-
-        message.AlternateViews.Add(
-            AlternateView.CreateAlternateViewFromString(
-                plainTextBody,
-                Encoding.UTF8,
-                MediaTypeNames.Text.Plain));
 
         return message;
     }
