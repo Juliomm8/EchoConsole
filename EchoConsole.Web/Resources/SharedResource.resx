@@ -2189,4 +2189,85 @@
   <data name="Auth_RapidPlayerEnrollment" xml:space="preserve">
     <value>RAPID PLAYER ENROLLMENT</value>
   </data>
+  <data name="Auth_ForgotPasswordPageTitle" xml:space="preserve">
+    <value>PASSWORD RECOVERY</value>
+  </data>
+  <data name="Auth_ForgotPasswordLink" xml:space="preserve">
+    <value>FORGOT YOUR PASSWORD?</value>
+  </data>
+  <data name="Auth_ReturnToLogin" xml:space="preserve">
+    <value>&lt; RETURN TO ACCESS NODE</value>
+  </data>
+  <data name="Auth_CredentialRecoveryChannel" xml:space="preserve">
+    <value>CREDENTIAL RECOVERY CHANNEL</value>
+  </data>
+  <data name="Auth_ForgotPasswordTitle" xml:space="preserve">
+    <value>RECOVER ACCESS</value>
+  </data>
+  <data name="Auth_ForgotPasswordDescription" xml:space="preserve">
+    <value>Enter the email address associated with your operator account. If it is registered, a secure reset sequence will be dispatched.</value>
+  </data>
+  <data name="Auth_RecoveryChannelReady" xml:space="preserve">
+    <value>&gt; RECOVERY_CHANNEL READY</value>
+  </data>
+  <data name="Auth_AwaitingRecoveryEmail" xml:space="preserve">
+    <value>&gt; AWAITING OPERATOR EMAIL</value>
+  </data>
+  <data name="Auth_SendResetSequence" xml:space="preserve">
+    <value>DISPATCH RESET SEQUENCE</value>
+  </data>
+  <data name="Auth_RecoveryProtocol" xml:space="preserve">
+    <value>SECURE RECOVERY PROTOCOL // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_PasswordResetDispatchGeneric" xml:space="preserve">
+    <value>If the email is registered, a reset sequence has been dispatched.</value>
+  </data>
+  <data name="Auth_ResetPasswordPageTitle" xml:space="preserve">
+    <value>RESET PASSWORD</value>
+  </data>
+  <data name="Auth_ResetPasswordTitle" xml:space="preserve">
+    <value>RESET ACCESS CREDENTIAL</value>
+  </data>
+  <data name="Auth_ResetPasswordDescription" xml:space="preserve">
+    <value>Create a new password for your Echo Console account.</value>
+  </data>
+  <data name="Auth_ResetChannelReady" xml:space="preserve">
+    <value>&gt; RESET_CHANNEL READY</value>
+  </data>
+  <data name="Auth_AwaitingNewCredential" xml:space="preserve">
+    <value>&gt; AWAITING NEW CREDENTIAL</value>
+  </data>
+  <data name="Auth_NewPasswordLabel" xml:space="preserve">
+    <value>NEW PASSWORD</value>
+  </data>
+  <data name="Auth_ConfirmPasswordLabel" xml:space="preserve">
+    <value>CONFIRM PASSWORD</value>
+  </data>
+  <data name="Auth_NewPasswordPlaceholder" xml:space="preserve">
+    <value>Enter a new secure password</value>
+  </data>
+  <data name="Auth_ConfirmPasswordPlaceholder" xml:space="preserve">
+    <value>Repeat the new password</value>
+  </data>
+  <data name="Auth_ResetPasswordButton" xml:space="preserve">
+    <value>RESET ACCESS CREDENTIAL</value>
+  </data>
+  <data name="Auth_ResetProtocol" xml:space="preserve">
+    <value>CREDENTIAL ROTATION PROTOCOL // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_ResetPasswordSucceeded" xml:space="preserve">
+    <value>Your password was reset successfully. Sign in with your new credential.</value>
+  </data>
+  <data name="Auth_ResetPasswordInvalidOrExpired" xml:space="preserve">
+    <value>The password reset authorization is invalid or has expired.</value>
+  </data>
+  <data name="Auth_PasswordConfirmationMismatch" xml:space="preserve">
+    <value>The password confirmation does not match.</value>
+  </data>
+  <data name="Auth_ShowPassword" xml:space="preserve">
+    <value>[ SHOW ]</value>
+  </data>
+  <data name="Auth_HidePassword" xml:space="preserve">
+    <value>[ HIDE ]</value>
+  </data>
 </root>

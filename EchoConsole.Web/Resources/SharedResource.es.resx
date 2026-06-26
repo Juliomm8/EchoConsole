@@ -2189,4 +2189,85 @@
   <data name="Auth_RapidPlayerEnrollment" xml:space="preserve">
     <value>REGISTRO RÁPIDO DE JUGADOR</value>
   </data>
+  <data name="Auth_ForgotPasswordPageTitle" xml:space="preserve">
+    <value>RECUPERACIÓN DE CONTRASEÑA</value>
+  </data>
+  <data name="Auth_ForgotPasswordLink" xml:space="preserve">
+    <value>¿OLVIDASTE TU CONTRASEÑA?</value>
+  </data>
+  <data name="Auth_ReturnToLogin" xml:space="preserve">
+    <value>&lt; VOLVER AL NODO DE ACCESO</value>
+  </data>
+  <data name="Auth_CredentialRecoveryChannel" xml:space="preserve">
+    <value>CANAL DE RECUPERACIÓN DE CREDENCIALES</value>
+  </data>
+  <data name="Auth_ForgotPasswordTitle" xml:space="preserve">
+    <value>RECUPERAR ACCESO</value>
+  </data>
+  <data name="Auth_ForgotPasswordDescription" xml:space="preserve">
+    <value>Ingresa el correo asociado a tu cuenta de operador. Si está registrado, se enviará una secuencia segura de restablecimiento.</value>
+  </data>
+  <data name="Auth_RecoveryChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_RECUPERACIÓN PREPARADO</value>
+  </data>
+  <data name="Auth_AwaitingRecoveryEmail" xml:space="preserve">
+    <value>&gt; ESPERANDO CORREO DEL OPERADOR</value>
+  </data>
+  <data name="Auth_SendResetSequence" xml:space="preserve">
+    <value>DESPACHAR SECUENCIA DE RESTABLECIMIENTO</value>
+  </data>
+  <data name="Auth_RecoveryProtocol" xml:space="preserve">
+    <value>PROTOCOLO SEGURO DE RECUPERACIÓN // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_PasswordResetDispatchGeneric" xml:space="preserve">
+    <value>Si el correo está registrado, se ha despachado una secuencia de restablecimiento.</value>
+  </data>
+  <data name="Auth_ResetPasswordPageTitle" xml:space="preserve">
+    <value>RESTABLECER CONTRASEÑA</value>
+  </data>
+  <data name="Auth_ResetPasswordTitle" xml:space="preserve">
+    <value>RESTABLECER CREDENCIAL DE ACCESO</value>
+  </data>
+  <data name="Auth_ResetPasswordDescription" xml:space="preserve">
+    <value>Crea una nueva contraseña para tu cuenta de Echo Console.</value>
+  </data>
+  <data name="Auth_ResetChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_RESTABLECIMIENTO PREPARADO</value>
+  </data>
+  <data name="Auth_AwaitingNewCredential" xml:space="preserve">
+    <value>&gt; ESPERANDO NUEVA CREDENCIAL</value>
+  </data>
+  <data name="Auth_NewPasswordLabel" xml:space="preserve">
+    <value>NUEVA CONTRASEÑA</value>
+  </data>
+  <data name="Auth_ConfirmPasswordLabel" xml:space="preserve">
+    <value>CONFIRMAR CONTRASEÑA</value>
+  </data>
+  <data name="Auth_NewPasswordPlaceholder" xml:space="preserve">
+    <value>Ingresa una nueva contraseña segura</value>
+  </data>
+  <data name="Auth_ConfirmPasswordPlaceholder" xml:space="preserve">
+    <value>Repite la nueva contraseña</value>
+  </data>
+  <data name="Auth_ResetPasswordButton" xml:space="preserve">
+    <value>RESTABLECER CREDENCIAL DE ACCESO</value>
+  </data>
+  <data name="Auth_ResetProtocol" xml:space="preserve">
+    <value>PROTOCOLO DE ROTACIÓN DE CREDENCIALES // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_ResetPasswordSucceeded" xml:space="preserve">
+    <value>Tu contraseña se restableció correctamente. Inicia sesión con tu nueva credencial.</value>
+  </data>
+  <data name="Auth_ResetPasswordInvalidOrExpired" xml:space="preserve">
+    <value>La autorización de restablecimiento es inválida o ha expirado.</value>
+  </data>
+  <data name="Auth_PasswordConfirmationMismatch" xml:space="preserve">
+    <value>La confirmación de la contraseña no coincide.</value>
+  </data>
+  <data name="Auth_ShowPassword" xml:space="preserve">
+    <value>[ MOSTRAR ]</value>
+  </data>
+  <data name="Auth_HidePassword" xml:space="preserve">
+    <value>[ OCULTAR ]</value>
+  </data>
 </root>

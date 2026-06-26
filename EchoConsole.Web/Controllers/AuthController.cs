@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
+using EchoConsole.Api.Persistence;
 using EchoConsole.Web.Models.Auth;
 using EchoConsole.Web.Security;
 using EchoConsole.Web.Services.Accounts;
@@ -22,6 +23,9 @@ public sealed class AuthController : Controller
     private static readonly TimeSpan OtpLifetime =
         TimeSpan.FromMinutes(5);
 
+    private static readonly TimeSpan PasswordResetLifetime =
+        TimeSpan.FromHours(2);
+
     private const string OtpEmailTempDataKey =
         "Auth:OtpEmail";
 
@@ -31,6 +35,7 @@ public sealed class AuthController : Controller
     private const string OtpExpiresAtTempDataKey =
         "Auth:OtpExpiresAtUtc";
 
+    private readonly EchoConsoleDbContext _dbContext;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IUserSessionService _userSessionService;
@@ -41,6 +46,7 @@ public sealed class AuthController : Controller
     private readonly IStringLocalizer<SharedResource> _localizer;
 
     public AuthController(
+        EchoConsoleDbContext dbContext,
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         IUserSessionService userSessionService,
@@ -50,6 +56,7 @@ public sealed class AuthController : Controller
         ILogger<AuthController> logger,
         IStringLocalizer<SharedResource> localizer)
     {
+        _dbContext = dbContext;
         _userManager = userManager;
         _signInManager = signInManager;
         _userSessionService = userSessionService;
@@ -484,6 +491,246 @@ public sealed class AuthController : Controller
         return RedirectToAction(
             nameof(VerifyOtp),
             new { email });
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ForgotPassword()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction(
+                "Index",
+                "Profile");
+        }
+
+        SetAuthTitle(
+            "Auth_ForgotPasswordPageTitle");
+
+        return View(
+            new ForgotPasswordViewModel());
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(
+        ForgotPasswordViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        SetAuthTitle(
+            "Auth_ForgotPasswordPageTitle");
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var normalizedEmail =
+            model.Email.Trim();
+
+        var user =
+            await _userManager.FindByEmailAsync(
+                normalizedEmail);
+
+        if (user is not null &&
+            !string.IsNullOrWhiteSpace(user.Email))
+        {
+            try
+            {
+                var resetToken =
+                    await _userManager
+                        .GeneratePasswordResetTokenAsync(
+                            user);
+
+                var resetUrl = Url.Action(
+                    nameof(ResetPassword),
+                    "Auth",
+                    new
+                    {
+                        email = user.Email,
+                        token = resetToken
+                    },
+                    Request.Scheme);
+
+                if (string.IsNullOrWhiteSpace(resetUrl))
+                {
+                    throw new InvalidOperationException(
+                        "The password reset URL could not be generated.");
+                }
+
+                await _otpEmailSender
+                    .SendPasswordResetAsync(
+                        user,
+                        resetUrl,
+                        _timeProvider
+                            .GetUtcNow()
+                            .Add(
+                                PasswordResetLifetime),
+                        cancellationToken);
+
+                _logger.LogInformation(
+                    "Password reset email dispatched. UserId={UserId}, Email={Email}.",
+                    user.Id,
+                    user.Email);
+            }
+            catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(
+                    exception,
+                    "Password reset email dispatch failed. Email={Email}.",
+                    normalizedEmail);
+            }
+        }
+        else
+        {
+            _logger.LogInformation(
+                "Password reset requested for an unregistered email address.");
+        }
+
+        TempData["AuthStatusType"] =
+            "success";
+
+        TempData["AuthStatusMessage"] =
+            _localizer[
+                "Auth_PasswordResetDispatchGeneric"]
+                .Value;
+
+        return RedirectToAction(
+            nameof(ForgotPassword));
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ResetPassword(
+        string? email,
+        string? token)
+    {
+        SetAuthTitle(
+            "Auth_ResetPasswordPageTitle");
+
+        var model =
+            new ResetPasswordViewModel
+            {
+                Email = email?.Trim() ??
+                    string.Empty,
+                Token = token ??
+                    string.Empty
+            };
+
+        if (string.IsNullOrWhiteSpace(
+                model.Email) ||
+            string.IsNullOrWhiteSpace(
+                model.Token))
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                _localizer[
+                    "Auth_ResetPasswordInvalidOrExpired"]);
+        }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(
+        ResetPasswordViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        SetAuthTitle(
+            "Auth_ResetPasswordPageTitle");
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var normalizedEmail =
+            model.Email.Trim();
+
+        var user =
+            await _userManager.FindByEmailAsync(
+                normalizedEmail);
+
+        if (user is null)
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                _localizer[
+                    "Auth_ResetPasswordInvalidOrExpired"]);
+
+            return View(model);
+        }
+
+        var result =
+            await _userManager.ResetPasswordAsync(
+                user,
+                model.Token,
+                model.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                var message =
+                    string.Equals(
+                        error.Code,
+                        "InvalidToken",
+                        StringComparison.Ordinal)
+                        ? _localizer[
+                            "Auth_ResetPasswordInvalidOrExpired"]
+                            .Value
+                        : LocalizeIdentityError(error);
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    message);
+            }
+
+            return View(model);
+        }
+
+        var now =
+            _timeProvider.GetUtcNow();
+
+        await _dbContext.UserSessions
+            .Where(session =>
+                session.UserId == user.Id &&
+                !session.RevokedAtUtc.HasValue)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(
+                        session =>
+                            session.RevokedAtUtc,
+                        now)
+                    .SetProperty(
+                        session =>
+                            session.RevokedReason,
+                        "PasswordReset"),
+                cancellationToken);
+
+        TempData["AuthStatusType"] =
+            "success";
+
+        TempData["AuthStatusMessage"] =
+            _localizer[
+                "Auth_ResetPasswordSucceeded"]
+                .Value;
+
+        _logger.LogInformation(
+            "Password reset completed and tracked sessions revoked. UserId={UserId}, Email={Email}.",
+            user.Id,
+            user.Email);
+
+        return RedirectToAction(
+            nameof(Login));
     }
 
     [HttpGet]
