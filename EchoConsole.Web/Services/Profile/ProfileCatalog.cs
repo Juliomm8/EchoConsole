@@ -5,28 +5,28 @@ namespace EchoConsole.Web.Services.Profile;
 
 public static partial class ProfileCatalog
 {
-    public const string DefaultTheme = "phosphor-green";
-    public const string DefaultAvatarKey = "operator-01";
+    public const string DefaultTheme = "green";
+    public const string DefaultAvatarKey = "avatar_01";
     public const string DefaultLanguage = "en";
 
     public static IReadOnlyList<string> AvatarKeys { get; } =
         new[]
         {
-            "operator-01",
-            "operator-02",
-            "operator-03",
-            "operator-04",
-            "operator-05",
-            "operator-06"
+            "avatar_01",
+            "avatar_02",
+            "avatar_03",
+            "avatar_04",
+            "avatar_05",
+            "avatar_06"
         };
 
     public static IReadOnlyList<string> ThemeKeys { get; } =
         new[]
         {
-            "phosphor-green",
-            "amber-monitor",
-            "cold-cyan",
-            "monochrome-crt"
+            "green",
+            "amber",
+            "cyan",
+            "monochrome"
         };
 
     public static IReadOnlyList<string> LanguageKeys { get; } =
@@ -85,15 +85,18 @@ public static partial class ProfileCatalog
     {
         return value?.Trim().ToLowerInvariant() switch
         {
-            "operator-01" or "operator-02" or "operator-03" or
-            "operator-04" or "operator-05" or "operator-06" =>
-                value.Trim().ToLowerInvariant(),
-            "avatar-01" => "operator-01",
-            "avatar-02" => "operator-02",
-            "avatar-03" => "operator-03",
-            "avatar-04" => "operator-04",
-            "avatar-05" => "operator-05",
-            "avatar-06" => "operator-06",
+            "avatar_01" => "avatar_01",
+            "avatar_02" => "avatar_02",
+            "avatar_03" => "avatar_03",
+            "avatar_04" => "avatar_04",
+            "avatar_05" => "avatar_05",
+            "avatar_06" => "avatar_06",
+            "operator-01" or "avatar-01" => "avatar_01",
+            "operator-02" or "avatar-02" => "avatar_02",
+            "operator-03" or "avatar-03" => "avatar_03",
+            "operator-04" or "avatar-04" => "avatar_04",
+            "operator-05" or "avatar-05" => "avatar_05",
+            "operator-06" or "avatar-06" => "avatar_06",
             _ => DefaultAvatarKey
         };
     }
@@ -102,11 +105,10 @@ public static partial class ProfileCatalog
     {
         return value?.Trim().ToLowerInvariant() switch
         {
-            "phosphor-green" or "amber-monitor" or
-            "cold-cyan" or "monochrome-crt" =>
-                value.Trim().ToLowerInvariant(),
-            "amber" => "amber-monitor",
-            "cyan" => "cold-cyan",
+            "green" or "phosphor-green" => "green",
+            "amber" or "amber-monitor" => "amber",
+            "cyan" or "cold-cyan" => "cyan",
+            "monochrome" or "monochrome-crt" => "monochrome",
             _ => DefaultTheme
         };
     }

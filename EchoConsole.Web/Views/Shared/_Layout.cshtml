@@ -1,8 +1,18 @@
 @using System.Globalization
+@using EchoConsole.Web.Services.Profile
+
+@{
+    var terminalTheme =
+        User.Identity?.IsAuthenticated == true
+            ? ProfileCatalog.NormalizeStoredTheme(
+                User.FindFirst("theme")?.Value)
+            : ProfileCatalog.DefaultTheme;
+}
 
 <!DOCTYPE html>
 <html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName"
       data-theme="retro-terminal"
+      data-terminal-theme="@terminalTheme"
       class="h-full bg-black">
 <head>
     <meta charset="utf-8" />
@@ -16,7 +26,8 @@
           asp-append-version="true" />
 </head>
 
-<body class="h-full bg-black font-mono text-green-100 antialiased">
+<body data-terminal-theme="@terminalTheme"
+      class="h-full bg-black font-mono antialiased">
     <div class="min-h-screen bg-black">
         <div class="grid min-h-screen grid-cols-1 xl:grid-cols-[5.5rem_minmax(0,1fr)]">
             <aside data-sidebar-shell

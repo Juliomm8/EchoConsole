@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Domain.Enums;
@@ -11,6 +12,7 @@ using EchoConsole.Web.Services.Profile;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -126,6 +128,8 @@ public sealed class ProfileSettingsController : Controller
                     DisplayName = _localizer[
                         $"Profile_Avatar_{index + 1:D2}"],
                     ShortCode = $"OP-{index + 1:D2}",
+                    ImageUrl =
+                        $"/images/avatars/{key}.png",
                     IsSelected = string.Equals(
                         key,
                         selectedAvatar,
@@ -472,9 +476,9 @@ public sealed class ProfileSettingsController : Controller
             await _dbContext.Users
                 .AsNoTracking()
                 .AnyAsync(
-                    x =>
-                        x.Id != user.Id &&
-                        x.Alias.ToUpper() ==
+                    candidate =>
+                        candidate.Id != user.Id &&
+                        candidate.Alias.ToUpper() ==
                         normalizedAlias,
                     cancellationToken);
 
@@ -488,6 +492,10 @@ public sealed class ProfileSettingsController : Controller
                     "Profile_Error_AliasUsed"].Value
             });
         }
+
+        var previousLanguage =
+            CultureInfo.CurrentUICulture
+                .TwoLetterISOLanguageName;
 
         user.Alias = alias;
         user.AvatarKey = avatarKey;
@@ -509,9 +517,13 @@ public sealed class ProfileSettingsController : Controller
                 message = _localizer[
                     "Profile_Error_UpdateFailed"].Value,
                 errors = updateResult.Errors
-                    .Select(x => x.Description)
+                    .Select(error =>
+                        error.Description)
             });
         }
+
+        PersistCultureCookie(
+            preferredLanguage);
 
         await _userSessionService
             .RefreshCurrentPrincipalAsync(
@@ -519,9 +531,18 @@ public sealed class ProfileSettingsController : Controller
                 user,
                 cancellationToken);
 
+        var reloadRequired =
+            !string.Equals(
+                previousLanguage,
+                preferredLanguage,
+                StringComparison.OrdinalIgnoreCase);
+
         _logger.LogInformation(
-            "Player settings updated. UserId={UserId}.",
-            user.Id);
+            "Player settings updated. UserId={UserId}, Avatar={Avatar}, Theme={Theme}, Language={Language}.",
+            user.Id,
+            avatarKey,
+            theme,
+            preferredLanguage);
 
         return Json(new
         {
@@ -534,7 +555,10 @@ public sealed class ProfileSettingsController : Controller
                 user.AvatarKey,
                 user.Theme,
                 user.PreferredLanguage,
-                user.ProfileUpdatedAtUtc
+                user.ProfileUpdatedAtUtc,
+                avatarImageUrl =
+                    $"/images/avatars/{user.AvatarKey}.png",
+                reloadRequired
             }
         });
     }
@@ -960,6 +984,32 @@ public sealed class ProfileSettingsController : Controller
         });
     }
 
+    private void PersistCultureCookie(
+        string culture)
+    {
+        var requestCulture =
+            new RequestCulture(
+                culture,
+                culture);
+
+        Response.Cookies.Append(
+            CookieRequestCultureProvider
+                .DefaultCookieName,
+            CookieRequestCultureProvider
+                .MakeCookieValue(requestCulture),
+            new CookieOptions
+            {
+                Expires = _timeProvider
+                    .GetUtcNow()
+                    .AddYears(1),
+                IsEssential = true,
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                Secure = Request.IsHttps,
+                Path = "/"
+            });
+    }
+
     private int? GetCurrentUserId()
     {
         var claim = User.FindFirst(
@@ -1025,11 +1075,11 @@ public sealed class ProfileSettingsController : Controller
     {
         return key switch
         {
-            "amber-monitor" =>
+            "amber" =>
                 "Profile_Theme_Amber",
-            "cold-cyan" =>
+            "cyan" =>
                 "Profile_Theme_Cyan",
-            "monochrome-crt" =>
+            "monochrome" =>
                 "Profile_Theme_Monochrome",
             _ =>
                 "Profile_Theme_Green"

@@ -5,6 +5,20 @@
     ViewData["TitleResourceKey"] = "Profile_SettingsPageTitle";
 
     var identity = Model.Identity;
+
+    var selectedAvatar =
+        Model.AvatarOptions
+            .FirstOrDefault(option =>
+                option.IsSelected)
+        ?? Model.AvatarOptions.FirstOrDefault();
+
+    var selectedAvatarImage =
+        selectedAvatar?.ImageUrl
+        ?? $"/images/avatars/{identity.AvatarKey}.png";
+
+    var selectedAvatarName =
+        selectedAvatar?.DisplayName
+        ?? identity.AvatarKey;
 }
 
 <div data-profile-settings
@@ -119,9 +133,13 @@
                         </p>
 
                         <div class="mt-5 flex items-center gap-5">
-                            <div data-avatar-preview
-                                 class="flex h-24 w-24 shrink-0 items-center justify-center border border-green-400/35 bg-black font-display text-lg tracking-[0.15em] text-green-300">
-                                @Model.AvatarOptions.FirstOrDefault(x => x.IsSelected)?.ShortCode
+                            <div class="h-24 w-24 shrink-0 overflow-hidden border border-green-400/35 bg-black">
+                                <img src="@selectedAvatarImage"
+                                     alt="@selectedAvatarName"
+                                     data-avatar-preview-image
+                                     class="h-full w-full object-cover"
+                                     width="96"
+                                     height="96" />
                             </div>
 
                             <div class="min-w-0">
@@ -141,7 +159,9 @@
                         </div>
                     </article>
 
-                    <form data-identity-form class="space-y-6 border border-slate-800 bg-[#020402] p-6 sm:p-8">
+                    <form id="identitySettingsForm"
+                          data-identity-form
+                          class="space-y-6 border border-slate-800 bg-[#020402] p-6 sm:p-8">
                         <div>
                             <label for="settingsAlias"
                                    class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
@@ -162,25 +182,30 @@
                                 @SharedLocalizer["Profile_AvatarLabel"]
                             </span>
 
-                            <input type="hidden"
-                                   name="AvatarKey"
-                                   value="@identity.AvatarKey"
-                                   data-avatar-key />
-
                             <button type="button"
                                     data-open-avatar-modal
                                     class="flex w-full items-center justify-between border border-green-500/20 bg-green-950/30 px-4 py-4 text-left transition hover:border-green-400">
-                                <span>
-                                    <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">
-                                        @SharedLocalizer["Profile_SelectedAvatar"]
-                                    </span>
+                                <span class="flex min-w-0 items-center gap-4">
+                                    <img src="@selectedAvatarImage"
+                                         alt=""
+                                         data-avatar-preview-image
+                                         class="h-14 w-14 shrink-0 border border-green-500/25 object-cover"
+                                         width="56"
+                                         height="56" />
 
-                                    <strong data-avatar-name class="mt-1 block text-sm uppercase tracking-[0.12em] text-green-300">
-                                        @Model.AvatarOptions.FirstOrDefault(x => x.IsSelected)?.DisplayName
-                                    </strong>
+                                    <span class="min-w-0">
+                                        <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                            @SharedLocalizer["Profile_SelectedAvatar"]
+                                        </span>
+
+                                        <strong data-avatar-name
+                                                class="mt-1 block truncate text-sm uppercase tracking-[0.12em] text-green-300">
+                                            @selectedAvatarName
+                                        </strong>
+                                    </span>
                                 </span>
 
-                                <span class="text-xs font-bold uppercase tracking-[0.16em] text-green-300">
+                                <span class="shrink-0 text-xs font-bold uppercase tracking-[0.16em] text-green-300">
                                     @SharedLocalizer["Profile_SelectAvatar"]
                                 </span>
                             </button>
@@ -191,42 +216,73 @@
                                 @SharedLocalizer["Profile_ThemeLabel"]
                             </legend>
 
-                            <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                                 @foreach (var theme in Model.ThemeOptions)
                                 {
-                                    <label class="cursor-pointer border border-slate-800 bg-black p-4 transition hover:border-green-500/40 has-[:checked]:border-green-400 has-[:checked]:bg-green-500/10">
+                                    <label class="cursor-pointer border border-slate-800 bg-black p-4 text-center transition hover:border-green-500/40 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
                                         <input type="radio"
                                                name="Theme"
                                                value="@theme.Key"
-                                               checked="@theme.IsSelected"
+                                               checked="@(theme.IsSelected ? "checked" : null)"
                                                class="sr-only" />
 
-                                        <span class="text-xs font-bold uppercase tracking-[0.18em] text-green-300">
+                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-green-300">
                                             @theme.DisplayName
+                                        </span>
+
+                                        <span class="mt-3 block h-1.5 w-full"
+                                              style="background-color: @(theme.Key switch
+                                              {
+                                                  "amber" => "#f59e0b",
+                                                  "cyan" => "#22d3ee",
+                                                  "monochrome" => "#cbd5e1",
+                                                  _ => "#39ff14"
+                                              })">
                                         </span>
                                     </label>
                                 }
                             </div>
                         </fieldset>
 
-                        <div>
-                            <label for="settingsLanguage"
-                                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
+                        <fieldset>
+                            <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
                                 @SharedLocalizer["Profile_LanguageLabel"]
-                            </label>
+                            </legend>
 
-                            <select id="settingsLanguage"
-                                    name="PreferredLanguage"
-                                    class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60">
-                                <option value="en" selected="@(identity.PreferredLanguage == "en")">
-                                    English
-                                </option>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="cursor-pointer border border-slate-800 bg-black p-4 text-center transition hover:border-green-500/40 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
+                                    <input type="radio"
+                                           name="PreferredLanguage"
+                                           value="en"
+                                           checked="@(identity.PreferredLanguage == "en" ? "checked" : null)"
+                                           class="sr-only" />
 
-                                <option value="es" selected="@(identity.PreferredLanguage == "es")">
-                                    Español
-                                </option>
-                            </select>
-                        </div>
+                                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+                                        EN
+                                    </span>
+
+                                    <span class="mt-2 block text-[9px] uppercase tracking-[0.14em] text-slate-500">
+                                        English
+                                    </span>
+                                </label>
+
+                                <label class="cursor-pointer border border-slate-800 bg-black p-4 text-center transition hover:border-green-500/40 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
+                                    <input type="radio"
+                                           name="PreferredLanguage"
+                                           value="es"
+                                           checked="@(identity.PreferredLanguage == "es" ? "checked" : null)"
+                                           class="sr-only" />
+
+                                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+                                        ES
+                                    </span>
+
+                                    <span class="mt-2 block text-[9px] uppercase tracking-[0.14em] text-slate-500">
+                                        Español
+                                    </span>
+                                </label>
+                            </div>
+                        </fieldset>
 
                         <button type="submit"
                                 data-identity-submit
@@ -463,19 +519,36 @@
             <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 @foreach (var avatar in Model.AvatarOptions)
                 {
-                    <button type="button"
-                            data-avatar-option="@avatar.Key"
-                            data-avatar-name-value="@avatar.DisplayName"
-                            data-avatar-code="@avatar.ShortCode"
-                            class="border border-slate-800 bg-black p-4 text-center transition hover:border-green-400 hover:bg-green-500/10">
-                        <span class="flex h-16 items-center justify-center border border-green-500/15 bg-green-950/30 font-display text-lg tracking-[0.15em] text-green-300">
-                            @avatar.ShortCode
+                    <label data-avatar-card
+                           class="group cursor-pointer border border-slate-800 bg-black p-3 text-center transition hover:border-green-400 hover:bg-green-500/5 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
+
+                        <input type="radio"
+                               form="identitySettingsForm"
+                               name="AvatarKey"
+                               value="@avatar.Key"
+                               checked="@(avatar.IsSelected ? "checked" : null)"
+                               data-avatar-radio
+                               data-avatar-name-value="@avatar.DisplayName"
+                               data-avatar-image="@avatar.ImageUrl"
+                               class="sr-only" />
+
+                        <span class="block aspect-square overflow-hidden border border-green-500/15 bg-green-950/30">
+                            <img src="@avatar.ImageUrl"
+                                 alt="@avatar.DisplayName"
+                                 class="h-full w-full object-cover transition duration-200 group-hover:scale-[1.03]"
+                                 width="256"
+                                 height="256"
+                                 loading="lazy" />
                         </span>
 
-                        <span class="mt-3 block text-[9px] uppercase tracking-[0.15em] text-slate-500">
+                        <span class="mt-3 block text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500 group-has-[:checked]:text-green-300">
                             @avatar.DisplayName
                         </span>
-                    </button>
+
+                        <span class="mt-1 block font-mono text-[8px] uppercase tracking-[0.14em] text-slate-700">
+                            @avatar.Key
+                        </span>
+                    </label>
                 }
             </div>
         </div>

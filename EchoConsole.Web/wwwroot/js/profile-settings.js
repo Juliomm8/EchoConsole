@@ -366,10 +366,36 @@
                         response.data?.alias
                     );
 
+                    applyTerminalTheme(
+                        response.data?.theme
+                    );
+
+                    const avatarImageUrl =
+                        response.data?.avatarImageUrl;
+
+                    if (avatarImageUrl) {
+                        for (
+                            const image of root.querySelectorAll(
+                                "[data-avatar-preview-image]"
+                            )
+                        ) {
+                            image.src = avatarImageUrl;
+                        }
+                    }
+
                     showToast(
                         response.message,
                         "success"
                     );
+
+                    if (
+                        response.data?.reloadRequired
+                    ) {
+                        window.setTimeout(
+                            () => window.location.reload(),
+                            450
+                        );
+                    }
                 } catch (error) {
                     showToast(
                         getErrorMessage(error),
@@ -689,9 +715,11 @@
                 "[data-close-avatar-modal]"
             );
 
-        const avatarKeyInput =
-            root.querySelector(
-                "[data-avatar-key]"
+        const avatarRadios =
+            Array.from(
+                root.querySelectorAll(
+                    "[data-avatar-radio]"
+                )
             );
 
         openButton?.addEventListener(
@@ -719,38 +747,38 @@
             }
         );
 
-        modal?.addEventListener(
-            "click",
-            event => {
-                const option =
-                    event.target.closest(
-                        "[data-avatar-option]"
+        for (const radio of avatarRadios) {
+            radio.addEventListener(
+                "change",
+                () => {
+                    if (!radio.checked) {
+                        return;
+                    }
+
+                    setText(
+                        "[data-avatar-name]",
+                        radio.dataset
+                            .avatarNameValue
                     );
 
-                if (!option) {
-                    return;
+                    const imageUrl =
+                        radio.dataset.avatarImage;
+
+                    if (imageUrl) {
+                        for (
+                            const image of
+                            root.querySelectorAll(
+                                "[data-avatar-preview-image]"
+                            )
+                        ) {
+                            image.src = imageUrl;
+                        }
+                    }
+
+                    closeAvatarModal();
                 }
-
-                if (avatarKeyInput) {
-                    avatarKeyInput.value =
-                        option.dataset
-                            .avatarOption ?? "";
-                }
-
-                setText(
-                    "[data-avatar-name]",
-                    option.dataset
-                        .avatarNameValue
-                );
-
-                setText(
-                    "[data-avatar-preview]",
-                    option.dataset.avatarCode
-                );
-
-                closeAvatarModal();
-            }
-        );
+            );
+        }
 
         function closeAvatarModal() {
             modal?.classList.add("hidden");
@@ -1087,6 +1115,29 @@
                 `;
             })
             .join("");
+    }
+
+    function applyTerminalTheme(theme) {
+        const allowedThemes =
+            new Set([
+                "green",
+                "amber",
+                "cyan",
+                "monochrome"
+            ]);
+
+        const normalizedTheme =
+            allowedThemes.has(theme)
+                ? theme
+                : "green";
+
+        document.documentElement.dataset
+            .terminalTheme =
+            normalizedTheme;
+
+        document.body.dataset
+            .terminalTheme =
+            normalizedTheme;
     }
 
     async function requestJson(

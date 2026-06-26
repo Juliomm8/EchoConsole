@@ -8,5 +8,7 @@ public sealed class AvatarOptionViewModel
 
     public string ShortCode { get; set; } = string.Empty;
 
+    public string ImageUrl { get; set; } = string.Empty;
+
     public bool IsSelected { get; set; }
 }
