@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1253,30 +1253,6 @@
   <data name="Error_RequestId" xml:space="preserve">
     <value>ID de solicitud</value>
   </data>
-  <data name="Privacy_PageTitle" xml:space="preserve">
-    <value>Privacidad</value>
-  </data>
-  <data name="Privacy_Badge" xml:space="preserve">
-    <value>Gobernanza de datos</value>
-  </data>
-  <data name="Privacy_Title" xml:space="preserve">
-    <value>Privacidad y telemetría</value>
-  </data>
-  <data name="Privacy_Description" xml:space="preserve">
-    <value>Echo Console procesa telemetría técnica de gameplay para operar paneles, diagnósticos e historial del jugador.</value>
-  </data>
-  <data name="Privacy_TelemetryTitle" xml:space="preserve">
-    <value>Alcance de la telemetría</value>
-  </data>
-  <data name="Privacy_TelemetryDescription" xml:space="preserve">
-    <value>La telemetría se limita a datos operativos del juego como sesiones, escenas, eventos, builds y estado de dispositivos.</value>
-  </data>
-  <data name="Privacy_SecurityTitle" xml:space="preserve">
-    <value>Seguridad</value>
-  </data>
-  <data name="Privacy_SecurityDescription" xml:space="preserve">
-    <value>Los tokens de sesión y credenciales administrativas nunca se muestran en la interfaz ni se incluyen en los payloads de gameplay.</value>
-  </data>
   <data name="Validation_Required" xml:space="preserve">
     <value>El campo {0} es obligatorio.</value>
   </data>
@@ -1288,5 +1264,860 @@
   </data>
   <data name="Validation_StringLength" xml:space="preserve">
     <value>El campo {0} debe tener una longitud mínima de {2} y máxima de {1} caracteres.</value>
+  </data>
+  <data name="Topbar_UserMenu" xml:space="preserve">
+    <value>Menú de operador</value>
+  </data>
+  <data name="Topbar_MyProfile" xml:space="preserve">
+    <value>Mi perfil</value>
+  </data>
+  <data name="Topbar_Settings" xml:space="preserve">
+    <value>Ajustes</value>
+  </data>
+  <data name="Footer_Transmission" xml:space="preserve">
+    <value>Canales oficiales de transmisión</value>
+  </data>
+  <data name="Footer_Description" xml:space="preserve">
+    <value>Cosmic Diner es un juego de exploración y terror analógico ambientado en un restaurante retrofuturista abandonado. Sigue los canales oficiales para recibir señales del desarrollo y nuevas transmisiones.</value>
+  </data>
+  <data name="Footer_Follow" xml:space="preserve">
+    <value>Sigue a Cosmic Diner</value>
+  </data>
+  <data name="Footer_LinkPending" xml:space="preserve">
+    <value>Configura la URL oficial en los ajustes ExternalLinks.</value>
+  </data>
+  <data name="Footer_Rights" xml:space="preserve">
+    <value>© {0} Cosmic Diner. Todas las señales reservadas.</value>
+  </data>
+  <data name="Home_HeroSignal" xml:space="preserve">
+    <value>Señal adquirida // transmisión comercial</value>
+  </data>
+  <data name="Home_CommercialHeroDescription" xml:space="preserve">
+    <value>Las luces están fallando. La cocina permanece en silencio. Algo en el comedor todavía espera ser atendido. Entra en un restaurante de la era espacial abandonado y sobrevive a la transmisión.</value>
+  </data>
+  <data name="Home_WishlistEyebrow" xml:space="preserve">
+    <value>Próximamente en Steam</value>
+  </data>
+  <data name="Home_WishlistButton" xml:space="preserve">
+    <value>Añade Cosmic Diner a tu Wishlist</value>
+  </data>
+  <data name="Home_ExternalLinkPending" xml:space="preserve">
+    <value>Configura ExternalLinks:SteamWishlist antes de publicar.</value>
+  </data>
+  <data name="Home_HeroImageAlt" xml:space="preserve">
+    <value>Placeholder promocional de Cosmic Diner</value>
+  </data>
+  <data name="Home_LiveReadout" xml:space="preserve">
+    <value>Lectura en vivo de la comunidad</value>
+  </data>
+  <data name="Home_ActivePlayers" xml:space="preserve">
+    <value>Jugadores en línea</value>
+  </data>
+  <data name="Home_MonitoredBuilds" xml:space="preserve">
+    <value>Builds del juego</value>
+  </data>
+  <data name="Home_FeaturedBuild" xml:space="preserve">
+    <value>Señal actual</value>
+  </data>
+  <data name="Home_LiveReadoutDescription" xml:space="preserve">
+    <value>Echo Console está recibiendo telemetría operativa de instalaciones activas de Cosmic Diner.</value>
+  </data>
+  <data name="Home_ShowcaseEyebrow" xml:space="preserve">
+    <value>Registros visuales recuperados</value>
+  </data>
+  <data name="Home_ShowcaseTitle" xml:space="preserve">
+    <value>Un diner construido para las estrellas. Abandonado por una razón.</value>
+  </data>
+  <data name="Home_ShowcaseIntro" xml:space="preserve">
+    <value>Reemplaza los placeholders de terminal por capturas finales del gameplay. El layout está listo para imágenes cinematográficas, narrativa ambiental y textos comerciales.</value>
+  </data>
+  <data name="Home_ShowcaseOneTitle" xml:space="preserve">
+    <value>Tu turno comienza después del cierre</value>
+  </data>
+  <data name="Home_ShowcaseOneDescription" xml:space="preserve">
+    <value>Explora un restaurante retrofuturista congelado entre los restos de la carrera espacial. Revisa oficinas, bodegas y comedores silenciosos mientras el edificio reacciona a tu presencia.</value>
+  </data>
+  <data name="Home_ShowcaseOneAlt" xml:space="preserve">
+    <value>Placeholder de gameplay mostrando el interior de Cosmic Diner</value>
+  </data>
+  <data name="Home_ShowcaseTwoTitle" xml:space="preserve">
+    <value>La luz es una herramienta, una advertencia y un riesgo</value>
+  </data>
+  <data name="Home_ShowcaseTwoDescription" xml:space="preserve">
+    <value>Administra baterías, restaura sistemas averiados y utiliza la linterna con cuidado. Cada circuito encendido revela otra parte del diner y también puede revelar tu posición.</value>
+  </data>
+  <data name="Home_ShowcaseTwoAlt" xml:space="preserve">
+    <value>Placeholder de gameplay mostrando una secuencia de apagón</value>
+  </data>
+  <data name="Home_ShowcaseThreeTitle" xml:space="preserve">
+    <value>El astronauta no forma parte de la atracción</value>
+  </data>
+  <data name="Home_ShowcaseThreeDescription" xml:space="preserve">
+    <value>Escucha el movimiento detrás de las paredes, escóndete cuando la ruta se cierre y reconstruye lo ocurrido mediante fotografías, objetos y grabaciones corruptas.</value>
+  </data>
+  <data name="Home_ShowcaseThreeAlt" xml:space="preserve">
+    <value>Placeholder de gameplay mostrando un encuentro con el enemigo</value>
+  </data>
+  <data name="Home_ChangelogEyebrow" xml:space="preserve">
+    <value>Archivo de desarrollo del juego</value>
+  </data>
+  <data name="Home_ChangelogTitle" xml:space="preserve">
+    <value>Notas del parche</value>
+  </data>
+  <data name="Home_ChangelogDescription" xml:space="preserve">
+    <value>Estos registros describen la evolución del videojuego Cosmic Diner, no la página web Echo Console.</value>
+  </data>
+  <data name="Home_ChangelogV01Title" xml:space="preserve">
+    <value>Alpha jugable</value>
+  </data>
+  <data name="Home_ChangelogV01Description" xml:space="preserve">
+    <value>Bucle inicial de exploración, navegación por el diner, interacción con objetos y primera ruta de progresión jugable.</value>
+  </data>
+  <data name="Home_ChangelogV02Title" xml:space="preserve">
+    <value>Protocolo de apagón</value>
+  </data>
+  <data name="Home_ChangelogV02Description" xml:space="preserve">
+    <value>Sistemas de linterna y baterías, objetos físicos dinámicos, restauración de energía y respuesta de audio ambiental.</value>
+  </data>
+  <data name="Home_ChangelogV03Title" xml:space="preserve">
+    <value>El astronauta</value>
+  </data>
+  <data name="Home_ChangelogV03Description" xml:space="preserve">
+    <value>Encuentros con el enemigo, lógica de escondites, sistemas de tensión y evidencia narrativa ampliada por todo el restaurante.</value>
+  </data>
+  <data name="Home_InterceptedSignals" xml:space="preserve">
+    <value>SEÑALES INTERCEPTADAS</value>
+  </data>
+  <data name="Home_ActiveInvestigators" xml:space="preserve">
+    <value>INVESTIGADORES ACTIVOS</value>
+  </data>
+  <data name="Home_LiveFrequencyScan" xml:space="preserve">
+    <value>ESCANEO DE FRECUENCIAS EN VIVO</value>
+  </data>
+  <data name="Home_ScanLocked" xml:space="preserve">
+    <value>ESCANEO FIJADO</value>
+  </data>
+  <data name="Home_SurviveShiftTitle" xml:space="preserve">
+    <value>SOBREVIVE AL TURNO</value>
+  </data>
+  <data name="Home_CorruptedData" xml:space="preserve">
+    <value>[// DATA_CORRUPTED: WE ARE WAITING FOR YOU //]</value>
+  </data>
+  <data name="PatchNotesAdmin_PageTitle" xml:space="preserve">
+    <value>CMS de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_Eyebrow" xml:space="preserve">
+    <value>Consola de transmisión de contenido</value>
+  </data>
+  <data name="PatchNotesAdmin_Title" xml:space="preserve">
+    <value>Publicar nota de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_Subtitle" xml:space="preserve">
+    <value>Crea una nueva actualización de Cosmic Diner y transmítela mediante Echo Console al archivo público de parches.</value>
+  </data>
+  <data name="PatchNotesAdmin_Version" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="PatchNotesAdmin_Category" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+  <data name="PatchNotesAdmin_Tone" xml:space="preserve">
+    <value>Tono de terminal</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneGreen" xml:space="preserve">
+    <value>Verde // Transmisión estándar</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneAmber" xml:space="preserve">
+    <value>Ámbar // Advertencia de sistemas</value>
+  </data>
+  <data name="PatchNotesAdmin_ToneRose" xml:space="preserve">
+    <value>Rojo // Encuentro crítico</value>
+  </data>
+  <data name="PatchNotesAdmin_PatchTitle" xml:space="preserve">
+    <value>Título del parche</value>
+  </data>
+  <data name="PatchNotesAdmin_TitlePlaceholder" xml:space="preserve">
+    <value>PROTOCOLO DE APAGÓN</value>
+  </data>
+  <data name="PatchNotesAdmin_Description" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="PatchNotesAdmin_DescriptionPlaceholder" xml:space="preserve">
+    <value>Describe los cambios de jugabilidad, correcciones y sistemas nuevos incluidos en esta versión.</value>
+  </data>
+  <data name="PatchNotesAdmin_PublishNotice" xml:space="preserve">
+    <value>Esta transmisión se publicará inmediatamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_Back" xml:space="preserve">
+    <value>Volver a la landing</value>
+  </data>
+  <data name="PatchNotesAdmin_Submit" xml:space="preserve">
+    <value>Transmitir parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTitle" xml:space="preserve">
+    <value>Protocolo de publicación</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolOne" xml:space="preserve">
+    <value>Los identificadores de versión deben ser únicos. La API rechaza versiones existentes.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolTwo" xml:space="preserve">
+    <value>Las categorías se normalizan a mayúsculas y los tonos se limitan a green, amber o rose.</value>
+  </data>
+  <data name="PatchNotesAdmin_ProtocolThree" xml:space="preserve">
+    <value>La API asigna la fecha UTC de publicación y la landing solo consume registros publicados.</value>
+  </data>
+  <data name="PatchNotesAdmin_Success" xml:space="preserve">
+    <value>La nota de parche se publicó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_Error" xml:space="preserve">
+    <value>No se pudo publicar la nota de parche.</value>
+  </data>
+  <data name="Sidebar_PatchNotesCms" xml:space="preserve">
+    <value>CMS de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardPageTitle" xml:space="preserve">
+    <value>Panel de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardEyebrow" xml:space="preserve">
+    <value>Archivo de transmisiones SQLite</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardTitle" xml:space="preserve">
+    <value>CMS de notas de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_DashboardSubtitle" xml:space="preserve">
+    <value>Revisa todas las actualizaciones almacenadas de Cosmic Diner, publica nuevas transmisiones y elimina registros incorrectos del CMS local.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateNew" xml:space="preserve">
+    <value>Crear parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveBadge" xml:space="preserve">
+    <value>Registros de base de datos</value>
+  </data>
+  <data name="PatchNotesAdmin_ArchiveTitle" xml:space="preserve">
+    <value>Archivo de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_TotalRecords" xml:space="preserve">
+    <value>Registros totales</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyTitle" xml:space="preserve">
+    <value>No hay transmisiones de parches</value>
+  </data>
+  <data name="PatchNotesAdmin_EmptyDescription" xml:space="preserve">
+    <value>El archivo SQLite está vacío. Crea la primera nota de parche para poblar la landing pública.</value>
+  </data>
+  <data name="PatchNotesAdmin_CreateFirst" xml:space="preserve">
+    <value>Crear primer parche</value>
+  </data>
+  <data name="PatchNotesAdmin_ColVersion" xml:space="preserve">
+    <value>Versión</value>
+  </data>
+  <data name="PatchNotesAdmin_ColCategory" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+  <data name="PatchNotesAdmin_ColTitle" xml:space="preserve">
+    <value>Título y descripción</value>
+  </data>
+  <data name="PatchNotesAdmin_ColStatus" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="PatchNotesAdmin_ColDate" xml:space="preserve">
+    <value>Creado</value>
+  </data>
+  <data name="PatchNotesAdmin_ColActions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="PatchNotesAdmin_Published" xml:space="preserve">
+    <value>Publicado</value>
+  </data>
+  <data name="PatchNotesAdmin_Draft" xml:space="preserve">
+    <value>Borrador</value>
+  </data>
+  <data name="PatchNotesAdmin_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteConfirm" xml:space="preserve">
+    <value>Esta operación elimina permanentemente la nota de parche. ¿Deseas continuar?</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteSuccess" xml:space="preserve">
+    <value>La nota de parche se eliminó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la nota de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_LoadError" xml:space="preserve">
+    <value>No se pudo cargar el panel de notas de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_InvalidId" xml:space="preserve">
+    <value>El identificador de la nota de parche no es válido.</value>
+  </data>
+  <data name="PatchNotesAdmin_BackToDashboard" xml:space="preserve">
+    <value>Volver al panel</value>
+  </data>
+  <data name="PatchNotesAdmin_Hidden" xml:space="preserve">
+    <value>Oculto</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToHidden" xml:space="preserve">
+    <value>Ocultar de la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleToPublished" xml:space="preserve">
+    <value>Publicar en la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_TogglePublishedSuccess" xml:space="preserve">
+    <value>La nota de parche se publicó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleHiddenSuccess" xml:space="preserve">
+    <value>La nota de parche se ocultó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_ToggleError" xml:space="preserve">
+    <value>No se pudo cambiar la visibilidad de la nota de parche.</value>
+  </data>
+  <data name="SimulationOrchestrator_OpenButton" xml:space="preserve">
+    <value>CONTROL_SIM</value>
+  </data>
+  <data name="SimulationOrchestrator_Kicker" xml:space="preserve">
+    <value>SO_SIMULACIÓN_TELEMETRÍA</value>
+  </data>
+  <data name="SimulationOrchestrator_Title" xml:space="preserve">
+    <value>Orquestador de Simulación</value>
+  </data>
+  <data name="SimulationOrchestrator_AdminOnly" xml:space="preserve">
+    <value>CANAL DE CONTROL // SOLO ADMIN</value>
+  </data>
+  <data name="SimulationOrchestrator_Close" xml:space="preserve">
+    <value>CERRAR</value>
+  </data>
+  <data name="SimulationOrchestrator_Module04" xml:space="preserve">
+    <value>MÓDULO_04</value>
+  </data>
+  <data name="SimulationOrchestrator_ActiveSessionControl" xml:space="preserve">
+    <value>Control de Sesiones Activas</value>
+  </data>
+  <data name="SimulationOrchestrator_StateIdle" xml:space="preserve">
+    <value>INACTIVO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateActive" xml:space="preserve">
+    <value>ACTIVO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateOffline" xml:space="preserve">
+    <value>DESCONECTADO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateTransmitting" xml:space="preserve">
+    <value>TRANSMITIENDO</value>
+  </data>
+  <data name="SimulationOrchestrator_StateError" xml:space="preserve">
+    <value>ERROR</value>
+  </data>
+  <data name="SimulationOrchestrator_ActiveReal" xml:space="preserve">
+    <value>REALES_ACTIVAS</value>
+  </data>
+  <data name="SimulationOrchestrator_ActiveSimulated" xml:space="preserve">
+    <value>SIMULADAS_ACTIVAS</value>
+  </data>
+  <data name="SimulationOrchestrator_ConnectedUserTarget" xml:space="preserve">
+    <value>OBJETIVO DE USUARIOS CONECTADOS</value>
+  </data>
+  <data name="SimulationOrchestrator_Apply" xml:space="preserve">
+    <value>APLICAR</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicMode" xml:space="preserve">
+    <value>MODO ORGÁNICO ESTOCÁSTICO</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicDescription" xml:space="preserve">
+    <value>Genera entradas, cambios de escena y salidas aleatorias cada 4–8 segundos.</value>
+  </data>
+  <data name="SimulationOrchestrator_ComponentMatrix" xml:space="preserve">
+    <value>MATRIZ_DE_COMPONENTES</value>
+  </data>
+  <data name="SimulationOrchestrator_Sessions" xml:space="preserve">
+    <value>Sesiones</value>
+  </data>
+  <data name="SimulationOrchestrator_Installations" xml:space="preserve">
+    <value>Instalaciones</value>
+  </data>
+  <data name="SimulationOrchestrator_Alerts" xml:space="preserve">
+    <value>Alertas</value>
+  </data>
+  <data name="SimulationOrchestrator_Module05" xml:space="preserve">
+    <value>MÓDULO_05</value>
+  </data>
+  <data name="SimulationOrchestrator_IncidentInjector" xml:space="preserve">
+    <value>INYECTOR_DE_INCIDENTES</value>
+  </data>
+  <data name="SimulationOrchestrator_InjectCriticalAlarm" xml:space="preserve">
+    <value>INYECTAR_ALARMA_CRÍTICA</value>
+  </data>
+  <data name="SimulationOrchestrator_InjectMassDrop" xml:space="preserve">
+    <value>INYECTAR_CAÍDA_MASIVA</value>
+  </data>
+  <data name="SimulationOrchestrator_DatabaseMaintenance" xml:space="preserve">
+    <value>MANTENIMIENTO_BASE_DATOS</value>
+  </data>
+  <data name="SimulationOrchestrator_PurgeSimulatedData" xml:space="preserve">
+    <value>PURGAR_DATOS_SIMULADOS</value>
+  </data>
+  <data name="SimulationOrchestrator_WipeAllTelemetry" xml:space="preserve">
+    <value>BORRAR_TODA_TELEMETRÍA</value>
+  </data>
+  <data name="SimulationOrchestrator_MaintenanceScope" xml:space="preserve">
+    <value>Los usuarios de identidad, builds del juego y registros del CMS están fuera de este mantenimiento.</value>
+  </data>
+  <data name="SimulationOrchestrator_DebugConsole" xml:space="preserve">
+    <value>CONSOLA_DEPURACIÓN</value>
+  </data>
+  <data name="SimulationOrchestrator_Clear" xml:space="preserve">
+    <value>LIMPIAR</value>
+  </data>
+  <data name="SimulationOrchestrator_Ready" xml:space="preserve">
+    <value>ORQUESTADOR_LISTO</value>
+  </data>
+  <data name="SimulationOrchestrator_LastSyncNever" xml:space="preserve">
+    <value>ÚLTIMA_SINCRONIZACIÓN: NUNCA</value>
+  </data>
+  <data name="SimulationOrchestrator_TransportBffProxy" xml:space="preserve">
+    <value>TRANSPORTE: PROXY_BFF</value>
+  </data>
+  <data name="SimulationOrchestrator_EndpointNotConfigured" xml:space="preserve">
+    <value>El endpoint de simulación no está configurado.</value>
+  </data>
+  <data name="SimulationOrchestrator_RequestFailedStatus" xml:space="preserve">
+    <value>La solicitud falló con estado {0}.</value>
+  </data>
+  <data name="SimulationOrchestrator_LastSync" xml:space="preserve">
+    <value>ÚLTIMA_SINCRONIZACIÓN: {0}</value>
+  </data>
+  <data name="SimulationOrchestrator_StatusError" xml:space="preserve">
+    <value>ERROR_ESTADO</value>
+  </data>
+  <data name="SimulationOrchestrator_ChannelBusy" xml:space="preserve">
+    <value>CANAL_OCUPADO: el comando anterior sigue ejecutándose.</value>
+  </data>
+  <data name="SimulationOrchestrator_RequestSent" xml:space="preserve">
+    <value>SOLICITUD_ENVIADA</value>
+  </data>
+  <data name="SimulationOrchestrator_Complete" xml:space="preserve">
+    <value>COMPLETADO</value>
+  </data>
+  <data name="SimulationOrchestrator_AccessDenied" xml:space="preserve">
+    <value>ACCESO_DENEGADO: se requiere una sesión de administrador.</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicEnabled" xml:space="preserve">
+    <value>MODO_ORGÁNICO: ACTIVADO</value>
+  </data>
+  <data name="SimulationOrchestrator_OrganicDisabled" xml:space="preserve">
+    <value>MODO_ORGÁNICO: DESACTIVADO</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmMassDrop" xml:space="preserve">
+    <value>¿Desconectar ahora todas las sesiones simuladas activas?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmPurge" xml:space="preserve">
+    <value>¿Eliminar todos los registros de telemetría generados por simulaciones PC-Player?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmWipeFirst" xml:space="preserve">
+    <value>Esto eliminará permanentemente todas las instalaciones, sesiones, eventos y alertas de telemetría. ¿Continuar?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmWipeFinal" xml:space="preserve">
+    <value>CONFIRMACIÓN FINAL: ¿Borrar ahora todos los datos de telemetría?</value>
+  </data>
+  <data name="SimulationOrchestrator_ConsoleCleared" xml:space="preserve">
+    <value>CONSOLA_DEPURACIÓN_LIMPIADA</value>
+  </data>
+  <data name="SimulationOrchestrator_Step01" xml:space="preserve">
+    <value>[ PASO_01: CARGAR_CONFIGURACIÓN ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step02" xml:space="preserve">
+    <value>[ PASO_02: MATRIZ_DE_COMPONENTES ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step03" xml:space="preserve">
+    <value>[ PASO_03: INYECCIÓN_DE_ANOMALÍAS ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step04" xml:space="preserve">
+    <value>[ PASO_04: MANTENIMIENTO_DE_BASE_DE_DATOS ]</value>
+  </data>
+  <data name="SimulationOrchestrator_Step05" xml:space="preserve">
+    <value>[ PASO_05: SALIDA_DE_DEPURACIÓN ]</value>
+  </data>
+  <data name="SimulationOrchestrator_TerminateSimulation" xml:space="preserve">
+    <value>TERMINAR_SIMULACIÓN</value>
+  </data>
+  <data name="SimulationOrchestrator_ConfirmTerminate" xml:space="preserve">
+    <value>¿Detener la simulación persistente y desconectar todas las sesiones simuladas?</value>
+  </data>
+  <data name="SimulationOrchestrator_PersistentHint" xml:space="preserve">
+    <value>El modo persistente permanece activo entre páginas hasta que se termine manualmente.</value>
+  </data>
+  <data name="Builds_RegisterNew" xml:space="preserve">
+    <value>REGISTRAR_NUEVA_BUILD</value>
+  </data>
+  <data name="Builds_FieldVersion" xml:space="preserve">
+    <value>Número de versión</value>
+  </data>
+  <data name="Builds_FieldEngine" xml:space="preserve">
+    <value>Versión base del motor</value>
+  </data>
+  <data name="Builds_FieldReleaseDate" xml:space="preserve">
+    <value>Fecha de lanzamiento UTC</value>
+  </data>
+  <data name="Builds_FieldNotes" xml:space="preserve">
+    <value>Notas de versión</value>
+  </data>
+  <data name="Builds_NotesPlaceholder" xml:space="preserve">
+    <value>Describe cambios relevantes, correcciones y contexto del despliegue.</value>
+  </data>
+  <data name="Builds_FieldSetActive" xml:space="preserve">
+    <value>Establecer como build activa de producción</value>
+  </data>
+  <data name="Builds_RegisterSubmit" xml:space="preserve">
+    <value>REGISTRAR_BUILD</value>
+  </data>
+  <data name="Builds_KpiTotal" xml:space="preserve">
+    <value>Total de builds registradas</value>
+  </data>
+  <data name="Builds_KpiActive" xml:space="preserve">
+    <value>Build activa en producción</value>
+  </data>
+  <data name="Builds_KpiEngine" xml:space="preserve">
+    <value>Versión base del motor</value>
+  </data>
+  <data name="Builds_NoActiveBuild" xml:space="preserve">
+    <value>SIN_BUILD_ACTIVA</value>
+  </data>
+  <data name="Builds_EngineUnavailable" xml:space="preserve">
+    <value>MOTOR_NO_REPORTADO</value>
+  </data>
+  <data name="Builds_ColInstallations" xml:space="preserve">
+    <value>Instalaciones vinculadas</value>
+  </data>
+  <data name="Builds_ColSessions" xml:space="preserve">
+    <value>Sesiones totales</value>
+  </data>
+  <data name="Builds_NoReleaseNotes" xml:space="preserve">
+    <value>Sin notas de versión</value>
+  </data>
+  <data name="Builds_Activate" xml:space="preserve">
+    <value>Activar build</value>
+  </data>
+  <data name="Builds_Deactivate" xml:space="preserve">
+    <value>Desactivar build</value>
+  </data>
+  <data name="Builds_EmptyHint" xml:space="preserve">
+    <value>Registra una build para inicializar la telemetría de versiones.</value>
+  </data>
+  <data name="Builds_CreateSuccess" xml:space="preserve">
+    <value>La build se registró correctamente.</value>
+  </data>
+  <data name="Builds_CreateError" xml:space="preserve">
+    <value>No se pudo registrar la build.</value>
+  </data>
+  <data name="Builds_StatusUpdated" xml:space="preserve">
+    <value>El estado de la build se actualizó correctamente.</value>
+  </data>
+  <data name="Builds_StatusError" xml:space="preserve">
+    <value>No se pudo actualizar el estado de la build.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Builds_ColActions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="Builds_Edit" xml:space="preserve">
+    <value>EDITAR</value>
+  </data>
+  <data name="Builds_Delete" xml:space="preserve">
+    <value>ELIMINAR</value>
+  </data>
+  <data name="Builds_DeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar esta build de forma permanente?</value>
+  </data>
+  <data name="Builds_DeleteActiveHint" xml:space="preserve">
+    <value>Desactiva la build de producción antes de eliminarla.</value>
+  </data>
+  <data name="Builds_DeleteTelemetryHint" xml:space="preserve">
+    <value>Esta build está protegida porque existen registros de telemetría vinculados.</value>
+  </data>
+  <data name="Builds_EditTitle" xml:space="preserve">
+    <value>Editar registro de build</value>
+  </data>
+  <data name="Builds_SaveChanges" xml:space="preserve">
+    <value>GUARDAR_CAMBIOS</value>
+  </data>
+  <data name="Builds_UpdateSuccess" xml:space="preserve">
+    <value>La build se actualizó correctamente.</value>
+  </data>
+  <data name="Builds_UpdateError" xml:space="preserve">
+    <value>No se pudo actualizar la build.</value>
+  </data>
+  <data name="Builds_UpdateValidationError" xml:space="preserve">
+    <value>Revisa los datos de la build antes de guardar los cambios.</value>
+  </data>
+  <data name="Builds_DeleteSuccess" xml:space="preserve">
+    <value>La build se eliminó correctamente.</value>
+  </data>
+  <data name="Builds_DeleteActiveBlocked" xml:space="preserve">
+    <value>La build activa de producción debe desactivarse antes de eliminarla.</value>
+  </data>
+  <data name="Builds_DeleteTelemetryBlocked" xml:space="preserve">
+    <value>No se puede eliminar la build mientras existan instalaciones o sesiones vinculadas.</value>
+  </data>
+  <data name="Builds_DeleteNotFound" xml:space="preserve">
+    <value>La build seleccionada ya no existe.</value>
+  </data>
+  <data name="Builds_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la build.</value>
+  </data>
+  <data name="PatchNotesAdmin_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="PatchNotesAdmin_EditTitle" xml:space="preserve">
+    <value>Editar nota de parche</value>
+  </data>
+  <data name="PatchNotesAdmin_EditSubtitle" xml:space="preserve">
+    <value>Carga el registro actual, ajusta su contenido y guarda la transmisión sin abandonar el archivo.</value>
+  </data>
+  <data name="PatchNotesAdmin_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="PatchNotesAdmin_SaveChanges" xml:space="preserve">
+    <value>Guardar cambios</value>
+  </data>
+  <data name="PatchNotesAdmin_EditPublishLabel" xml:space="preserve">
+    <value>Mantener esta nota visible en la landing pública</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateSuccess" xml:space="preserve">
+    <value>La nota de parche se actualizó correctamente.</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateError" xml:space="preserve">
+    <value>No se pudo actualizar la nota de parche.</value>
+  </data>
+  <data name="PatchNotesAdmin_UpdateValidationError" xml:space="preserve">
+    <value>La nota de parche contiene datos inválidos y no pudo actualizarse.</value>
+  </data>
+  <data name="Installations_ReadOnlyNotice" xml:space="preserve">
+    <value>La telemetría de hardware es de solo lectura. Solo se pueden modificar el alias y estado administrativos.</value>
+  </data>
+  <data name="Installations_ColAliasDevice" xml:space="preserve">
+    <value>Alias / Dispositivo</value>
+  </data>
+  <data name="Installations_ColBuild" xml:space="preserve">
+    <value>Build asociada</value>
+  </data>
+  <data name="Installations_ColOwner" xml:space="preserve">
+    <value>Usuario vinculado</value>
+  </data>
+  <data name="Installations_ColAdminStatus" xml:space="preserve">
+    <value>Estado administrativo</value>
+  </data>
+  <data name="Installations_EditAlias" xml:space="preserve">
+    <value>EDITAR ALIAS</value>
+  </data>
+  <data name="Installations_Details" xml:space="preserve">
+    <value>DETALLES</value>
+  </data>
+  <data name="Installations_Delete" xml:space="preserve">
+    <value>ELIMINAR</value>
+  </data>
+  <data name="Installations_DeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar esta instalación y todos sus registros de telemetría relacionados?</value>
+  </data>
+  <data name="Installations_OwnerUnassigned" xml:space="preserve">
+    <value>SIN ASIGNAR</value>
+  </data>
+  <data name="Installations_AdminAlias" xml:space="preserve">
+    <value>Alias administrativo</value>
+  </data>
+  <data name="Installations_AdminStatus" xml:space="preserve">
+    <value>Estado administrativo</value>
+  </data>
+  <data name="Installations_StatusActive" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="Installations_StatusInactive" xml:space="preserve">
+    <value>Inactivo</value>
+  </data>
+  <data name="Installations_StatusBanned" xml:space="preserve">
+    <value>Baneado</value>
+  </data>
+  <data name="Installations_SaveMetadata" xml:space="preserve">
+    <value>GUARDAR METADATOS</value>
+  </data>
+  <data name="Installations_UpdateSuccess" xml:space="preserve">
+    <value>Los metadatos de la instalación se actualizaron correctamente.</value>
+  </data>
+  <data name="Installations_UpdateError" xml:space="preserve">
+    <value>No se pudieron actualizar los metadatos de la instalación.</value>
+  </data>
+  <data name="Installations_UpdateValidationError" xml:space="preserve">
+    <value>El alias o estado administrativo no es válido.</value>
+  </data>
+  <data name="Installations_DeleteSuccess" xml:space="preserve">
+    <value>La instalación y su telemetría relacionada fueron eliminadas.</value>
+  </data>
+  <data name="Installations_DeleteError" xml:space="preserve">
+    <value>No se pudo eliminar la instalación.</value>
+  </data>
+  <data name="Alerts_AnalyticsTitle" xml:space="preserve">
+    <value>REPORTES ANALÍTICOS E INCIDENCIAS</value>
+  </data>
+  <data name="Alerts_AiDescription" xml:space="preserve">
+    <value>Ejecuta un análisis local determinista sobre la telemetría reciente sin utilizar servicios externos de IA.</value>
+  </data>
+  <data name="Alerts_AiIdle" xml:space="preserve">
+    <value>&gt; Análisis IA listo. Ejecuta el motor de tendencias para inspeccionar la ventana de telemetría más reciente.</value>
+  </data>
+  <data name="Alerts_AiProcessing" xml:space="preserve">
+    <value>&gt; Procesando vectores de alertas y comparando ventanas de telemetría...</value>
+  </data>
+  <data name="Alerts_DiscordDescription" xml:space="preserve">
+    <value>Transmite las últimas incidencias críticas y fatales no resueltas mediante el webhook de Discord configurado.</value>
+  </data>
+  <data name="Alerts_DiscordIdle" xml:space="preserve">
+    <value>ESTADO_WEBHOOK: LISTO_PARA_CONFIGURACIÓN</value>
+  </data>
+  <data name="Alerts_DiscordSending" xml:space="preserve">
+    <value>ESTADO_WEBHOOK: TRANSMITIENDO_INCIDENCIAS</value>
+  </data>
+  <data name="Alerts_RequestFailed" xml:space="preserve">
+    <value>No se pudo completar la operación.</value>
+  </data>
+  <data name="Alerts_TabOpen" xml:space="preserve">
+    <value>INCIDENCIAS ABIERTAS</value>
+  </data>
+  <data name="Alerts_TabResolved" xml:space="preserve">
+    <value>HISTORIAL DE RESUELTAS</value>
+  </data>
+  <data name="Alerts_FilterAllSeverities" xml:space="preserve">
+    <value>TODAS LAS SEVERIDADES</value>
+  </data>
+  <data name="Alerts_ManageTypes" xml:space="preserve">
+    <value>GESTIONAR TIPOS DE ERROR</value>
+  </data>
+  <data name="Alerts_ColErrorType" xml:space="preserve">
+    <value>TIPO DE ERROR</value>
+  </data>
+  <data name="Alerts_ColBuild" xml:space="preserve">
+    <value>BUILD DEL JUEGO</value>
+  </data>
+  <data name="Alerts_TypeCatalogTitle" xml:space="preserve">
+    <value>CATÁLOGO DE TIPOS DE ERROR</value>
+  </data>
+  <data name="Alerts_TypeDeleteConfirm" xml:space="preserve">
+    <value>¿Eliminar este tipo de error? Las alertas existentes pasarán a UNCLASSIFIED.</value>
+  </data>
+  <data name="Alerts_TypeUpdated" xml:space="preserve">
+    <value>Tipo de error actualizado.</value>
+  </data>
+  <data name="Alerts_TypeDeleted" xml:space="preserve">
+    <value>Tipo de error eliminado.</value>
+  </data>
+  <data name="Alerts_DiscordAutomaticDescription" xml:space="preserve">
+    <value>Las alertas críticas y fatales se envían automáticamente mediante el outbox persistente de Discord con reintentos.</value>
+  </data>
+  <data name="Alerts_ActionCancelUndo" xml:space="preserve">
+    <value>CANCELAR / DESHACER</value>
+  </data>
+  <data name="Alerts_ResolveCountdown" xml:space="preserve">
+    <value>Resolviendo en {0}s...</value>
+  </data>
+  <data name="Alerts_ResolvingNow" xml:space="preserve">
+    <value>Resolviendo...</value>
+  </data>
+  <data name="Alerts_LoadingState" xml:space="preserve">
+    <value>Sincronizando incidencias...</value>
+  </data>
+  <data name="Alerts_MonitoringScopeHint" xml:space="preserve">
+    <value>Monitoreo en tiempo real. La consola principal filtra incidencias activas; el motor de IA evalúa el comportamiento acumulado de las últimas 24 horas.</value>
+  </data>
+  <data name="Alerts_KpiActive" xml:space="preserve">
+    <value>ACTIVAS_NOC</value>
+  </data>
+  <data name="Alerts_KpiMitigated" xml:space="preserve">
+    <value>MITIGADAS_24H</value>
+  </data>
+  <data name="Alerts_KpiDiscord" xml:space="preserve">
+    <value>RELÉ_DISCORD</value>
+  </data>
+  <data name="Users_StationInspectionHint" xml:space="preserve">
+    <value>Inspección de Estaciones Activas: Seleccione un operador para auditar las especificaciones de hardware enlazadas a sus sesiones de telemetría.</value>
+  </data>
+  <data name="Users_KpiAdmins" xml:space="preserve">
+    <value>ADMINISTRADORES</value>
+  </data>
+  <data name="Users_KpiViewers" xml:space="preserve">
+    <value>VISUALIZADORES</value>
+  </data>
+  <data name="Users_SearchLabel" xml:space="preserve">
+    <value>BÚSQUEDA DE OPERADORES</value>
+  </data>
+  <data name="Users_ColStations" xml:space="preserve">
+    <value>Estaciones vinculadas</value>
+  </data>
+  <data name="Users_ColLastTelemetry" xml:space="preserve">
+    <value>Última telemetría</value>
+  </data>
+  <data name="Users_Audit" xml:space="preserve">
+    <value>AUDITAR</value>
+  </data>
+  <data name="Users_AuditOperator" xml:space="preserve">
+    <value>Auditar operador</value>
+  </data>
+  <data name="Users_NoLinkedStations" xml:space="preserve">
+    <value>No se encontraron estaciones de hardware vinculadas a este operador.</value>
+  </data>
+  <data name="SessionEvents_RealtimeHint" xml:space="preserve">
+    <value>Flujo reactivo. La telemetría nueva se inserta arriba y el navegador conserva un máximo de 50 filas visibles.</value>
+  </data>
+  <data name="SessionEvents_StreamOnline" xml:space="preserve">
+    <value>STREAM EN LÍNEA</value>
+  </data>
+  <data name="SessionEvents_TimelineTitle" xml:space="preserve">
+    <value>TRAZA DE LÍNEA DE TIEMPO</value>
+  </data>
+  <data name="SessionEvents_TimelineLoading" xml:space="preserve">
+    <value>Cargando traza cronológica de la sesión...</value>
+  </data>
+  <data name="SessionEvents_TimelineEmpty" xml:space="preserve">
+    <value>No se registraron eventos para esta sesión.</value>
+  </data>
+  <data name="SessionEvents_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="SessionEvents_Connection" xml:space="preserve">
+    <value>Conexión establecida</value>
+  </data>
+  <data name="SessionEvents_Disconnection" xml:space="preserve">
+    <value>Sesión desconectada</value>
+  </data>
+  <data name="SessionEvents_LastHeartbeat" xml:space="preserve">
+    <value>Último heartbeat recibido</value>
+  </data>
+  <data name="SessionEvents_ServerTime" xml:space="preserve">
+    <value>Servidor UTC</value>
+  </data>
+  <data name="SessionEvents_ClientTime" xml:space="preserve">
+    <value>Cliente UTC</value>
+  </data>
+  <data name="SessionEvents_VisibleLimit" xml:space="preserve">
+    <value>Límite visible del DOM: 50 filas</value>
+  </data>
+  <data name="SessionEvents_Purge" xml:space="preserve">
+    <value>Purgar</value>
+  </data>
+  <data name="SessionEvents_CancelPurge" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="SessionEvents_PurgingIn" xml:space="preserve">
+    <value>Purgando en {0}s...</value>
+  </data>
+  <data name="SessionEvents_PurgeFailed" xml:space="preserve">
+    <value>Error de purga</value>
+  </data>
+  <data name="Analytics_ContextBanner" xml:space="preserve">
+    <value>Intelligence Console: Agregaciones analíticas optimizadas en servidor. Las zonas calientes evalúan la estabilidad estructural del gameplay en Cosmic Diner.</value>
+  </data>
+  <data name="SimulationOrchestrator_Events" xml:space="preserve">
+    <value>Eventos</value>
   </data>
 </root>

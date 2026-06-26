@@ -1,0 +1,315 @@
+@{
+    const int DefaultSimulationTarget = 40;
+    const string JavaScriptFormatPlaceholder = "{0}";
+}
+
+<button type="button"
+        data-sim-open
+        class="pointer-events-auto fixed right-0 top-1/2 z-[9999] flex -translate-y-1/2 items-center justify-center border-y border-l border-cyan-500/30 bg-black/95 px-2 py-4 font-mono text-[9px] font-bold uppercase tracking-[0.20em] text-cyan-300 opacity-100 shadow-[-8px_0_24px_rgba(34,211,238,0.12)] transition duration-200 [writing-mode:vertical-rl] [text-orientation:mixed] hover:border-cyan-300/60 hover:bg-cyan-500/10 hover:text-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
+        aria-controls="simulation-orchestrator-panel"
+        aria-expanded="false"
+        aria-label="@SharedLocalizer["SimulationOrchestrator_OpenButton"]">
+    &gt;_ @SharedLocalizer["SimulationOrchestrator_OpenButton"]
+</button>
+
+<div id="simulation-orchestrator-root"
+     data-status-url="/admin/simulation/status"
+     data-reconcile-url="/admin/simulation/reconcile"
+     data-critical-alert-url="/admin/simulation/alerts/critical"
+     data-mass-drop-url="/admin/simulation/mass-drop"
+     data-purge-url="/admin/simulation/purge-simulated"
+     data-wipe-url="/admin/simulation/wipe-telemetry"
+     data-default-target="@DefaultSimulationTarget"
+     data-i18n-state-active="@SharedLocalizer["SimulationOrchestrator_StateActive"]"
+     data-i18n-state-idle="@SharedLocalizer["SimulationOrchestrator_StateIdle"]"
+     data-i18n-state-offline="@SharedLocalizer["SimulationOrchestrator_StateOffline"]"
+     data-i18n-state-transmitting="@SharedLocalizer["SimulationOrchestrator_StateTransmitting"]"
+     data-i18n-state-error="@SharedLocalizer["SimulationOrchestrator_StateError"]"
+     data-i18n-endpoint-not-configured="@SharedLocalizer["SimulationOrchestrator_EndpointNotConfigured"]"
+     data-i18n-request-failed-status="@SharedLocalizer["SimulationOrchestrator_RequestFailedStatus", JavaScriptFormatPlaceholder]"
+     data-i18n-last-sync="@SharedLocalizer["SimulationOrchestrator_LastSync", JavaScriptFormatPlaceholder]"
+     data-i18n-status-error="@SharedLocalizer["SimulationOrchestrator_StatusError"]"
+     data-i18n-channel-busy="@SharedLocalizer["SimulationOrchestrator_ChannelBusy"]"
+     data-i18n-request-sent="@SharedLocalizer["SimulationOrchestrator_RequestSent"]"
+     data-i18n-complete="@SharedLocalizer["SimulationOrchestrator_Complete"]"
+     data-i18n-access-denied="@SharedLocalizer["SimulationOrchestrator_AccessDenied"]"
+     data-i18n-organic-enabled="@SharedLocalizer["SimulationOrchestrator_OrganicEnabled"]"
+     data-i18n-organic-disabled="@SharedLocalizer["SimulationOrchestrator_OrganicDisabled"]"
+     data-i18n-confirm-terminate="@SharedLocalizer["SimulationOrchestrator_ConfirmTerminate"]"
+     data-i18n-confirm-mass-drop="@SharedLocalizer["SimulationOrchestrator_ConfirmMassDrop"]"
+     data-i18n-confirm-purge="@SharedLocalizer["SimulationOrchestrator_ConfirmPurge"]"
+     data-i18n-confirm-wipe-first="@SharedLocalizer["SimulationOrchestrator_ConfirmWipeFirst"]"
+     data-i18n-confirm-wipe-final="@SharedLocalizer["SimulationOrchestrator_ConfirmWipeFinal"]"
+     data-i18n-console-cleared="@SharedLocalizer["SimulationOrchestrator_ConsoleCleared"]"
+     class="pointer-events-none fixed inset-0 z-[9998]"
+     aria-hidden="true">
+    <div data-sim-overlay
+         class="absolute inset-0 z-0 bg-black/75 opacity-0 transition-opacity duration-200">
+    </div>
+
+    <aside id="simulation-orchestrator-panel"
+           data-sim-panel
+           class="pointer-events-auto absolute right-0 top-0 z-[9999] flex h-dvh w-[min(31rem,calc(100vw-0.75rem))] translate-x-full transform-gpu flex-col border-l border-cyan-500/25 bg-[#010301] shadow-[-18px_0_48px_rgba(0,0,0,0.75)] transition-transform duration-200 [will-change:transform]"
+           role="dialog"
+           aria-modal="true"
+           aria-hidden="true"
+           aria-labelledby="simulation-orchestrator-title">
+        <header class="border-b border-slate-800 bg-gradient-to-l from-cyan-500/10 via-black to-black px-5 py-4">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="font-mono text-[9px] uppercase tracking-[0.24em] text-cyan-600">
+                        &gt;_ @SharedLocalizer["SimulationOrchestrator_Kicker"]
+                    </p>
+                    <h2 id="simulation-orchestrator-title"
+                        class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-100">
+                        @SharedLocalizer["SimulationOrchestrator_Title"]
+                    </h2>
+                    <p class="mt-2 text-[10px] uppercase tracking-[0.16em] text-slate-600">
+                        @SharedLocalizer["SimulationOrchestrator_AdminOnly"]
+                    </p>
+                </div>
+
+                <button type="button"
+                        data-sim-close
+                        class="rounded border border-slate-700 bg-black px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400/30">
+                    @SharedLocalizer["SimulationOrchestrator_Close"] [X]
+                </button>
+            </div>
+        </header>
+
+        <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 [scrollbar-gutter:stable]">
+            <form data-sim-antiforgery class="hidden">
+                @Html.AntiForgeryToken()
+            </form>
+
+            <section class="border-t border-green-500/10 pt-5">
+                <p class="text-[9px] uppercase tracking-[0.24em] text-cyan-700">
+                    @SharedLocalizer["SimulationOrchestrator_Step01"]
+                </p>
+
+                <div class="mt-3 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.22em] text-cyan-600">
+                            @SharedLocalizer["SimulationOrchestrator_Module04"]
+                        </p>
+                        <h3 class="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-200">
+                            @SharedLocalizer["SimulationOrchestrator_ActiveSessionControl"]
+                        </h3>
+                    </div>
+                    <span data-sim-channel-state
+                          class="rounded border border-slate-700 bg-black px-2 py-1 text-[9px] uppercase tracking-[0.16em] text-slate-500">
+                        [ @SharedLocalizer["SimulationOrchestrator_StateIdle"] ]
+                    </span>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    <div class="border-l-2 border-cyan-500/35 bg-cyan-500/[0.025] p-3">
+                        <div class="text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                            @SharedLocalizer["SimulationOrchestrator_ActiveReal"]
+                        </div>
+                        <div data-sim-real-count
+                             class="mt-2 font-display text-2xl text-slate-100">
+                            --
+                        </div>
+                    </div>
+                    <div class="border-l-2 border-green-500/35 bg-green-500/[0.025] p-3">
+                        <div class="text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                            @SharedLocalizer["SimulationOrchestrator_ActiveSimulated"]
+                        </div>
+                        <div data-sim-simulated-count
+                             class="mt-2 font-display text-2xl text-green-400">
+                            --
+                        </div>
+                    </div>
+                </div>
+
+                <label class="mt-4 block">
+                    <span class="text-[9px] uppercase tracking-[0.20em] text-slate-500">
+                        @SharedLocalizer["SimulationOrchestrator_ConnectedUserTarget"]
+                    </span>
+                    <div class="mt-2 flex gap-2">
+                        <input data-sim-target
+                               type="number"
+                               min="0"
+                               max="250"
+                               step="1"
+                               value="@DefaultSimulationTarget"
+                               class="min-w-0 flex-1 rounded border border-cyan-500/25 bg-black px-3 py-3 font-mono text-sm text-cyan-300 outline-none transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/10" />
+                        <button type="button"
+                                data-sim-apply-target
+                                class="rounded border border-cyan-500/35 bg-cyan-500/10 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-cyan-200 transition hover:bg-cyan-500/20 focus:outline-none focus:ring-2 focus:ring-cyan-400/30">
+                            @SharedLocalizer["SimulationOrchestrator_Apply"]
+                        </button>
+                    </div>
+                </label>
+
+                <label class="mt-4 block">
+                    <span class="text-[9px] uppercase tracking-[0.20em] text-slate-500">
+                        CHURN_INTENSITY / VOLATILITY
+                    </span>
+                    <select data-sim-volatility
+                            class="mt-2 w-full rounded border border-amber-500/25 bg-black px-3 py-3 font-mono text-xs uppercase tracking-[0.16em] text-amber-300 outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/10">
+                        <option value="Low">
+                            LOW // BAJA
+                        </option>
+                        <option value="Medium" selected>
+                            MEDIUM // MEDIA
+                        </option>
+                        <option value="Chaotic">
+                            CHAOTIC // CAÓTICA
+                        </option>
+                    </select>
+                    <span class="mt-2 block text-[8px] uppercase leading-4 tracking-[0.12em] text-slate-700">
+                        RAMP_SPEED // OSCILLATION // CHURN_RATE // HEARTBEAT_FAILURES
+                    </span>
+                </label>
+
+                <label class="mt-4 flex cursor-pointer items-center justify-between gap-4 border border-amber-500/20 bg-amber-500/[0.025] p-3">
+                    <span>
+                        <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-amber-400">
+                            @SharedLocalizer["SimulationOrchestrator_OrganicMode"]
+                        </span>
+                        <span class="mt-1 block text-[9px] leading-5 text-slate-600">
+                            @SharedLocalizer["SimulationOrchestrator_OrganicDescription"]
+                        </span>
+                        <span class="mt-1 block text-[8px] uppercase tracking-[0.14em] text-green-800">
+                            @SharedLocalizer["SimulationOrchestrator_PersistentHint"]
+                        </span>
+                    </span>
+                    <input data-sim-organic
+                           type="checkbox"
+                           class="h-4 w-4 shrink-0 accent-amber-500" />
+                </label>
+
+                <button type="button"
+                        data-sim-terminate
+                        class="mt-3 w-full border border-rose-500/35 bg-rose-950/15 px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-rose-300 transition hover:bg-rose-500/15 focus:outline-none focus:ring-2 focus:ring-rose-400/30">
+                    [ @SharedLocalizer["SimulationOrchestrator_TerminateSimulation"] ]
+                </button>
+            </section>
+
+            <section class="mt-6 border-t border-green-500/10 pt-5">
+                <p class="text-[9px] uppercase tracking-[0.24em] text-cyan-700">
+                    @SharedLocalizer["SimulationOrchestrator_Step02"]
+                </p>
+                <p class="mt-2 text-[9px] uppercase tracking-[0.22em] text-slate-600">
+                    @SharedLocalizer["SimulationOrchestrator_ComponentMatrix"]
+                </p>
+
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <label class="flex cursor-pointer flex-col gap-2 border border-cyan-500/20 bg-cyan-500/[0.02] p-3 text-[9px] uppercase tracking-[0.14em] text-cyan-300">
+                        <input data-sim-module="sessions"
+                               type="checkbox"
+                               checked
+                               class="h-4 w-4 accent-cyan-400" />
+                        @SharedLocalizer["SimulationOrchestrator_Sessions"]
+                    </label>
+                    <label class="flex cursor-pointer flex-col gap-2 border border-green-500/20 bg-green-500/[0.02] p-3 text-[9px] uppercase tracking-[0.14em] text-green-400">
+                        <input data-sim-module="installations"
+                               type="checkbox"
+                               checked
+                               class="h-4 w-4 accent-green-400" />
+                        @SharedLocalizer["SimulationOrchestrator_Installations"]
+                    </label>
+                    <label class="flex cursor-pointer flex-col gap-2 border border-amber-500/20 bg-amber-500/[0.02] p-3 text-[9px] uppercase tracking-[0.14em] text-amber-400">
+                        <input data-sim-module="alerts"
+                               type="checkbox"
+                               checked
+                               class="h-4 w-4 accent-amber-500" />
+                        @SharedLocalizer["SimulationOrchestrator_Alerts"]
+                    </label>
+                    <label class="flex cursor-pointer flex-col gap-2 border border-slate-800 bg-slate-950/70 p-3 text-[9px] uppercase tracking-[0.14em] text-green-400 transition-colors hover:border-green-500/30 hover:bg-green-500/[0.03]">
+                        <input data-sim-module="events"
+                               type="checkbox"
+                               checked
+                               class="h-4 w-4 accent-green-400" />
+                        @SharedLocalizer["SimulationOrchestrator_Events"]
+                    </label>
+                </div>
+            </section>
+
+            <section class="mt-6 border-t border-green-500/10 pt-5">
+                <p class="text-[9px] uppercase tracking-[0.24em] text-rose-700">
+                    @SharedLocalizer["SimulationOrchestrator_Step03"]
+                </p>
+                <p class="mt-2 text-[9px] uppercase tracking-[0.22em] text-rose-700">
+                    @SharedLocalizer["SimulationOrchestrator_Module05"] // @SharedLocalizer["SimulationOrchestrator_IncidentInjector"]
+                </p>
+
+                <div class="mt-3 grid gap-2">
+                    <button type="button"
+                            data-sim-critical
+                            class="border border-rose-500/35 bg-gradient-to-r from-rose-950/25 to-black px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-rose-300 transition hover:bg-rose-500/15 focus:outline-none focus:ring-2 focus:ring-rose-400/30">
+                        [ @SharedLocalizer["SimulationOrchestrator_InjectCriticalAlarm"] ]
+                    </button>
+                    <button type="button"
+                            data-sim-mass-drop
+                            class="border border-orange-500/35 bg-gradient-to-r from-orange-950/20 to-black px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-orange-300 transition hover:bg-orange-500/15 focus:outline-none focus:ring-2 focus:ring-orange-400/30">
+                        [ @SharedLocalizer["SimulationOrchestrator_InjectMassDrop"] ]
+                    </button>
+                </div>
+            </section>
+
+            <section class="mt-6 border-t border-green-500/10 pt-5">
+                <p class="text-[9px] uppercase tracking-[0.24em] text-amber-700">
+                    @SharedLocalizer["SimulationOrchestrator_Step04"]
+                </p>
+                <p class="mt-2 text-[9px] uppercase tracking-[0.22em] text-amber-700">
+                    @SharedLocalizer["SimulationOrchestrator_DatabaseMaintenance"]
+                </p>
+
+                <div class="mt-3 grid gap-2">
+                    <button type="button"
+                            data-sim-purge
+                            class="border border-amber-500/35 bg-black px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-amber-400 transition hover:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-amber-400/30">
+                        [ @SharedLocalizer["SimulationOrchestrator_PurgeSimulatedData"] ]
+                    </button>
+                    <button type="button"
+                            data-sim-wipe
+                            class="border border-red-500/45 bg-red-950/15 px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-red-300 transition hover:bg-red-500/15 focus:outline-none focus:ring-2 focus:ring-red-400/30">
+                        [ @SharedLocalizer["SimulationOrchestrator_WipeAllTelemetry"] ]
+                    </button>
+                </div>
+
+                <p class="mt-3 text-[8px] uppercase leading-5 tracking-[0.14em] text-slate-700">
+                    @SharedLocalizer["SimulationOrchestrator_MaintenanceScope"]
+                </p>
+            </section>
+
+            <section class="mt-6 border-t border-green-500/10 pt-5">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.24em] text-green-800">
+                            @SharedLocalizer["SimulationOrchestrator_Step05"]
+                        </p>
+                        <p class="mt-2 text-[9px] uppercase tracking-[0.22em] text-green-700">
+                            @SharedLocalizer["SimulationOrchestrator_DebugConsole"]
+                        </p>
+                    </div>
+                    <button type="button"
+                            data-sim-clear-log
+                            class="text-[8px] uppercase tracking-[0.16em] text-slate-600 transition hover:text-slate-300">
+                        @SharedLocalizer["SimulationOrchestrator_Clear"]
+                    </button>
+                </div>
+
+                <div data-sim-log
+                     class="mt-3 h-36 overflow-y-auto overscroll-contain border-l border-green-900/50 pl-3 font-mono text-[9px] leading-5 text-green-700 [scrollbar-gutter:stable]"
+                     aria-live="polite">
+                    <div>&gt; @SharedLocalizer["SimulationOrchestrator_Ready"]</div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="border-t border-slate-800 bg-black px-5 py-3">
+            <div class="flex items-center justify-between gap-3 text-[8px] uppercase tracking-[0.16em] text-slate-700">
+                <span data-sim-last-sync>
+                    @SharedLocalizer["SimulationOrchestrator_LastSyncNever"]
+                </span>
+                <span>
+                    @SharedLocalizer["SimulationOrchestrator_TransportBffProxy"]
+                </span>
+            </div>
+        </footer>
+    </aside>
+</div>

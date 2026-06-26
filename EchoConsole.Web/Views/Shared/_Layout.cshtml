@@ -2,7 +2,8 @@
 
 <!DOCTYPE html>
 <html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName"
-      class="h-full">
+      data-theme="retro-terminal"
+      class="h-full bg-black">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport"
@@ -13,38 +14,42 @@
     <link rel="stylesheet"
           href="~/css/tailwind.output.css"
           asp-append-version="true" />
-
-    <script>
-        try {
-            if (sessionStorage.getItem("echoConsole.presentationMode") === "true") {
-                document.documentElement.classList.add("presentation-mode");
-            }
-        } catch {
-        }
-    </script>
 </head>
 
-<body class="h-full bg-[#070B12] text-slate-100 antialiased">
-    <div class="min-h-screen bg-[#070B12]">
-        <div data-presentation-shell
-             class="grid min-h-screen grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]">
-            <aside data-presentation-sidebar
-                   class="border-b border-cyan-500/10 bg-slate-950/80 xl:sticky xl:top-0 xl:h-screen xl:border-b-0 xl:border-r">
+<body class="h-full bg-black font-mono text-green-100 antialiased">
+    <div class="min-h-screen bg-black">
+        <div class="grid min-h-screen grid-cols-1 xl:grid-cols-[5.5rem_minmax(0,1fr)]">
+            <aside data-sidebar-shell
+                   class="group/sidebar z-50 border-b border-green-500/15 bg-black/95 transition-[width,box-shadow] duration-300 xl:sticky xl:top-0 xl:h-screen xl:w-[5.5rem] xl:overflow-visible xl:border-b-0 xl:border-r xl:hover:w-[19rem] xl:hover:shadow-[14px_0_42px_rgba(57,255,20,0.08)]">
                 @await Html.PartialAsync("_Sidebar")
             </aside>
 
-            <div class="flex min-h-screen min-w-0 flex-col">
+            <div class="flex min-h-screen min-w-0 flex-col bg-black">
                 @await Html.PartialAsync("_Topbar")
 
                 <main class="min-w-0 flex-1">
                     @RenderBody()
                 </main>
+
+                @await Html.PartialAsync("_Footer")
             </div>
         </div>
     </div>
 
-    <script src="~/js/presentation-mode.js"
+    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+    {
+        @await Html.PartialAsync("_SimulationOrchestrator")
+    }
+
+    <script src="~/js/navigation-shell.js"
             asp-append-version="true"></script>
+
+    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+    {
+        <script src="~/js/simulation-orchestrator.js"
+                asp-append-version="true"
+                defer></script>
+    }
 
     @await RenderSectionAsync(
         "Scripts",

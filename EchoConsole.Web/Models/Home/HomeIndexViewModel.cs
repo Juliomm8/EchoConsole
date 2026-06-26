@@ -1,4 +1,4 @@
-﻿namespace EchoConsole.Web.Models.Home;
+namespace EchoConsole.Web.Models.Home;
 
 public sealed class HomeIndexViewModel
 {
@@ -12,6 +12,9 @@ public sealed class HomeIndexViewModel
     public int OpenAlerts { get; set; }
     
     public string FeaturedBuildVersion { get; set; } = "N/A";
+
+    public IReadOnlyList<PatchNoteCardViewModel> PatchNotes { get; set; } =
+        Array.Empty<PatchNoteCardViewModel>();
 
     // Authenticated user block
     public bool IsAuthenticated { get; set; }

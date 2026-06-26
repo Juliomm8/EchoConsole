@@ -1,4 +1,4 @@
-﻿using EchoConsole.Api.Contracts.Admin.SessionEventAnalytics;
+using EchoConsole.Api.Contracts.Admin.SessionEventAnalytics;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +10,9 @@ public sealed class AdminSessionEventAnalyticsService
 {
     private static readonly DateTimeOffset TrendAnchorUtc =
         new(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+    private const int MaximumFilterLength = 64;
+    private const int MaximumSceneBuckets = 12;
 
     private readonly EchoConsoleDbContext _dbContext;
     private readonly ILogger<AdminSessionEventAnalyticsService> _logger;
@@ -29,131 +32,123 @@ public sealed class AdminSessionEventAnalyticsService
         string? trendGranularity,
         CancellationToken cancellationToken = default)
     {
-        buildVersion = NormalizeFilter(buildVersion);
-        trendGranularity = NormalizeGranularity(trendGranularity);
+        var normalizedBuildVersion = NormalizeFilter(buildVersion);
+        var normalizedGranularity = NormalizeGranularity(trendGranularity);
 
-        IQueryable<GameSessionEvent> query = _dbContext.GameSessionEvents
-            .AsNoTracking();
-
-        if (!string.IsNullOrWhiteSpace(buildVersion))
-        {
-            query = query.Where(
-                x => x.GameSession.BuildVersion == buildVersion);
-        }
-
-        if (fromUtc.HasValue)
-        {
-            query = query.Where(
-                x => x.CreatedAtUtc >= fromUtc.Value);
-        }
-
-        if (toUtcExclusive.HasValue)
-        {
-            query = query.Where(
-                x => x.CreatedAtUtc < toUtcExclusive.Value);
-        }
+        var query = ApplyFilters(
+            _dbContext.GameSessionEvents.AsNoTracking(),
+            normalizedBuildVersion,
+            fromUtc,
+            toUtcExclusive)
+            .TagWith("SessionEventAnalytics.ServerAggregates");
 
         var totalEvents = await query.CountAsync(cancellationToken);
 
-        var eventTypeRows = await query
-            .GroupBy(x =>
-                string.IsNullOrEmpty(x.EventType)
+        var eventTypes = await query
+            .GroupBy(sessionEvent =>
+                sessionEvent.EventType == string.Empty
                     ? "Unknown"
-                    : x.EventType)
-            .Select(group => new
+                    : sessionEvent.EventType)
+            .Select(group => new AdminSessionEventAnalyticsBucketDto
             {
                 Key = group.Key,
                 Count = group.Count()
             })
-            .OrderByDescending(x => x.Count)
-            .ThenBy(x => x.Key)
+            .OrderByDescending(bucket => bucket.Count)
+            .ThenBy(bucket => bucket.Key)
             .ToListAsync(cancellationToken);
 
-        var sceneRows = await query
-            .GroupBy(x =>
-                string.IsNullOrEmpty(x.Scene)
+        var scenes = await query
+            .GroupBy(sessionEvent =>
+                sessionEvent.Scene == string.Empty
                     ? "Unknown"
-                    : x.Scene)
-            .Select(group => new
+                    : sessionEvent.Scene)
+            .Select(group => new AdminSessionEventAnalyticsBucketDto
             {
                 Key = group.Key,
                 Count = group.Count()
             })
-            .OrderByDescending(x => x.Count)
-            .ThenBy(x => x.Key)
+            .OrderByDescending(bucket => bucket.Count)
+            .ThenBy(bucket => bucket.Key)
+            .Take(MaximumSceneBuckets)
             .ToListAsync(cancellationToken);
 
-        var buildRows = await query
-            .GroupBy(x =>
-                string.IsNullOrEmpty(x.GameSession.BuildVersion)
+        var buildVersions = await query
+            .GroupBy(sessionEvent =>
+                sessionEvent.GameSession.BuildVersion == string.Empty
                     ? "Unknown"
-                    : x.GameSession.BuildVersion)
-            .Select(group => new
+                    : sessionEvent.GameSession.BuildVersion)
+            .Select(group => new AdminSessionEventAnalyticsBucketDto
             {
                 Key = group.Key,
                 Count = group.Count()
             })
-            .OrderByDescending(x => x.Count)
-            .ThenBy(x => x.Key)
+            .OrderByDescending(bucket => bucket.Count)
+            .ThenBy(bucket => bucket.Key)
             .ToListAsync(cancellationToken);
 
-        var timeSeries = trendGranularity == "hour"
+        var timeSeries = normalizedGranularity == "hour"
             ? await LoadHourlyTimeSeriesAsync(query, cancellationToken)
             : await LoadDailyTimeSeriesAsync(query, cancellationToken);
 
-        var availableBuildVersions = await _dbContext.GameSessionEvents
+        var availableBuildVersions = await _dbContext.GameSessions
             .AsNoTracking()
-            .Where(x =>
-                x.GameSession.BuildVersion != null &&
-                x.GameSession.BuildVersion != string.Empty)
-            .Select(x => x.GameSession.BuildVersion)
+            .Where(session => session.BuildVersion != string.Empty)
+            .Select(session => session.BuildVersion)
             .Distinct()
-            .OrderByDescending(x => x)
+            .OrderByDescending(version => version)
             .ToListAsync(cancellationToken);
 
         _logger.LogInformation(
-            "Loaded event analytics. BuildVersion={BuildVersion}, FromUtc={FromUtc}, ToUtcExclusive={ToUtcExclusive}, Granularity={Granularity}, TotalEvents={TotalEvents}.",
-            buildVersion,
+            "Loaded SQL-aggregated session event analytics. BuildVersion={BuildVersion}, FromUtc={FromUtc}, ToUtcExclusive={ToUtcExclusive}, Granularity={Granularity}, TotalEvents={TotalEvents}.",
+            normalizedBuildVersion,
             fromUtc,
             toUtcExclusive,
-            trendGranularity,
+            normalizedGranularity,
             totalEvents);
 
         return new AdminSessionEventAnalyticsDto
         {
             TotalEvents = totalEvents,
-            AppliedBuildVersion = buildVersion ?? string.Empty,
+            AppliedBuildVersion = normalizedBuildVersion ?? string.Empty,
             AppliedFromUtc = fromUtc,
             AppliedToUtcExclusive = toUtcExclusive,
-            TrendGranularity = trendGranularity,
+            TrendGranularity = normalizedGranularity,
             AvailableBuildVersions = availableBuildVersions,
-
-            EventTypes = eventTypeRows
-                .Select(x => new AdminSessionEventAnalyticsBucketDto
-                {
-                    Key = x.Key,
-                    Count = x.Count
-                })
-                .ToList(),
-
-            Scenes = sceneRows
-                .Select(x => new AdminSessionEventAnalyticsBucketDto
-                {
-                    Key = x.Key,
-                    Count = x.Count
-                })
-                .ToList(),
-
-            BuildVersions = buildRows
-                .Select(x => new AdminSessionEventAnalyticsBucketDto
-                {
-                    Key = x.Key,
-                    Count = x.Count
-                })
-                .ToList(),
-
+            EventTypes = eventTypes,
+            Scenes = scenes,
+            BuildVersions = buildVersions,
             TimeSeries = timeSeries
         };
+    }
+
+    private static IQueryable<GameSessionEvent> ApplyFilters(
+        IQueryable<GameSessionEvent> query,
+        string? buildVersion,
+        DateTimeOffset? fromUtc,
+        DateTimeOffset? toUtcExclusive)
+    {
+        if (fromUtc.HasValue)
+        {
+            query = query.Where(
+                sessionEvent => sessionEvent.CreatedAtUtc >= fromUtc.Value);
+        }
+
+        if (toUtcExclusive.HasValue)
+        {
+            query = query.Where(
+                sessionEvent =>
+                    sessionEvent.CreatedAtUtc < toUtcExclusive.Value);
+        }
+
+        if (buildVersion is not null)
+        {
+            query = query.Where(
+                sessionEvent =>
+                    sessionEvent.GameSession.BuildVersion == buildVersion);
+        }
+
+        return query;
     }
 
     private static async Task<IReadOnlyList<AdminSessionEventTimePointDto>>
@@ -162,25 +157,25 @@ public sealed class AdminSessionEventAnalyticsService
             CancellationToken cancellationToken)
     {
         var rows = await query
-            .GroupBy(x =>
+            .GroupBy(sessionEvent =>
                 EF.Functions.DateDiffHour(
                     TrendAnchorUtc,
-                    x.CreatedAtUtc))
+                    sessionEvent.CreatedAtUtc))
             .Select(group => new
             {
                 Offset = group.Key,
                 Count = group.Count()
             })
-            .OrderBy(x => x.Offset)
+            .OrderBy(row => row.Offset)
             .ToListAsync(cancellationToken);
 
         return rows
-            .Select(x => new AdminSessionEventTimePointDto
+            .Select(row => new AdminSessionEventTimePointDto
             {
-                BucketStartUtc = TrendAnchorUtc.AddHours(x.Offset),
-                Count = x.Count
+                BucketStartUtc = TrendAnchorUtc.AddHours(row.Offset),
+                Count = row.Count
             })
-            .ToList();
+            .ToArray();
     }
 
     private static async Task<IReadOnlyList<AdminSessionEventTimePointDto>>
@@ -189,32 +184,39 @@ public sealed class AdminSessionEventAnalyticsService
             CancellationToken cancellationToken)
     {
         var rows = await query
-            .GroupBy(x =>
+            .GroupBy(sessionEvent =>
                 EF.Functions.DateDiffDay(
                     TrendAnchorUtc,
-                    x.CreatedAtUtc))
+                    sessionEvent.CreatedAtUtc))
             .Select(group => new
             {
                 Offset = group.Key,
                 Count = group.Count()
             })
-            .OrderBy(x => x.Offset)
+            .OrderBy(row => row.Offset)
             .ToListAsync(cancellationToken);
 
         return rows
-            .Select(x => new AdminSessionEventTimePointDto
+            .Select(row => new AdminSessionEventTimePointDto
             {
-                BucketStartUtc = TrendAnchorUtc.AddDays(x.Offset),
-                Count = x.Count
+                BucketStartUtc = TrendAnchorUtc.AddDays(row.Offset),
+                Count = row.Count
             })
-            .ToList();
+            .ToArray();
     }
 
     private static string? NormalizeFilter(string? value)
     {
-        return string.IsNullOrWhiteSpace(value)
-            ? null
-            : value.Trim();
+        var normalized = value?.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        return normalized.Length <= MaximumFilterLength
+            ? normalized
+            : normalized[..MaximumFilterLength];
     }
 
     private static string NormalizeGranularity(string? value)
@@ -223,7 +225,7 @@ public sealed class AdminSessionEventAnalyticsService
             value,
             "hour",
             StringComparison.OrdinalIgnoreCase)
-            ? "hour"
-            : "day";
+                ? "hour"
+                : "day";
     }
 }

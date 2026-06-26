@@ -2,29 +2,54 @@ using EchoConsole.Api.BackgroundServices;
 using EchoConsole.Api.Configuration;
 using EchoConsole.Api.Hubs;
 using EchoConsole.Api.Persistence;
+using EchoConsole.Api.Persistence.Cms;
 using EchoConsole.Api.Security;
 using EchoConsole.Api.Seed;
-using EchoConsole.Api.Services;
 using EchoConsole.Api.Services.LiveOperations;
 using EchoConsole.Api.Services.Ownership;
 using EchoConsole.Api.Services.Profile;
 using EchoConsole.Api.Services.SessionEventAnalytics;
 using EchoConsole.Api.Services.SessionEvents;
+using EchoConsole.Api.Services.Simulation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
 
 builder.Services.AddControllers();
 
-// --- INYECCIÓN DE SEGURIDAD: API KEY (Server-to-Server) ---
+builder.Services.AddHttpClient(
+    DiscordAlertDispatcher.HttpClientName,
+    httpClient =>
+    {
+        httpClient.Timeout = TimeSpan.FromSeconds(15);
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
+            "EchoConsole-DiscordDispatcher/1.0");
+    });
+
+builder.Services.AddOptions<DiscordOptions>()
+    .Bind(
+        builder.Configuration.GetSection(
+            DiscordOptions.SectionName))
+    .Validate(
+        options => options.PollIntervalSeconds is >= 1 and <= 60,
+        "DiscordAlerts:PollIntervalSeconds must be between 1 and 60.")
+    .Validate(
+        options => options.BatchSize is >= 1 and <= 50,
+        "DiscordAlerts:BatchSize must be between 1 and 50.")
+    .ValidateOnStart();
+
+// Server-to-server API key authentication
 builder.Services.AddAuthentication(AdminApiKeyAuthenticationOptions.SchemeName)
     .AddScheme<AdminApiKeyAuthenticationOptions, AdminApiKeyAuthenticationHandler>(
         AdminApiKeyAuthenticationOptions.SchemeName,
@@ -49,12 +74,31 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 
-builder.Services.AddDbContext<EchoConsoleDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContextPool<EchoConsoleDbContext>(options =>
+    options.UseSqlServer(
+        connectionString,
+        sqlOptions => sqlOptions.EnableRetryOnFailure()));
+
+var cmsConnectionString = builder.Configuration.GetConnectionString("CmsConnection")
+    ?? throw new InvalidOperationException("ConnectionStrings:CmsConnection is not configured.");
+
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+    options.UseSqlite(cmsConnectionString));
+
+builder.Services.AddSingleton(TimeProvider.System);
+
+builder.Services.Configure<SimulationOrchestratorOptions>(
+    builder.Configuration.GetSection(
+        SimulationOrchestratorOptions.SectionName));
+
+builder.Services.AddScoped<
+    ISimulationOrchestratorService,
+    SimulationOrchestratorService>();
 
 builder.Services.AddScoped<IInstallationOwnershipService, InstallationOwnershipService>();
 builder.Services.AddSingleton<SessionTokenService>();
 builder.Services.AddHostedService<SessionPresenceWorker>();
+builder.Services.AddHostedService<DiscordAlertDispatcher>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>();
 builder.Services.AddScoped<IUserSessionTimelineService, UserSessionTimelineService>();
@@ -173,7 +217,7 @@ builder.Services.AddSignalR(options =>
     options.AddFilter<TelemetryHubApiKeyFilter>();
 });
 
-// --- INYECCIÓN DEL SEEDER DE DATOS (Fake Data) ---
+// Development demo data seeding
 builder.Services.Configure<DemoSeedOptions>(
     builder.Configuration.GetSection(DemoSeedOptions.SectionName));
 
@@ -192,8 +236,12 @@ if (app.Environment.IsDevelopment())
     var seeder = scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
     await seeder.SeedAsync();
 }
+else
+{
+    app.UseHttpsRedirection();
+    app.UseResponseCompression();
+}
 
-app.UseHttpsRedirection();
 app.UseRateLimiter();
 app.UseCors("EchoConsoleCors");
 app.UseAuthentication();

@@ -1,4 +1,4 @@
-﻿namespace EchoConsole.Api.Contracts.Admin;
+namespace EchoConsole.Api.Contracts.Admin;
 
 public sealed class GameBuildDto
 {
@@ -13,4 +13,8 @@ public sealed class GameBuildDto
     public bool IsActive { get; set; }
 
     public string EngineVersion { get; set; } = string.Empty;
+
+    public int LinkedInstallations { get; set; }
+
+    public int TotalSessions { get; set; }
 }

@@ -10,23 +10,18 @@
     {
         timeSeries = new
         {
-            labels = Model.TimeSeries?.Select(x => x.Label) ?? Array.Empty<string>(),
-            values = Model.TimeSeries?.Select(x => x.Count) ?? Array.Empty<int>()
+            labels = Model.TimeSeries.Select(point => point.Label),
+            values = Model.TimeSeries.Select(point => point.Count)
         },
         eventTypes = new
         {
-            labels = Model.EventTypes?.Select(x => x.Label) ?? Array.Empty<string>(),
-            values = Model.EventTypes?.Select(x => x.Count) ?? Array.Empty<int>()
+            labels = Model.EventTypes.Select(bucket => bucket.Label),
+            values = Model.EventTypes.Select(bucket => bucket.Count)
         },
         scenes = new
         {
-            labels = Model.Scenes?.Take(12).Select(x => x.Label) ?? Array.Empty<string>(),
-            values = Model.Scenes?.Take(12).Select(x => x.Count) ?? Array.Empty<int>()
-        },
-        buildVersions = new
-        {
-            labels = Model.BuildVersions?.Select(x => x.Label) ?? Array.Empty<string>(),
-            values = Model.BuildVersions?.Select(x => x.Count) ?? Array.Empty<int>()
+            labels = Model.Scenes.Select(bucket => bucket.Label),
+            values = Model.Scenes.Select(bucket => bucket.Count)
         }
     };
 
@@ -37,283 +32,220 @@
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
 
-    var chartLabels = new
+    var chartLabelsJson = JsonSerializer.Serialize(new
     {
         events = SharedLocalizer["Analytics_ChartEvents"].Value,
         eventTypes = SharedLocalizer["Analytics_ChartEventTypes"].Value
-    };
-
-    var chartLabelsJson = JsonSerializer.Serialize(chartLabels);
+    });
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1700px] px-6 py-8">
-        <section class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+<section class="min-h-screen bg-[#020504] font-mono text-slate-100">
+    <div class="mx-auto w-full max-w-[1760px] px-4 py-5 sm:px-6 lg:px-8">
+        <header class="border border-slate-800 bg-[linear-gradient(135deg,rgba(15,23,42,0.58),rgba(2,6,8,0.98)_62%,rgba(22,163,74,0.05))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.30)]">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        @SharedLocalizer["Analytics_Badge"]
+                    <p class="text-[9px] uppercase tracking-[0.28em] text-slate-600">
+                        @SharedLocalizer["Analytics_Badge"] // SQL_AGGREGATION_NODE
                     </p>
-
-                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.16em] text-white">
-                        @SharedLocalizer["Analytics_HeroTitle"]
+                    <h1 class="mt-3 font-display text-2xl uppercase tracking-[0.13em] text-slate-100 sm:text-3xl">
+                        &gt; @SharedLocalizer["Analytics_HeroTitle"]
                     </h1>
-
-                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                    <p class="mt-3 max-w-4xl text-sm leading-6 text-slate-500">
                         @SharedLocalizer["Analytics_HeroSubtitle"]
                     </p>
                 </div>
 
                 <a asp-controller="SessionEvents"
                    asp-action="Index"
-                   class="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-200 transition hover:bg-fuchsia-500/15">
-                    @SharedLocalizer["Analytics_OpenRecentEvents"]
+                   class="inline-flex h-10 min-w-[190px] items-center justify-center whitespace-nowrap border border-slate-700 bg-slate-900/70 px-4 text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-300 transition-colors hover:bg-slate-800 hover:text-green-400">
+                    [ @SharedLocalizer["Analytics_OpenRecentEvents"] ]
                 </a>
             </div>
-        </section>
+        </header>
 
-        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
+        <aside class="mt-4 border border-slate-800 bg-black/45 px-4 py-3 text-[10px] leading-5 text-slate-500">
+            &gt; @SharedLocalizer["Analytics_ContextBanner"]
+        </aside>
+
+        <section class="mt-4 border border-slate-800 bg-[#040807] p-4">
             <form method="get"
                   asp-controller="SessionEventAnalytics"
                   asp-action="Index"
-                  class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                  class="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(180px,1fr)_minmax(170px,0.85fr)_minmax(170px,0.85fr)_minmax(170px,0.75fr)_auto] xl:items-end">
                 <div>
-                    <label for="buildVersion"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="buildVersion" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["Common_Build"]
                     </label>
-
                     <select id="buildVersion"
                             name="buildVersion"
-                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
+                            class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40">
                         <option value="">@SharedLocalizer["Common_AllBuilds"]</option>
-
-                        @if (Model.AvailableBuildVersions != null)
+                        @foreach (var option in Model.AvailableBuildVersions)
                         {
-                            foreach (var option in Model.AvailableBuildVersions)
+                            if (string.Equals(Model.BuildVersion, option, StringComparison.OrdinalIgnoreCase))
                             {
-                                if (string.Equals(
-                                Model.BuildVersion,
-                                option,
-                                StringComparison.OrdinalIgnoreCase))
-                                {
-                                    <option value="@option" selected>@option</option>
-                                }
-                                else
-                                {
-                                    <option value="@option">@option</option>
-                                }
+                                <option value="@option" selected>@option</option>
+                            }
+                            else
+                            {
+                                <option value="@option">@option</option>
                             }
                         }
                     </select>
                 </div>
 
                 <div>
-                    <label for="fromDate"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="fromDate" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["Common_FromDateUtc"]
                     </label>
-
                     <input id="fromDate"
                            name="fromDate"
                            type="date"
                            value="@Model.FromDate?.ToString("yyyy-MM-dd")"
-                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40" />
+                           class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40" />
                 </div>
 
                 <div>
-                    <label for="toDate"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="toDate" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["Common_ToDateUtc"]
                     </label>
-
                     <input id="toDate"
                            name="toDate"
                            type="date"
                            value="@Model.ToDate?.ToString("yyyy-MM-dd")"
-                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40" />
+                           class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40" />
                 </div>
 
                 <div>
-                    <label for="trendGranularity"
-                           class="mb-2 block text-xs font-semibold uppercase tracking-[0.20em] text-slate-400">
+                    <label for="trendGranularity" class="mb-2 block text-[9px] uppercase tracking-[0.18em] text-slate-600">
                         @SharedLocalizer["Analytics_TrendResolution"]
                     </label>
-
                     <select id="trendGranularity"
                             name="trendGranularity"
-                            class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-400/40">
-                        <option value="day"
-                                selected="@(Model.TrendGranularity == "day")">
-                            @SharedLocalizer["Analytics_Daily"]
-                        </option>
-                        <option value="hour"
-                                selected="@(Model.TrendGranularity == "hour")">
-                            @SharedLocalizer["Analytics_Hourly"]
-                        </option>
+                            class="h-10 w-full border border-slate-800 bg-black px-3 text-xs text-slate-300 outline-none focus:border-green-500/40">
+                        @if (Model.TrendGranularity == "day")
+                        {
+                            <option value="day" selected>@SharedLocalizer["Analytics_Daily"]</option>
+                            <option value="hour">@SharedLocalizer["Analytics_Hourly"]</option>
+                        }
+                        else
+                        {
+                            <option value="day">@SharedLocalizer["Analytics_Daily"]</option>
+                            <option value="hour" selected>@SharedLocalizer["Analytics_Hourly"]</option>
+                        }
                     </select>
                 </div>
 
-                <div class="flex items-end gap-3">
+                <div class="flex items-end gap-2 whitespace-nowrap">
                     <button type="submit"
-                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                        @SharedLocalizer["Common_Apply"]
+                            class="inline-flex h-10 min-w-[105px] items-center justify-center border border-green-500/30 bg-green-500/10 px-4 text-[9px] font-semibold uppercase tracking-[0.14em] text-green-400 transition-colors hover:bg-green-500/15">
+                        [ @SharedLocalizer["Common_Apply"] ]
                     </button>
-
                     <a asp-controller="SessionEventAnalytics"
                        asp-action="Index"
-                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:text-white">
-                        @SharedLocalizer["Common_Reset"]
+                       class="inline-flex h-10 min-w-[105px] items-center justify-center border border-slate-800 bg-slate-950 px-4 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500 transition-colors hover:bg-slate-900 hover:text-slate-300">
+                        [ @SharedLocalizer["Common_Reset"] ]
                     </a>
                 </div>
             </form>
 
             @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
             {
-                <div class="mt-5 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                <div class="mt-4 border border-red-900/60 bg-red-950/20 px-4 py-3 text-xs text-red-400">
                     @Model.ErrorMessage
                 </div>
             }
         </section>
 
-        <section class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6">
-                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    @SharedLocalizer["Analytics_TotalEvents"]
-                </div>
-                <div class="mt-3 font-display text-4xl text-cyan-300"
-                     data-analytics-counter="@Model.TotalEvents">
-                    0
-                </div>
-            </div>
-
-            <div class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
-                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    @SharedLocalizer["Analytics_EventTypes"]
-                </div>
-                <div class="mt-3 font-display text-4xl text-fuchsia-300"
-                     data-analytics-counter="@Model.EventTypeCount">
-                    0
-                </div>
-            </div>
-
-            <div class="rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
-                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    @SharedLocalizer["Analytics_Scenes"]
-                </div>
-                <div class="mt-3 font-display text-4xl text-amber-300"
-                     data-analytics-counter="@Model.SceneCount">
-                    0
-                </div>
-            </div>
-
-            <div class="rounded-2xl border border-emerald-500/20 bg-slate-950/70 p-6">
-                <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                    @SharedLocalizer["Analytics_Builds"]
-                </div>
-                <div class="mt-3 font-display text-4xl text-emerald-300"
-                     data-analytics-counter="@Model.BuildCount">
-                    0
-                </div>
-            </div>
+        <section class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.98),rgba(1,3,4,0.99))] px-4 py-3">
+                <p class="text-3xl font-mono text-green-400" data-analytics-counter="@Model.TotalEvents">0</p>
+                <p class="mt-2 text-[9px] uppercase tracking-[0.16em] text-slate-600">@SharedLocalizer["Analytics_TotalEvents"]</p>
+            </article>
+            <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.98),rgba(1,3,4,0.99))] px-4 py-3">
+                <p class="text-3xl font-mono text-green-400" data-analytics-counter="@Model.EventTypeCount">0</p>
+                <p class="mt-2 text-[9px] uppercase tracking-[0.16em] text-slate-600">@SharedLocalizer["Analytics_EventTypes"]</p>
+            </article>
+            <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.98),rgba(1,3,4,0.99))] px-4 py-3">
+                <p class="text-3xl font-mono text-green-400" data-analytics-counter="@Model.SceneCount">0</p>
+                <p class="mt-2 text-[9px] uppercase tracking-[0.16em] text-slate-600">@SharedLocalizer["Analytics_Scenes"]</p>
+            </article>
+            <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.98),rgba(1,3,4,0.99))] px-4 py-3">
+                <p class="text-3xl font-mono text-green-400" data-analytics-counter="@Model.BuildCount">0</p>
+                <p class="mt-2 text-[9px] uppercase tracking-[0.16em] text-slate-600">@SharedLocalizer["Analytics_Builds"]</p>
+            </article>
         </section>
 
         @if (Model.TotalEvents == 0)
         {
-            <section class="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-12 text-center">
-                <p class="font-display text-sm uppercase tracking-[0.28em] text-slate-400">
+            <section class="mt-4 border border-slate-800 bg-black/40 px-6 py-12 text-center">
+                <p class="font-display text-sm uppercase tracking-[0.24em] text-slate-400">
                     @SharedLocalizer["Analytics_NoData"]
                 </p>
-
-                <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">
                     @SharedLocalizer["Analytics_NoDataDescription"]
                 </p>
             </section>
         }
         else
         {
-            <script id="session-event-analytics-chart-data"
-                    type="application/json">
-                @Html.Raw(chartJson)
-            </script>
+            <script id="session-event-analytics-chart-data" type="application/json">@Html.Raw(chartJson)</script>
 
-            <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(34,211,238,0.05)]">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.30em] text-cyan-300">
-                        @SharedLocalizer["Analytics_ActivityTrend"]
-                    </p>
-
-                    <h2 class="mt-2 text-xl font-semibold text-white">
-                        @SharedLocalizer["Analytics_EventsOverTime"]
-                    </h2>
-                </div>
-
-                <div class="relative mt-6 h-[380px]">
-                    <canvas id="event-trend-chart"></canvas>
-                </div>
-            </section>
-
-            <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-                <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
-                    <p class="font-display text-xs uppercase tracking-[0.30em] text-fuchsia-300">
-                        @SharedLocalizer["Analytics_Distribution"]
-                    </p>
-
-                    <h2 class="mt-2 text-xl font-semibold text-white">
-                        @SharedLocalizer["Analytics_EventsByType"]
-                    </h2>
-
-                    <div class="relative mt-6 h-[380px]">
-                        <canvas id="event-type-chart"></canvas>
+            <section class="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.98),rgba(1,3,4,0.99))] p-5 lg:col-span-2">
+                    <header class="flex items-center justify-between gap-4 border-b border-slate-800 pb-3">
+                        <div>
+                            <p class="text-[9px] uppercase tracking-[0.20em] text-slate-600">PRIMARY_TRAFFIC_VECTOR</p>
+                            <h2 class="mt-2 font-display text-base uppercase tracking-[0.12em] text-slate-200">
+                                @SharedLocalizer["Analytics_EventsOverTime"]
+                            </h2>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-[0.14em] text-green-500">@Model.TrendGranularity.ToUpperInvariant()</span>
+                    </header>
+                    <div class="relative mt-4 h-[536px]">
+                        <canvas id="event-trend-chart"></canvas>
                     </div>
-                </section>
+                </article>
 
-                <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-6">
-                    <p class="font-display text-xs uppercase tracking-[0.30em] text-fuchsia-300">
-                        @SharedLocalizer["Analytics_HotZones"]
-                    </p>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
+                    <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.98),rgba(1,3,4,0.99))] p-4">
+                        <header class="border-b border-slate-800 pb-3">
+                            <p class="text-[9px] uppercase tracking-[0.18em] text-slate-600">EVENT_DISTRIBUTION</p>
+                            <h2 class="mt-2 font-display text-sm uppercase tracking-[0.11em] text-slate-200">
+                                @SharedLocalizer["Analytics_EventsByType"]
+                            </h2>
+                        </header>
+                        <div class="relative mt-3 h-64">
+                            <canvas id="event-type-chart"></canvas>
+                        </div>
+                    </article>
 
-                    <h2 class="mt-2 text-xl font-semibold text-white">
-                        @SharedLocalizer["Analytics_EventsByScene"]
-                    </h2>
-
-                    <div class="relative mt-6 h-[380px]">
-                        <canvas id="scene-chart"></canvas>
-                    </div>
-                </section>
-            </div>
-
-            <section class="mt-6 rounded-2xl border border-amber-500/20 bg-slate-950/70 p-6">
-                <p class="font-display text-xs uppercase tracking-[0.30em] text-amber-300">
-                    @SharedLocalizer["Analytics_ReleaseComparison"]
-                </p>
-
-                <h2 class="mt-2 text-xl font-semibold text-white">
-                    @SharedLocalizer["Analytics_EventsByBuild"]
-                </h2>
-
-                <div class="relative mt-6 h-[360px]">
-                    <canvas id="build-chart"></canvas>
+                    <article class="border border-slate-800 bg-[linear-gradient(180deg,rgba(8,13,16,0.98),rgba(1,3,4,0.99))] p-4">
+                        <header class="border-b border-slate-800 pb-3">
+                            <p class="text-[9px] uppercase tracking-[0.18em] text-slate-600">GAMEPLAY_HOT_ZONES</p>
+                            <h2 class="mt-2 font-display text-sm uppercase tracking-[0.11em] text-slate-200">
+                                @SharedLocalizer["Analytics_EventsByScene"]
+                            </h2>
+                        </header>
+                        <div class="relative mt-3 h-64">
+                            <canvas id="scene-chart"></canvas>
+                        </div>
+                    </article>
                 </div>
             </section>
         }
     </div>
-</div>
+</section>
 
 @section Scripts {
-    <script src="~/lib/chart.js/chart.umd.min.js"
-            asp-append-version="true"></script>
-
-    <script src="~/js/session-event-analytics-charts.js"
-            asp-append-version="true"></script>
-
+    <script src="~/lib/chart.js/chart.umd.min.js" asp-append-version="true"></script>
+    <script src="~/js/session-event-analytics-charts.js" asp-append-version="true"></script>
     <script>
         window.echoConsoleAnalyticsCharts.init({
             dataElementId: "session-event-analytics-chart-data",
             trendCanvasId: "event-trend-chart",
             eventTypeCanvasId: "event-type-chart",
             sceneCanvasId: "scene-chart",
-            buildCanvasId: "build-chart",
             culture: @Html.Raw(JsonSerializer.Serialize(CultureInfo.CurrentUICulture.Name)),
             labels: @Html.Raw(chartLabelsJson)
         });

@@ -3,134 +3,394 @@
 @{
     ViewData["Title"] = SharedLocalizer["Builds_PageTitle"].Value;
     ViewData["TitleResourceKey"] = "Builds_PageTitle";
+
+    var activeBuildDisplay = string.IsNullOrWhiteSpace(Model.ActiveBuildVersion)
+        ? SharedLocalizer["Builds_NoActiveBuild"].Value
+        : Model.ActiveBuildVersion;
+
+    var engineDisplay = string.IsNullOrWhiteSpace(Model.BaseEngineVersion)
+        ? SharedLocalizer["Builds_EngineUnavailable"].Value
+        : Model.BaseEngineVersion;
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1600px] px-6 py-6">
-        <div class="mb-6 flex flex-col gap-4 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur md:flex-row md:items-center md:justify-between">
-            <div>
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">@SharedLocalizer["Builds_ModuleBadge"]</p>
-                <h1 class="mt-2 font-display text-3xl uppercase tracking-[0.18em] text-white md:text-4xl">@SharedLocalizer["Builds_HeroTitle"]</h1>
-                <p class="mt-3 max-w-3xl text-sm text-slate-400 md:text-base">@SharedLocalizer["Builds_HeroSubtitle"]</p>
-            </div>
+<section class="min-h-screen bg-[#020504] font-mono text-slate-200">
+    <div class="mx-auto w-full max-w-[1680px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="relative overflow-hidden border border-slate-800 bg-[linear-gradient(135deg,rgba(15,23,42,0.72),rgba(2,6,8,0.96)_58%,rgba(6,78,59,0.10))] p-5 shadow-[0_18px_60px_rgba(0,0,0,0.35)] sm:p-7">
+            <div class="pointer-events-none absolute inset-y-0 right-0 w-64 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.07),transparent_68%)]"></div>
 
-            <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/80 px-5 py-4">
-                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-500">@SharedLocalizer["Builds_TotalLabel"]</div>
-                <div class="mt-2 font-display text-3xl uppercase tracking-[0.08em] text-cyan-300">
-                    @Model.TotalCount.ToString("N0")
+            <div class="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+                <div class="max-w-4xl">
+                    <p class="text-[10px] uppercase tracking-[0.32em] text-[#06b6d4]">
+                        &gt;_ @SharedLocalizer["Builds_ModuleBadge"] // VERSION_CONTROL
+                    </p>
+                    <h1 class="mt-3 font-display text-2xl uppercase tracking-[0.13em] text-slate-100 sm:text-4xl">
+                        &gt; @SharedLocalizer["Builds_PageTitle"]
+                    </h1>
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
+                        @SharedLocalizer["Builds_HeroSubtitle"]
+                    </p>
                 </div>
+
+                <details class="group w-full border border-[#22d3ee]/20 bg-black/50 xl:w-auto xl:min-w-[330px]">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#67e8f9] transition hover:bg-[#22d3ee]/5 hover:text-[#a5f3fc] [&::-webkit-details-marker]:hidden">
+                        <span>[ + @SharedLocalizer["Builds_RegisterNew"] ]</span>
+                        <span class="text-slate-600 transition group-open:rotate-45">+</span>
+                    </summary>
+
+                    <form method="post"
+                          asp-controller="Builds"
+                          asp-action="Create"
+                          asp-antiforgery="true"
+                          class="grid gap-4 border-t border-slate-800 p-4">
+                        <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                        <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-xs text-red-400"></div>
+
+                        <div>
+                            <label asp-for="NewBuild.VersionNumber" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                                @SharedLocalizer["Builds_FieldVersion"]
+                            </label>
+                            <input asp-for="NewBuild.VersionNumber"
+                                   autocomplete="off"
+                                   placeholder="v2.1.0-Production"
+                                   class="w-full border border-slate-800 bg-[#030706] px-3 py-2.5 text-sm text-slate-200 outline-none transition placeholder:text-slate-700 focus:border-[#22d3ee]/50" />
+                            <span asp-validation-for="NewBuild.VersionNumber" class="mt-1 block text-[11px] text-red-400"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="NewBuild.EngineVersion" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                                @SharedLocalizer["Builds_FieldEngine"]
+                            </label>
+                            <input asp-for="NewBuild.EngineVersion"
+                                   autocomplete="off"
+                                   class="w-full border border-slate-800 bg-[#030706] px-3 py-2.5 text-sm text-[#67e8f9] outline-none transition focus:border-[#22d3ee]/50" />
+                            <span asp-validation-for="NewBuild.EngineVersion" class="mt-1 block text-[11px] text-red-400"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="NewBuild.ReleaseDateUtc" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                                @SharedLocalizer["Builds_FieldReleaseDate"]
+                            </label>
+                            <input asp-for="NewBuild.ReleaseDateUtc"
+                                   asp-format="{0:yyyy-MM-ddTHH:mm}"
+                                   type="datetime-local"
+                                   class="w-full border border-slate-800 bg-[#030706] px-3 py-2.5 text-sm text-slate-300 outline-none transition focus:border-[#22d3ee]/50" />
+                            <span asp-validation-for="NewBuild.ReleaseDateUtc" class="mt-1 block text-[11px] text-red-400"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="NewBuild.ReleaseNotes" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                                @SharedLocalizer["Builds_FieldNotes"]
+                            </label>
+                            <textarea asp-for="NewBuild.ReleaseNotes"
+                                      rows="3"
+                                      placeholder="@SharedLocalizer["Builds_NotesPlaceholder"]"
+                                      class="w-full resize-none border border-slate-800 bg-[#030706] px-3 py-2.5 text-sm leading-5 text-slate-300 outline-none transition placeholder:text-slate-700 focus:border-[#22d3ee]/50"></textarea>
+                            <span asp-validation-for="NewBuild.ReleaseNotes" class="mt-1 block text-[11px] text-red-400"></span>
+                        </div>
+
+                        <label class="flex cursor-pointer items-center gap-3 border border-slate-800 bg-slate-950/50 px-3 py-2.5">
+                            <input asp-for="NewBuild.IsActive"
+                                   class="h-4 w-4 rounded-none border-slate-700 bg-black text-green-500 focus:ring-green-500/30" />
+                            <span class="text-[10px] uppercase tracking-[0.16em] text-slate-400">
+                                @SharedLocalizer["Builds_FieldSetActive"]
+                            </span>
+                        </label>
+
+                        <button type="submit"
+                                class="border border-[#22d3ee]/30 bg-[#22d3ee]/10 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[#67e8f9] transition hover:border-[#67e8f9]/60 hover:bg-[#22d3ee]/15 hover:text-[#cffafe]">
+                            [ @SharedLocalizer["Builds_RegisterSubmit"] ]
+                        </button>
+                    </form>
+                </details>
             </div>
+        </header>
+
+        @if (TempData["BuildsSuccess"] is string successKey)
+        {
+            <div class="mt-4 border border-green-500/25 bg-green-500/5 px-4 py-3 text-xs uppercase tracking-[0.14em] text-green-400">
+                [ OK ] @SharedLocalizer[successKey]
+            </div>
+        }
+
+        @if (TempData["BuildsError"] is string errorKey)
+        {
+            <div class="mt-4 border border-red-500/25 bg-red-500/5 px-4 py-3 text-xs uppercase tracking-[0.14em] text-red-400">
+                [ ERROR ] @SharedLocalizer[errorKey]
+            </div>
+        }
+
+        <div class="mt-5 grid gap-3 md:grid-cols-3">
+            <article class="border border-slate-800 bg-[linear-gradient(145deg,rgba(15,23,42,0.58),rgba(2,6,8,0.94))] p-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.24em] text-slate-600">CARD_01 // REGISTRY</p>
+                        <h2 class="mt-2 text-[11px] uppercase tracking-[0.17em] text-slate-400">
+                            @SharedLocalizer["Builds_KpiTotal"]
+                        </h2>
+                    </div>
+                    <span class="text-[10px] text-slate-700">[DB]</span>
+                </div>
+                <p class="mt-5 font-display text-3xl font-semibold tracking-[0.08em] text-slate-100">
+                    @Model.TotalRegisteredBuilds.ToString("N0")
+                </p>
+                <div class="mt-4 h-px bg-gradient-to-r from-slate-500/40 to-transparent"></div>
+            </article>
+
+            <article class="border border-green-900/50 bg-[linear-gradient(145deg,rgba(3,20,13,0.82),rgba(2,6,8,0.96))] p-4 shadow-[inset_0_0_22px_rgba(34,197,94,0.03)]">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.24em] text-green-900">CARD_02 // PRODUCTION</p>
+                        <h2 class="mt-2 text-[11px] uppercase tracking-[0.17em] text-green-700">
+                            @SharedLocalizer["Builds_KpiActive"]
+                        </h2>
+                    </div>
+                    <span class="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.16em] text-green-500">
+                        <span class="h-1.5 w-1.5 rounded-full bg-green-400"></span>
+                        LIVE
+                    </span>
+                </div>
+                <p class="mt-5 truncate font-display text-xl font-semibold tracking-[0.07em] text-green-400 sm:text-2xl" title="@activeBuildDisplay">
+                    @activeBuildDisplay
+                </p>
+                <div class="mt-4 h-px bg-gradient-to-r from-green-500/40 to-transparent"></div>
+            </article>
+
+            <article class="border border-[#083344] bg-[linear-gradient(145deg,rgba(4,18,24,0.82),rgba(2,6,8,0.96))] p-4 shadow-[inset_0_0_22px_rgba(34,211,238,0.03)]">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.24em] text-[#083344]">CARD_03 // RUNTIME</p>
+                        <h2 class="mt-2 text-[11px] uppercase tracking-[0.17em] text-[#0e7490]">
+                            @SharedLocalizer["Builds_KpiEngine"]
+                        </h2>
+                    </div>
+                    <span class="text-[10px] text-[#155e75]">[UNITY]</span>
+                </div>
+                <p class="mt-5 truncate font-display text-xl font-semibold tracking-[0.06em] text-[#22d3ee] sm:text-2xl" title="@engineDisplay">
+                    @engineDisplay
+                </p>
+                <div class="mt-4 h-px bg-gradient-to-r from-[#22d3ee]/40 to-transparent"></div>
+            </article>
         </div>
 
-        <div class="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)] backdrop-blur">
-            <form method="get" asp-controller="Builds" asp-action="Index" class="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+        <section class="mt-5 border border-slate-800 bg-[linear-gradient(180deg,rgba(7,12,15,0.96),rgba(1,3,3,0.99))] shadow-[0_24px_70px_rgba(0,0,0,0.30)]">
+            <div class="flex flex-col gap-4 border-b border-slate-800 px-4 py-4 lg:flex-row lg:items-end lg:justify-between lg:px-5">
                 <div>
-                    <label for="searchTerm" class="mb-2 block font-display text-xs uppercase tracking-[0.25em] text-slate-400">@SharedLocalizer["Common_Search"]</label>
+                    <p class="text-[9px] uppercase tracking-[0.25em] text-[#0e7490]">
+                        &gt;_ @SharedLocalizer["Builds_TableBadge"] // CROSS_TELEMETRY
+                    </p>
+                    <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-200">
+                        @SharedLocalizer["Builds_TableTitle"]
+                    </h2>
+                </div>
+
+                <form method="get"
+                      asp-controller="Builds"
+                      asp-action="Index"
+                      class="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+                    <label for="searchTerm" class="sr-only">@SharedLocalizer["Common_Search"]</label>
                     <input id="searchTerm"
                            name="searchTerm"
                            value="@Model.SearchTerm"
-                           type="text"
-                           
+                           type="search"
                            placeholder="@SharedLocalizer["Builds_SearchPlaceholder"]"
-                           class="w-full rounded-xl border border-cyan-500/20 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/10" />
-                </div>
-
-                <div class="flex items-end gap-3">
+                           class="min-w-0 flex-1 border border-slate-800 bg-black/60 px-3 py-2.5 text-xs text-slate-300 outline-none transition placeholder:text-slate-700 focus:border-[#22d3ee]/40 sm:min-w-[300px]" />
                     <button type="submit"
-                            class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">@SharedLocalizer["Common_Search"]</button>
-
+                            class="border border-[#22d3ee]/25 bg-[#22d3ee]/5 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.17em] text-[#22d3ee] transition hover:bg-[#22d3ee]/10">
+                        [ @SharedLocalizer["Common_Search"] ]
+                    </button>
                     <a asp-controller="Builds"
                        asp-action="Index"
-                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">@SharedLocalizer["Common_Reset"]</a>
-                </div>
-            </form>
-        </div>
-
-        <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur">
-            <div class="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">@SharedLocalizer["Builds_TableBadge"]</p>
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">@SharedLocalizer["Builds_TableTitle"]</h2>
-                </div>
-
-                <div class="text-sm text-slate-400">
-                    <span>@SharedLocalizer["Common_Results"]</span>
-                    <span class="font-semibold text-cyan-300">@Model.TotalCount.ToString("N0")</span>
-                </div>
+                       class="border border-slate-800 bg-slate-950 px-4 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.17em] text-slate-500 transition hover:border-slate-700 hover:text-slate-300">
+                        [ @SharedLocalizer["Common_Reset"] ]
+                    </a>
+                </form>
             </div>
 
-            <div class="overflow-hidden rounded-2xl border border-slate-800">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-800">
-                        <thead class="bg-slate-900/90">
-                            <tr class="text-left">
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Builds_ColVersion"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Builds_ColReleaseNotes"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Builds_ColReleaseDate"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Builds_ColActive"]</th>
-                                <th class="px-5 py-4 font-display text-xs uppercase tracking-[0.22em] text-slate-400">@SharedLocalizer["Builds_ColEngineVersion"]</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-900 bg-slate-950/80">
-                            @if (Model.Items != null && Model.Items.Any())
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1440px] border-collapse text-left">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-slate-950/90 text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Builds_ColVersion"]</th>
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Builds_ColReleaseNotes"]</th>
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Builds_ColReleaseDate"]</th>
+                            <th class="px-4 py-3 text-center font-medium">@SharedLocalizer["Builds_ColInstallations"]</th>
+                            <th class="px-4 py-3 text-center font-medium">@SharedLocalizer["Builds_ColSessions"]</th>
+                            <th class="px-4 py-3 font-medium">@SharedLocalizer["Builds_ColEngineVersion"]</th>
+                            <th class="px-4 py-3 text-center font-medium">@SharedLocalizer["Builds_ColActive"]</th>
+                            <th class="px-4 py-3 text-right font-medium">@SharedLocalizer["Builds_ColActions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-900/90">
+                        @if (Model.Items != null && Model.Items.Any())
+                        {
+                            @foreach (var item in Model.Items)
                             {
-                                @foreach (var item in Model.Items)
-                                {
-                                    <tr class="transition-colors duration-150 hover:bg-slate-900/70">
-                                        <td class="px-5 py-4 text-sm text-cyan-300">@item.VersionNumber</td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@(string.IsNullOrWhiteSpace(item.ReleaseNotes) ? "-" : item.ReleaseNotes)</td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@item.ReleaseDateUtc.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'")</td>
-                                        <td class="px-5 py-4">
-                                            @if (item.IsActive)
-                                            {
-                                                <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-                                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                                                    <span>@SharedLocalizer["Common_Active"]</span>
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="inline-flex items-center gap-2 rounded-full border border-slate-600/30 bg-slate-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
-                                                    <span class="h-2 w-2 rounded-full bg-slate-400"></span>
-                                                    <span>@SharedLocalizer["Common_Inactive"]</span>
-                                                </span>
-                                            }
-                                        </td>
-                                        <td class="px-5 py-4 text-sm text-slate-300">@item.EngineVersion</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="px-5 py-6 text-center text-sm text-slate-400">@SharedLocalizer["Builds_EmptyState"]</td>
+                                var actionKey = item.IsActive
+                                    ? "Builds_Deactivate"
+                                    : "Builds_Activate";
+
+                                var stateKey = item.IsActive
+                                    ? "Common_Active"
+                                    : "Common_Inactive";
+
+                                var releaseNotesDisplay = string.IsNullOrWhiteSpace(item.ReleaseNotes)
+                                    ? SharedLocalizer["Builds_NoReleaseNotes"].Value
+                                    : item.ReleaseNotes;
+
+                                var rowClass = item.IsActive
+                                    ? "bg-green-950/10 hover:bg-green-950/20"
+                                    : "bg-transparent hover:bg-slate-900/45";
+
+                                var deleteBlocked = item.IsActive ||
+                                    item.LinkedInstallations > 0 ||
+                                    item.TotalSessions > 0;
+
+                                var deleteTitleKey = item.IsActive
+                                    ? "Builds_DeleteActiveHint"
+                                    : deleteBlocked
+                                        ? "Builds_DeleteTelemetryHint"
+                                        : "Builds_Delete";
+
+                                <tr class="@rowClass transition-colors duration-150">
+                                    <td class="px-4 py-4 align-middle">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-7 w-1 @(item.IsActive ? "bg-green-500" : "bg-slate-800")"></span>
+                                            <div class="min-w-0">
+                                                <p class="font-display text-sm font-semibold tracking-[0.06em] @(item.IsActive ? "text-green-400" : "text-slate-200")">
+                                                    @item.VersionNumber
+                                                </p>
+                                                <p class="mt-1 text-[9px] uppercase tracking-[0.16em] text-slate-700">
+                                                    BUILD_ID: @item.Id.ToString("D4")
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 align-middle">
+                                        <p class="max-w-xs truncate text-xs text-slate-500"
+                                           title="@releaseNotesDisplay">
+                                            @releaseNotesDisplay
+                                        </p>
+                                    </td>
+                                    <td class="px-4 py-4 align-middle text-xs text-slate-500">
+                                        <time datetime="@item.ReleaseDateUtc.ToString("O")">
+                                            @item.ReleaseDateUtc.UtcDateTime.ToString("yyyy-MM-dd")
+                                            <span class="ml-1 text-slate-700">@item.ReleaseDateUtc.UtcDateTime.ToString("HH:mm") UTC</span>
+                                        </time>
+                                    </td>
+                                    <td class="px-4 py-4 text-center align-middle">
+                                        <span class="inline-flex min-w-16 items-center justify-center border border-[#164e63]/60 bg-[#083344]/20 px-2.5 py-1.5 text-xs font-semibold text-[#22d3ee]">
+                                            @item.LinkedInstallations.ToString("N0")
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 text-center align-middle">
+                                        <span class="inline-flex min-w-16 items-center justify-center border border-slate-700 bg-slate-900/60 px-2.5 py-1.5 text-xs font-semibold text-slate-300">
+                                            @item.TotalSessions.ToString("N0")
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 align-middle">
+                                        <span class="text-xs text-[#0891b2]">@item.EngineVersion</span>
+                                    </td>
+                                    <td class="px-4 py-4 text-center align-middle">
+                                        <form method="post"
+                                              asp-controller="Builds"
+                                              asp-action="ToggleActive"
+                                              asp-antiforgery="true"
+                                              data-build-toggle-form
+                                              class="inline-flex">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                                            <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+
+                                            <button type="submit"
+                                                    title="@SharedLocalizer[actionKey]"
+                                                    class="group inline-flex h-8 w-28 shrink-0 items-center justify-center gap-2 border px-3 text-[9px] font-semibold uppercase tracking-[0.15em] transition-colors duration-150 @(item.IsActive ? "border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/15 hover:text-green-300" : "border-slate-700 bg-slate-900/60 text-slate-500 hover:bg-slate-800/80 hover:text-green-400/70")">
+                                                <span class="h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-150 @(item.IsActive ? "bg-green-400" : "bg-slate-600 group-hover:bg-green-500/70")"></span>
+                                                <span class="whitespace-nowrap">@SharedLocalizer[stateKey]</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="px-4 py-4 text-right align-middle">
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button"
+                                                    data-build-edit
+                                                    data-build-id="@item.Id"
+                                                    data-build-version="@item.VersionNumber"
+                                                    data-build-engine="@item.EngineVersion"
+                                                    data-build-release-date="@item.ReleaseDateUtc.UtcDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                                                    data-build-release-notes="@(item.ReleaseNotes ?? string.Empty)"
+                                                    class="border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-cyan-500 transition hover:border-cyan-400/50 hover:text-cyan-300">
+                                                [ @SharedLocalizer["Builds_Edit"] ]
+                                            </button>
+
+                                            <form method="post"
+                                                  asp-controller="Builds"
+                                                  asp-action="Delete"
+                                                  asp-antiforgery="true"
+                                                  data-build-delete-form
+                                                  data-confirm-message="@SharedLocalizer["Builds_DeleteConfirm"]"
+                                                  class="inline-flex">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                                                <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+
+                                                <button type="submit"
+                                                        disabled="@deleteBlocked"
+                                                        title="@SharedLocalizer[deleteTitleKey]"
+                                                        class="border px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.14em] transition @(deleteBlocked ? "cursor-not-allowed border-slate-900 bg-black text-slate-800" : "border-red-500/20 bg-red-500/5 text-red-500/70 hover:border-red-400/50 hover:bg-red-500/10 hover:text-red-400")">
+                                                    [ @SharedLocalizer["Builds_Delete"] ]
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="px-5 py-14 text-center">
+                                    <p class="text-xs uppercase tracking-[0.2em] text-amber-600">
+                                        [ @SharedLocalizer["Builds_EmptyState"] ]
+                                    </p>
+                                    <p class="mt-2 text-[10px] text-slate-700">
+                                        @SharedLocalizer["Builds_EmptyHint"]
+                                    </p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
 
-            <div class="mt-5 flex flex-col gap-4 border-t border-slate-800 pt-5 md:flex-row md:items-center md:justify-between">
-                <div class="text-sm text-slate-400">
-                    <span>@SharedLocalizer["Common_Page"]</span>
-                    <span class="font-semibold text-cyan-300">@Model.PageNumber</span>
-                    <span>@SharedLocalizer["Common_Of"]</span>
-                    <span class="font-semibold text-cyan-300">@Math.Max(Model.TotalPages, 1)</span>
+            <footer class="flex flex-col gap-4 border-t border-slate-800 px-4 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-5">
+                <div class="text-[10px] uppercase tracking-[0.15em] text-slate-600">
+                    @SharedLocalizer["Common_Results"]
+                    <span class="text-slate-300">@Model.TotalCount.ToString("N0")</span>
+                    <span class="mx-2 text-slate-800">//</span>
+                    @SharedLocalizer["Common_Page"]
+                    <span class="text-[#06b6d4]">@Model.PageNumber</span>
+                    @SharedLocalizer["Common_Of"]
+                    <span class="text-[#06b6d4]">@Math.Max(Model.TotalPages, 1)</span>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     @if (Model.HasPreviousPage)
                     {
                         <a asp-controller="Builds"
                            asp-action="Index"
                            asp-route-searchTerm="@Model.SearchTerm"
                            asp-route-pageNumber="@(Model.PageNumber - 1)"
-                           class="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">@SharedLocalizer["Common_Previous"]</a>
+                           class="border border-slate-800 bg-slate-950 px-4 py-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-400 transition hover:border-[#22d3ee]/30 hover:text-[#22d3ee]">
+                            [ @SharedLocalizer["Common_Previous"] ]
+                        </a>
                     }
                     else
                     {
-                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">@SharedLocalizer["Common_Previous"]</span>
+                        <span class="cursor-not-allowed border border-slate-900 bg-black px-4 py-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-800">
+                            [ @SharedLocalizer["Common_Previous"] ]
+                        </span>
                     }
 
                     @if (Model.HasNextPage)
@@ -139,14 +399,108 @@
                            asp-action="Index"
                            asp-route-searchTerm="@Model.SearchTerm"
                            asp-route-pageNumber="@(Model.PageNumber + 1)"
-                           class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">@SharedLocalizer["Common_Next"]</a>
+                           class="border border-[#22d3ee]/25 bg-[#22d3ee]/5 px-4 py-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-[#22d3ee] transition hover:bg-[#22d3ee]/10">
+                            [ @SharedLocalizer["Common_Next"] ]
+                        </a>
                     }
                     else
                     {
-                        <span class="rounded-xl border border-slate-800 bg-slate-950/70 px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">@SharedLocalizer["Common_Next"]</span>
+                        <span class="cursor-not-allowed border border-slate-900 bg-black px-4 py-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-800">
+                            [ @SharedLocalizer["Common_Next"] ]
+                        </span>
                     }
                 </div>
+            </footer>
+        </section>
+    </div>
+</section>
+
+<dialog data-build-edit-dialog
+        class="m-auto w-[min(92vw,640px)] border border-cyan-500/25 bg-[#020504] p-0 text-slate-200 shadow-[0_0_80px_rgba(0,0,0,0.85)] backdrop:bg-black/85">
+    <div class="border-b border-slate-800 bg-[linear-gradient(135deg,rgba(8,51,68,0.18),rgba(2,5,4,0.98))] px-5 py-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-[9px] uppercase tracking-[0.24em] text-cyan-700">
+                    &gt;_ MODULE_02 // BUILD_EDITOR
+                </p>
+                <h2 class="mt-2 font-display text-lg uppercase tracking-[0.12em] text-slate-100">
+                    @SharedLocalizer["Builds_EditTitle"]
+                </h2>
             </div>
+            <button type="button"
+                    data-build-edit-close
+                    class="border border-slate-800 px-3 py-2 text-[9px] uppercase tracking-[0.15em] text-slate-500 transition hover:border-slate-600 hover:text-slate-200">
+                [ @SharedLocalizer["Common_Close"] ]
+            </button>
         </div>
     </div>
-</div>
+
+    <form method="post"
+          asp-controller="Builds"
+          asp-action="Update"
+          asp-antiforgery="true"
+          class="grid gap-4 p-5">
+        <input asp-for="EditBuild.Id" data-edit-field="id" type="hidden" />
+        <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+        <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+                <label asp-for="EditBuild.VersionNumber" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    @SharedLocalizer["Builds_FieldVersion"]
+                </label>
+                <input asp-for="EditBuild.VersionNumber"
+                       data-edit-field="version"
+                       autocomplete="off"
+                       class="w-full border border-slate-800 bg-black px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-500/50" />
+            </div>
+
+            <div>
+                <label asp-for="EditBuild.EngineVersion" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                    @SharedLocalizer["Builds_FieldEngine"]
+                </label>
+                <input asp-for="EditBuild.EngineVersion"
+                       data-edit-field="engine"
+                       autocomplete="off"
+                       class="w-full border border-slate-800 bg-black px-3 py-2.5 text-sm text-cyan-300 outline-none transition focus:border-cyan-500/50" />
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="EditBuild.ReleaseDateUtc" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                @SharedLocalizer["Builds_FieldReleaseDate"]
+            </label>
+            <input asp-for="EditBuild.ReleaseDateUtc"
+                   data-edit-field="release-date"
+                   type="datetime-local"
+                   class="w-full border border-slate-800 bg-black px-3 py-2.5 text-sm text-slate-300 outline-none transition focus:border-cyan-500/50" />
+        </div>
+
+        <div>
+            <label asp-for="EditBuild.ReleaseNotes" class="mb-2 block text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                @SharedLocalizer["Builds_FieldNotes"]
+            </label>
+            <textarea asp-for="EditBuild.ReleaseNotes"
+                      data-edit-field="release-notes"
+                      rows="5"
+                      class="w-full resize-none border border-slate-800 bg-black px-3 py-2.5 text-sm leading-6 text-slate-300 outline-none transition focus:border-cyan-500/50"></textarea>
+        </div>
+
+        <div class="flex flex-col-reverse gap-2 border-t border-slate-800 pt-4 sm:flex-row sm:justify-end">
+            <button type="button"
+                    data-build-edit-close
+                    class="border border-slate-800 bg-slate-950 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition hover:text-slate-200">
+                [ @SharedLocalizer["Common_Cancel"] ]
+            </button>
+            <button type="submit"
+                    class="border border-cyan-500/30 bg-cyan-500/10 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-300 transition hover:border-cyan-300/60 hover:text-cyan-100">
+                [ @SharedLocalizer["Builds_SaveChanges"] ]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/builds-management.js" asp-append-version="true" defer></script>
+}

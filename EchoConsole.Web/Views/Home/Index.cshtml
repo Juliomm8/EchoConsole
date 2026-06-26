@@ -1,68 +1,1184 @@
-﻿@model EchoConsole.Web.Models.Home.HomeIndexViewModel
-
+@model EchoConsole.Web.Models.Home.HomeIndexViewModel
 @{
     ViewData["Title"] =
         SharedLocalizer["Home_PageTitle"].Value;
 
     ViewData["TitleResourceKey"] =
         "Home_PageTitle";
+
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1600px] px-6 py-6">
-        <div class="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_40px_rgba(0,255,255,0.05)] backdrop-blur">
-            <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-400">
-                @SharedLocalizer["Home_Badge"]
+<style>
+    @@keyframes home-radar-sweep {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes home-frequency-pulse {
+        0%,
+        100% {
+            transform: scaleY(0.2);
+            opacity: 0.3;
+        }
+
+        45% {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+    }
+
+    .home-radar-sweep {
+        animation: home-radar-sweep 3.8s linear infinite;
+    }
+
+    .home-frequency-bar {
+        transform-origin: bottom;
+        animation: home-frequency-pulse 1.1s ease-in-out infinite;
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .home-radar-sweep,
+        .home-frequency-bar {
+            animation: none;
+        }
+    }
+</style>
+
+<div class="bg-black text-green-100">
+    <section class="relative isolate overflow-hidden border-b border-green-500/20">
+        <img src="~/images/cosmic-diner/showcase-hero.png"
+             alt="@SharedLocalizer["Home_HeroImageAlt"]"
+             loading="eager"
+             fetchpriority="high"
+             decoding="async"
+             class="absolute inset-0 -z-20 h-full w-full object-cover opacity-40" />
+
+        <div class="absolute inset-0 -z-10 bg-[linear-gradient(90deg,#000_0%,rgba(0,0,0,0.90)_42%,rgba(0,0,0,0.52)_72%,#000_100%)]"></div>
+        <div class="crt-grid-background pointer-events-none absolute inset-0 -z-10 opacity-30"></div>
+
+        <div class="mx-auto grid min-h-[680px] max-w-[1700px] items-center gap-10 px-6 py-20 lg:grid-cols-[1.15fr_0.85fr] lg:px-10">
+            <div class="max-w-4xl">
+                <div class="inline-flex items-center gap-3 rounded border border-green-500/30 bg-black/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-green-300 shadow-phosphor">
+                    <span class="h-2 w-2 rounded-full bg-green-400 animate-signal-pulse"></span>
+                    @SharedLocalizer["Home_HeroSignal"]
+                </div>
+
+                <p class="mt-8 terminal-kicker">
+                    @SharedLocalizer["Home_Badge"]
+                </p>
+
+                <h1 class="mt-4 font-display text-5xl uppercase leading-[0.94] tracking-[-0.04em] text-green-100 text-glow-cyan sm:text-6xl xl:text-8xl">
+                    Cosmic<br />Diner
+                </h1>
+
+                <p class="mt-7 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
+                    @SharedLocalizer["Home_CommercialHeroDescription"]
+                </p>
+
+                <div class="mt-9 flex items-center">
+                    <a href="https://store.steampowered.com/"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       title="@SharedLocalizer["Home_WishlistButton"]"
+                       class="steam-store-button">
+                        <svg class="h-8 w-8"
+                             viewBox="0 0 32 32"
+                             fill="none"
+                             aria-hidden="true">
+                            <circle cx="16"
+                                    cy="16"
+                                    r="14"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    opacity="0.35" />
+
+                            <circle cx="21.5"
+                                    cy="10.5"
+                                    r="4.5"
+                                    stroke="currentColor"
+                                    stroke-width="2.2" />
+
+                            <circle cx="10"
+                                    cy="22"
+                                    r="3.5"
+                                    stroke="currentColor"
+                                    stroke-width="2.2" />
+
+                            <path d="m13 20 5.2-7.2M13.1 22.1l5.2 2.2a4.2 4.2 0 0 0 5.4-2.4l1.2-3.1"
+                                  stroke="currentColor"
+                                  stroke-width="2.2"
+                                  stroke-linecap="round" />
+                        </svg>
+
+                        <span>
+                            <span class="block text-[10px] font-medium tracking-[0.16em] text-slate-300">
+                                @SharedLocalizer["Home_WishlistEyebrow"]
+                            </span>
+
+                            <span class="mt-1 block text-sm">
+                                @SharedLocalizer["Home_WishlistButton"]
+                            </span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <aside class="terminal-panel rounded-lg p-5 lg:justify-self-end lg:p-7">
+                <div class="flex items-center justify-between border-b border-green-500/15 pb-4">
+                    <span class="terminal-kicker">
+                        @SharedLocalizer["Home_LiveReadout"]
+                    </span>
+
+                    <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-green-400">
+                        <span class="h-1.5 w-1.5 rounded-full bg-green-400 animate-signal-pulse"></span>
+                        ONLINE
+                    </span>
+                </div>
+
+                <dl class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div class="rounded border border-green-500/20 bg-black p-5 shadow-[inset_0_0_24px_rgba(34,197,94,0.04)]">
+                        <dt class="text-[10px] uppercase tracking-[0.18em] text-green-600">
+                            @SharedLocalizer["Home_InterceptedSignals"]
+                        </dt>
+
+                        <dd class="mt-3 font-display text-4xl text-green-300 text-glow-cyan">
+                            @Model.TotalSessions.ToString("N0")
+                        </dd>
+                    </div>
+
+                    <div class="rounded border border-green-500/20 bg-black p-5 shadow-[inset_0_0_24px_rgba(34,197,94,0.04)]">
+                        <dt class="text-[10px] uppercase tracking-[0.18em] text-green-600">
+                            @SharedLocalizer["Home_ActiveInvestigators"]
+                        </dt>
+
+                        <dd class="mt-3 font-display text-4xl text-green-300 text-glow-cyan">
+                            @Model.ActivePlayersNow.ToString("N0")
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="mt-3 grid gap-5 rounded border border-green-500/20 bg-black p-5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+                    <div class="relative mx-auto h-32 w-32 overflow-hidden rounded-full border border-green-500/35 bg-[radial-gradient(circle,rgba(34,197,94,0.12)_0%,rgba(0,0,0,0.95)_68%)] shadow-[0_0_26px_rgba(34,197,94,0.12)]">
+                        <div class="absolute inset-[18%] rounded-full border border-green-500/15"></div>
+                        <div class="absolute inset-[36%] rounded-full border border-green-500/20"></div>
+                        <div class="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-green-500/10"></div>
+                        <div class="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-green-500/10"></div>
+
+                        <div class="home-radar-sweep absolute left-1/2 top-1/2 h-px w-[46%] origin-left bg-gradient-to-r from-green-300 via-green-400/70 to-transparent shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>
+
+                        <span class="absolute left-[66%] top-[34%] h-2 w-2 rounded-full bg-green-300 shadow-[0_0_12px_rgba(34,197,94,0.95)]"></span>
+                        <span class="absolute left-[66%] top-[34%] h-2 w-2 rounded-full bg-green-300 animate-ping"></span>
+
+                        <span class="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] uppercase tracking-[0.2em] text-green-700">
+                            BAND_07
+                        </span>
+                    </div>
+
+                    <div class="min-w-0">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-[10px] uppercase tracking-[0.2em] text-green-500">
+                                @SharedLocalizer["Home_LiveFrequencyScan"]
+                            </span>
+
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-green-700">
+                                @SharedLocalizer["Home_ScanLocked"]
+                            </span>
+                        </div>
+
+                        <div class="mt-5 flex h-24 items-end gap-1.5 overflow-hidden border-b border-green-500/20 pb-1">
+                            <span class="home-frequency-bar w-full bg-green-800/70" style="height: 24%; animation-delay: -0.10s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-700/80" style="height: 52%; animation-delay: -0.45s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-500/80" style="height: 82%; animation-delay: -0.70s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-600/80" style="height: 38%; animation-delay: -0.25s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-400/90" style="height: 94%; animation-delay: -0.85s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-700/80" style="height: 61%; animation-delay: -0.35s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-500/90" style="height: 76%; animation-delay: -0.95s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-800/70" style="height: 29%; animation-delay: -0.18s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-500/80" style="height: 67%; animation-delay: -0.58s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-400/90" style="height: 88%; animation-delay: -0.78s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-700/80" style="height: 46%; animation-delay: -0.30s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-600/90" style="height: 72%; animation-delay: -0.64s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-800/70" style="height: 34%; animation-delay: -0.22s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-500/90" style="height: 91%; animation-delay: -0.88s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-700/80" style="height: 58%; animation-delay: -0.40s;"></span>
+                            <span class="home-frequency-bar w-full bg-green-400/90" style="height: 79%; animation-delay: -0.74s;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded border border-green-500/15 bg-green-500/5 p-4 text-xs leading-6 text-slate-400">
+                    <span class="text-green-400">&gt;</span>
+                    @SharedLocalizer["Home_LiveReadoutDescription"]
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section class="mx-auto max-w-[1600px] px-6 py-20 lg:px-10">
+        <div class="max-w-3xl">
+            <p class="terminal-kicker">@SharedLocalizer["Home_ShowcaseEyebrow"]</p>
+            <h2 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-green-100 sm:text-5xl">
+                @SharedLocalizer["Home_ShowcaseTitle"]
+            </h2>
+            <p class="mt-5 text-sm leading-7 text-slate-400 sm:text-base">
+                @SharedLocalizer["Home_ShowcaseIntro"]
             </p>
+        </div>
 
-            <h1 class="mt-3 font-display text-4xl uppercase tracking-[0.16em] text-white md:text-5xl">
-                @SharedLocalizer["Home_HeroTitle"]
-            </h1>
+        <div class="mt-14 space-y-12 lg:space-y-20">
+            <article class="grid items-center gap-8 lg:grid-cols-2">
+                <div class="overflow-hidden rounded-lg border border-green-500/25 bg-green-500/5 shadow-phosphor">
+                    <img src="~/images/cosmic-diner/showcase-01.png"
+                         alt="@SharedLocalizer["Home_ShowcaseOneAlt"]"
+                         loading="lazy"
+                         decoding="async"
+                         class="aspect-video h-full w-full object-cover transition duration-500 hover:scale-[1.02]" />
+                </div>
 
-            <p class="mt-4 max-w-3xl text-base text-slate-300">
-                @SharedLocalizer["Home_HeroSubtitle"]
-            </p>
+                <div class="lg:pl-8">
+                    <p class="terminal-kicker">LOG_01 // ARRIVAL</p>
+                    <h3 class="mt-3 font-display text-2xl uppercase tracking-[0.06em] text-green-100 sm:text-3xl">
+                        @SharedLocalizer["Home_ShowcaseOneTitle"]
+                    </h3>
+                    <p class="mt-5 text-sm leading-8 text-slate-400 sm:text-base">
+                        @SharedLocalizer["Home_ShowcaseOneDescription"]
+                    </p>
+                </div>
+            </article>
 
-            <div class="mt-6 flex flex-wrap gap-3">
-                @if (!Model.IsAuthenticated)
+            <article class="grid items-center gap-8 lg:grid-cols-2">
+                <div class="overflow-hidden rounded-lg border border-amber-500/25 bg-amber-500/5 shadow-amber lg:order-2">
+                    <img src="~/images/cosmic-diner/showcase-02.png"
+                         alt="@SharedLocalizer["Home_ShowcaseTwoAlt"]"
+                         loading="lazy"
+                         decoding="async"
+                         class="aspect-video h-full w-full object-cover transition duration-500 hover:scale-[1.02]" />
+                </div>
+
+                <div class="lg:order-1 lg:pr-8">
+                    <p class="terminal-kicker text-amber-400">LOG_02 // BLACKOUT</p>
+                    <h3 class="mt-3 font-display text-2xl uppercase tracking-[0.06em] text-amber-100 sm:text-3xl">
+                        @SharedLocalizer["Home_ShowcaseTwoTitle"]
+                    </h3>
+                    <p class="mt-5 text-sm leading-8 text-slate-400 sm:text-base">
+                        @SharedLocalizer["Home_ShowcaseTwoDescription"]
+                    </p>
+                </div>
+            </article>
+
+            <article class="grid items-center gap-8 lg:grid-cols-2">
+                <div class="overflow-hidden rounded-lg border border-green-500/25 bg-green-500/5 shadow-phosphor">
+                    <img src="~/images/cosmic-diner/showcase-03.png"
+                         alt="@SharedLocalizer["Home_ShowcaseThreeAlt"]"
+                         loading="lazy"
+                         decoding="async"
+                         class="aspect-video h-full w-full object-cover transition duration-500 hover:scale-[1.02]" />
+                </div>
+
+                <div class="lg:pl-8">
+                    <p class="terminal-kicker">LOG_03 // CONTACT</p>
+                    <h3 class="mt-3 font-display text-2xl uppercase tracking-[0.06em] text-green-100 sm:text-3xl">
+                        @SharedLocalizer["Home_ShowcaseThreeTitle"]
+                    </h3>
+                    <p class="mt-5 text-sm leading-8 text-slate-400 sm:text-base">
+                        @SharedLocalizer["Home_ShowcaseThreeDescription"]
+                    </p>
+                </div>
+            </article>
+        </div>
+    </section>
+    <style>
+        .patch-carousel-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #22c55e #000000;
+            overscroll-behavior-x: contain;
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar-track {
+            background: #000000;
+            border-top: 1px solid rgba(34, 197, 94, 0.10);
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border: 2px solid #000000;
+            border-radius: 999px;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+        }
+
+        .patch-carousel-scroll::-webkit-scrollbar-thumb:hover {
+            background: #4ade80;
+            box-shadow: 0 0 14px rgba(74, 222, 128, 0.75);
+        }
+    </style>
+
+    <section class="border-y border-green-500/15 bg-[#020502]">
+        <div class="mx-auto max-w-[1600px] px-6 py-20 lg:px-10">
+            <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                <header class="max-w-3xl">
+                    <p class="terminal-kicker">
+                        @SharedLocalizer["Home_ChangelogEyebrow"]
+                    </p>
+
+                    <h2 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-green-100 sm:text-5xl">
+                        @SharedLocalizer["Home_ChangelogTitle"]
+                    </h2>
+
+                    <p class="mt-5 max-w-2xl text-sm leading-7 text-slate-500">
+                        @SharedLocalizer["Home_ChangelogDescription"]
+                    </p>
+                </header>
+
+                <div class="shrink-0 border-l border-green-500/20 pl-4 text-[10px] uppercase tracking-[0.20em] text-green-700">
+                    <div>ARCHIVE_MODE: HORIZONTAL</div>
+                    <div class="mt-2">SOURCE_TARGET: SQLITE_CMS</div>
+                    <div class="mt-2">INPUT: SHIFT + WHEEL / DRAG</div>
+                </div>
+            </div>
+
+            <div class="terminal-panel mt-10 overflow-hidden rounded-lg">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-green-500/15 bg-green-500/5 px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-green-400">
+                    <span>cosmic_diner_changelog.log</span>
+                    <span>SCROLL_X // READ_ONLY</span>
+                </div>
+
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-black via-black/65 to-transparent"></div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-black via-black/65 to-transparent"></div>
+
+                    <div class="patch-carousel-scroll flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 py-7 pb-8">
+                        @*
+                            Patch notes are loaded from EchoConsole.Api.
+                            Keep the article markup unchanged so every database
+                            record renders with the same card structure.
+                        *@
+
+                        @foreach (var patch in Model.PatchNotes)
+                        {
+                            var borderClass = "border-green-500/30";
+                            var badgeClass = "border-green-500/35 bg-green-500/10 text-green-300";
+                            var titleClass = "text-green-100";
+                            var glowClass = "hover:shadow-[0_0_28px_rgba(34,197,94,0.12)]";
+                            var statusClass = "text-green-700";
+
+                            if (patch.Tone == "amber")
+                            {
+                                borderClass = "border-amber-500/30";
+                                badgeClass = "border-amber-500/35 bg-amber-500/10 text-amber-300";
+                                titleClass = "text-amber-100";
+                                glowClass = "hover:shadow-[0_0_28px_rgba(251,191,36,0.12)]";
+                                statusClass = "text-amber-700";
+                            }
+                            else if (patch.Tone == "rose")
+                            {
+                                borderClass = "border-rose-500/30";
+                                badgeClass = "border-rose-500/35 bg-rose-500/10 text-rose-300";
+                                titleClass = "text-rose-100";
+                                glowClass = "hover:shadow-[0_0_28px_rgba(251,113,133,0.12)]";
+                                statusClass = "text-rose-700";
+                            }
+
+                            <article class="group flex min-h-[320px] w-80 shrink-0 snap-start flex-col rounded border @borderClass bg-black p-6 shadow-[inset_0_0_32px_rgba(34,197,94,0.025)] transition duration-300 hover:-translate-y-1 @glowClass sm:w-96">
+                                <div class="flex items-start justify-between gap-4">
+                                    <span class="inline-flex rounded border px-3 py-1.5 text-xs font-bold @badgeClass">
+                                        @patch.Version
+                                    </span>
+
+                                    <span class="pt-1 text-[9px] uppercase tracking-[0.20em] @statusClass">
+                                        ARCHIVED
+                                    </span>
+                                </div>
+
+                                <div class="mt-6 text-[10px] uppercase tracking-[0.22em] text-slate-600">
+                                    @patch.Category
+                                </div>
+
+                                <h3 class="mt-4 font-display text-xl uppercase leading-snug tracking-[0.06em] @titleClass">
+                                    @patch.Title
+                                </h3>
+
+                                <p class="mt-5 flex-1 text-sm leading-7 text-slate-400">
+                                    @patch.Description
+                                </p>
+
+                                <div class="mt-8 border-t border-current/10 pt-4 text-[9px] uppercase tracking-[0.18em] text-slate-700">
+                                    RECORD_STATUS: VERIFIED
+                                </div>
+                            </article>
+                        }
+
+                        <aside class="flex min-h-[320px] w-72 shrink-0 snap-start flex-col items-center justify-center rounded border border-dashed border-green-500/20 bg-green-500/[0.025] px-6 text-center sm:w-80">
+                            <span class="h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_14px_rgba(34,197,94,0.80)] animate-pulse"></span>
+
+                            <p class="mt-5 font-mono text-xs uppercase tracking-[0.16em] text-green-600">
+                                &gt; AWAITING SQLITE TRANSMISSION...
+                            </p>
+
+                            <p class="mt-3 text-[9px] uppercase tracking-[0.18em] text-green-900">
+                                NEXT_RECORD_SLOT_READY
+                            </p>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <style>
+        #cosmic-gallery .gallery-capture {
+            position: relative;
+            isolation: isolate;
+        }
+
+        #cosmic-gallery .gallery-capture::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.14;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(34, 197, 94, 0.08) 0,
+                    rgba(34, 197, 94, 0.08) 1px,
+                    transparent 1px,
+                    transparent 4px
+                );
+            mix-blend-mode: screen;
+            transition:
+                opacity 180ms ease,
+                transform 180ms ease;
+        }
+
+        #cosmic-gallery .gallery-capture::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -35%;
+            z-index: 3;
+            height: 30%;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                linear-gradient(
+                    180deg,
+                    transparent,
+                    rgba(74, 222, 128, 0.28),
+                    rgba(34, 197, 94, 0.08),
+                    transparent
+                );
+            filter: blur(1px);
+        }
+
+        #cosmic-gallery .gallery-capture:hover::before,
+        #cosmic-gallery .gallery-capture:focus-visible::before {
+            opacity: 0.34;
+            animation: gallery-interference 180ms steps(2, end) infinite;
+        }
+
+        #cosmic-gallery .gallery-capture:hover::after,
+        #cosmic-gallery .gallery-capture:focus-visible::after {
+            opacity: 1;
+            animation: gallery-scan 1.15s linear infinite;
+        }
+
+        #cosmic-gallery .gallery-capture:hover img,
+        #cosmic-gallery .gallery-capture:focus-visible img {
+            transform: scale(1.035);
+            filter:
+                contrast(1.08)
+                saturate(0.85)
+                brightness(0.92);
+        }
+
+        #gallery-lightbox.gallery-lightbox-root {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(0.75rem, 2.5vw, 2rem);
+        }
+
+        #gallery-lightbox .gallery-lightbox-panel {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns:
+                minmax(0, 7fr)
+                minmax(18rem, 3fr);
+            width: min(72rem, calc(100vw - 1.5rem));
+            height: min(760px, 80vh);
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        #gallery-lightbox .gallery-lightbox-image-shell,
+        #gallery-lightbox .gallery-lightbox-details {
+            min-width: 0;
+            min-height: 0;
+        }
+
+        #gallery-lightbox .gallery-lightbox-details-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #22c55e #000000;
+        }
+
+        #gallery-lightbox .gallery-lightbox-details-scroll::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        #gallery-lightbox .gallery-lightbox-details-scroll::-webkit-scrollbar-track {
+            background: #000000;
+        }
+
+        #gallery-lightbox .gallery-lightbox-details-scroll::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border: 2px solid #000000;
+            border-radius: 999px;
+        }
+
+        @@keyframes gallery-scan {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(450%);
+            }
+        }
+
+        @@keyframes gallery-interference {
+            0% {
+                transform: translateX(0);
+            }
+
+            33% {
+                transform: translateX(1px);
+            }
+
+            66% {
+                transform: translateX(-1px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        @@media (max-width: 1023px) {
+            #gallery-lightbox .gallery-lightbox-panel {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows:
+                    minmax(220px, 52%)
+                    minmax(0, 48%);
+            }
+        }
+
+        @@media (max-width: 639px) {
+            #gallery-lightbox.gallery-lightbox-root {
+                padding: 0.75rem;
+            }
+
+            #gallery-lightbox .gallery-lightbox-panel {
+                width: calc(100vw - 1.5rem);
+                height: 84vh;
+                max-height: 84vh;
+                grid-template-rows:
+                    minmax(190px, 46%)
+                    minmax(0, 54%);
+            }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            #cosmic-gallery .gallery-capture::before,
+            #cosmic-gallery .gallery-capture::after,
+            #cosmic-gallery .gallery-capture img {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+
+    <section id="cosmic-gallery"
+             class="relative border-y border-green-500/15 bg-black">
+        <div class="crt-grid-background pointer-events-none absolute inset-0 opacity-20"></div>
+
+        <div class="relative mx-auto max-w-[1600px] px-6 py-20 lg:px-10">
+            <header class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-3xl">
+                    <p class="terminal-kicker">
+                        VISUAL_ARCHIVE // 10 FILES
+                    </p>
+
+                    <h2 class="mt-4 font-display text-3xl uppercase tracking-[0.06em] text-green-100 sm:text-5xl">
+                        Screenshot Gallery
+                    </h2>
+
+                    <p class="mt-5 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base">
+                        Recovered visual records from inside Cosmic Diner.
+                        Select a capture to open the full-resolution archive.
+                    </p>
+                </div>
+
+                <div class="shrink-0 border-l border-green-500/20 pl-4 text-[10px] uppercase tracking-[0.20em] text-green-700">
+                    <div>ARCHIVE_STATUS: ACCESSIBLE</div>
+                    <div class="mt-2">FORMAT: PNG</div>
+                    <div class="mt-2">INTERFACE: CENTERED_POPUP</div>
+                </div>
+            </header>
+
+            @{
+                var galleryTitles = new[]
                 {
-                    <a asp-controller="Auth"
-                       asp-action="Register"
-                       class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                        @SharedLocalizer["Home_CreateAccount"]
-                    </a>
+                    "Sector 4 Anomaly",
+                    "Midnight Service Protocol",
+                    "Maintenance Corridor Breach",
+                    "Dining Hall Blackout",
+                    "Signal Relay Chamber",
+                    "Staff Access Terminal",
+                    "Freezer Unit Distortion",
+                    "Exterior Storm Watch",
+                    "Emergency Power Cycle",
+                    "Final Shift Transmission"
+                };
 
-                    <a asp-controller="Auth"
-                       asp-action="Login"
-                       class="rounded-xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300 transition hover:border-cyan-400/20 hover:text-white">
-                        @SharedLocalizer["Common_Login"]
-                    </a>
-                }
-                else
+                var galleryDescriptions = new[]
                 {
-                    <a asp-controller="Profile"
-                       asp-action="Index"
-                       class="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                        @SharedLocalizer["Home_OpenProfile"]
-                    </a>
+                    "Visual record of unusual activity detected near the main dining hall during the fourth service sector inspection.",
+                    "Archived frame from the midnight service protocol shortly before the restaurant communications became unstable.",
+                    "Maintenance footage showing a restricted corridor after an unexpected pressure and lighting failure.",
+                    "A complete power interruption left the dining area visible only through emergency phosphor lighting.",
+                    "Recovered image of the relay chamber responsible for routing internal diner transmissions.",
+                    "The staff access console displayed an unauthorized sequence while the facility remained under lockdown.",
+                    "Thermal distortion was detected around the freezer units after the environmental systems stopped responding.",
+                    "Exterior surveillance recorded severe weather and signal interference surrounding the Cosmic Diner.",
+                    "Emergency generators restored partial lighting while several internal systems remained disconnected.",
+                    "The final visual transmission recovered from the shift before the archive signal was interrupted."
+                };
+            }
+
+            <div id="gallery-grid"
+                 class="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+                @for (var galleryIndex = 1; galleryIndex <= 10; galleryIndex++)
+                {
+                    var galleryNumber =
+                        galleryIndex.ToString("00");
+
+                    var galleryFileName =
+                        $"gallery-{galleryNumber}.png";
+
+                    var galleryImagePath =
+                        Url.Content(
+                            $"~/images/gallery/{galleryFileName}");
+
+                    var galleryTitle =
+                        galleryTitles[galleryIndex - 1];
+
+                    var galleryDescription =
+                        galleryDescriptions[galleryIndex - 1];
+
+                    var galleryAlt =
+                        $"{galleryTitle} - Cosmic Diner screenshot {galleryNumber}";
+
+                    <button type="button"
+                            class="gallery-capture group overflow-hidden rounded border border-green-500/20 bg-black text-left shadow-[0_0_20px_rgba(34,197,94,0.04)] outline-none transition duration-300 hover:-translate-y-1 hover:border-green-400/45 hover:shadow-[0_0_28px_rgba(34,197,94,0.15)] focus-visible:border-green-300 focus-visible:ring-2 focus-visible:ring-green-400/30"
+                            data-gallery-trigger
+                            data-gallery-src="@galleryImagePath"
+                            data-gallery-download="@galleryFileName"
+                            data-gallery-alt="@galleryAlt"
+                            data-gallery-title="@galleryTitle"
+                            data-gallery-desc="@galleryDescription"
+                            aria-label="Open @galleryTitle">
+                        <span class="relative block aspect-video overflow-hidden bg-[#020502]">
+                            <img src="@galleryImagePath"
+                                 alt="@galleryAlt"
+                                 loading="lazy"
+                                 decoding="async"
+                                 class="h-full w-full object-cover transition duration-500" />
+
+                            <span class="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-center justify-between bg-gradient-to-t from-black via-black/75 to-transparent px-3 pb-3 pt-10">
+                                <span class="font-mono text-[9px] uppercase tracking-[0.20em] text-green-400">
+                                    FILE_@galleryNumber
+                                </span>
+
+                                <span class="font-mono text-[8px] uppercase tracking-[0.18em] text-green-800 transition group-hover:text-green-500">
+                                    OPEN
+                                </span>
+                            </span>
+                        </span>
+                    </button>
                 }
             </div>
         </div>
+    </section>
 
-        <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-5">
-            <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-5 shadow-[0_0_30px_rgba(0,255,255,0.04)]">
-                <div class="font-display text-xs uppercase tracking-[0.25em] text-slate-400">
-                    @SharedLocalizer["Home_CommunitySessions"]
+    <div id="gallery-lightbox"
+         class="gallery-lightbox-root pointer-events-none invisible bg-black/80 opacity-0 backdrop-blur-sm transition duration-300"
+         role="dialog"
+         aria-modal="true"
+         aria-hidden="true"
+         aria-labelledby="gallery-lightbox-title"
+         aria-describedby="gallery-lightbox-description">
+        <button type="button"
+                class="absolute inset-0 cursor-default"
+                data-gallery-backdrop
+                tabindex="-1"
+                aria-label="Close screenshot preview">
+        </button>
+
+        <div id="gallery-lightbox-panel"
+             class="gallery-lightbox-panel terminal-panel rounded-lg border border-green-500/35 bg-black shadow-[0_0_60px_rgba(34,197,94,0.18)]"
+             role="document"
+             tabindex="-1">
+            <figure class="gallery-lightbox-image-shell relative flex items-center justify-center overflow-hidden border-b border-green-500/20 bg-[#010301] lg:border-b-0 lg:border-r">
+                <div class="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(34,197,94,0.035)_0,rgba(34,197,94,0.035)_1px,transparent_1px,transparent_4px)]"></div>
+
+                <div class="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-green-500/10 bg-black/70 px-4 py-2 text-[8px] uppercase tracking-[0.20em] text-green-800">
+                    <span>VISUAL_FEED</span>
+                    <span>OBJECT_CONTAIN</span>
                 </div>
 
-                <div class="mt-3 font-display text-3xl text-cyan-300">
-                    @Model.TotalSessions.ToString("N0")
+                <img id="gallery-lightbox-image"
+                     src=""
+                     alt=""
+                     class="relative z-[1] h-full w-full object-contain p-4 pt-12 sm:p-6 sm:pt-14" />
+            </figure>
+
+            <aside class="gallery-lightbox-details flex min-h-0 flex-col bg-black">
+                <header class="flex items-start justify-between gap-4 border-b border-green-500/20 bg-green-500/5 px-5 py-4">
+                    <div class="min-w-0">
+                        <p class="text-[8px] uppercase tracking-[0.22em] text-green-700">
+                            ARCHIVE_METADATA
+                        </p>
+
+                        <p id="gallery-lightbox-file"
+                           class="mt-2 truncate text-[9px] uppercase tracking-[0.18em] text-green-500">
+                            NO_FILE_SELECTED
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            id="gallery-lightbox-close"
+                            class="shrink-0 rounded border border-green-500/20 bg-black px-3 py-2 text-[9px] font-bold uppercase tracking-[0.16em] text-green-600 transition hover:border-rose-500/40 hover:bg-rose-500/10 hover:text-rose-300 focus:outline-none focus:ring-2 focus:ring-green-400/30"
+                            aria-label="Close gallery lightbox">
+                        CLOSE [X]
+                    </button>
+                </header>
+
+                <div class="gallery-lightbox-details-scroll min-h-0 flex-1 overflow-y-auto px-5 py-6">
+                    <div class="border-l-2 border-green-500/30 pl-4">
+                        <p class="text-[8px] uppercase tracking-[0.22em] text-green-800">
+                            RECORD_TITLE
+                        </p>
+
+                        <h2 id="gallery-lightbox-title"
+                            class="mt-3 font-display text-xl uppercase leading-snug tracking-[0.08em] text-green-200 sm:text-2xl">
+                            Screenshot Preview
+                        </h2>
+                    </div>
+
+                    <div class="mt-7">
+                        <p class="text-[8px] uppercase tracking-[0.22em] text-green-800">
+                            FIELD_DESCRIPTION
+                        </p>
+
+                        <p id="gallery-lightbox-description"
+                           class="mt-3 text-sm leading-7 text-slate-400">
+                            Select a gallery record to load its visual description.
+                        </p>
+                    </div>
+
+                    <dl class="mt-8 grid grid-cols-2 gap-3 text-[8px] uppercase tracking-[0.16em]">
+                        <div class="rounded border border-green-500/15 bg-green-500/5 p-3">
+                            <dt class="text-green-800">FORMAT</dt>
+                            <dd class="mt-2 text-green-400">PNG</dd>
+                        </div>
+
+                        <div class="rounded border border-green-500/15 bg-green-500/5 p-3">
+                            <dt class="text-green-800">STATUS</dt>
+                            <dd class="mt-2 text-green-400">RECOVERED</dd>
+                        </div>
+                    </dl>
                 </div>
 
-                <div class="mt-2 text-sm text-slate-400">
-                    @SharedLocalizer["Home_CommunitySessionsDescription"]
-                </div>
-            </div>
+                <footer class="grid gap-3 border-t border-green-500/20 bg-[#020502] p-5">
+                    <a id="gallery-lightbox-download"
+                       href="#"
+                       download
+                       class="inline-flex items-center justify-center rounded border border-green-400/40 bg-green-500/10 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-green-200 shadow-phosphor transition hover:bg-green-500/20 hover:text-green-100 focus:outline-none focus:ring-2 focus:ring-green-400/30">
+                        DOWNLOAD FILE
+                    </a>
+
+                    <button type="button"
+                            id="gallery-lightbox-close-secondary"
+                            class="inline-flex items-center justify-center rounded border border-slate-700 bg-black px-5 py-3 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500 transition hover:border-rose-500/35 hover:text-rose-300 focus:outline-none focus:ring-2 focus:ring-green-400/30">
+                        CLOSE PREVIEW
+                    </button>
+                </footer>
+            </aside>
         </div>
     </div>
+
+    <section class="relative isolate overflow-hidden border-t border-green-500/15 bg-black">
+        <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.09),transparent_58%)]"></div>
+        <div class="crt-grid-background pointer-events-none absolute inset-0 -z-10 opacity-20"></div>
+
+        <div class="mx-auto flex max-w-[1200px] flex-col items-center px-6 py-24 text-center lg:px-10">
+            <h2 class="font-display text-3xl uppercase tracking-[0.08em] text-green-100 text-glow-cyan sm:text-5xl">
+                @SharedLocalizer["Home_SurviveShiftTitle"]
+            </h2>
+
+            <p class="mt-5 cursor-help select-none text-[9px] uppercase tracking-[0.24em] text-[#071007] transition-all duration-500 hover:text-green-500/70 hover:drop-shadow-[0_0_8px_rgba(34,197,94,0.65)]">
+                @SharedLocalizer["Home_CorruptedData"]
+            </p>
+
+            <a href="https://store.steampowered.com/"
+               target="_blank"
+               rel="noopener noreferrer"
+               title="@SharedLocalizer["Home_WishlistButton"]"
+               class="steam-store-button mt-10">
+                <svg class="h-8 w-8"
+                     viewBox="0 0 32 32"
+                     fill="none"
+                     aria-hidden="true">
+                    <circle cx="16"
+                            cy="16"
+                            r="14"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            opacity="0.35" />
+
+                    <circle cx="21.5"
+                            cy="10.5"
+                            r="4.5"
+                            stroke="currentColor"
+                            stroke-width="2.2" />
+
+                    <circle cx="10"
+                            cy="22"
+                            r="3.5"
+                            stroke="currentColor"
+                            stroke-width="2.2" />
+
+                    <path d="m13 20 5.2-7.2M13.1 22.1l5.2 2.2a4.2 4.2 0 0 0 5.4-2.4l1.2-3.1"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round" />
+                </svg>
+
+                <span>
+                    <span class="block text-[10px] font-medium tracking-[0.16em] text-slate-300">
+                        @SharedLocalizer["Home_WishlistEyebrow"]
+                    </span>
+
+                    <span class="mt-1 block text-sm">
+                        @SharedLocalizer["Home_WishlistButton"]
+                    </span>
+                </span>
+            </a>
+        </div>
+    </section>
+
 </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const lightbox =
+                document.getElementById(
+                    "gallery-lightbox");
+
+            const lightboxPanel =
+                document.getElementById(
+                    "gallery-lightbox-panel");
+
+            const lightboxImage =
+                document.getElementById(
+                    "gallery-lightbox-image");
+
+            const lightboxDownload =
+                document.getElementById(
+                    "gallery-lightbox-download");
+
+            const lightboxFile =
+                document.getElementById(
+                    "gallery-lightbox-file");
+
+            const lightboxTitle =
+                document.getElementById(
+                    "gallery-lightbox-title");
+
+            const lightboxDescription =
+                document.getElementById(
+                    "gallery-lightbox-description");
+
+            const closeButton =
+                document.getElementById(
+                    "gallery-lightbox-close");
+
+            const secondaryCloseButton =
+                document.getElementById(
+                    "gallery-lightbox-close-secondary");
+
+            const galleryTriggers =
+                document.querySelectorAll(
+                    "[data-gallery-trigger]");
+
+            if (
+                !lightbox
+                || !lightboxPanel
+                || !lightboxImage
+                || !lightboxDownload
+                || !lightboxFile
+                || !lightboxTitle
+                || !lightboxDescription
+                || !closeButton
+                || !secondaryCloseButton
+            ) {
+                return;
+            }
+
+            let lastFocusedElement = null;
+            let previousBodyOverflow = "";
+            let previousBodyPaddingRight = "";
+
+            const lockPageScroll = () => {
+                const scrollbarWidth =
+                    window.innerWidth
+                    - document.documentElement.clientWidth;
+
+                previousBodyOverflow =
+                    document.body.style.overflow;
+
+                previousBodyPaddingRight =
+                    document.body.style.paddingRight;
+
+                document.body.style.overflow =
+                    "hidden";
+
+                if (scrollbarWidth > 0) {
+                    document.body.style.paddingRight =
+                        `${scrollbarWidth}px`;
+                }
+            };
+
+            const unlockPageScroll = () => {
+                document.body.style.overflow =
+                    previousBodyOverflow;
+
+                document.body.style.paddingRight =
+                    previousBodyPaddingRight;
+            };
+
+            window.addEventListener(
+                "pagehide",
+                unlockPageScroll);
+
+            const openLightbox = trigger => {
+                const imageSource =
+                    trigger.dataset.gallerySrc;
+
+                const downloadName =
+                    trigger.dataset.galleryDownload
+                    ?? "cosmic-diner-screenshot.png";
+
+                const imageAlt =
+                    trigger.dataset.galleryAlt
+                    ?? "Cosmic Diner screenshot";
+
+                const imageTitle =
+                    trigger.dataset.galleryTitle
+                    ?? "Recovered Visual Record";
+
+                const imageDescription =
+                    trigger.dataset.galleryDesc
+                    ?? "No field description is available for this visual record.";
+
+                if (!imageSource) {
+                    return;
+                }
+
+                lastFocusedElement =
+                    document.activeElement;
+
+                lightboxImage.src =
+                    imageSource;
+
+                lightboxImage.alt =
+                    imageAlt;
+
+                lightboxDownload.href =
+                    imageSource;
+
+                lightboxDownload.download =
+                    downloadName;
+
+                lightboxFile.textContent =
+                    downloadName;
+
+                lightboxTitle.textContent =
+                    imageTitle;
+
+                lightboxDescription.textContent =
+                    imageDescription;
+
+                lightbox.classList.remove(
+                    "pointer-events-none",
+                    "invisible",
+                    "opacity-0");
+
+                lightbox.classList.add(
+                    "visible",
+                    "opacity-100");
+
+                lightbox.setAttribute(
+                    "aria-hidden",
+                    "false");
+
+                lockPageScroll();
+
+                window.requestAnimationFrame(() => {
+                    closeButton.focus();
+                });
+            };
+
+            const closeLightbox = () => {
+                if (
+                    lightbox.getAttribute(
+                        "aria-hidden") === "true"
+                ) {
+                    return;
+                }
+
+                lightbox.classList.add(
+                    "pointer-events-none",
+                    "invisible",
+                    "opacity-0");
+
+                lightbox.classList.remove(
+                    "visible",
+                    "opacity-100");
+
+                lightbox.setAttribute(
+                    "aria-hidden",
+                    "true");
+
+                unlockPageScroll();
+
+                window.setTimeout(() => {
+                    lightboxImage.src = "";
+                    lightboxImage.alt = "";
+                    lightboxDownload.href = "#";
+                    lightboxDownload.download = "";
+                    lightboxFile.textContent =
+                        "NO_FILE_SELECTED";
+                    lightboxTitle.textContent =
+                        "Screenshot Preview";
+                    lightboxDescription.textContent =
+                        "Select a gallery record to load its visual description.";
+                }, 300);
+
+                if (
+                    lastFocusedElement
+                    instanceof HTMLElement
+                ) {
+                    lastFocusedElement.focus();
+                }
+            };
+
+            galleryTriggers.forEach(trigger => {
+                trigger.addEventListener(
+                    "click",
+                    () => openLightbox(trigger));
+            });
+
+            closeButton.addEventListener(
+                "click",
+                closeLightbox);
+
+            secondaryCloseButton.addEventListener(
+                "click",
+                closeLightbox);
+
+            lightbox.addEventListener(
+                "click",
+                event => {
+                    if (
+                        event.target
+                        instanceof HTMLElement
+                        && event.target.hasAttribute(
+                            "data-gallery-backdrop")
+                    ) {
+                        closeLightbox();
+                    }
+                });
+
+            document.addEventListener(
+                "keydown",
+                event => {
+                    const isOpen =
+                        lightbox.getAttribute(
+                            "aria-hidden") === "false";
+
+                    if (!isOpen) {
+                        return;
+                    }
+
+                    if (event.key === "Escape") {
+                        closeLightbox();
+                        return;
+                    }
+
+                    if (event.key !== "Tab") {
+                        return;
+                    }
+
+                    const focusableElements = [
+                        closeButton,
+                        lightboxDownload,
+                        secondaryCloseButton
+                    ].filter(element => {
+                        return !element.hasAttribute(
+                            "disabled");
+                    });
+
+                    const firstElement =
+                        focusableElements[0];
+
+                    const lastElement =
+                        focusableElements[
+                            focusableElements.length - 1
+                        ];
+
+                    if (
+                        event.shiftKey
+                        && document.activeElement
+                            === firstElement
+                    ) {
+                        event.preventDefault();
+                        lastElement.focus();
+                    }
+                    else if (
+                        !event.shiftKey
+                        && document.activeElement
+                            === lastElement
+                    ) {
+                        event.preventDefault();
+                        firstElement.focus();
+                    }
+                });
+        })();
+    </script>
+}

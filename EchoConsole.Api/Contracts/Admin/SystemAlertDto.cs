@@ -1,10 +1,16 @@
-﻿namespace EchoConsole.Api.Contracts.Admin;
+namespace EchoConsole.Api.Contracts.Admin;
 
 public sealed class SystemAlertDto
 {
     public int Id { get; set; }
 
     public string Severity { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    public string ErrorTypeCode { get; set; } = string.Empty;
+
+    public string? BuildVersion { get; set; }
 
     public string Message { get; set; } = string.Empty;
 

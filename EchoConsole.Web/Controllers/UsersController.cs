@@ -27,49 +27,66 @@ public sealed class UsersController : Controller
         int pageNumber = 1,
         CancellationToken cancellationToken = default)
     {
-        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        pageNumber = Math.Max(1, pageNumber);
+        var normalizedSearch = string.IsNullOrWhiteSpace(searchTerm)
+            ? null
+            : searchTerm.Trim();
 
         try
         {
             var response = await _usersApiClient.GetUsersAsync(
-                searchTerm,
+                normalizedSearch,
                 pageNumber,
                 DefaultPageSize,
                 cancellationToken);
 
             var model = new UsersIndexViewModel
             {
-                SearchTerm = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm.Trim(),
-                PageNumber = response.PageNumber > 0 ? response.PageNumber : pageNumber,
-                PageSize = response.PageSize > 0 ? response.PageSize : DefaultPageSize,
+                SearchTerm = normalizedSearch,
+                PageNumber = response.PageNumber > 0
+                    ? response.PageNumber
+                    : pageNumber,
+                PageSize = response.PageSize > 0
+                    ? response.PageSize
+                    : DefaultPageSize,
                 TotalCount = response.TotalCount,
-                TotalPages = response.TotalPages > 0 ? response.TotalPages : 1,
-                Items = response.Items ?? Array.Empty<UserApiDto>()
+                TotalPages = response.TotalPages > 0
+                    ? response.TotalPages
+                    : 1,
+                AdminCount = response.AdminCount,
+                ViewerCount = response.ViewerCount,
+                Items = response.Items
             };
 
-            ViewData["Title"] = "USER MANAGEMENT";
-            ViewData["TitleResourceKey"] = "Users_PageTitle";
-
+            SetPageTitle();
             return View(model);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load users page.");
+            _logger.LogError(
+                ex,
+                "Failed to load users operations page.");
 
-            var fallbackModel = new UsersIndexViewModel
+            SetPageTitle();
+
+            return View(new UsersIndexViewModel
             {
-                SearchTerm = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm.Trim(),
+                SearchTerm = normalizedSearch,
                 PageNumber = pageNumber,
                 PageSize = DefaultPageSize,
-                TotalCount = 0,
-                TotalPages = 1,
-                Items = Array.Empty<UserApiDto>()
-            };
-
-            ViewData["Title"] = "USER MANAGEMENT";
-            ViewData["TitleResourceKey"] = "Users_PageTitle";
-
-            return View(fallbackModel);
+                TotalPages = 1
+            });
         }
+    }
+
+    private void SetPageTitle()
+    {
+        ViewData["Title"] = "USER MANAGEMENT";
+        ViewData["TitleResourceKey"] = "Users_PageTitle";
     }
 }

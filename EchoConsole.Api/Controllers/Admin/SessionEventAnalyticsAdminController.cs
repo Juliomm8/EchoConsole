@@ -1,4 +1,5 @@
-﻿using EchoConsole.Api.Security;
+using EchoConsole.Api.Contracts.Admin.SessionEventAnalytics;
+using EchoConsole.Api.Security;
 using EchoConsole.Api.Services.SessionEventAnalytics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,7 @@ public sealed class SessionEventAnalyticsAdminController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAnalytics(
+    public async Task<ActionResult<AdminSessionEventAnalyticsDto>> GetAnalytics(
         [FromQuery] string? buildVersion,
         [FromQuery] DateTimeOffset? fromUtc,
         [FromQuery] DateTimeOffset? toUtcExclusive,

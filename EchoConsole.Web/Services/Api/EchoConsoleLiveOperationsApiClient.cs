@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 using EchoConsole.Web.Models.Api.LiveOperations;
 
@@ -14,7 +14,7 @@ public sealed class EchoConsoleLiveOperationsApiClient
         ILogger<EchoConsoleLiveOperationsApiClient> logger)
     {
         _httpClient = httpClientFactory.CreateClient(
-            "EchoConsoleApiAdmin");
+            EchoConsoleApiClientNames.Admin);
 
         _logger = logger;
     }
@@ -52,6 +52,11 @@ public sealed class EchoConsoleLiveOperationsApiClient
                 "Failed to deserialize live operations snapshot.");
 
             return null;
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using EchoConsole.Web.Models.Api.Profile;
 
@@ -13,7 +13,7 @@ public sealed class EchoConsoleProfileApiClient
         IHttpClientFactory httpClientFactory,
         ILogger<EchoConsoleProfileApiClient> logger)
     {
-        _httpClient = httpClientFactory.CreateClient("EchoConsoleApiAdmin");
+        _httpClient = httpClientFactory.CreateClient(EchoConsoleApiClientNames.Admin);
         _logger = logger;
     }
 
@@ -26,6 +26,11 @@ public sealed class EchoConsoleProfileApiClient
             return await _httpClient.GetFromJsonAsync<UserProfileApiModel>(
                 $"/api/profile/dashboard/{userId}",
                 cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -48,6 +53,11 @@ public sealed class EchoConsoleProfileApiClient
             return await _httpClient.GetFromJsonAsync<UserSessionHistoryPageApiModel>(
                 $"/api/profile/sessions/{userId}?page={page}&pageSize={pageSize}",
                 cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -107,6 +117,11 @@ public sealed class EchoConsoleProfileApiClient
             return await response.Content.ReadFromJsonAsync<UserSessionDetailApiModel>(
                 cancellationToken: cancellationToken);
         }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(
@@ -135,6 +150,11 @@ public sealed class EchoConsoleProfileApiClient
                 "claim installation",
                 request.InstallationId,
                 cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -170,6 +190,11 @@ public sealed class EchoConsoleProfileApiClient
                 "unlink installation",
                 request.InstallationId,
                 cancellationToken);
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -252,6 +277,11 @@ public sealed class EchoConsoleProfileApiClient
                 Success = false,
                 Message = "The platform could not update your profile."
             };
+        }
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

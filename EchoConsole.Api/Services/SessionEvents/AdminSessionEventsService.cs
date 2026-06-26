@@ -1,4 +1,4 @@
-﻿using EchoConsole.Api.Contracts.Admin.SessionEvents;
+using EchoConsole.Api.Contracts.Admin.SessionEvents;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +7,8 @@ namespace EchoConsole.Api.Services.SessionEvents;
 
 public sealed class AdminSessionEventsService : IAdminSessionEventsService
 {
-    private const int DefaultPageSize = 25;
-    private const int MaximumPageSize = 100;
+    private const int DefaultPageSize = 50;
+    private const int MaximumPageSize = 50;
 
     private readonly EchoConsoleDbContext _dbContext;
     private readonly ILogger<AdminSessionEventsService> _logger;
