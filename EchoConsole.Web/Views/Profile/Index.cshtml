@@ -96,61 +96,56 @@
                         <span data-profile-status class="mt-1 block text-green-300">@identity.Status</span>
                     </div>
                     <div class="border border-slate-800 bg-black/80 px-4 py-3">
-                        <span class="block text-slate-600">SHORTCUTS</span>
+                        <span class="block text-slate-600">NAVIGATION</span>
                         <span class="mt-1 block text-green-300">ALT 1-3</span>
                     </div>
                 </div>
             </div>
         </header>
 
-        <nav class="mt-4 border border-slate-800 bg-[#020402] p-2"
-             role="tablist"
-             aria-label="Player profile sections">
-            <div class="grid gap-2 lg:grid-cols-3">
-                <button type="button"
-                        role="tab"
-                        id="profile-tab-identity"
-                        aria-controls="profile-panel-identity"
-                        aria-selected="@(initialSection == "identity" ? "true" : "false")"
-                        data-profile-tab="identity"
-                        class="border px-4 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] transition">
-                    <span class="block text-green-300">[ 01 IDENTITY ]</span>
-                    <span class="mt-2 block text-[9px] font-normal text-slate-600">PLAYER CARD // ALT+1</span>
-                </button>
-
-                <button type="button"
-                        role="tab"
-                        id="profile-tab-security"
-                        aria-controls="profile-panel-security"
-                        aria-selected="@(initialSection == "security" ? "true" : "false")"
-                        data-profile-tab="security"
-                        class="border px-4 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] transition">
-                    <span class="block text-green-300">[ 02 SECURITY ]</span>
-                    <span class="mt-2 block text-[9px] font-normal text-slate-600">ACCESS CONTROL // ALT+2</span>
-                </button>
-
-                <button type="button"
-                        role="tab"
-                        id="profile-tab-fleet"
-                        aria-controls="profile-panel-fleet"
-                        aria-selected="@(initialSection == "fleet" ? "true" : "false")"
-                        data-profile-tab="fleet"
-                        class="border px-4 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] transition">
-                    <span class="block text-green-300">[ 03 FLEET ]</span>
-                    <span class="mt-2 block text-[9px] font-normal text-slate-600">LINKED HARDWARE // ALT+3</span>
-                </button>
+        <nav data-profile-anchor-bar
+             aria-label="Player dossier navigation"
+             class="sticky z-30 mt-4 border border-green-500/20 bg-black/95 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.72)] backdrop-blur-xl">
+            <div class="flex gap-2 overflow-x-auto">
+                <a href="#profile-section"
+                   data-profile-anchor="identity"
+                   class="shrink-0 border border-green-500/30 bg-green-500/10 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-green-200 transition hover:border-green-300 hover:bg-green-500/15 sm:flex-1 sm:text-center">
+                    [ PERFIL ]
+                    <span class="ml-2 text-[8px] text-slate-600">ALT+1</span>
+                </a>
+                <a href="#security-section"
+                   data-profile-anchor="security"
+                   class="shrink-0 border border-slate-800 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-green-500/40 hover:text-green-200 sm:flex-1 sm:text-center">
+                    [ ACCESO &amp; SEGURIDAD ]
+                    <span class="ml-2 text-[8px] text-slate-600">ALT+2</span>
+                </a>
+                <a href="#devices-section"
+                   data-profile-anchor="fleet"
+                   class="shrink-0 border border-slate-800 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-green-500/40 hover:text-green-200 sm:flex-1 sm:text-center">
+                    [ MIS DISPOSITIVOS ]
+                    <span class="ml-2 text-[8px] text-slate-600">ALT+3</span>
+                </a>
             </div>
         </nav>
 
-        <main class="mt-4">
-            <section id="profile-panel-identity"
-                     role="tabpanel"
-                     aria-labelledby="profile-tab-identity"
-                     data-profile-panel="identity"
-                     class="@(initialSection == "identity" ? string.Empty : "hidden")">
+        <main class="mt-8 space-y-16 pb-16">
+            <section id="profile-section"
+                     data-profile-section="identity"
+                     class="scroll-mt-40">
+                <div class="mb-5 flex flex-col gap-3 border-b border-green-500/20 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">[ PERFIL ]</p>
+                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
+                            IDENTIDAD DEL JUGADOR
+                        </h2>
+                    </div>
+                    <span data-identity-loading class="text-[9px] uppercase tracking-[0.18em] text-amber-400">
+                        SYNCHRONIZING
+                    </span>
+                </div>
 
                 <div class="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-                    <article class="relative overflow-hidden border border-green-500/25 bg-[#020602] p-6 shadow-[0_0_32px_rgba(57,255,20,0.07)] sm:p-8">
+                    <article class="relative overflow-hidden border border-green-500/25 bg-green-950/30 p-6 shadow-[0_0_32px_rgba(57,255,20,0.07)] sm:p-8">
                         <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
 
                         <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
@@ -161,9 +156,9 @@
 
                             <div class="min-w-0 flex-1">
                                 <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER IDENTIFICATION</p>
-                                <h2 data-player-alias class="mt-2 truncate font-display text-3xl uppercase tracking-[0.1em] text-green-100">
+                                <h3 data-player-alias class="mt-2 truncate font-display text-3xl uppercase tracking-[0.1em] text-green-100">
                                     @identity.Alias
-                                </h2>
+                                </h3>
                                 <p data-player-name class="mt-2 text-sm text-slate-400">@identity.Name</p>
 
                                 <div class="mt-5 flex flex-wrap gap-2">
@@ -181,61 +176,58 @@
                         </div>
 
                         <div class="mt-8 grid gap-3 border-t border-green-500/15 pt-5 text-[10px] uppercase tracking-[0.18em] sm:grid-cols-2">
-                            <div class="border border-slate-800 bg-black p-4">
+                            <div class="border border-green-500/15 bg-black/80 p-4">
                                 <span class="block text-slate-600">EMAIL CHANNEL</span>
                                 <span data-player-email class="mt-2 block truncate text-slate-300">@identity.Email</span>
                             </div>
-                            <div class="border border-slate-800 bg-black p-4">
+                            <div class="border border-green-500/15 bg-black/80 p-4">
                                 <span class="block text-slate-600">EMAIL STATUS</span>
                                 <span data-email-confirmed class="mt-2 block @(identity.EmailConfirmed ? "text-green-300" : "text-amber-300")">
                                     @(identity.EmailConfirmed ? "VERIFIED" : "PENDING")
                                 </span>
                             </div>
-                            <div class="border border-slate-800 bg-black p-4">
+                            <div class="border border-green-500/15 bg-black/80 p-4">
                                 <span class="block text-slate-600">ENROLLED</span>
                                 <span data-created-at class="mt-2 block text-slate-300">@identity.CreatedAtUtc.ToString("yyyy-MM-dd")</span>
                             </div>
-                            <div class="border border-slate-800 bg-black p-4">
+                            <div class="border border-green-500/15 bg-black/80 p-4">
                                 <span class="block text-slate-600">LANGUAGE</span>
                                 <span data-player-language class="mt-2 block text-slate-300">@selectedLanguage.ToUpperInvariant()</span>
                             </div>
                         </div>
                     </article>
 
-                    <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
-                        <div class="flex items-end justify-between gap-4">
-                            <div>
-                                <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">COSMIC DINER TELEMETRY</p>
-                                <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVITY SUMMARY</h2>
-                            </div>
-                            <span data-identity-loading class="text-[9px] uppercase tracking-[0.18em] text-amber-400">SYNCHRONIZING</span>
+                    <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">COSMIC DINER TELEMETRY</p>
+                            <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVITY SUMMARY</h3>
                         </div>
 
                         <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                            <div class="border border-green-500/20 bg-green-500/[0.04] p-5 sm:col-span-2">
+                            <div class="border border-green-500/20 bg-black/70 p-5 sm:col-span-2">
                                 <span class="text-[10px] uppercase tracking-[0.22em] text-green-600">TOTAL PLAY TIME</span>
                                 <div class="mt-3 flex items-end gap-3">
                                     <strong data-total-play-time class="font-display text-5xl tracking-[0.08em] text-green-200 sm:text-7xl">--</strong>
                                     <span class="pb-2 text-xs uppercase tracking-[0.2em] text-slate-600">HOURS</span>
                                 </div>
                             </div>
-                            <div class="border border-slate-800 bg-black p-5">
+                            <div class="border border-green-500/15 bg-black/70 p-5">
                                 <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">COMPLETED SESSIONS</span>
                                 <strong data-total-sessions class="mt-3 block font-display text-3xl text-green-300">--</strong>
                             </div>
-                            <div class="border border-slate-800 bg-black p-5">
+                            <div class="border border-green-500/15 bg-black/70 p-5">
                                 <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LINKED NODES</span>
                                 <strong data-linked-nodes class="mt-3 block font-display text-3xl text-green-300">--</strong>
                             </div>
-                            <div class="border border-slate-800 bg-black p-5">
+                            <div class="border border-green-500/15 bg-black/70 p-5">
                                 <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LONGEST SESSION</span>
                                 <strong data-longest-session class="mt-3 block font-display text-3xl text-green-300">--</strong>
                             </div>
-                            <div class="border border-slate-800 bg-black p-5">
+                            <div class="border border-green-500/15 bg-black/70 p-5">
                                 <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">FAVORITE BUILD</span>
                                 <strong data-favorite-build class="mt-3 block truncate font-display text-2xl text-green-300">--</strong>
                             </div>
-                            <div class="border border-slate-800 bg-black p-5 sm:col-span-2">
+                            <div class="border border-green-500/15 bg-black/70 p-5 sm:col-span-2">
                                 <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LAST ACTIVITY</span>
                                 <strong data-last-activity class="mt-3 block text-sm uppercase tracking-[0.12em] text-green-300">--</strong>
                             </div>
@@ -244,16 +236,16 @@
                         <a asp-controller="Profile"
                            asp-action="Sessions"
                            class="mt-5 inline-flex w-full items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15">
-                            OPEN COMPLETE SESSION ARCHIVE
+                            [ OPEN COMPLETE SESSION ARCHIVE ]
                         </a>
                     </section>
                 </div>
 
-                <section class="mt-4 border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                <section class="mt-4 border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
                     <div class="grid gap-8 xl:grid-cols-[0.65fr_1.35fr]">
                         <div>
                             <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER CONFIGURATION</p>
-                            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">IDENTITY CHANNEL</h2>
+                            <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">IDENTITY CHANNEL</h3>
                             <p class="mt-4 text-sm leading-7 text-slate-500">
                                 Configure your public alias, operator portrait, terminal palette and interface language.
                             </p>
@@ -272,7 +264,7 @@
                                        maxlength="32"
                                        autocomplete="nickname"
                                        value="@identity.Alias"
-                                       class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-slate-700 focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20" />
+                                       class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-slate-700 focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20" />
                             </div>
 
                             <fieldset>
@@ -281,13 +273,13 @@
                                     @for (var index = 1; index <= 6; index++)
                                     {
                                         var avatarKey = $"operator-{index:D2}";
-                                        <label class="cursor-pointer border border-slate-800 bg-black p-4 transition hover:border-green-500/40 has-[:checked]:border-green-400 has-[:checked]:bg-green-500/10">
+                                        <label class="cursor-pointer border border-green-500/15 bg-green-950/30 p-4 transition hover:border-green-500/40 has-[:checked]:border-green-400 has-[:checked]:bg-green-500/10">
                                             <input type="radio"
                                                    name="AvatarKey"
                                                    value="@avatarKey"
                                                    checked="@(selectedAvatarKey == avatarKey)"
                                                    class="sr-only" />
-                                            <span class="flex h-12 items-center justify-center border border-slate-800 font-display text-sm tracking-[0.15em] text-green-300">OP-@index.ToString("D2")</span>
+                                            <span class="flex h-12 items-center justify-center border border-green-500/15 bg-black/60 font-display text-sm tracking-[0.15em] text-green-300">OP-@index.ToString("D2")</span>
                                             <span class="mt-3 block text-center text-[9px] uppercase tracking-[0.15em] text-slate-500">@avatarKey</span>
                                         </label>
                                     }
@@ -297,19 +289,19 @@
                             <fieldset>
                                 <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">TERMINAL THEME</legend>
                                 <div class="grid gap-3 sm:grid-cols-2">
-                                    <label class="cursor-pointer border border-green-500/20 bg-black p-4 transition has-[:checked]:border-green-300 has-[:checked]:bg-green-500/10">
+                                    <label class="cursor-pointer border border-green-500/20 bg-green-950/30 p-4 transition has-[:checked]:border-green-300 has-[:checked]:bg-green-500/10">
                                         <input type="radio" name="Theme" value="phosphor-green" checked="@(selectedTheme == "phosphor-green")" class="sr-only" />
                                         <span class="block text-xs font-bold uppercase tracking-[0.18em] text-green-300">PHOSPHOR GREEN</span>
                                     </label>
-                                    <label class="cursor-pointer border border-amber-500/20 bg-black p-4 transition has-[:checked]:border-amber-300 has-[:checked]:bg-amber-500/10">
+                                    <label class="cursor-pointer border border-amber-500/20 bg-green-950/30 p-4 transition has-[:checked]:border-amber-300 has-[:checked]:bg-amber-500/10">
                                         <input type="radio" name="Theme" value="amber-monitor" checked="@(selectedTheme == "amber-monitor")" class="sr-only" />
                                         <span class="block text-xs font-bold uppercase tracking-[0.18em] text-amber-300">AMBER MONITOR</span>
                                     </label>
-                                    <label class="cursor-pointer border border-cyan-500/20 bg-black p-4 transition has-[:checked]:border-cyan-300 has-[:checked]:bg-cyan-500/10">
+                                    <label class="cursor-pointer border border-cyan-500/20 bg-green-950/30 p-4 transition has-[:checked]:border-cyan-300 has-[:checked]:bg-cyan-500/10">
                                         <input type="radio" name="Theme" value="cold-cyan" checked="@(selectedTheme == "cold-cyan")" class="sr-only" />
                                         <span class="block text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">COLD CYAN</span>
                                     </label>
-                                    <label class="cursor-pointer border border-slate-500/30 bg-black p-4 transition has-[:checked]:border-slate-200 has-[:checked]:bg-slate-500/10">
+                                    <label class="cursor-pointer border border-slate-500/30 bg-green-950/30 p-4 transition has-[:checked]:border-slate-200 has-[:checked]:bg-slate-500/10">
                                         <input type="radio" name="Theme" value="monochrome-crt" checked="@(selectedTheme == "monochrome-crt")" class="sr-only" />
                                         <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-300">MONOCHROME CRT</span>
                                     </label>
@@ -320,7 +312,7 @@
                                 <label for="profileLanguage" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">INTERFACE LANGUAGE</label>
                                 <select id="profileLanguage"
                                         name="PreferredLanguage"
-                                        class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60">
+                                        class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60">
                                     <option value="en" selected="@(selectedLanguage == "en")">ENGLISH</option>
                                     <option value="es" selected="@(selectedLanguage == "es")">ESPAÑOL</option>
                                 </select>
@@ -329,22 +321,30 @@
                             <button type="submit"
                                     data-identity-submit
                                     class="inline-flex w-full items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15 disabled:cursor-wait disabled:opacity-50">
-                                APPLY TERMINAL PROFILE
+                                [ APPLY TERMINAL PROFILE ]
                             </button>
                         </form>
                     </div>
                 </section>
             </section>
 
-            <section id="profile-panel-security"
-                     role="tabpanel"
-                     aria-labelledby="profile-tab-security"
-                     data-profile-panel="security"
-                     class="@(initialSection == "security" ? string.Empty : "hidden")">
+            <section id="security-section"
+                     data-profile-section="security"
+                     class="scroll-mt-40">
+                <div class="mb-5 border-b border-green-500/20 pb-5">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">[ ACCESO &amp; SEGURIDAD ]</p>
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
+                        CONTROL DE CREDENCIALES
+                    </h2>
+                    <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+                        Rotate local credentials and inspect every authenticated terminal connected to your account.
+                    </p>
+                </div>
+
                 <div class="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
-                    <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                    <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
                         <p class="text-[10px] uppercase tracking-[0.3em] text-amber-500">CREDENTIAL ROTATION</p>
-                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">SECURITY CHANNEL</h2>
+                        <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">SECURITY CHANNEL</h3>
 
                         <div data-password-unavailable class="mt-6 hidden border border-amber-500/20 bg-amber-500/[0.04] p-4 text-sm leading-6 text-amber-200">
                             This account currently authenticates through an external provider and has no local password.
@@ -353,38 +353,31 @@
                         <form data-password-form class="mt-6 space-y-4">
                             <div>
                                 <label for="currentPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">CURRENT PASSWORD</label>
-                                <input id="currentPassword" name="CurrentPassword" type="password" autocomplete="current-password" class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
+                                <input id="currentPassword" name="CurrentPassword" type="password" autocomplete="current-password" class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
                             </div>
                             <div>
                                 <label for="newPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">NEW PASSWORD</label>
-                                <input id="newPassword" name="NewPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
+                                <input id="newPassword" name="NewPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
                             </div>
                             <div>
                                 <label for="confirmPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">CONFIRM PASSWORD</label>
-                                <input id="confirmPassword" name="ConfirmPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
+                                <input id="confirmPassword" name="ConfirmPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
                             </div>
                             <button type="submit"
                                     data-password-submit
                                     class="w-full border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-amber-200 transition hover:border-amber-400 hover:bg-amber-500/15 disabled:cursor-wait disabled:opacity-50">
-                                ROTATE CREDENTIALS
+                                [ ROTATE CREDENTIALS ]
                             </button>
                         </form>
                     </section>
 
-                    <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                            <div>
-                                <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">AUTHENTICATED TERMINALS</p>
-                                <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVE SESSIONS</h2>
-                            </div>
-                            <button type="button"
-                                    data-terminate-sessions
-                                    class="border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.17em] text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-40">
-                                TERMINATE ALL OTHER SESSIONS
-                            </button>
+                    <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">AUTHENTICATED TERMINALS</p>
+                            <h3 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVE SESSIONS</h3>
                         </div>
 
-                        <div data-security-loading class="mt-6 border border-slate-800 bg-black p-6 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
+                        <div data-security-loading class="mt-6 border border-green-500/15 bg-black/70 p-6 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
                             QUERYING AUTHENTICATION MATRIX
                         </div>
                         <div data-session-list class="mt-6 space-y-3"></div>
@@ -392,35 +385,54 @@
                 </div>
             </section>
 
-            <section id="profile-panel-fleet"
-                     role="tabpanel"
-                     aria-labelledby="profile-tab-fleet"
-                     data-profile-panel="fleet"
-                     class="@(initialSection == "fleet" ? string.Empty : "hidden")">
-                <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER HARDWARE INVENTORY</p>
-                            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">LINKED FLEET</h2>
-                            <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
-                                Telemetry status is controlled by the server. Players can only remove nodes from their account.
-                            </p>
-                        </div>
-                        <div class="border border-green-500/20 bg-green-500/[0.04] px-5 py-4 text-center">
-                            <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">LINKED NODES</span>
-                            <strong data-fleet-count class="mt-1 block font-display text-2xl text-green-300">--</strong>
-                        </div>
+            <section id="devices-section"
+                     data-profile-section="fleet"
+                     class="scroll-mt-40">
+                <div class="mb-5 flex flex-col gap-4 border-b border-green-500/20 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">[ MIS DISPOSITIVOS ]</p>
+                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
+                            INVENTARIO DE HARDWARE
+                        </h2>
+                        <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+                            Telemetry status is controlled by the server. Players can only remove nodes from their account.
+                        </p>
                     </div>
+                    <div class="border border-green-500/20 bg-green-950/30 px-5 py-4 text-center">
+                        <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">LINKED NODES</span>
+                        <strong data-fleet-count class="mt-1 block font-display text-2xl text-green-300">--</strong>
+                    </div>
+                </div>
 
-                    <div data-fleet-loading class="mt-6 border border-slate-800 bg-black p-8 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
+                <section class="border border-green-500/20 bg-green-950/30 p-5 sm:p-8">
+                    <div data-fleet-loading class="border border-green-500/15 bg-black/70 p-8 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
                         SCANNING OWNED HARDWARE
                     </div>
-                    <div data-fleet-empty class="mt-6 hidden border border-slate-800 bg-black p-10 text-center">
+                    <div data-fleet-empty class="hidden border border-green-500/15 bg-black/70 p-10 text-center">
                         <p class="font-display text-lg uppercase tracking-[0.12em] text-slate-400">NO LINKED HARDWARE</p>
                         <p class="mt-3 text-sm text-slate-600">No Cosmic Diner installations are currently assigned to this player.</p>
                     </div>
-                    <div data-fleet-list class="mt-6 grid gap-3 xl:grid-cols-2"></div>
+                    <div data-fleet-list class="grid gap-3 xl:grid-cols-2"></div>
                 </section>
+            </section>
+
+            <section id="danger-zone"
+                     class="scroll-mt-40 border border-rose-500/25 bg-rose-500/[0.03] p-5 shadow-[0_0_32px_rgba(244,63,94,0.05)] sm:p-8">
+                <div class="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-rose-500">[ DANGER ZONE ]</p>
+                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-rose-100">REMOTE SESSION TERMINATION</h2>
+                        <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+                            Revoke every authenticated browser session except the terminal currently in use. This command cannot be undone.
+                        </p>
+                    </div>
+                    <button type="button"
+                            data-terminate-sessions
+                            disabled
+                            class="border border-rose-500/40 bg-rose-500/10 px-5 py-4 text-[10px] font-bold uppercase tracking-[0.17em] text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-40">
+                        [ TERMINATE ALL OTHER SESSIONS ]
+                    </button>
+                </div>
             </section>
         </main>
     </div>

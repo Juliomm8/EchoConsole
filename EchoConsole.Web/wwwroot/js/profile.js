@@ -22,12 +22,21 @@
         unlinkDevice: root.dataset.unlinkDeviceUrl
     };
 
-    const tabs = Array.from(
-        root.querySelectorAll("[data-profile-tab]")
+    const anchorBar = root.querySelector("[data-profile-anchor-bar]");
+
+    const anchorLinks = Array.from(
+        root.querySelectorAll("[data-profile-anchor]")
     );
 
-    const panels = Array.from(
-        root.querySelectorAll("[data-profile-panel]")
+    const sections = Array.from(
+        root.querySelectorAll("[data-profile-section]")
+    );
+
+    const sectionElements = new Map(
+        sections.map(section => [
+            normalizeSection(section.dataset.profileSection),
+            section
+        ])
     );
 
     const identityForm = root.querySelector("[data-identity-form]");
@@ -35,6 +44,7 @@
     const terminateSessionsButton = root.querySelector("[data-terminate-sessions]");
     const fleetList = root.querySelector("[data-fleet-list]");
     const loadedSections = new Set();
+    const loadingPromises = new Map();
 
     const sectionLoaders = {
         identity: loadIdentity,
@@ -42,63 +52,73 @@
         fleet: loadFleet
     };
 
+    const sectionIds = {
+        identity: "profile-section",
+        security: "security-section",
+        fleet: "devices-section"
+    };
+
     let modalResolver = null;
+    let activeSection = "";
+    let stickyOffset = 0;
 
     initialize();
 
     function initialize() {
-        bindTabs();
+        bindAnchorNavigation();
         bindKeyboardShortcuts();
         bindIdentityForm();
         bindPasswordForm();
         bindSessionTermination();
         bindFleetActions();
         bindConfirmationModal();
+        bindViewportObservers();
+        syncStickyOffset();
 
-        activateSection(
-            normalizeSection(root.dataset.initialSection),
-            {
+        void ensureSectionLoaded("identity");
+
+        const initialSection = readSectionFromLocation();
+
+        if (initialSection !== "identity") {
+            window.requestAnimationFrame(() => {
+                scrollToSection(initialSection, {
+                    updateUrl: false,
+                    focusAnchor: false
+                });
+            });
+        } else {
+            setActiveAnchor("identity");
+        }
+
+        window.addEventListener("resize", () => {
+            window.requestAnimationFrame(syncStickyOffset);
+        });
+
+        window.addEventListener("popstate", () => {
+            scrollToSection(readSectionFromLocation(), {
                 updateUrl: false,
-                focusTab: false
-            }
-        );
+                focusAnchor: false
+            });
+        });
+
+        window.addEventListener("hashchange", () => {
+            scrollToSection(readSectionFromLocation(), {
+                updateUrl: false,
+                focusAnchor: false
+            });
+        });
     }
 
-    function bindTabs() {
-        for (const tab of tabs) {
-            tab.addEventListener("click", () => {
-                activateSection(
-                    normalizeSection(tab.dataset.profileTab),
-                    {
-                        updateUrl: true,
-                        focusTab: false
-                    }
-                );
-            });
-
-            tab.addEventListener("keydown", event => {
-                const currentIndex = tabs.indexOf(tab);
-                let nextIndex = currentIndex;
-
-                if (event.key === "ArrowRight") {
-                    nextIndex = (currentIndex + 1) % tabs.length;
-                } else if (event.key === "ArrowLeft") {
-                    nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-                } else if (event.key === "Home") {
-                    nextIndex = 0;
-                } else if (event.key === "End") {
-                    nextIndex = tabs.length - 1;
-                } else {
-                    return;
-                }
-
+    function bindAnchorNavigation() {
+        for (const link of anchorLinks) {
+            link.addEventListener("click", event => {
                 event.preventDefault();
 
-                activateSection(
-                    normalizeSection(tabs[nextIndex].dataset.profileTab),
+                scrollToSection(
+                    normalizeSection(link.dataset.profileAnchor),
                     {
                         updateUrl: true,
-                        focusTab: true
+                        focusAnchor: false
                     }
                 );
             });
@@ -131,22 +151,270 @@
 
             event.preventDefault();
 
-            activateSection(section, {
+            scrollToSection(section, {
                 updateUrl: true,
-                focusTab: true
+                focusAnchor: true
             });
         });
+    }
 
-        window.addEventListener("popstate", () => {
-            const section = new URL(window.location.href)
-                .searchParams
-                .get("section");
+    function bindViewportObservers() {
+        if (!("IntersectionObserver" in window)) {
+            void Promise.all([
+                ensureSectionLoaded("security"),
+                ensureSectionLoaded("fleet")
+            ]);
 
-            activateSection(normalizeSection(section), {
-                updateUrl: false,
-                focusTab: false
-            });
+            return;
+        }
+
+        const loadingObserver = new IntersectionObserver(
+            entries => {
+                for (const entry of entries) {
+                    if (!entry.isIntersecting) {
+                        continue;
+                    }
+
+                    const section = normalizeSection(
+                        entry.target.dataset.profileSection
+                    );
+
+                    void ensureSectionLoaded(section);
+                    loadingObserver.unobserve(entry.target);
+                }
+            },
+            {
+                rootMargin: "420px 0px",
+                threshold: 0.01
+            }
+        );
+
+        for (const section of sections) {
+            loadingObserver.observe(section);
+        }
+
+        const activeObserver = new IntersectionObserver(
+            entries => {
+                const visibleEntries = entries
+                    .filter(entry => entry.isIntersecting)
+                    .sort(
+                        (left, right) =>
+                            right.intersectionRatio -
+                            left.intersectionRatio
+                    );
+
+                const current = visibleEntries[0];
+
+                if (!current) {
+                    return;
+                }
+
+                setActiveAnchor(
+                    normalizeSection(
+                        current.target.dataset.profileSection
+                    )
+                );
+            },
+            {
+                rootMargin: "-28% 0px -58% 0px",
+                threshold: [0.01, 0.15, 0.35, 0.6]
+            }
+        );
+
+        for (const section of sections) {
+            activeObserver.observe(section);
+        }
+    }
+
+    function scrollToSection(
+        section,
+        options = {}
+    ) {
+        const {
+            updateUrl = true,
+            focusAnchor = false
+        } = options;
+
+        const normalizedSection = normalizeSection(section);
+        const target = sectionElements.get(normalizedSection);
+
+        if (!target) {
+            return;
+        }
+
+        void ensureSectionLoaded(normalizedSection);
+        syncStickyOffset();
+        setActiveAnchor(normalizedSection);
+
+        target.scrollIntoView({
+            behavior: prefersReducedMotion()
+                ? "auto"
+                : "smooth",
+            block: "start"
         });
+
+        if (updateUrl) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("section");
+            url.hash = sectionIds[normalizedSection];
+
+            window.history.pushState(
+                { section: normalizedSection },
+                "",
+                url
+            );
+        }
+
+        if (focusAnchor) {
+            anchorLinks
+                .find(
+                    link =>
+                        normalizeSection(
+                            link.dataset.profileAnchor
+                        ) === normalizedSection
+                )
+                ?.focus();
+        }
+    }
+
+    async function ensureSectionLoaded(section) {
+        const normalizedSection = normalizeSection(section);
+        const loader = sectionLoaders[normalizedSection];
+
+        if (!loader || loadedSections.has(normalizedSection)) {
+            return;
+        }
+
+        const pendingLoad =
+            loadingPromises.get(normalizedSection);
+
+        if (pendingLoad) {
+            await pendingLoad;
+            return;
+        }
+
+        const loadPromise = loader()
+            .finally(() => {
+                loadingPromises.delete(
+                    normalizedSection
+                );
+            });
+
+        loadingPromises.set(
+            normalizedSection,
+            loadPromise
+        );
+
+        await loadPromise;
+    }
+
+    function setActiveAnchor(section) {
+        const normalizedSection = normalizeSection(section);
+
+        if (activeSection === normalizedSection) {
+            return;
+        }
+
+        activeSection = normalizedSection;
+
+        for (const link of anchorLinks) {
+            const isActive =
+                normalizeSection(
+                    link.dataset.profileAnchor
+                ) === normalizedSection;
+
+            link.setAttribute(
+                "aria-current",
+                isActive ? "location" : "false"
+            );
+
+            link.classList.toggle(
+                "border-green-500/30",
+                isActive
+            );
+
+            link.classList.toggle(
+                "bg-green-500/10",
+                isActive
+            );
+
+            link.classList.toggle(
+                "text-green-200",
+                isActive
+            );
+
+            link.classList.toggle(
+                "border-slate-800",
+                !isActive
+            );
+
+            link.classList.toggle(
+                "bg-black",
+                !isActive
+            );
+
+            link.classList.toggle(
+                "text-slate-400",
+                !isActive
+            );
+        }
+    }
+
+    function syncStickyOffset() {
+        if (!anchorBar) {
+            return;
+        }
+
+        const globalTopbar = Array.from(
+            document.querySelectorAll("header.sticky")
+        ).find(header => !root.contains(header));
+
+        const topbarHeight = globalTopbar
+            ? Math.ceil(
+                globalTopbar.getBoundingClientRect().height
+            )
+            : 0;
+
+        stickyOffset = topbarHeight;
+        anchorBar.style.top = `${stickyOffset}px`;
+
+        const sectionOffset =
+            stickyOffset +
+            Math.ceil(
+                anchorBar.getBoundingClientRect().height
+            ) +
+            24;
+
+        for (const section of sections) {
+            section.style.scrollMarginTop =
+                `${sectionOffset}px`;
+        }
+    }
+
+    function readSectionFromLocation() {
+        const hashSection = Object.entries(sectionIds)
+            .find(([, id]) =>
+                window.location.hash === `#${id}`
+            )?.[0];
+
+        if (hashSection) {
+            return normalizeSection(hashSection);
+        }
+
+        const querySection = new URL(
+            window.location.href
+        ).searchParams.get("section");
+
+        return normalizeSection(
+            querySection ??
+            root.dataset.initialSection
+        );
+    }
+
+    function prefersReducedMotion() {
+        return window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
     }
 
     function bindIdentityForm() {
@@ -348,7 +616,11 @@
 
                 loadedSections.delete("fleet");
                 loadedSections.delete("identity");
-                await loadFleet();
+
+                await Promise.all([
+                    loadFleet(),
+                    loadIdentity()
+                ]);
 
                 showToast(
                     response.message ??
@@ -390,58 +662,6 @@
                 closeConfirmation(false);
             }
         });
-    }
-
-    async function activateSection(section, options = {}) {
-        const {
-            updateUrl = true,
-            focusTab = false
-        } = options;
-
-        for (const tab of tabs) {
-            const isActive = tab.dataset.profileTab === section;
-
-            tab.setAttribute(
-                "aria-selected",
-                isActive ? "true" : "false"
-            );
-            tab.tabIndex = isActive ? 0 : -1;
-            tab.classList.toggle("border-green-400", isActive);
-            tab.classList.toggle("bg-green-500/10", isActive);
-            tab.classList.toggle(
-                "shadow-[inset_3px_0_0_rgba(74,222,128,0.8)]",
-                isActive
-            );
-            tab.classList.toggle("border-slate-800", !isActive);
-            tab.classList.toggle("bg-black", !isActive);
-
-            if (isActive && focusTab) {
-                tab.focus();
-            }
-        }
-
-        for (const panel of panels) {
-            const isActive = panel.dataset.profilePanel === section;
-            panel.classList.toggle("hidden", !isActive);
-            panel.hidden = !isActive;
-        }
-
-        if (updateUrl) {
-            const url = new URL(window.location.href);
-            url.searchParams.set("section", section);
-
-            window.history.pushState(
-                { section },
-                "",
-                url
-            );
-        }
-
-        const loader = sectionLoaders[section];
-
-        if (loader && !loadedSections.has(section)) {
-            await loader();
-        }
     }
 
     async function loadIdentity() {
