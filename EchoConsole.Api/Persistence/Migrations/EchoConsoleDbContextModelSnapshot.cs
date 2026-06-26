@@ -454,6 +454,67 @@ namespace EchoConsole.Api.Persistence.Migrations
                     b.ToTable("SystemAlerts");
                 });
 
+            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.UserSession", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("LastSeenAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("MaskedIpAddress")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset?>("RevokedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("RevokedReason")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("SessionKeyHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAtUtc")
+                        .HasDatabaseName("IX_UserSessions_ExpiresAtUtc");
+
+                    b.HasIndex("SessionKeyHash")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserSessions_SessionKeyHash");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_UserSessions_UserId");
+
+                    b.HasIndex("UserId", "RevokedAtUtc", "LastSeenAtUtc")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("IX_UserSessions_UserId_RevokedAtUtc_LastSeenAtUtc");
+
+                    b.ToTable("UserSessions", (string)null);
+                });
+
             modelBuilder.Entity("EchoConsole.Api.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -535,6 +596,16 @@ namespace EchoConsole.Api.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("PreferredLanguage")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)")
+                        .HasDefaultValue("en");
+
+                    b.Property<DateTimeOffset?>("ProfileUpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -663,6 +734,17 @@ namespace EchoConsole.Api.Persistence.Migrations
                     b.Navigation("OwnerUser");
                 });
 
+            modelBuilder.Entity("EchoConsole.Api.Domain.Entities.UserSession", b =>
+                {
+                    b.HasOne("EchoConsole.Api.Domain.Entities.User", "User")
+                        .WithMany("UserSessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.HasOne("EchoConsole.Api.Domain.Entities.User", null)
@@ -708,6 +790,8 @@ namespace EchoConsole.Api.Persistence.Migrations
             modelBuilder.Entity("EchoConsole.Api.Domain.Entities.User", b =>
                 {
                     b.Navigation("Installations");
+
+                    b.Navigation("UserSessions");
                 });
 #pragma warning restore 612, 618
         }
