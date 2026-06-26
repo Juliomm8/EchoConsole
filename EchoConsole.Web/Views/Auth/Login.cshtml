@@ -140,7 +140,7 @@
                             <input asp-for="Password"
                                    id="loginPassword"
                                    autocomplete="current-password"
-                                   class="auth-field pr-24"
+                                   class="auth-field pr-16"
                                    placeholder="@SharedLocalizer["Auth_PasswordPlaceholder"]" />
 
                             <button type="button"
@@ -150,7 +150,7 @@
                                     aria-controls="loginPassword"
                                     aria-pressed="false"
                                     aria-label="@SharedLocalizer["Auth_ShowPassword"]"
-                                    class="absolute inset-y-0 right-3 flex items-center text-[9px] font-bold uppercase tracking-[0.16em] text-green-400 transition hover:text-green-200">
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 whitespace-nowrap text-[9px] font-bold uppercase leading-none tracking-[0.16em] text-green-400 transition hover:text-green-200">
                                 <span data-password-toggle-label>
                                     @SharedLocalizer["Auth_ShowPassword"]
                                 </span>

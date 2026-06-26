@@ -167,6 +167,8 @@ public sealed class SmtpEmailSender : IOtpEmailSender
                     SmtpDeliveryMethod.Network
             };
 
+        message.IsBodyHtml = true;
+
         await smtpClient.SendMailAsync(
             message,
             cancellationToken);
@@ -267,9 +269,8 @@ public sealed class SmtpEmailSender : IOtpEmailSender
             WebUtility.HtmlEncode(
                 NormalizeAlias(alias));
 
-        var safeResetUrl =
-            WebUtility.HtmlEncode(
-                resetUri.AbsoluteUri);
+        var resetUrl =
+            resetUri.AbsoluteUri;
 
         var expirationText =
             FormatExpiration(
@@ -302,7 +303,7 @@ public sealed class SmtpEmailSender : IOtpEmailSender
                                 STATUS: SECURE RESET LINK GENERATED
                             </p>
                             <div style="margin:24px 0;padding:24px;border:1px solid #45d66b;background:#031008;text-align:center;">
-                                <a href="{safeResetUrl}" style="display:inline-block;padding:14px 22px;border:1px solid #45d66b;background:#06150a;color:#7cff9b;text-decoration:none;font-weight:bold;letter-spacing:2px;">
+                                <a href="{resetUrl}" style="display:inline-block;padding:14px 22px;border:1px solid #45d66b;background:#06150a;color:#7cff9b;text-decoration:none;font-weight:bold;letter-spacing:2px;">
                                     &gt; RESET ACCESS CREDENTIAL
                                 </a>
                             </div>
@@ -311,7 +312,7 @@ public sealed class SmtpEmailSender : IOtpEmailSender
                                 If you did not request a password reset, ignore this transmission.
                             </p>
                             <p style="margin:18px 0 0;color:#42664d;font-size:10px;line-height:1.6;word-break:break-all;">
-                                FALLBACK LINK:<br>{safeResetUrl}
+                                FALLBACK LINK:<br>{resetUrl}
                             </p>
                             <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid #16351f;color:#42664d;font-size:10px;letter-spacing:2px;">
                                 ECHO CONSOLE // COSMIC DINER TELEMETRY NETWORK

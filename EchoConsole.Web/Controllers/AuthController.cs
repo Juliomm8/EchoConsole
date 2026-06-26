@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 
@@ -543,21 +544,26 @@ public sealed class AuthController : Controller
                         .GeneratePasswordResetTokenAsync(
                             user);
 
-                var resetUrl = Url.Action(
+                var resetPath = Url.Action(
                     nameof(ResetPassword),
-                    "Auth",
-                    new
-                    {
-                        email = user.Email,
-                        token = resetToken
-                    },
-                    Request.Scheme);
+                    "Auth");
 
-                if (string.IsNullOrWhiteSpace(resetUrl))
+                if (string.IsNullOrWhiteSpace(resetPath))
                 {
                     throw new InvalidOperationException(
-                        "The password reset URL could not be generated.");
+                        "The password reset path could not be generated.");
                 }
+
+                var resetBaseUrl =
+                    $"{Request.Scheme}://{Request.Host}{Request.PathBase}{resetPath}";
+
+                var resetUrl = QueryHelpers.AddQueryString(
+                    resetBaseUrl,
+                    new Dictionary<string, string?>
+                    {
+                        ["email"] = user.Email,
+                        ["token"] = resetToken
+                    });
 
                 await _otpEmailSender
                     .SendPasswordResetAsync(
