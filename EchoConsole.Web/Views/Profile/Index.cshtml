@@ -1,430 +1,455 @@
-@using System.Text.Json
-@model EchoConsole.Web.Models.Profile.ProfileIndexViewModel
+@model EchoConsole.Web.Models.Profile.ProfileViewModel
 
 @{
-    ViewData["Title"] = SharedLocalizer["Profile_PageTitle"].Value;
+    ViewData["Title"] = "PLAYER DOSSIER";
     ViewData["TitleResourceKey"] = "Profile_PageTitle";
 
-    string LocalizedRole(string role) => role switch
+    var initialSection = Model.InitialSection switch
     {
-        "Admin" => SharedLocalizer["Role_Admin"].Value,
-        "Moderator" => SharedLocalizer["Role_Moderator"].Value,
-        "Viewer" => SharedLocalizer["Role_Viewer"].Value,
-        _ => SharedLocalizer["Role_User"].Value
+        "security" => "security",
+        "fleet" => "fleet",
+        _ => "identity"
     };
 
-    string LocalizedStatus(string status) => status switch
+    var identity = Model.IdentityPreview;
+    var alias = string.IsNullOrWhiteSpace(identity.Alias)
+        ? "PLAYER"
+        : identity.Alias.Trim();
+
+    var initials = alias.Length >= 2
+        ? alias[..2].ToUpperInvariant()
+        : alias.ToUpperInvariant();
+
+    var selectedAvatarKey = identity.AvatarKey?.ToLowerInvariant() switch
     {
-        "Active" => SharedLocalizer["Common_Active"].Value,
-        "Suspended" => SharedLocalizer["Common_Suspended"].Value,
-        "Expired" => SharedLocalizer["Status_Expired"].Value,
-        _ => status
+        "operator-01" or "operator-02" or "operator-03" or
+        "operator-04" or "operator-05" or "operator-06" => identity.AvatarKey.ToLowerInvariant(),
+        "avatar-01" => "operator-01",
+        "avatar-02" => "operator-02",
+        "avatar-03" => "operator-03",
+        "avatar-04" => "operator-04",
+        "avatar-05" => "operator-05",
+        "avatar-06" => "operator-06",
+        _ => "operator-01"
     };
 
-    // Device ownership notification state
-    var claimStatusType = TempData["ClaimStatusType"]?.ToString();
-    var claimStatusMessage = TempData["ClaimStatusMessage"]?.ToString();
-    var isClaimSuccess = string.Equals(claimStatusType, "success", StringComparison.OrdinalIgnoreCase);
+    var selectedTheme = identity.Theme?.ToLowerInvariant() switch
+    {
+        "phosphor-green" or "amber-monitor" or
+        "cold-cyan" or "monochrome-crt" => identity.Theme.ToLowerInvariant(),
+        "amber" => "amber-monitor",
+        "cyan" => "cold-cyan",
+        _ => "phosphor-green"
+    };
 
-    // Profile update notification state
-    var profileStatusType = TempData["ProfileStatusType"]?.ToString();
-    var profileStatusMessage = TempData["ProfileStatusMessage"]?.ToString();
-    var isProfileSuccess = string.Equals(profileStatusType, "success", StringComparison.OrdinalIgnoreCase);
-
-    var availableThemes = new[] { "cyan", "fuchsia", "amber" };
-    var availableAvatars = new[] { "avatar-01", "avatar-02", "avatar-03", "avatar-04", "avatar-05" };
-    var unlinkConfirmJson = JsonSerializer.Serialize(
-        SharedLocalizer["Profile_UnlinkConfirm"].Value);
+    var selectedLanguage = string.Equals(
+        identity.PreferredLanguage,
+        "es",
+        StringComparison.OrdinalIgnoreCase)
+            ? "es"
+            : "en";
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1600px] px-6 py-8">
-        <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
-                    @SharedLocalizer["Profile_OperatorIdentity"]
-                </p>
+<div data-profile-root
+     data-initial-section="@initialSection"
+     data-identity-url="@Url.Action("GetIdentity", "Profile")"
+     data-security-url="@Url.Action("GetActiveSessions", "Profile")"
+     data-fleet-url="@Url.Action("GetFleet", "Profile")"
+     data-update-identity-url="@Url.Action("UpdateIdentity", "Profile")"
+     data-change-password-url="@Url.Action("ChangePassword", "Profile")"
+     data-terminate-sessions-url="@Url.Action("TerminateAllOtherSessions", "Profile")"
+     data-unlink-device-url="@Url.Action("UnlinkDevice", "Profile")"
+     class="min-h-screen bg-black text-green-100">
 
-                <h1 class="mt-3 font-display text-4xl uppercase tracking-[0.16em] text-white">
-                    @Model.Alias
-                </h1>
+    <form data-antiforgery-form class="hidden">
+        @Html.AntiForgeryToken()
+    </form>
 
-                <p class="mt-3 max-w-2xl text-sm text-slate-400">
-                    @SharedLocalizer["Profile_HeroSubtitle"]
-                </p>
+    <div class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="relative overflow-hidden border border-green-500/20 bg-black px-5 py-6 shadow-[0_0_36px_rgba(57,255,20,0.06)] sm:px-8">
+            <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(57,255,20,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,20,0.025)_1px,transparent_1px)] bg-[size:28px_28px]"></div>
 
-                <div class="mt-6 flex flex-wrap gap-3">
-                    <span class="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
-                        @SharedLocalizer["Profile_ThemeLabel"]: @Model.Theme
-                    </span>
-
-                    <span class="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-200">
-                        @SharedLocalizer["Profile_RoleLabel"]: @LocalizedRole(Model.Role)
-                    </span>
-
-                    <span class="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
-                        @SharedLocalizer["Profile_StatusLabel"]: @LocalizedStatus(Model.Status)
-                    </span>
+            <div class="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.38em] text-green-500">
+                        DARK SKY STUDIOS // PLAYER TELEMETRY
+                    </p>
+                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.12em] text-green-100 text-glow-cyan sm:text-5xl">
+                        PLAYER DOSSIER
+                    </h1>
+                    <p class="mt-4 max-w-3xl text-sm leading-7 text-slate-500">
+                        Personal telemetry record, linked hardware inventory and access security channel.
+                    </p>
                 </div>
 
-                <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_Installations"]
-                        </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.TotalInstallations.ToString("N0")
-                        </div>
+                <div class="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-[0.18em] sm:grid-cols-4">
+                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
+                        <span class="block text-slate-600">RECORD</span>
+                        <span class="mt-1 block text-green-300">DS-@identity.UserId.ToString("D5")</span>
                     </div>
+                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
+                        <span class="block text-slate-600">CLEARANCE</span>
+                        <span data-profile-role class="mt-1 block text-green-300">@identity.RoleDisplayName</span>
+                    </div>
+                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
+                        <span class="block text-slate-600">STATUS</span>
+                        <span data-profile-status class="mt-1 block text-green-300">@identity.Status</span>
+                    </div>
+                    <div class="border border-slate-800 bg-black/80 px-4 py-3">
+                        <span class="block text-slate-600">SHORTCUTS</span>
+                        <span class="mt-1 block text-green-300">ALT 1-3</span>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_Sessions"]
-                        </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.TotalSessions.ToString("N0")
-                        </div>
-                    </div>
+        <nav class="mt-4 border border-slate-800 bg-[#020402] p-2"
+             role="tablist"
+             aria-label="Player profile sections">
+            <div class="grid gap-2 lg:grid-cols-3">
+                <button type="button"
+                        role="tab"
+                        id="profile-tab-identity"
+                        aria-controls="profile-panel-identity"
+                        aria-selected="@(initialSection == "identity" ? "true" : "false")"
+                        data-profile-tab="identity"
+                        class="border px-4 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] transition">
+                    <span class="block text-green-300">[ 01 IDENTITY ]</span>
+                    <span class="mt-2 block text-[9px] font-normal text-slate-600">PLAYER CARD // ALT+1</span>
+                </button>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_PlayTime"]
-                        </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.TotalPlayTimeLabel
-                        </div>
-                    </div>
+                <button type="button"
+                        role="tab"
+                        id="profile-tab-security"
+                        aria-controls="profile-panel-security"
+                        aria-selected="@(initialSection == "security" ? "true" : "false")"
+                        data-profile-tab="security"
+                        class="border px-4 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] transition">
+                    <span class="block text-green-300">[ 02 SECURITY ]</span>
+                    <span class="mt-2 block text-[9px] font-normal text-slate-600">ACCESS CONTROL // ALT+2</span>
+                </button>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_FavoriteBuild"]
-                        </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.FavoriteBuild
-                        </div>
-                    </div>
+                <button type="button"
+                        role="tab"
+                        id="profile-tab-fleet"
+                        aria-controls="profile-panel-fleet"
+                        aria-selected="@(initialSection == "fleet" ? "true" : "false")"
+                        data-profile-tab="fleet"
+                        class="border px-4 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] transition">
+                    <span class="block text-green-300">[ 03 FLEET ]</span>
+                    <span class="mt-2 block text-[9px] font-normal text-slate-600">LINKED HARDWARE // ALT+3</span>
+                </button>
+            </div>
+        </nav>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_LastActivity"]
+        <main class="mt-4">
+            <section id="profile-panel-identity"
+                     role="tabpanel"
+                     aria-labelledby="profile-tab-identity"
+                     data-profile-panel="identity"
+                     class="@(initialSection == "identity" ? string.Empty : "hidden")">
+
+                <div class="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+                    <article class="relative overflow-hidden border border-green-500/25 bg-[#020602] p-6 shadow-[0_0_32px_rgba(57,255,20,0.07)] sm:p-8">
+                        <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
+
+                        <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+                            <div data-player-avatar
+                                 class="flex h-28 w-28 shrink-0 items-center justify-center border border-green-400/40 bg-green-500/10 font-display text-3xl tracking-[0.12em] text-green-200 shadow-[inset_0_0_24px_rgba(57,255,20,0.08)]">
+                                <span data-player-initials>@initials</span>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER IDENTIFICATION</p>
+                                <h2 data-player-alias class="mt-2 truncate font-display text-3xl uppercase tracking-[0.1em] text-green-100">
+                                    @identity.Alias
+                                </h2>
+                                <p data-player-name class="mt-2 text-sm text-slate-400">@identity.Name</p>
+
+                                <div class="mt-5 flex flex-wrap gap-2">
+                                    <span data-player-role class="border border-green-500/25 bg-green-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-green-300">
+                                        @identity.RoleDisplayName
+                                    </span>
+                                    <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                                        AVATAR: <span data-player-avatar-key>@selectedAvatarKey</span>
+                                    </span>
+                                    <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                                        THEME: <span data-player-theme>@selectedTheme</span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.LastActivityLabel
+
+                        <div class="mt-8 grid gap-3 border-t border-green-500/15 pt-5 text-[10px] uppercase tracking-[0.18em] sm:grid-cols-2">
+                            <div class="border border-slate-800 bg-black p-4">
+                                <span class="block text-slate-600">EMAIL CHANNEL</span>
+                                <span data-player-email class="mt-2 block truncate text-slate-300">@identity.Email</span>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-4">
+                                <span class="block text-slate-600">EMAIL STATUS</span>
+                                <span data-email-confirmed class="mt-2 block @(identity.EmailConfirmed ? "text-green-300" : "text-amber-300")">
+                                    @(identity.EmailConfirmed ? "VERIFIED" : "PENDING")
+                                </span>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-4">
+                                <span class="block text-slate-600">ENROLLED</span>
+                                <span data-created-at class="mt-2 block text-slate-300">@identity.CreatedAtUtc.ToString("yyyy-MM-dd")</span>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-4">
+                                <span class="block text-slate-600">LANGUAGE</span>
+                                <span data-player-language class="mt-2 block text-slate-300">@selectedLanguage.ToUpperInvariant()</span>
+                            </div>
                         </div>
+                    </article>
+
+                    <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                        <div class="flex items-end justify-between gap-4">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">COSMIC DINER TELEMETRY</p>
+                                <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVITY SUMMARY</h2>
+                            </div>
+                            <span data-identity-loading class="text-[9px] uppercase tracking-[0.18em] text-amber-400">SYNCHRONIZING</span>
+                        </div>
+
+                        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                            <div class="border border-green-500/20 bg-green-500/[0.04] p-5 sm:col-span-2">
+                                <span class="text-[10px] uppercase tracking-[0.22em] text-green-600">TOTAL PLAY TIME</span>
+                                <div class="mt-3 flex items-end gap-3">
+                                    <strong data-total-play-time class="font-display text-5xl tracking-[0.08em] text-green-200 sm:text-7xl">--</strong>
+                                    <span class="pb-2 text-xs uppercase tracking-[0.2em] text-slate-600">HOURS</span>
+                                </div>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-5">
+                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">COMPLETED SESSIONS</span>
+                                <strong data-total-sessions class="mt-3 block font-display text-3xl text-green-300">--</strong>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-5">
+                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LINKED NODES</span>
+                                <strong data-linked-nodes class="mt-3 block font-display text-3xl text-green-300">--</strong>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-5">
+                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LONGEST SESSION</span>
+                                <strong data-longest-session class="mt-3 block font-display text-3xl text-green-300">--</strong>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-5">
+                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">FAVORITE BUILD</span>
+                                <strong data-favorite-build class="mt-3 block truncate font-display text-2xl text-green-300">--</strong>
+                            </div>
+                            <div class="border border-slate-800 bg-black p-5 sm:col-span-2">
+                                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">LAST ACTIVITY</span>
+                                <strong data-last-activity class="mt-3 block text-sm uppercase tracking-[0.12em] text-green-300">--</strong>
+                            </div>
+                        </div>
+
+                        <a asp-controller="Profile"
+                           asp-action="Sessions"
+                           class="mt-5 inline-flex w-full items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15">
+                            OPEN COMPLETE SESSION ARCHIVE
+                        </a>
+                    </section>
+                </div>
+
+                <section class="mt-4 border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                    <div class="grid gap-8 xl:grid-cols-[0.65fr_1.35fr]">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER CONFIGURATION</p>
+                            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">IDENTITY CHANNEL</h2>
+                            <p class="mt-4 text-sm leading-7 text-slate-500">
+                                Configure your public alias, operator portrait, terminal palette and interface language.
+                            </p>
+                            <div class="mt-5 border border-amber-500/20 bg-amber-500/[0.04] p-4 text-xs leading-6 text-amber-200/70">
+                                Email changes require a separate verification channel and remain locked in this frontend phase.
+                            </div>
+                        </div>
+
+                        <form data-identity-form class="space-y-6">
+                            <div>
+                                <label for="profileAlias" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">PLAYER ALIAS</label>
+                                <input id="profileAlias"
+                                       name="Alias"
+                                       type="text"
+                                       minlength="3"
+                                       maxlength="32"
+                                       autocomplete="nickname"
+                                       value="@identity.Alias"
+                                       class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none transition placeholder:text-slate-700 focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20" />
+                            </div>
+
+                            <fieldset>
+                                <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">AVATAR CATALOG</legend>
+                                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                    @for (var index = 1; index <= 6; index++)
+                                    {
+                                        var avatarKey = $"operator-{index:D2}";
+                                        <label class="cursor-pointer border border-slate-800 bg-black p-4 transition hover:border-green-500/40 has-[:checked]:border-green-400 has-[:checked]:bg-green-500/10">
+                                            <input type="radio"
+                                                   name="AvatarKey"
+                                                   value="@avatarKey"
+                                                   checked="@(selectedAvatarKey == avatarKey)"
+                                                   class="sr-only" />
+                                            <span class="flex h-12 items-center justify-center border border-slate-800 font-display text-sm tracking-[0.15em] text-green-300">OP-@index.ToString("D2")</span>
+                                            <span class="mt-3 block text-center text-[9px] uppercase tracking-[0.15em] text-slate-500">@avatarKey</span>
+                                        </label>
+                                    }
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">TERMINAL THEME</legend>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <label class="cursor-pointer border border-green-500/20 bg-black p-4 transition has-[:checked]:border-green-300 has-[:checked]:bg-green-500/10">
+                                        <input type="radio" name="Theme" value="phosphor-green" checked="@(selectedTheme == "phosphor-green")" class="sr-only" />
+                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-green-300">PHOSPHOR GREEN</span>
+                                    </label>
+                                    <label class="cursor-pointer border border-amber-500/20 bg-black p-4 transition has-[:checked]:border-amber-300 has-[:checked]:bg-amber-500/10">
+                                        <input type="radio" name="Theme" value="amber-monitor" checked="@(selectedTheme == "amber-monitor")" class="sr-only" />
+                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-amber-300">AMBER MONITOR</span>
+                                    </label>
+                                    <label class="cursor-pointer border border-cyan-500/20 bg-black p-4 transition has-[:checked]:border-cyan-300 has-[:checked]:bg-cyan-500/10">
+                                        <input type="radio" name="Theme" value="cold-cyan" checked="@(selectedTheme == "cold-cyan")" class="sr-only" />
+                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">COLD CYAN</span>
+                                    </label>
+                                    <label class="cursor-pointer border border-slate-500/30 bg-black p-4 transition has-[:checked]:border-slate-200 has-[:checked]:bg-slate-500/10">
+                                        <input type="radio" name="Theme" value="monochrome-crt" checked="@(selectedTheme == "monochrome-crt")" class="sr-only" />
+                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-300">MONOCHROME CRT</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            <div>
+                                <label for="profileLanguage" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">INTERFACE LANGUAGE</label>
+                                <select id="profileLanguage"
+                                        name="PreferredLanguage"
+                                        class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60">
+                                    <option value="en" selected="@(selectedLanguage == "en")">ENGLISH</option>
+                                    <option value="es" selected="@(selectedLanguage == "es")">ESPAÑOL</option>
+                                </select>
+                            </div>
+
+                            <button type="submit"
+                                    data-identity-submit
+                                    class="inline-flex w-full items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15 disabled:cursor-wait disabled:opacity-50">
+                                APPLY TERMINAL PROFILE
+                            </button>
+                        </form>
                     </div>
+                </section>
+            </section>
+
+            <section id="profile-panel-security"
+                     role="tabpanel"
+                     aria-labelledby="profile-tab-security"
+                     data-profile-panel="security"
+                     class="@(initialSection == "security" ? string.Empty : "hidden")">
+                <div class="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+                    <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-amber-500">CREDENTIAL ROTATION</p>
+                        <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">SECURITY CHANNEL</h2>
+
+                        <div data-password-unavailable class="mt-6 hidden border border-amber-500/20 bg-amber-500/[0.04] p-4 text-sm leading-6 text-amber-200">
+                            This account currently authenticates through an external provider and has no local password.
+                        </div>
+
+                        <form data-password-form class="mt-6 space-y-4">
+                            <div>
+                                <label for="currentPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">CURRENT PASSWORD</label>
+                                <input id="currentPassword" name="CurrentPassword" type="password" autocomplete="current-password" class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
+                            </div>
+                            <div>
+                                <label for="newPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">NEW PASSWORD</label>
+                                <input id="newPassword" name="NewPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
+                            </div>
+                            <div>
+                                <label for="confirmPassword" class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">CONFIRM PASSWORD</label>
+                                <input id="confirmPassword" name="ConfirmPassword" type="password" minlength="8" autocomplete="new-password" class="w-full border border-slate-800 bg-black px-4 py-3 text-sm text-green-100 outline-none focus:border-green-500/60" />
+                            </div>
+                            <button type="submit"
+                                    data-password-submit
+                                    class="w-full border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-amber-200 transition hover:border-amber-400 hover:bg-amber-500/15 disabled:cursor-wait disabled:opacity-50">
+                                ROTATE CREDENTIALS
+                            </button>
+                        </form>
+                    </section>
+
+                    <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">AUTHENTICATED TERMINALS</p>
+                                <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">ACTIVE SESSIONS</h2>
+                            </div>
+                            <button type="button"
+                                    data-terminate-sessions
+                                    class="border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.17em] text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-40">
+                                TERMINATE ALL OTHER SESSIONS
+                            </button>
+                        </div>
+
+                        <div data-security-loading class="mt-6 border border-slate-800 bg-black p-6 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
+                            QUERYING AUTHENTICATION MATRIX
+                        </div>
+                        <div data-session-list class="mt-6 space-y-3"></div>
+                    </section>
                 </div>
             </section>
 
-            <aside class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                    @SharedLocalizer["Profile_PlayerCard"]
-                </p>
-
-                <div class="mt-6 rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-[0_0_24px_rgba(0,255,255,0.04)]">
-                    <div class="flex items-center gap-4">
-                        <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 font-display text-2xl uppercase tracking-[0.18em] text-cyan-200">
-                            @(Model.Alias.Length >= 2 ? Model.Alias.Substring(0, 2).ToUpperInvariant() : Model.Alias.ToUpperInvariant())
-                        </div>
-
+            <section id="profile-panel-fleet"
+                     role="tabpanel"
+                     aria-labelledby="profile-tab-fleet"
+                     data-profile-panel="fleet"
+                     class="@(initialSection == "fleet" ? string.Empty : "hidden")">
+                <section class="border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <div class="font-display text-2xl uppercase tracking-[0.12em] text-white">
-                                @Model.Alias
-                            </div>
-                            <div class="mt-1 text-sm text-slate-400">
-                                @Model.Email
-                            </div>
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">PLAYER HARDWARE INVENTORY</p>
+                            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">LINKED FLEET</h2>
+                            <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+                                Telemetry status is controlled by the server. Players can only remove nodes from their account.
+                            </p>
+                        </div>
+                        <div class="border border-green-500/20 bg-green-500/[0.04] px-5 py-4 text-center">
+                            <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">LINKED NODES</span>
+                            <strong data-fleet-count class="mt-1 block font-display text-2xl text-green-300">--</strong>
                         </div>
                     </div>
 
-                    <div class="mt-6 grid grid-cols-2 gap-3">
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_Avatar"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @Model.AvatarKey
-                            </div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_ThemeLabel"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @Model.Theme
-                            </div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_Name"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @Model.Name
-                            </div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_Access"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @LocalizedRole(Model.Role)
-                            </div>
-                        </div>
+                    <div data-fleet-loading class="mt-6 border border-slate-800 bg-black p-8 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
+                        SCANNING OWNED HARDWARE
                     </div>
-                </div>
-            </aside>
+                    <div data-fleet-empty class="mt-6 hidden border border-slate-800 bg-black p-10 text-center">
+                        <p class="font-display text-lg uppercase tracking-[0.12em] text-slate-400">NO LINKED HARDWARE</p>
+                        <p class="mt-3 text-sm text-slate-600">No Cosmic Diner installations are currently assigned to this player.</p>
+                    </div>
+                    <div data-fleet-list class="mt-6 grid gap-3 xl:grid-cols-2"></div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <div data-toast-host
+         aria-live="polite"
+         aria-atomic="true"
+         class="pointer-events-none fixed bottom-5 right-5 z-[100] flex w-[min(26rem,calc(100vw-2.5rem))] flex-col gap-3">
+    </div>
+
+    <div data-confirm-modal
+         class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/80 px-4"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="profile-confirm-title">
+        <div class="w-full max-w-lg border border-rose-500/30 bg-black p-6 shadow-[0_0_40px_rgba(244,63,94,0.12)]">
+            <p class="text-[10px] uppercase tracking-[0.3em] text-rose-500">CONFIRM COMMAND</p>
+            <h2 id="profile-confirm-title" data-confirm-title class="mt-3 font-display text-2xl uppercase tracking-[0.1em] text-rose-100">CONFIRM ACTION</h2>
+            <p data-confirm-message class="mt-4 text-sm leading-7 text-slate-400"></p>
+            <div class="mt-7 grid grid-cols-2 gap-3">
+                <button type="button" data-confirm-cancel class="border border-slate-700 bg-black px-4 py-3 text-xs uppercase tracking-[0.18em] text-slate-400">CANCEL</button>
+                <button type="button" data-confirm-accept class="border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-rose-200">EXECUTE</button>
+            </div>
         </div>
-
-        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        @SharedLocalizer["Profile_SettingsBadge"]
-                    </p>
-
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                        @SharedLocalizer["Profile_SettingsTitle"]
-                    </h2>
-
-                    <p class="mt-3 text-sm leading-6 text-slate-400">
-                        @SharedLocalizer["Profile_SettingsSubtitle"]
-                    </p>
-                </div>
-
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-                    @if (!string.IsNullOrWhiteSpace(profileStatusMessage))
-                    {
-                        <div class="mb-4 rounded-xl border @(isProfileSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200") px-4 py-3 text-sm">
-                            @profileStatusMessage
-                        </div>
-                    }
-
-                    <form asp-controller="Profile"
-                          asp-action="UpdateProfile"
-                          method="post"
-                          class="space-y-4">
-                        @Html.AntiForgeryToken()
-
-                        <div>
-                            <label for="alias" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                @SharedLocalizer["Profile_Alias"]
-                            </label>
-
-                            <input id="alias"
-                                   name="Alias"
-                                   type="text"
-                                   value="@Model.Alias"
-                                   minlength="3"
-                                   maxlength="32"
-                                   autocomplete="off"
-                                   class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-400/40" />
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <label for="avatarKey" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                    @SharedLocalizer["Profile_Avatar"]
-                                </label>
-
-                                <select id="avatarKey"
-                                        name="AvatarKey"
-                                        class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400/40">
-                                    @foreach (var avatar in availableAvatars)
-                                    {
-                                        <option value="@avatar" selected="@(string.Equals(Model.AvatarKey, avatar, StringComparison.OrdinalIgnoreCase))">
-                                            @avatar
-                                        </option>
-                                    }
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="theme" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                    @SharedLocalizer["Profile_ThemeLabel"]
-                                </label>
-
-                                <select id="theme"
-                                        name="Theme"
-                                        class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400/40">
-                                    @foreach (var theme in availableThemes)
-                                    {
-                                        <option value="@theme" selected="@(string.Equals(Model.Theme, theme, StringComparison.OrdinalIgnoreCase))">
-                                            @theme
-                                        </option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-3 pt-2">
-                            <button type="submit"
-                                    class="inline-flex rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                                @SharedLocalizer["Profile_SaveProfile"]
-                            </button>
-
-                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 px-5 py-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_RoleStatusLocked"]
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <section class="mt-6 rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
-            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
-                        @SharedLocalizer["Profile_OwnershipBadge"]
-                    </p>
-
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                        @SharedLocalizer["Profile_LinkTitle"]
-                    </h2>
-
-                    <p class="mt-3 text-sm leading-6 text-slate-400">
-                        @SharedLocalizer["Profile_LinkSubtitle"]
-                    </p>
-                </div>
-
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-                    @if (!string.IsNullOrWhiteSpace(claimStatusMessage))
-                    {
-                        <div class="mb-4 rounded-xl border @(isClaimSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200") px-4 py-3 text-sm">
-                            @claimStatusMessage
-                        </div>
-                    }
-
-                    <form asp-controller="Profile"
-                          asp-action="ClaimInstallation"
-                          method="post"
-                          class="space-y-4">
-                        @Html.AntiForgeryToken()
-
-                        <div>
-                            <label for="installationId" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                @SharedLocalizer["Common_InstallationId"]
-                            </label>
-
-                            <input id="installationId"
-                                   name="installationId"
-                                   type="text"
-                                   autocomplete="off"
-                                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                                   class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-400/40" />
-                        </div>
-
-                        <button type="submit"
-                                class="inline-flex rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                            @SharedLocalizer["Profile_LinkDevice"]
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        @SharedLocalizer["Profile_LinkedInstallationsBadge"]
-                    </p>
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                        @SharedLocalizer["Profile_OwnedDevices"]
-                    </h2>
-                    <p class="mt-3 max-w-2xl text-sm text-slate-400">
-                        @SharedLocalizer["Profile_OwnedDevicesSubtitle"]
-                    </p>
-                    <a asp-controller="Profile"
-                       asp-action="Sessions"
-                       class="inline-flex rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-200 transition hover:bg-fuchsia-500/15">
-                        @SharedLocalizer["Profile_ViewSessionHistory"]
-                    </a>
-                </div>
-
-                <div class="rounded-xl border border-cyan-400/15 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
-                    @SharedLocalizer["Profile_DeviceCount", Model.Installations.Count]
-                </div>
-            </div>
-
-            @if (Model.Installations.Count == 0)
-            {
-                <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-8 text-center">
-                    <p class="font-display text-sm uppercase tracking-[0.24em] text-slate-400">
-                        @SharedLocalizer["Profile_NoLinkedDevices"]
-                    </p>
-
-                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                        @SharedLocalizer["Profile_NoLinkedDevicesDescription"]
-                    </p>
-                </div>
-            }
-            else
-            {
-                <div class="mt-6 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-800">
-                        <thead>
-                            <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Device"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Platform"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Build"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Status"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Profile_FirstSeen"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Profile_LastUpdate"]</th>
-                                <th class="px-4 py-3 text-right">@SharedLocalizer["Common_Actions"]</th>
-                            </tr>
-                        </thead>
-
-                        <tbody class="divide-y divide-slate-900">
-                            @foreach (var installation in Model.Installations)
-                            {
-                                <tr class="text-sm text-slate-300">
-                                    <td class="px-4 py-4">
-                                        <div class="font-medium text-white">@installation.DeviceName</div>
-                                        <div class="text-xs text-slate-500">@installation.DeviceModel</div>
-                                        <div class="mt-1 text-[11px] text-slate-600">@installation.InstallationId</div>
-                                    </td>
-
-                                    <td class="px-4 py-4">@installation.Platform</td>
-
-                                    <td class="px-4 py-4">@installation.BuildVersion</td>
-
-                                    <td class="px-4 py-4">
-                                        <span class="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
-                                            @LocalizedStatus(installation.Status)
-                                        </span>
-                                    </td>
-
-                                    <td class="px-4 py-4">@installation.FirstSeenLabel</td>
-
-                                    <td class="px-4 py-4">@installation.LastUpdateLabel</td>
-
-                                    <td class="px-4 py-4 text-right">
-                                        <form asp-controller="Profile"
-                                              asp-action="UnlinkInstallation"
-                                              method="post"
-                                              class="inline-flex"
-                                              onsubmit='return confirm(@Html.Raw(unlinkConfirmJson));'>
-                                            @Html.AntiForgeryToken()
-
-                                            <input type="hidden"
-                                                   name="installationId"
-                                                   value="@installation.InstallationId" />
-
-                                            <button type="submit"
-                                                    class="rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-rose-200 transition hover:bg-rose-500/15">
-                                                @SharedLocalizer["Profile_Unlink"]
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </section>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/profile.js"
+            asp-append-version="true"
+            defer></script>
+}
