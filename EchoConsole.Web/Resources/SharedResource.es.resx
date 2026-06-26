@@ -2120,4 +2120,73 @@
   <data name="SimulationOrchestrator_Events" xml:space="preserve">
     <value>Eventos</value>
   </data>
+  <data name="Auth_VerifyTerminalTitle" xml:space="preserve">
+    <value>VERIFICAR TERMINAL</value>
+  </data>
+  <data name="Auth_VerifyTerminalDesc" xml:space="preserve">
+    <value>Ingresa la secuencia de autorización de seis dígitos asignada a</value>
+  </data>
+  <data name="Auth_AuthorizationCode" xml:space="preserve">
+    <value>CÓDIGO DE AUTORIZACIÓN</value>
+  </data>
+  <data name="Auth_ValidateTerminalBtn" xml:space="preserve">
+    <value>VALIDAR TERMINAL</value>
+  </data>
+  <data name="Auth_ResendOtpLink" xml:space="preserve">
+    <value>[ SOLICITAR NUEVA SECUENCIA / REENVIAR OTP ]</value>
+  </data>
+  <data name="Auth_OtpChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_OTP_PREPARADO</value>
+  </data>
+  <data name="Auth_AwaitingSequence" xml:space="preserve">
+    <value>&gt; ESPERANDO SECUENCIA DE SEIS DÍGITOS</value>
+  </data>
+  <data name="Auth_ReturnAccessNode" xml:space="preserve">
+    <value>&lt; VOLVER AL NODO DE ACCESO</value>
+  </data>
+  <data name="Auth_GoogleLink" xml:space="preserve">
+    <value>[ ENLACE SEGURO DE GOOGLE ]</value>
+  </data>
+  <data name="Auth_GoogleRegister" xml:space="preserve">
+    <value>[ REGISTRARSE CON GOOGLE ]</value>
+  </data>
+  <data name="Auth_ExternalAuthChannel" xml:space="preserve">
+    <value>CANAL DE AUTENTICACIÓN EXTERNO</value>
+  </data>
+  <data name="Auth_SecureEnrollmentChannel" xml:space="preserve">
+    <value>CANAL DE REGISTRO SEGURO</value>
+  </data>
+  <data name="Auth_SmtpDeliveryConfirmed" xml:space="preserve">
+    <value>&gt; ENTREGA SMTP CONFIRMADA</value>
+  </data>
+  <data name="Auth_OtpSequenceRequired" xml:space="preserve">
+    <value>&gt; SE REQUIERE SECUENCIA OTP</value>
+  </data>
+  <data name="Auth_TimeRemaining" xml:space="preserve">
+    <value>TIEMPO RESTANTE:</value>
+  </data>
+  <data name="Auth_AuthorizationProtocol" xml:space="preserve">
+    <value>PROTOCOLO DE AUTORIZACIÓN // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_SecureAccessNode" xml:space="preserve">
+    <value>NODO DE ACCESO SEGURO</value>
+  </data>
+  <data name="Auth_AuthChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_AUTENTICACIÓN_PREPARADO</value>
+  </data>
+  <data name="Auth_EncryptedSessionRequired" xml:space="preserve">
+    <value>&gt; SESIÓN CIFRADA REQUERIDA</value>
+  </data>
+  <data name="Auth_OperatorEnrollment" xml:space="preserve">
+    <value>REGISTRO DE OPERADOR</value>
+  </data>
+  <data name="Auth_ProfileBufferEmpty" xml:space="preserve">
+    <value>&gt; BÚFER DE PERFIL VACÍO</value>
+  </data>
+  <data name="Auth_AwaitingOperatorData" xml:space="preserve">
+    <value>&gt; ESPERANDO DATOS DEL OPERADOR</value>
+  </data>
+  <data name="Auth_RapidPlayerEnrollment" xml:space="preserve">
+    <value>REGISTRO RÁPIDO DE JUGADOR</value>
+  </data>
 </root>

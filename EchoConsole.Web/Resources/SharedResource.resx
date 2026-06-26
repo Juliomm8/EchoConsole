@@ -2120,4 +2120,73 @@
   <data name="SimulationOrchestrator_Events" xml:space="preserve">
     <value>Events</value>
   </data>
+  <data name="Auth_VerifyTerminalTitle" xml:space="preserve">
+    <value>VERIFY TERMINAL</value>
+  </data>
+  <data name="Auth_VerifyTerminalDesc" xml:space="preserve">
+    <value>Enter the six-digit authorization sequence assigned to</value>
+  </data>
+  <data name="Auth_AuthorizationCode" xml:space="preserve">
+    <value>AUTHORIZATION CODE</value>
+  </data>
+  <data name="Auth_ValidateTerminalBtn" xml:space="preserve">
+    <value>VALIDAR TERMINAL</value>
+  </data>
+  <data name="Auth_ResendOtpLink" xml:space="preserve">
+    <value>[ SOLICITAR NUEVA SECUENCIA / REENVIAR OTP ]</value>
+  </data>
+  <data name="Auth_OtpChannelReady" xml:space="preserve">
+    <value>&gt; OTP_CHANNEL_READY</value>
+  </data>
+  <data name="Auth_AwaitingSequence" xml:space="preserve">
+    <value>&gt; AWAITING SIX-DIGIT SEQUENCE</value>
+  </data>
+  <data name="Auth_ReturnAccessNode" xml:space="preserve">
+    <value>&lt; RETURN TO ACCESS NODE</value>
+  </data>
+  <data name="Auth_GoogleLink" xml:space="preserve">
+    <value>[ SECURE GOOGLE LINK ]</value>
+  </data>
+  <data name="Auth_GoogleRegister" xml:space="preserve">
+    <value>[ REGISTER WITH GOOGLE ]</value>
+  </data>
+  <data name="Auth_ExternalAuthChannel" xml:space="preserve">
+    <value>EXTERNAL AUTH CHANNEL</value>
+  </data>
+  <data name="Auth_SecureEnrollmentChannel" xml:space="preserve">
+    <value>SECURE ENROLLMENT CHANNEL</value>
+  </data>
+  <data name="Auth_SmtpDeliveryConfirmed" xml:space="preserve">
+    <value>&gt; SMTP DELIVERY CONFIRMED</value>
+  </data>
+  <data name="Auth_OtpSequenceRequired" xml:space="preserve">
+    <value>&gt; OTP SEQUENCE REQUIRED</value>
+  </data>
+  <data name="Auth_TimeRemaining" xml:space="preserve">
+    <value>TIME REMAINING:</value>
+  </data>
+  <data name="Auth_AuthorizationProtocol" xml:space="preserve">
+    <value>AUTHORIZATION PROTOCOL // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_SecureAccessNode" xml:space="preserve">
+    <value>SECURE ACCESS NODE</value>
+  </data>
+  <data name="Auth_AuthChannelReady" xml:space="preserve">
+    <value>&gt; AUTH_CHANNEL READY</value>
+  </data>
+  <data name="Auth_EncryptedSessionRequired" xml:space="preserve">
+    <value>&gt; ENCRYPTED SESSION REQUIRED</value>
+  </data>
+  <data name="Auth_OperatorEnrollment" xml:space="preserve">
+    <value>OPERATOR ENROLLMENT</value>
+  </data>
+  <data name="Auth_ProfileBufferEmpty" xml:space="preserve">
+    <value>&gt; PROFILE BUFFER EMPTY</value>
+  </data>
+  <data name="Auth_AwaitingOperatorData" xml:space="preserve">
+    <value>&gt; AWAITING OPERATOR DATA</value>
+  </data>
+  <data name="Auth_RapidPlayerEnrollment" xml:space="preserve">
+    <value>RAPID PLAYER ENROLLMENT</value>
+  </data>
 </root>
