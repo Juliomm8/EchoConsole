@@ -1,0 +1,680 @@
+@model EchoConsole.Web.Models.Profile.ProfileSettingsViewModel
+
+@{
+    ViewData["Title"] = SharedLocalizer["Profile_SettingsPageTitle"].Value;
+    ViewData["TitleResourceKey"] = "Profile_SettingsPageTitle";
+
+    var identity = Model.Identity;
+
+    var selectedAvatar =
+        Model.AvatarOptions
+            .FirstOrDefault(option =>
+                option.IsSelected)
+        ?? Model.AvatarOptions.FirstOrDefault();
+
+    var selectedAvatarImage =
+        selectedAvatar?.ImageUrl
+        ?? $"/images/avatars/{identity.AvatarKey}.png";
+
+    var selectedAvatarName =
+        selectedAvatar?.DisplayName
+        ?? identity.AvatarKey;
+
+    var fallbackAvatarUrl =
+        Url.Content(
+            "~/images/avatars/avatar_01.png");
+}
+
+<div data-profile-settings
+     data-security-url="@Url.Action("GetActiveSessions", "ProfileSettings")"
+     data-fleet-url="@Url.Action("GetFleet", "ProfileSettings")"
+     data-update-identity-url="@Url.Action("UpdateIdentity", "ProfileSettings")"
+     data-change-password-url="@Url.Action("ChangePassword", "ProfileSettings")"
+     data-revoke-session-url="@Url.Action("RevokeSession", "ProfileSettings")"
+     data-terminate-sessions-url="@Url.Action("TerminateAllOtherSessions", "ProfileSettings")"
+     data-claim-device-url="@Url.Action("ClaimDevice", "ProfileSettings")"
+     data-unlink-device-url="@Url.Action("UnlinkDevice", "ProfileSettings")"
+     data-delete-profile-url="@Url.Action("DeleteProfile", "ProfileSettings")"
+     data-label-current-session="@SharedLocalizer["Profile_CurrentTerminal"]"
+     data-label-revoke-session="@SharedLocalizer["Profile_RevokeSession"]"
+     data-label-no-sessions="@SharedLocalizer["Profile_NoActiveAuthSessions"]"
+     data-label-no-devices="@SharedLocalizer["Profile_NoLinkedDevices"]"
+     data-label-unlink-device="@SharedLocalizer["Profile_UnlinkDevice"]"
+     data-label-active="@SharedLocalizer["Profile_Status_Online"]"
+     data-label-inactive="@SharedLocalizer["Profile_Status_Offline"]"
+     data-label-not-available="@SharedLocalizer["Common_NotAvailable"]"
+     data-message-confirm-revoke="@SharedLocalizer["Profile_ConfirmRevokeSession"]"
+     data-message-confirm-unlink="@SharedLocalizer["Profile_ConfirmUnlinkDevice"]"
+     data-message-confirm-terminate="@SharedLocalizer["Profile_ConfirmTerminateOthers"]"
+     data-message-delete-first="@SharedLocalizer["Profile_DeleteFirstConfirmation"]"
+     data-message-delete-second="@SharedLocalizer["Profile_DeleteSecondConfirmation"]"
+     data-message-password-mismatch="@SharedLocalizer["Auth_PasswordConfirmationMismatch"]"
+     data-message-confirm-password-change="@SharedLocalizer["Profile_ConfirmPasswordChange"]"
+     data-toast-success-prefix="@SharedLocalizer["Profile_ToastSuccessPrefix"]"
+     data-toast-error-prefix="@SharedLocalizer["Profile_ToastErrorPrefix"]"
+     data-message-generic-error="@SharedLocalizer["Profile_GenericError"]"
+     class="min-h-screen bg-black text-green-100">
+
+    <form data-antiforgery-form class="hidden">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="relative overflow-hidden border border-green-500/20 bg-black px-5 py-6 shadow-[0_0_36px_rgba(57,255,20,0.06)] sm:px-8">
+            <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(57,255,20,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,20,0.025)_1px,transparent_1px)] bg-[size:28px_28px]"></div>
+
+            <div class="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.38em] text-green-500">
+                        @SharedLocalizer["Profile_SettingsKicker"]
+                    </p>
+
+                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.12em] text-green-100 text-glow-cyan sm:text-5xl">
+                        @SharedLocalizer["Profile_SettingsTitle"]
+                    </h1>
+
+                    <p class="mt-4 max-w-3xl text-sm leading-7 text-slate-500">
+                        @SharedLocalizer["Profile_SettingsDescription"]
+                    </p>
+                </div>
+
+                <a asp-controller="Profile"
+                   asp-action="Index"
+                   class="inline-flex items-center justify-center gap-3 border border-slate-700 bg-black px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-slate-300 transition hover:border-green-500/50 hover:text-green-200">
+                    <span>&lt;</span>
+                    <span>@SharedLocalizer["Profile_BackToDashboard"]</span>
+                </a>
+            </div>
+        </header>
+
+        <nav data-settings-anchor-bar
+             aria-label="@SharedLocalizer["Profile_SettingsNavigation"]"
+             class="sticky z-30 mt-4 border border-green-500/20 bg-black/95 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.72)] backdrop-blur-xl">
+            <div class="flex gap-2 overflow-x-auto">
+                <a href="#settings-identity"
+                   data-settings-anchor="identity"
+                   class="shrink-0 border border-green-500/30 bg-green-500/10 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-green-200 transition hover:border-green-300 sm:flex-1 sm:text-center">
+                    @SharedLocalizer["Profile_AnchorIdentity"]
+                </a>
+
+                <a href="#settings-security"
+                   data-settings-anchor="security"
+                   class="shrink-0 border border-slate-800 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-green-500/40 hover:text-green-200 sm:flex-1 sm:text-center">
+                    @SharedLocalizer["Profile_AnchorSecurity"]
+                </a>
+
+                <a href="#settings-devices"
+                   data-settings-anchor="devices"
+                   class="shrink-0 border border-slate-800 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-green-500/40 hover:text-green-200 sm:flex-1 sm:text-center">
+                    @SharedLocalizer["Profile_AnchorDevices"]
+                </a>
+
+                <a href="#settings-danger"
+                   data-settings-anchor="danger"
+                   class="shrink-0 border border-rose-500/20 bg-black px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-rose-300/70 transition hover:border-rose-400 hover:text-rose-200 sm:flex-1 sm:text-center">
+                    @SharedLocalizer["Profile_AnchorDanger"]
+                </a>
+            </div>
+        </nav>
+
+        <main class="mt-8 space-y-16 pb-16">
+            <section id="settings-identity"
+                     data-settings-section="identity"
+                     class="scroll-mt-40">
+                <div class="mb-5 border-b border-green-500/20 pb-5">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">
+                        @SharedLocalizer["Profile_IdentitySectionLabel"]
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
+                        @SharedLocalizer["Profile_IdentitySectionTitle"]
+                    </h2>
+                </div>
+
+                <div class="grid gap-5 xl:grid-cols-[0.72fr_1.28fr]">
+                    <article class="border border-green-500/20 bg-green-950/30 p-6">
+                        <p class="text-[10px] uppercase tracking-[0.24em] text-green-600">
+                            @SharedLocalizer["Profile_CurrentIdentity"]
+                        </p>
+
+                        <div class="mt-5 flex items-center gap-5">
+                            <div class="h-24 w-24 shrink-0 overflow-hidden border border-green-400/35 bg-black">
+                                <img src="@selectedAvatarImage"
+                                     alt="@selectedAvatarName"
+                                     data-avatar-preview-image
+                                     data-user-avatar-image
+                                     class="h-full w-full object-cover"
+                                     width="96"
+                                     height="96"
+                                     onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
+                            </div>
+
+                            <div class="min-w-0">
+                                <h3 data-settings-alias
+                                    class="truncate font-display text-2xl uppercase tracking-[0.08em] text-green-100">
+                                    @identity.Alias
+                                </h3>
+
+                                <p class="mt-2 truncate text-sm text-slate-500">
+                                    @identity.Email
+                                </p>
+
+                                <span class="mt-4 inline-block border border-green-500/20 bg-green-500/10 px-3 py-2 text-[9px] uppercase tracking-[0.16em] text-green-300">
+                                    @identity.RoleDisplayName
+                                </span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <form id="identitySettingsForm"
+                          data-identity-form
+                          class="space-y-6 border border-slate-800 bg-[#020402] p-6 sm:p-8">
+                        <div>
+                            <label for="settingsAlias"
+                                   class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
+                                @SharedLocalizer["Profile_AliasLabel"]
+                            </label>
+
+                            <input id="settingsAlias"
+                                   name="Alias"
+                                   type="text"
+                                   minlength="3"
+                                   maxlength="32"
+                                   value="@identity.Alias"
+                                   class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 text-sm text-green-100 outline-none transition focus:border-green-500/60 focus:ring-1 focus:ring-green-500/20" />
+                        </div>
+
+                        <div>
+                            <span class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
+                                @SharedLocalizer["Profile_AvatarLabel"]
+                            </span>
+
+                            <button type="button"
+                                    data-open-avatar-modal
+                                    class="flex w-full items-center justify-between border border-green-500/20 bg-green-950/30 px-4 py-4 text-left transition hover:border-green-400">
+                                <span class="flex min-w-0 items-center gap-4">
+                                    <img src="@selectedAvatarImage"
+                                         alt="@selectedAvatarName"
+                                         data-avatar-preview-image
+                                         class="h-14 w-14 shrink-0 border border-green-500/25 object-cover"
+                                         width="56"
+                                         height="56"
+                                         onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
+
+                                    <span class="min-w-0">
+                                        <span class="block text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                            @SharedLocalizer["Profile_SelectedAvatar"]
+                                        </span>
+
+                                        <strong data-avatar-name
+                                                class="mt-1 block truncate text-sm uppercase tracking-[0.12em] text-green-300">
+                                            @selectedAvatarName
+                                        </strong>
+                                    </span>
+                                </span>
+
+                                <span class="shrink-0 text-xs font-bold uppercase tracking-[0.16em] text-green-300">
+                                    @SharedLocalizer["Profile_SelectAvatar"]
+                                </span>
+                            </button>
+                        </div>
+
+                        <fieldset>
+                            <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
+                                @SharedLocalizer["Profile_ThemeLabel"]
+                            </legend>
+
+                            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                @foreach (var theme in Model.ThemeOptions)
+                                {
+                                    <label class="cursor-pointer border border-slate-800 bg-black p-4 text-center transition hover:border-green-500/40 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
+                                        <input type="radio"
+                                               name="Theme"
+                                               value="@theme.Key"
+                                               checked="@(theme.IsSelected ? "checked" : null)"
+                                               class="sr-only" />
+
+                                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-green-300">
+                                            @theme.DisplayName
+                                        </span>
+
+                                        <span class="mt-3 block h-1.5 w-full"
+                                              style="background-color: @(theme.Key switch
+                                              {
+                                                  "amber" => "#f59e0b",
+                                                  "cyan" => "#22d3ee",
+                                                  "monochrome" => "#cbd5e1",
+                                                  _ => "#39ff14"
+                                              })">
+                                        </span>
+                                    </label>
+                                }
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
+                                @SharedLocalizer["Profile_LanguageLabel"]
+                            </legend>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="cursor-pointer border border-slate-800 bg-black p-4 text-center transition hover:border-green-500/40 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
+                                    <input type="radio"
+                                           name="PreferredLanguage"
+                                           value="en"
+                                           checked="@(identity.PreferredLanguage == "en" ? "checked" : null)"
+                                           class="sr-only" />
+
+                                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+                                        EN
+                                    </span>
+
+                                    <span class="mt-2 block text-[9px] uppercase tracking-[0.14em] text-slate-500">
+                                        English
+                                    </span>
+                                </label>
+
+                                <label class="cursor-pointer border border-slate-800 bg-black p-4 text-center transition hover:border-green-500/40 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
+                                    <input type="radio"
+                                           name="PreferredLanguage"
+                                           value="es"
+                                           checked="@(identity.PreferredLanguage == "es" ? "checked" : null)"
+                                           class="sr-only" />
+
+                                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+                                        ES
+                                    </span>
+
+                                    <span class="mt-2 block text-[9px] uppercase tracking-[0.14em] text-slate-500">
+                                        Español
+                                    </span>
+                                </label>
+                            </div>
+                        </fieldset>
+
+                        <button type="submit"
+                                data-identity-submit
+                                class="w-full border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15 disabled:cursor-wait disabled:opacity-50">
+                            @SharedLocalizer["Profile_SaveIdentity"]
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="settings-security"
+                     data-settings-section="security"
+                     class="scroll-mt-40">
+                <div class="mb-5 border-b border-green-500/20 pb-5">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">
+                        @SharedLocalizer["Profile_SecuritySectionLabel"]
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
+                        @SharedLocalizer["Profile_SecuritySectionTitle"]
+                    </h2>
+                </div>
+
+                <div class="grid gap-5 xl:grid-cols-[0.78fr_1.22fr]">
+                    <form data-password-form class="space-y-4 border border-slate-800 bg-[#020402] p-6 sm:p-8">
+                        <h3 class="font-display text-xl uppercase tracking-[0.1em] text-green-100">
+                            @SharedLocalizer["Profile_ChangePasswordTitle"]
+                        </h3>
+
+                        <p class="text-sm leading-6 text-slate-500">
+                            @SharedLocalizer["Profile_ChangePasswordDescription"]
+                        </p>
+
+                        <div data-password-feedback
+                             role="status"
+                             aria-live="polite"
+                             class="hidden border p-4 text-sm leading-6">
+                        </div>
+
+                        <div data-password-unavailable
+                             class="hidden border border-amber-500/20 bg-amber-500/[0.05] p-4 text-sm leading-6 text-amber-200">
+                            @SharedLocalizer["Profile_NoLocalPassword"]
+                        </div>
+
+                        <div>
+                            <label for="settingsCurrentPassword"
+                                   class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                                @SharedLocalizer["Auth_CurrentPasswordLabel"]
+                            </label>
+
+                            <div class="relative">
+                                <input id="settingsCurrentPassword"
+                                       name="CurrentPassword"
+                                       type="password"
+                                       autocomplete="current-password"
+                                       class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 pr-20 text-sm text-green-100 outline-none focus:border-green-500/60" />
+
+                                <button type="button"
+                                        data-password-toggle
+                                        data-target="settingsCurrentPassword"
+                                        aria-controls="settingsCurrentPassword"
+                                        aria-pressed="false"
+                                        aria-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                        data-show-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                        data-hide-label="@SharedLocalizer["Auth_HidePassword"]"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-[0.12em] text-green-400">
+                                    <span data-password-toggle-label>
+                                        @SharedLocalizer["Auth_ShowPassword"]
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="settingsNewPassword"
+                                   class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                                @SharedLocalizer["Auth_NewPasswordLabel"]
+                            </label>
+
+                            <div class="relative">
+                                <input id="settingsNewPassword"
+                                       name="NewPassword"
+                                       type="password"
+                                       autocomplete="new-password"
+                                       class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 pr-20 text-sm text-green-100 outline-none focus:border-green-500/60" />
+
+                                <button type="button"
+                                        data-password-toggle
+                                        data-target="settingsNewPassword"
+                                        aria-controls="settingsNewPassword"
+                                        aria-pressed="false"
+                                        aria-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                        data-show-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                        data-hide-label="@SharedLocalizer["Auth_HidePassword"]"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-[0.12em] text-green-400">
+                                    <span data-password-toggle-label>
+                                        @SharedLocalizer["Auth_ShowPassword"]
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="settingsConfirmPassword"
+                                   class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                                @SharedLocalizer["Auth_ConfirmPasswordLabel"]
+                            </label>
+
+                            <div class="relative">
+                                <input id="settingsConfirmPassword"
+                                       name="ConfirmPassword"
+                                       type="password"
+                                       autocomplete="new-password"
+                                       class="w-full border border-green-500/20 bg-green-950/30 px-4 py-3 pr-20 text-sm text-green-100 outline-none focus:border-green-500/60" />
+
+                                <button type="button"
+                                        data-password-toggle
+                                        data-target="settingsConfirmPassword"
+                                        aria-controls="settingsConfirmPassword"
+                                        aria-pressed="false"
+                                        aria-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                        data-show-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                        data-hide-label="@SharedLocalizer["Auth_HidePassword"]"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-[0.12em] text-green-400">
+                                    <span data-password-toggle-label>
+                                        @SharedLocalizer["Auth_ShowPassword"]
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                                data-password-submit
+                                class="w-full border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-amber-200 transition hover:border-amber-400 disabled:cursor-wait disabled:opacity-50">
+                            @SharedLocalizer["Profile_ChangePasswordAction"]
+                        </button>
+                    </form>
+
+                    <section class="border border-slate-800 bg-[#020402] p-6 sm:p-8">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
+                                    @SharedLocalizer["Profile_ActiveSessionsKicker"]
+                                </p>
+
+                                <h3 class="mt-2 font-display text-xl uppercase tracking-[0.1em] text-green-100">
+                                    @SharedLocalizer["Profile_ActiveSessionsTitle"]
+                                </h3>
+                            </div>
+
+                            <button type="button"
+                                    data-terminate-sessions
+                                    class="border border-rose-500/25 bg-rose-500/[0.06] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-rose-300 transition hover:border-rose-400 disabled:opacity-40">
+                                @SharedLocalizer["Profile_TerminateOtherSessions"]
+                            </button>
+                        </div>
+
+                        <div data-security-loading
+                             class="mt-6 border border-slate-800 bg-black p-6 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
+                            @SharedLocalizer["Profile_LoadingSessions"]
+                        </div>
+
+                        <div data-session-list class="mt-6 space-y-3"></div>
+                    </section>
+                </div>
+            </section>
+
+            <section id="settings-devices"
+                     data-settings-section="devices"
+                     class="scroll-mt-40">
+                <div class="mb-5 border-b border-green-500/20 pb-5">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-green-500">
+                        @SharedLocalizer["Profile_DevicesSectionLabel"]
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100 sm:text-3xl">
+                        @SharedLocalizer["Profile_DevicesSectionTitle"]
+                    </h2>
+                </div>
+
+                <form data-claim-device-form
+                      class="grid gap-4 border border-green-500/20 bg-green-950/30 p-6 md:grid-cols-[1fr_auto] md:items-end">
+                    <div>
+                        <label for="installationId"
+                               class="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-green-400">
+                            @SharedLocalizer["Profile_InstallationIdLabel"]
+                        </label>
+
+                        <input id="installationId"
+                               name="InstallationId"
+                               type="text"
+                               inputmode="text"
+                               autocomplete="off"
+                               placeholder="00000000-0000-0000-0000-000000000000"
+                               class="w-full border border-green-500/20 bg-black px-4 py-3 font-mono text-sm text-green-100 outline-none focus:border-green-500/60" />
+                    </div>
+
+                    <button type="submit"
+                            data-claim-device-submit
+                            class="border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 disabled:opacity-50">
+                        @SharedLocalizer["Profile_VerifyHardware"]
+                    </button>
+                </form>
+
+                <div data-fleet-loading
+                     class="mt-5 border border-slate-800 bg-black p-8 text-center text-[10px] uppercase tracking-[0.2em] text-amber-400">
+                    @SharedLocalizer["Profile_LoadingDevices"]
+                </div>
+
+                <div data-fleet-list class="mt-5 grid gap-4 xl:grid-cols-2"></div>
+            </section>
+
+            <section id="settings-danger"
+                     data-settings-section="danger"
+                     class="scroll-mt-40">
+                <div class="border border-rose-500/25 bg-rose-500/[0.03] p-6 sm:p-8">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-rose-400">
+                        @SharedLocalizer["Profile_DangerSectionLabel"]
+                    </p>
+
+                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-rose-100 sm:text-3xl">
+                        @SharedLocalizer["Profile_DangerSectionTitle"]
+                    </h2>
+
+                    <p class="mt-4 max-w-3xl text-sm leading-7 text-rose-100/60">
+                        @SharedLocalizer["Profile_DangerDescription"]
+                    </p>
+
+                    <button type="button"
+                            data-open-delete-modal
+                            class="mt-6 border border-rose-500/40 bg-rose-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-rose-200 transition hover:border-rose-300 hover:bg-rose-500/15">
+                        @SharedLocalizer["Profile_DeleteProfileAction"]
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div data-avatar-modal
+         class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/85 px-4"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="avatar-modal-title">
+
+        <div class="w-full max-w-3xl border border-green-500/25 bg-black p-6 shadow-[0_0_42px_rgba(57,255,20,0.1)] sm:p-8">
+            <div class="flex items-center justify-between gap-4">
+                <h2 id="avatar-modal-title"
+                    class="font-display text-2xl uppercase tracking-[0.1em] text-green-100">
+                    @SharedLocalizer["Profile_AvatarModalTitle"]
+                </h2>
+
+                <button type="button"
+                        data-close-avatar-modal
+                        class="border border-slate-700 px-3 py-2 text-xs text-slate-400 hover:border-green-500 hover:text-green-200">
+                    [ X ]
+                </button>
+            </div>
+
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                @foreach (var avatar in Model.AvatarOptions)
+                {
+                    <label data-avatar-card
+                           class="group cursor-pointer border border-slate-800 bg-black p-3 text-center transition hover:border-green-400 hover:bg-green-500/5 has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
+
+                        <input type="radio"
+                               form="identitySettingsForm"
+                               name="AvatarKey"
+                               value="@avatar.Key"
+                               checked="@(avatar.IsSelected ? "checked" : null)"
+                               data-avatar-radio
+                               data-avatar-name-value="@avatar.DisplayName"
+                               data-avatar-image="@avatar.ImageUrl"
+                               class="sr-only" />
+
+                        <span class="block aspect-square overflow-hidden border border-green-500/15 bg-green-950/30">
+                            <img src="@avatar.ImageUrl"
+                                 alt="@avatar.DisplayName"
+                                 class="h-full w-full object-cover transition duration-200 group-hover:scale-[1.03]"
+                                 width="256"
+                                 height="256"
+                                 loading="lazy"
+                                 onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
+                        </span>
+
+                        <span class="mt-3 block text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500 group-has-[:checked]:text-green-300">
+                            @avatar.DisplayName
+                        </span>
+
+                        <span class="mt-1 block font-mono text-[8px] uppercase tracking-[0.14em] text-slate-700">
+                            @avatar.Key
+                        </span>
+                    </label>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div data-delete-modal
+         class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/90 px-4"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="delete-profile-title">
+
+        <form data-delete-profile-form
+              class="w-full max-w-xl border border-rose-500/35 bg-black p-6 shadow-[0_0_42px_rgba(244,63,94,0.12)] sm:p-8">
+
+            <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-rose-400">
+                @SharedLocalizer["Profile_DangerSectionLabel"]
+            </p>
+
+            <h2 id="delete-profile-title"
+                class="mt-3 font-display text-2xl uppercase tracking-[0.1em] text-rose-100">
+                @SharedLocalizer["Profile_DeleteModalTitle"]
+            </h2>
+
+            <p class="mt-4 text-sm leading-7 text-slate-500">
+                @SharedLocalizer["Profile_DeleteModalDescription"]
+            </p>
+
+            <div class="mt-6">
+                <label for="deletePassword"
+                       class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-rose-300">
+                    @SharedLocalizer["Profile_DeletePasswordLabel"]
+                </label>
+
+                <input id="deletePassword"
+                       name="Password"
+                       type="password"
+                       autocomplete="current-password"
+                       class="w-full border border-rose-500/25 bg-black px-4 py-3 text-sm text-rose-100 outline-none focus:border-rose-400" />
+            </div>
+
+            <div class="mt-4">
+                <label for="deleteConfirmation"
+                       class="mb-2 block text-[10px] uppercase tracking-[0.2em] text-rose-300">
+                    @SharedLocalizer["Profile_DeletePhraseLabel"]
+                </label>
+
+                <input id="deleteConfirmation"
+                       name="ConfirmationText"
+                       type="text"
+                       autocomplete="off"
+                       placeholder="DELETE MY PROFILE"
+                       class="w-full border border-rose-500/25 bg-black px-4 py-3 font-mono text-sm text-rose-100 outline-none focus:border-rose-400" />
+            </div>
+
+            <label class="mt-5 flex items-start gap-3 text-xs leading-6 text-slate-500">
+                <input type="checkbox"
+                       data-delete-acknowledgement
+                       class="mt-1 h-4 w-4 border-rose-500/40 bg-black text-rose-500 focus:ring-rose-500" />
+
+                <span>@SharedLocalizer["Profile_DeleteAcknowledgement"]</span>
+            </label>
+
+            <div class="mt-7 grid grid-cols-2 gap-3">
+                <button type="button"
+                        data-close-delete-modal
+                        class="border border-slate-700 bg-black px-4 py-3 text-xs uppercase tracking-[0.18em] text-slate-400">
+                    @SharedLocalizer["Common_Cancel"]
+                </button>
+
+                <button type="submit"
+                        data-delete-profile-submit
+                        disabled
+                        class="border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-rose-200 disabled:cursor-not-allowed disabled:opacity-40">
+                    @SharedLocalizer["Profile_DeleteFinalAction"]
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div data-settings-toast-host
+         aria-live="polite"
+         aria-atomic="true"
+         class="pointer-events-none fixed bottom-5 right-5 z-[120] flex w-[min(26rem,calc(100vw-2.5rem))] flex-col gap-3">
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/password-visibility.js"
+            asp-append-version="true"
+            defer></script>
+
+    <script src="~/js/profile-settings.js"
+            asp-append-version="true"
+            defer></script>
+}

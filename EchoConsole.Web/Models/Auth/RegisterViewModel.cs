@@ -22,7 +22,7 @@ public sealed class RegisterViewModel
 
     [Required(ErrorMessage = "Validation_Required")]
     [DataType(DataType.Password)]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "Validation_StringLength")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Validation_StringLength")]
     [Display(Name = "Auth_PasswordLabel")]
     public string Password { get; set; } = string.Empty;
 }

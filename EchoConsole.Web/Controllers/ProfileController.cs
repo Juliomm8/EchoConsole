@@ -1,37 +1,47 @@
 using System.Security.Claims;
-using EchoConsole.Api.Domain.Entities;
+using EchoConsole.Api.Domain.Enums;
+using EchoConsole.Api.Persistence;
+using EchoConsole.Web;
 using EchoConsole.Web.Models.Api.Profile;
 using EchoConsole.Web.Models.Profile;
 using EchoConsole.Web.Services.Api;
-using Microsoft.AspNetCore.Authentication;
+using EchoConsole.Web.Services.Profile;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace EchoConsole.Web.Controllers;
 
 [Authorize]
 public sealed class ProfileController : Controller
 {
+    private static readonly TimeSpan ActiveHeartbeatWindow =
+        TimeSpan.FromSeconds(90);
+
+    private static readonly TimeSpan DegradedHeartbeatWindow =
+        TimeSpan.FromMinutes(5);
+
+    private readonly EchoConsoleDbContext _dbContext;
     private readonly EchoConsoleProfileApiClient _profileApiClient;
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
-    private readonly ILogger<ProfileController> _logger;
+    private readonly TimeProvider _timeProvider;
+    private readonly IStringLocalizer<SharedResource> _localizer;
 
     public ProfileController(
+        EchoConsoleDbContext dbContext,
         EchoConsoleProfileApiClient profileApiClient,
-        UserManager<User> userManager,
-        SignInManager<User> signInManager,
-        ILogger<ProfileController> logger)
+        TimeProvider timeProvider,
+        IStringLocalizer<SharedResource> localizer)
     {
+        _dbContext = dbContext;
         _profileApiClient = profileApiClient;
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _logger = logger;
+        _timeProvider = timeProvider;
+        _localizer = localizer;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(
+        CancellationToken cancellationToken = default)
     {
         var userId = GetCurrentUserId();
 
@@ -40,174 +50,347 @@ public sealed class ProfileController : Controller
             return Challenge();
         }
 
-        var profile = await _profileApiClient.GetProfileAsync(userId.Value, cancellationToken);
-
-        if (profile is null)
-        {
-            var fallbackModel = new ProfileIndexViewModel
+        var user = await _dbContext.Users
+            .AsNoTracking()
+            .Where(x => x.Id == userId.Value)
+            .Select(x => new
             {
-                Alias = User.FindFirst("alias")?.Value ?? User.Identity?.Name ?? "Player",
-                Role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Viewer",
-                Status = User.FindFirst("app_status")?.Value ?? "Active",
-                Installations = Array.Empty<LinkedInstallationViewModel>()
-            };
+                x.Id,
+                x.Alias,
+                x.Name,
+                x.AvatarKey,
+                x.Role,
+                x.Status,
+                x.CreatedAtUtc
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
-            ViewData["Title"] = "PROFILE";
-            ViewData["TitleResourceKey"] = "Profile_PageTitle";
-
-            return View(fallbackModel);
+        if (user is null)
+        {
+            return Challenge();
         }
 
-        var model = MapProfileToViewModel(profile);
+        var model = new ProfileDashboardViewModel
+        {
+            UserId = user.Id,
+            Alias = user.Alias,
+            Name = user.Name,
+            AvatarKey = ProfileCatalog.NormalizeStoredAvatarKey(
+                user.AvatarKey),
+            RoleDisplayName =
+                _localizer[GetRoleResourceKey(user.Role)],
+            Status =
+                _localizer[GetStatusResourceKey(user.Status)],
+            CreatedAtUtc = user.CreatedAtUtc
+        };
 
-        ViewData["Title"] = "PROFILE";
-        ViewData["TitleResourceKey"] = "Profile_PageTitle";
+        ViewData["Title"] =
+            _localizer["Profile_DashboardPageTitle"].Value;
+
+        ViewData["TitleResourceKey"] =
+            "Profile_DashboardPageTitle";
 
         return View(model);
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ClaimInstallation(
-        string installationId,
+    [HttpGet("Profile/Api/Dashboard/Live")]
+    [ResponseCache(
+        Duration = 0,
+        Location = ResponseCacheLocation.None,
+        NoStore = true)]
+    public async Task<IActionResult> GetLiveSnapshotAsync(
         CancellationToken cancellationToken = default)
     {
         var userId = GetCurrentUserId();
 
         if (userId is null)
         {
-            return Challenge();
+            return Unauthorized();
         }
 
-        if (!TryParseInstallationId(installationId, out var parsedInstallationId))
+        var installationIds = await _dbContext.Installations
+            .AsNoTracking()
+            .Where(x => x.OwnerUserId == userId.Value)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        var now = _timeProvider.GetUtcNow();
+
+        if (installationIds.Count == 0)
         {
-            TempData["ClaimStatusType"] = "error";
-            TempData["ClaimStatusMessage"] = "Installation ID format is invalid.";
-            return RedirectToAction(nameof(Index));
+            return Json(new
+            {
+                success = true,
+                data = new ProfileLiveSnapshotViewModel
+                {
+                    ConnectionStatus = "Offline",
+                    ServerTimeUtc = now
+                }
+            });
         }
 
-        var request = new ClaimInstallationRequestModel
+        var sessionQuery = _dbContext.GameSessions
+            .AsNoTracking()
+            .Where(x =>
+                installationIds.Contains(
+                    x.InstallationDbId));
+
+        var activeCutoff =
+            now.Subtract(ActiveHeartbeatWindow);
+
+        var activeSession = await sessionQuery
+            .Where(x =>
+                x.Status == SessionStatus.Active &&
+                !x.EndedAtUtc.HasValue &&
+                x.LastHeartbeatUtc >= activeCutoff)
+            .OrderByDescending(x => x.LastHeartbeatUtc)
+            .Select(x => new
+            {
+                x.SessionId,
+                x.StartedAtUtc,
+                x.LastHeartbeatUtc,
+                x.CurrentScene,
+                x.CurrentGameState,
+                x.CurrentPhase
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var lastActivityUtc = await sessionQuery
+            .Select(x =>
+                (DateTimeOffset?)x.LastHeartbeatUtc)
+            .MaxAsync(cancellationToken);
+
+        var connectionStatus = activeSession is not null
+            ? "Online"
+            : lastActivityUtc.HasValue &&
+              lastActivityUtc.Value >=
+              now.Subtract(DegradedHeartbeatWindow)
+                ? "Degraded"
+                : "Offline";
+
+        var snapshot = new ProfileLiveSnapshotViewModel
         {
-            InstallationId = parsedInstallationId,
-            UserId = userId.Value
+            ConnectionStatus = connectionStatus,
+            HasActiveSession = activeSession is not null,
+            ActiveSessionId = activeSession?.SessionId,
+            CurrentScene = NormalizeTelemetryValue(
+                activeSession?.CurrentScene),
+            CurrentGameState = NormalizeTelemetryValue(
+                activeSession?.CurrentGameState),
+            CurrentPhase = NormalizeTelemetryValue(
+                activeSession?.CurrentPhase),
+            SessionStartedAtUtc =
+                activeSession?.StartedAtUtc,
+            LastHeartbeatUtc =
+                activeSession?.LastHeartbeatUtc ??
+                lastActivityUtc,
+            ServerTimeUtc = now
         };
 
-        var result = await _profileApiClient.ClaimInstallationAsync(request, cancellationToken);
-
-        if (result?.Success == true)
+        return Json(new
         {
-            TempData["ClaimStatusType"] = "success";
-            TempData["ClaimStatusMessage"] = result.Message;
-        }
-        else
-        {
-            TempData["ClaimStatusType"] = "error";
-            TempData["ClaimStatusMessage"] = result?.Message ?? "The platform could not link this installation right now.";
-        }
-
-        return RedirectToAction(nameof(Index));
+            success = true,
+            data = snapshot
+        });
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UnlinkInstallation(
-        string installationId,
+    [HttpGet("Profile/Api/Dashboard/Statistics")]
+    [ResponseCache(
+        Duration = 0,
+        Location = ResponseCacheLocation.None,
+        NoStore = true)]
+    public async Task<IActionResult> GetStatisticsSnapshotAsync(
         CancellationToken cancellationToken = default)
     {
         var userId = GetCurrentUserId();
 
         if (userId is null)
         {
-            return Challenge();
+            return Unauthorized();
         }
 
-        if (!TryParseInstallationId(installationId, out var parsedInstallationId))
+        var installationIds = await _dbContext.Installations
+            .AsNoTracking()
+            .Where(x => x.OwnerUserId == userId.Value)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        var now = _timeProvider.GetUtcNow();
+        var activityPoints = CreateEmptyActivityPoints(now);
+
+        if (installationIds.Count == 0)
         {
-            TempData["ClaimStatusType"] = "error";
-            TempData["ClaimStatusMessage"] = "Installation ID format is invalid.";
-            return RedirectToAction(nameof(Index));
+            return Json(new
+            {
+                success = true,
+                data = new ProfileStatisticsSnapshotViewModel
+                {
+                    ActivityLastSevenDays = activityPoints
+                }
+            });
         }
 
-        var request = new UnlinkInstallationRequestModel
+        var sessionQuery = _dbContext.GameSessions
+            .AsNoTracking()
+            .Where(x =>
+                installationIds.Contains(
+                    x.InstallationDbId));
+
+        var totalSessions =
+            await sessionQuery.CountAsync(
+                cancellationToken);
+
+        var totalPlayTimeMinutes = await sessionQuery
+            .Select(x =>
+                (long?)EF.Functions.DateDiffMinute(
+                    x.StartedAtUtc,
+                    x.EndedAtUtc ??
+                    x.LastHeartbeatUtc))
+            .SumAsync(cancellationToken) ?? 0;
+
+        var longestSessionMinutes = await sessionQuery
+            .Select(x =>
+                (int?)EF.Functions.DateDiffMinute(
+                    x.StartedAtUtc,
+                    x.EndedAtUtc ??
+                    x.LastHeartbeatUtc))
+            .MaxAsync(cancellationToken) ?? 0;
+
+        var lastActivityUtc = await sessionQuery
+            .Select(x =>
+                (DateTimeOffset?)x.LastHeartbeatUtc)
+            .MaxAsync(cancellationToken);
+
+        var favoriteBuild = await sessionQuery
+            .Where(x =>
+                !string.IsNullOrWhiteSpace(
+                    x.BuildVersion))
+            .GroupBy(x => x.BuildVersion)
+            .Select(group => new
+            {
+                BuildVersion = group.Key,
+                SessionCount = group.Count()
+            })
+            .OrderByDescending(x => x.SessionCount)
+            .ThenBy(x => x.BuildVersion)
+            .Select(x => x.BuildVersion)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? "N/A";
+
+        var todayUtc = now.UtcDateTime.Date;
+        var trendStartUtc = new DateTimeOffset(
+            todayUtc.AddDays(-6),
+            TimeSpan.Zero);
+
+        var trendEndUtc = new DateTimeOffset(
+            todayUtc.AddDays(1),
+            TimeSpan.Zero);
+
+        var trendSessions = await sessionQuery
+            .Where(x =>
+                x.LastHeartbeatUtc >= trendStartUtc &&
+                x.StartedAtUtc < trendEndUtc)
+            .Select(x => new
+            {
+                x.StartedAtUtc,
+                EndedAtUtc =
+                    x.EndedAtUtc ??
+                    x.LastHeartbeatUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        activityPoints = Enumerable
+            .Range(0, 7)
+            .Select(index =>
+            {
+                var dayStart = new DateTimeOffset(
+                    todayUtc.AddDays(index - 6),
+                    TimeSpan.Zero);
+
+                var dayEnd = dayStart.AddDays(1);
+
+                var totalMinutes = trendSessions.Sum(
+                    session =>
+                    {
+                        var overlapStart =
+                            session.StartedAtUtc > dayStart
+                                ? session.StartedAtUtc
+                                : dayStart;
+
+                        var overlapEnd =
+                            session.EndedAtUtc < dayEnd
+                                ? session.EndedAtUtc
+                                : dayEnd;
+
+                        if (overlapEnd <= overlapStart)
+                        {
+                            return 0L;
+                        }
+
+                        return Math.Max(
+                            0L,
+                            (long)Math.Floor(
+                                (overlapEnd - overlapStart)
+                                .TotalMinutes));
+                    });
+
+                return new ProfileDailyActivityPointViewModel
+                {
+                    Date = DateOnly.FromDateTime(
+                        dayStart.UtcDateTime),
+                    Minutes = totalMinutes
+                };
+            })
+            .ToArray();
+
+        var recentEvents = await _dbContext
+            .GameSessionEvents
+            .AsNoTracking()
+            .Where(x =>
+                installationIds.Contains(
+                    x.GameSession.InstallationDbId))
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ThenByDescending(x => x.Id)
+            .Take(5)
+            .Select(x => new ProfileRecentEventViewModel
+            {
+                Id = x.Id,
+                EventType = x.EventType,
+                Scene = x.Scene ?? "N/A",
+                OccurredAtUtc = x.CreatedAtUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        var snapshot =
+            new ProfileStatisticsSnapshotViewModel
+            {
+                LinkedNodeCount =
+                    installationIds.Count,
+                TotalSessions =
+                    totalSessions,
+                TotalPlayTimeMinutes =
+                    Math.Max(
+                        0,
+                        totalPlayTimeMinutes),
+                LongestSessionMinutes =
+                    Math.Max(
+                        0,
+                        longestSessionMinutes),
+                FavoriteBuild =
+                    favoriteBuild,
+                LastActivityUtc =
+                    lastActivityUtc,
+                ActivityLastSevenDays =
+                    activityPoints,
+                RecentEvents =
+                    recentEvents
+            };
+
+        return Json(new
         {
-            InstallationId = parsedInstallationId,
-            UserId = userId.Value
-        };
-
-        var result = await _profileApiClient.UnlinkInstallationAsync(request, cancellationToken);
-
-        if (result?.Success == true)
-        {
-            TempData["ClaimStatusType"] = "success";
-            TempData["ClaimStatusMessage"] = result.Message;
-        }
-        else
-        {
-            TempData["ClaimStatusType"] = "error";
-            TempData["ClaimStatusMessage"] = result?.Message ?? "The platform could not unlink this installation right now.";
-        }
-
-        return RedirectToAction(nameof(Index));
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateProfile(
-        UpdateProfileFormModel form,
-        CancellationToken cancellationToken = default)
-    {
-        var userId = GetCurrentUserId();
-
-        if (userId is null)
-        {
-            return Challenge();
-        }
-
-        if (!ModelState.IsValid)
-        {
-            TempData["ProfileStatusType"] = "error";
-            TempData["ProfileStatusMessage"] = "Check the profile fields and try again.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        var request = new UpdateProfileRequestModel
-        {
-            Alias = form.Alias.Trim(),
-            AvatarKey = form.AvatarKey.Trim(),
-            Theme = form.Theme.Trim()
-        };
-
-        var result = await _profileApiClient.UpdateProfileAsync(
-            userId.Value,
-            request,
-            cancellationToken);
-
-        if (result?.Success != true)
-        {
-            TempData["ProfileStatusType"] = "error";
-            TempData["ProfileStatusMessage"] = result?.Message ?? "The platform could not update your profile.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        var refreshedUser = await _userManager.FindByIdAsync(userId.Value.ToString());
-
-        if (refreshedUser is null)
-        {
-            TempData["ProfileStatusType"] = "error";
-            TempData["ProfileStatusMessage"] = "Profile updated, but the current session could not be refreshed.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        var principal = await _signInManager.CreateUserPrincipalAsync(refreshedUser);
-
-        await HttpContext.SignInAsync(
-            IdentityConstants.ApplicationScheme,
-            principal);
-
-        TempData["ProfileStatusType"] = "success";
-        TempData["ProfileStatusMessage"] = result.Message;
-
-        return RedirectToAction(nameof(Index));
+            success = true,
+            data = snapshot
+        });
     }
 
     [HttpGet("Profile/Sessions")]
@@ -251,20 +434,33 @@ public sealed class ProfileController : Controller
                 TotalPages = result.TotalPages,
                 HasPreviousPage = result.HasPreviousPage,
                 HasNextPage = result.HasNextPage,
-                Items = result.Items.Select(x => new ProfileSessionHistoryRowViewModel
-                {
-                    SessionId = x.SessionId,
-                    InstallationId = x.InstallationId,
-                    DeviceName = string.IsNullOrWhiteSpace(x.DeviceName) ? "-" : x.DeviceName,
-                    BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion) ? "-" : x.BuildVersion,
-                    CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene) ? "-" : x.CurrentScene,
-                    CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase) ? "-" : x.CurrentPhase,
-                    StatusLabel = string.IsNullOrWhiteSpace(x.StatusLabel) ? "-" : x.StatusLabel,
-                    IsLive = x.IsLive,
-                    StartedAtLabel = FormatDateTime(x.StartedAtUtc),
-                    DurationLabel = FormatMinutes(x.DurationMinutes),
-                    LastHeartbeatLabel = FormatRelativeDate(x.LastHeartbeatUtc)
-                }).ToList()
+                Items = result.Items.Select(x =>
+                    new ProfileSessionHistoryRowViewModel
+                    {
+                        SessionId = x.SessionId,
+                        InstallationId = x.InstallationId,
+                        DeviceName = string.IsNullOrWhiteSpace(x.DeviceName)
+                            ? "-"
+                            : x.DeviceName,
+                        BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion)
+                            ? "-"
+                            : x.BuildVersion,
+                        CurrentScene = string.IsNullOrWhiteSpace(x.CurrentScene)
+                            ? "-"
+                            : x.CurrentScene,
+                        CurrentPhase = string.IsNullOrWhiteSpace(x.CurrentPhase)
+                            ? "-"
+                            : x.CurrentPhase,
+                        StatusLabel = string.IsNullOrWhiteSpace(x.StatusLabel)
+                            ? "-"
+                            : x.StatusLabel,
+                        IsLive = x.IsLive,
+                        StartedAtLabel = FormatDateTime(x.StartedAtUtc),
+                        DurationLabel = FormatMinutes(x.DurationMinutes),
+                        LastHeartbeatLabel = FormatRelativeDate(
+                            x.LastHeartbeatUtc)
+                    })
+                    .ToList()
             };
 
         ViewData["Title"] = "SESSION HISTORY";
@@ -275,8 +471,8 @@ public sealed class ProfileController : Controller
 
     [HttpGet("Profile/Sessions/{id:guid}")]
     public async Task<IActionResult> SessionDetail(
-    Guid id,
-    CancellationToken cancellationToken = default)
+        Guid id,
+        CancellationToken cancellationToken = default)
     {
         var userId = GetCurrentUserId();
 
@@ -299,92 +495,106 @@ public sealed class ProfileController : Controller
         {
             SessionId = detail.SessionId,
             InstallationId = detail.InstallationId,
-            DeviceName = string.IsNullOrWhiteSpace(detail.DeviceName) ? "-" : detail.DeviceName,
-            DeviceModel = string.IsNullOrWhiteSpace(detail.DeviceModel) ? "-" : detail.DeviceModel,
-            Platform = string.IsNullOrWhiteSpace(detail.Platform) ? "-" : detail.Platform,
-            BuildVersion = string.IsNullOrWhiteSpace(detail.BuildVersion) ? "-" : detail.BuildVersion,
-            CurrentScene = string.IsNullOrWhiteSpace(detail.CurrentScene) ? "-" : detail.CurrentScene,
-            CurrentGameState = string.IsNullOrWhiteSpace(detail.CurrentGameState) ? "-" : detail.CurrentGameState,
-            CurrentPhase = string.IsNullOrWhiteSpace(detail.CurrentPhase) ? "-" : detail.CurrentPhase,
-            StatusLabel = string.IsNullOrWhiteSpace(detail.StatusLabel) ? "-" : detail.StatusLabel,
+            DeviceName = string.IsNullOrWhiteSpace(detail.DeviceName)
+                ? "-"
+                : detail.DeviceName,
+            DeviceModel = string.IsNullOrWhiteSpace(detail.DeviceModel)
+                ? "-"
+                : detail.DeviceModel,
+            Platform = string.IsNullOrWhiteSpace(detail.Platform)
+                ? "-"
+                : detail.Platform,
+            BuildVersion = string.IsNullOrWhiteSpace(detail.BuildVersion)
+                ? "-"
+                : detail.BuildVersion,
+            CurrentScene = string.IsNullOrWhiteSpace(detail.CurrentScene)
+                ? "-"
+                : detail.CurrentScene,
+            CurrentGameState = string.IsNullOrWhiteSpace(
+                detail.CurrentGameState)
+                    ? "-"
+                    : detail.CurrentGameState,
+            CurrentPhase = string.IsNullOrWhiteSpace(detail.CurrentPhase)
+                ? "-"
+                : detail.CurrentPhase,
+            StatusLabel = string.IsNullOrWhiteSpace(detail.StatusLabel)
+                ? "-"
+                : detail.StatusLabel,
             IsLive = detail.IsLive,
             StartedAtLabel = FormatDateTime(detail.StartedAtUtc),
-            EndedAtLabel = detail.EndedAtUtc.HasValue ? FormatDateTime(detail.EndedAtUtc.Value) : "Not ended",
+            EndedAtLabel = detail.EndedAtUtc.HasValue
+                ? FormatDateTime(detail.EndedAtUtc.Value)
+                : "Not ended",
             LastHeartbeatLabel = FormatDateTime(detail.LastHeartbeatUtc),
             DurationLabel = FormatMinutes(detail.DurationMinutes),
-            Events = detail.Events.Select(x => new ProfileSessionEventTimelineItemViewModel
-            {
-                Id = x.Id,
-                EventType = string.IsNullOrWhiteSpace(x.EventType) ? "-" : x.EventType,
-                Scene = string.IsNullOrWhiteSpace(x.Scene) ? "-" : x.Scene,
-                GameState = string.IsNullOrWhiteSpace(x.GameState) ? "-" : x.GameState,
-                Phase = string.IsNullOrWhiteSpace(x.Phase) ? "-" : x.Phase,
-                PayloadJson = string.IsNullOrWhiteSpace(x.PayloadJson) ? string.Empty : x.PayloadJson,
-                HasPayload = !string.IsNullOrWhiteSpace(x.PayloadJson),
-                ClientTimeLabel = x.ClientTimeUtc.HasValue ? FormatDateTime(x.ClientTimeUtc.Value) : "Not provided",
-                CreatedAtLabel = FormatDateTime(x.CreatedAtUtc)
-            }).ToList()
+            Events = detail.Events.Select(x =>
+                new ProfileSessionEventTimelineItemViewModel
+                {
+                    Id = x.Id,
+                    EventType = string.IsNullOrWhiteSpace(x.EventType)
+                        ? "-"
+                        : x.EventType,
+                    Scene = string.IsNullOrWhiteSpace(x.Scene)
+                        ? "-"
+                        : x.Scene,
+                    GameState = string.IsNullOrWhiteSpace(x.GameState)
+                        ? "-"
+                        : x.GameState,
+                    Phase = string.IsNullOrWhiteSpace(x.Phase)
+                        ? "-"
+                        : x.Phase,
+                    PayloadJson = string.IsNullOrWhiteSpace(x.PayloadJson)
+                        ? string.Empty
+                        : x.PayloadJson,
+                    HasPayload = !string.IsNullOrWhiteSpace(x.PayloadJson),
+                    ClientTimeLabel = x.ClientTimeUtc.HasValue
+                        ? FormatDateTime(x.ClientTimeUtc.Value)
+                        : "Not provided",
+                    CreatedAtLabel = FormatDateTime(x.CreatedAtUtc)
+                })
+                .ToList()
         };
 
         ViewData["Title"] = "SESSION DETAIL";
-        ViewData["TitleResourceKey"] = "Profile_SessionDetailPageTitle";
+        ViewData["TitleResourceKey"] =
+            "Profile_SessionDetailPageTitle";
 
         return View("SessionDetail", model);
     }
 
+
+
+    private static IReadOnlyList<ProfileDailyActivityPointViewModel>
+        CreateEmptyActivityPoints(DateTimeOffset now)
+    {
+        var todayUtc = now.UtcDateTime.Date;
+
+        return Enumerable
+            .Range(0, 7)
+            .Select(index =>
+                new ProfileDailyActivityPointViewModel
+                {
+                    Date = DateOnly.FromDateTime(
+                        todayUtc.AddDays(index - 6)),
+                    Minutes = 0
+                })
+            .ToArray();
+    }
+
     private int? GetCurrentUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = User.FindFirst(
+            ClaimTypes.NameIdentifier)?.Value;
 
-        return int.TryParse(userIdClaim, out var userId)
-            ? userId
-            : null;
+        return int.TryParse(
+            userIdClaim,
+            out var userId)
+                ? userId
+                : null;
     }
 
-    private static bool TryParseInstallationId(string? installationId, out Guid parsedInstallationId)
-    {
-        parsedInstallationId = Guid.Empty;
-
-        return !string.IsNullOrWhiteSpace(installationId)
-            && Guid.TryParse(installationId.Trim(), out parsedInstallationId);
-    }
-
-    private static ProfileIndexViewModel MapProfileToViewModel(UserProfileApiModel profile)
-    {
-        return new ProfileIndexViewModel
-        {
-            Alias = profile.Alias,
-            Name = profile.Name,
-            Email = profile.Email,
-            AvatarKey = profile.AvatarKey,
-            Theme = profile.Theme,
-            Role = profile.Role,
-            Status = profile.Status,
-            TotalInstallations = profile.TotalInstallations,
-            TotalSessions = profile.TotalSessions,
-            TotalPlayTimeMinutes = profile.TotalPlayTimeMinutes,
-            TotalPlayTimeLabel = FormatMinutes(profile.TotalPlayTimeMinutes),
-            LastActivityLabel = profile.LastActivityUtc.HasValue
-                ? FormatRelativeDate(profile.LastActivityUtc.Value)
-                : "N/A",
-            FavoriteBuild = string.IsNullOrWhiteSpace(profile.FavoriteBuild) ? "N/A" : profile.FavoriteBuild,
-            Installations = profile.Installations
-                .Select(x => new LinkedInstallationViewModel
-                {
-                    InstallationId = x.InstallationId,
-                    DeviceName = string.IsNullOrWhiteSpace(x.DeviceName) ? "-" : x.DeviceName,
-                    DeviceModel = string.IsNullOrWhiteSpace(x.DeviceModel) ? "-" : x.DeviceModel,
-                    Platform = string.IsNullOrWhiteSpace(x.Platform) ? "-" : x.Platform,
-                    BuildVersion = string.IsNullOrWhiteSpace(x.BuildVersion) ? "-" : x.BuildVersion,
-                    Status = string.IsNullOrWhiteSpace(x.Status) ? "-" : x.Status,
-                    FirstSeenLabel = x.FirstSeenUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"),
-                    LastUpdateLabel = x.LastUpdateUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
-                })
-                .ToList()
-        };
-    }
-
-    private static string FormatMinutes(int totalMinutes)
+    private static string FormatMinutes(
+        long totalMinutes)
     {
         if (totalMinutes <= 0)
         {
@@ -407,9 +617,11 @@ public sealed class ProfileController : Controller
         return $"{hours}h {minutes}m";
     }
 
-    private static string FormatRelativeDate(DateTimeOffset utcDate)
+    private static string FormatRelativeDate(
+        DateTimeOffset utcDate)
     {
-        var diff = DateTimeOffset.UtcNow - utcDate;
+        var diff =
+            DateTimeOffset.UtcNow - utcDate;
 
         if (diff.TotalMinutes < 1)
         {
@@ -431,11 +643,51 @@ public sealed class ProfileController : Controller
             return $"{(int)diff.TotalDays}d ago";
         }
 
-        return utcDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+        return utcDate
+            .ToLocalTime()
+            .ToString("yyyy-MM-dd HH:mm");
     }
 
-    private static string FormatDateTime(DateTimeOffset utcDate)
+    private static string FormatDateTime(
+        DateTimeOffset utcDate)
     {
-        return utcDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+        return utcDate
+            .ToLocalTime()
+            .ToString("yyyy-MM-dd HH:mm");
     }
+
+    private static string GetRoleResourceKey(
+        UserRole role)
+    {
+        return role switch
+        {
+            UserRole.Admin =>
+                "Profile_Role_Admin",
+            UserRole.Moderator =>
+                "Profile_Role_Supervisor",
+            _ =>
+                "Profile_Role_Player"
+        };
+    }
+
+    private static string GetStatusResourceKey(
+        UserStatus status)
+    {
+        return status switch
+        {
+            UserStatus.Suspended =>
+                "Profile_AccountStatus_Suspended",
+            _ =>
+                "Profile_AccountStatus_Active"
+        };
+    }
+
+    private static string NormalizeTelemetryValue(
+        string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? "N/A"
+            : value.Trim();
+    }
+
 }

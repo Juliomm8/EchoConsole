@@ -1,6 +1,6 @@
-﻿namespace EchoConsole.Web.Models.Profile;
+namespace EchoConsole.Web.Models.Profile;
 
-public sealed class ProfileIndexViewModel
+public class ProfileIndexViewModel
 {
     public string Alias { get; set; } = "Player";
 

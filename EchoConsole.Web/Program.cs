@@ -1,15 +1,21 @@
 using System.Globalization;
+using System.Security.Claims;
+using System.Threading.RateLimiting;
 using EchoConsole.Api.Domain.Entities;
 using EchoConsole.Api.Persistence;
 using EchoConsole.Web;
 using EchoConsole.Web.BackgroundServices;
 using EchoConsole.Web.Hubs;
 using EchoConsole.Web.Security;
+using EchoConsole.Web.Services.Accounts;
 using EchoConsole.Web.Services.Api;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -43,14 +49,35 @@ builder.Services
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.DefaultRequestCulture = new RequestCulture("en");
-
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
-
     options.RequestCultureProviders = new IRequestCultureProvider[]
     {
         new CookieRequestCultureProvider()
     };
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy(
+        "FixedWindow_Auth",
+        httpContext =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey:
+                    httpContext.Connection.RemoteIpAddress?.ToString()
+                    ?? "unknown",
+                factory: _ =>
+                    new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueProcessingOrder =
+                            QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    }));
 });
 
 var connectionString = builder.Configuration.GetConnectionString(
@@ -81,16 +108,26 @@ builder.Services
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = false;
         options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequiredLength = 6;
+        options.Password.RequiredLength = 8;
 
-        options.SignIn.RequireConfirmedAccount = false;
-        options.SignIn.RequireConfirmedEmail = false;
+        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedEmail = true;
     })
     .AddSignInManager<SignInManager<User>>()
     .AddEntityFrameworkStores<EchoConsoleDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(2);
+});
+
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.FromMinutes(1);
+});
+
+var authenticationBuilder = builder.Services
     .AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme =
@@ -114,16 +151,61 @@ builder.Services
             options.Cookie.Name = "EchoConsole.Auth";
             options.Cookie.HttpOnly = true;
             options.Cookie.SameSite = SameSiteMode.Lax;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
             options.ExpireTimeSpan = TimeSpan.FromDays(7);
             options.SlidingExpiration = true;
+            options.EventsType =
+                typeof(EchoConsoleCookieAuthenticationEvents);
+        })
+    .AddCookie(
+        IdentityConstants.ExternalScheme,
+        options =>
+        {
+            options.Cookie.Name = "EchoConsole.External";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
         });
+
+var googleClientId = builder.Configuration[
+    "Authentication:Google:ClientId"];
+
+var googleClientSecret = builder.Configuration[
+    "Authentication:Google:ClientSecret"];
+
+if (!string.IsNullOrWhiteSpace(googleClientId) &&
+    !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    authenticationBuilder.AddGoogle(
+        GoogleDefaults.AuthenticationScheme,
+        options =>
+        {
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+            options.SignInScheme = IdentityConstants.ExternalScheme;
+            options.SaveTokens = true;
+
+            options.ClaimActions.MapJsonKey(
+                "urn:google:email_verified",
+                "verified_email",
+                ClaimValueTypes.Boolean);
+        });
+}
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<User>,
     EchoConsoleUserClaimsPrincipalFactory>();
+
+builder.Services.AddScoped<IUserSessionService, UserSessionService>();
+builder.Services.AddScoped<EchoConsoleCookieAuthenticationEvents>();
+builder.Services.AddScoped<IOtpEmailSender, SmtpEmailSender>();
 
 builder.Services.AddTransient<AdminApiKeyHandler>();
 
@@ -132,9 +214,9 @@ var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]
         "ApiSettings:BaseUrl is not configured.");
 
 if (!Uri.TryCreate(
-        apiBaseUrl,
-        UriKind.Absolute,
-        out var apiBaseUri))
+    apiBaseUrl,
+    UriKind.Absolute,
+    out var apiBaseUri))
 {
     throw new InvalidOperationException(
         "ApiSettings:BaseUrl must be an absolute URI.");
@@ -198,10 +280,12 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<AdminTelemetryHub>("/hubs/admin-telemetry");
+app.MapHub<ProfileTelemetryHub>("/hubs/profile-telemetry");
 
 app.MapControllerRoute(
     name: "default",

@@ -1,0 +1,321 @@
+﻿@model EchoConsole.Web.Models.Auth.VerifyOtpViewModel
+
+@{
+    ViewData["Title"] = SharedLocalizer["Auth_VerifyTerminalTitle"].Value;
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+
+    var otpStatusType =
+        TempData["OtpStatusType"]?.ToString();
+
+    var otpStatusMessage =
+        TempData["OtpStatusMessage"]?.ToString();
+
+    var otpStatusSuccess = string.Equals(
+        otpStatusType,
+        "success",
+        StringComparison.OrdinalIgnoreCase);
+
+    var expiresAtUtc =
+        Model.ExpiresAtUtc?.ToString("O")
+        ?? string.Empty;
+
+    var serverTimeUtc =
+        Model.ServerTimeUtc.ToString("O");
+
+    var hasActiveOtp =
+        Model.ExpiresAtUtc.HasValue &&
+        Model.ExpiresAtUtc.Value >
+        Model.ServerTimeUtc;
+
+    var timeRemainingLabel =
+        SharedLocalizer["Auth_TimeRemaining"].Value;
+}
+
+<div class="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-20 sm:px-6">
+    <div class="w-full max-w-3xl">
+        <a asp-controller="Auth"
+           asp-action="Login"
+           class="mb-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-green-400 transition hover:text-green-200">
+            <svg class="h-4 w-4"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+            </svg>
+
+            @SharedLocalizer["Auth_ReturnAccessNode"]
+        </a>
+
+        <section data-otp-terminal
+                 data-expires-at="@expiresAtUtc"
+                 data-server-time="@serverTimeUtc"
+                 data-countdown-prefix="@timeRemainingLabel"
+                 class="terminal-panel relative overflow-hidden rounded-lg p-8 sm:p-10 lg:p-12">
+
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
+
+            <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(57,255,20,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,20,0.025)_1px,transparent_1px)] bg-[size:28px_28px]"></div>
+
+            <div class="relative">
+                <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-green-500/35 bg-green-500/10 shadow-phosphor">
+                    <svg class="h-9 w-9 text-green-300"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.6"
+                         aria-hidden="true">
+                        <rect x="5"
+                              y="10"
+                              width="14"
+                              height="10"
+                              rx="2" />
+
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+
+                        <path d="M12 14v2" />
+                    </svg>
+                </div>
+
+                <div class="mt-7 text-center">
+                    <p class="terminal-kicker">
+                        @SharedLocalizer["Auth_SecureEnrollmentChannel"]
+                    </p>
+
+                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.12em] text-green-100 text-glow-cyan sm:text-4xl">
+                        @SharedLocalizer["Auth_VerifyTerminalTitle"]
+                    </h1>
+
+                    <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-400">
+                        @SharedLocalizer["Auth_VerifyTerminalDesc"]
+                        <span class="font-bold text-green-300">
+                            @Model.Email
+                        </span>.
+                    </p>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(otpStatusMessage))
+                {
+                    <div class="mx-auto mt-6 max-w-xl rounded border px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.12em] @(otpStatusSuccess
+                        ? "border-green-500/30 bg-green-500/10 text-green-200"
+                        : "border-rose-500/30 bg-rose-500/10 text-rose-200")">
+                        @otpStatusMessage
+                    </div>
+                }
+
+                <div class="mx-auto mt-8 max-w-xl rounded border border-green-500/15 bg-black/70 p-4 text-xs leading-6 text-slate-500">
+                    @SharedLocalizer["Auth_OtpChannelReady"]
+                    <br />
+
+                    @(hasActiveOtp
+                        ? SharedLocalizer["Auth_AwaitingSequence"].Value
+                        : SharedLocalizer["Auth_OtpSequenceRequired"].Value)
+                    <br />
+
+                    <span data-otp-countdown
+                          class="font-bold text-green-300">
+                        @(hasActiveOtp
+                            ? $"{timeRemainingLabel} 05:00"
+                            : $"{timeRemainingLabel} 00:00")
+                    </span>
+                </div>
+
+                <form asp-controller="Auth"
+                      asp-action="VerifyOtp"
+                      method="post"
+                      novalidate
+                      class="mx-auto mt-8 max-w-xl space-y-6">
+
+                    <input asp-for="Email"
+                           type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="rounded border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-center text-sm text-rose-200">
+                    </div>
+
+                    <div>
+                        <label asp-for="Code"
+                               class="mb-3 block text-center text-[10px] font-bold uppercase tracking-[0.24em] text-green-300">
+                            @SharedLocalizer["Auth_AuthorizationCode"]
+                        </label>
+
+                        <input asp-for="Code"
+                               type="text"
+                               inputmode="numeric"
+                               autocomplete="one-time-code"
+                               pattern="[0-9]{6}"
+                               minlength="6"
+                               maxlength="6"
+                               autofocus
+                               data-otp-input
+                               disabled="@(!hasActiveOtp)"
+                               class="w-full rounded border border-slate-800 bg-black px-4 py-4 text-center font-mono text-3xl font-bold leading-normal tracking-[0.55em] text-green-300 outline-none transition placeholder:text-slate-800 focus:border-green-500/60 focus:ring-2 focus:ring-green-500/10 disabled:cursor-not-allowed disabled:border-slate-900 disabled:text-slate-700 sm:text-4xl"
+                               placeholder="000000" />
+
+                        <span asp-validation-for="Code"
+                              class="mt-3 block text-center text-xs font-bold uppercase tracking-[0.14em] text-rose-300">
+                        </span>
+                    </div>
+
+                    <button type="submit"
+                            data-otp-submit
+                            disabled="@(!hasActiveOtp)"
+                            class="terminal-button flex w-full items-center justify-center gap-3 py-4 disabled:cursor-not-allowed disabled:opacity-35">
+                        <span>&gt;</span>
+                        @SharedLocalizer["Auth_ValidateTerminalBtn"]
+                    </button>
+                </form>
+
+                <form asp-controller="Auth"
+                      asp-action="ResendOtp"
+                      method="post"
+                      class="mx-auto mt-4 max-w-xl">
+
+                    <input type="hidden"
+                           name="email"
+                           value="@Model.Email" />
+
+                    <button type="submit"
+                            class="flex w-full items-center justify-center border border-slate-700 bg-black px-5 py-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400 transition hover:border-green-500/50 hover:bg-green-500/[0.05] hover:text-green-200">
+                        @SharedLocalizer["Auth_ResendOtpLink"]
+                    </button>
+                </form>
+
+                <div class="mx-auto mt-8 max-w-xl border-t border-slate-800 pt-5 text-center text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                    @SharedLocalizer["Auth_AuthorizationProtocol"]
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    (() => {
+        "use strict";
+
+        const terminal = document.querySelector(
+            "[data-otp-terminal]"
+        );
+
+        if (!terminal) {
+            return;
+        }
+
+        const countdown = terminal.querySelector(
+            "[data-otp-countdown]"
+        );
+
+        const otpInput = terminal.querySelector(
+            "[data-otp-input]"
+        );
+
+        const submitButton = terminal.querySelector(
+            "[data-otp-submit]"
+        );
+
+        const expiresAtMilliseconds = Date.parse(
+            terminal.dataset.expiresAt ?? ""
+        );
+
+        const serverTimeMilliseconds = Date.parse(
+            terminal.dataset.serverTime ?? ""
+        );
+
+        const clientStartedAt = Date.now();
+
+        const countdownPrefix =
+            terminal.dataset.countdownPrefix ?? "";
+
+        const hasValidClock =
+            Number.isFinite(expiresAtMilliseconds) &&
+            Number.isFinite(serverTimeMilliseconds);
+
+        const disableVerification = () => {
+            if (otpInput) {
+                otpInput.disabled = true;
+                otpInput.value = "";
+            }
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            if (countdown) {
+                countdown.textContent =
+                    `${countdownPrefix} 00:00`;
+                countdown.classList.remove(
+                    "text-green-300"
+                );
+                countdown.classList.add(
+                    "text-rose-300"
+                );
+            }
+        };
+
+        if (!hasValidClock) {
+            disableVerification();
+            return;
+        }
+
+        const updateCountdown = () => {
+            const elapsedClientMilliseconds =
+                Date.now() - clientStartedAt;
+
+            const estimatedServerTime =
+                serverTimeMilliseconds +
+                elapsedClientMilliseconds;
+
+            const remainingMilliseconds =
+                Math.max(
+                    0,
+                    expiresAtMilliseconds -
+                    estimatedServerTime
+                );
+
+            const remainingSeconds = Math.ceil(
+                remainingMilliseconds / 1000
+            );
+
+            const minutes = Math.floor(
+                remainingSeconds / 60
+            );
+
+            const seconds =
+                remainingSeconds % 60;
+
+            if (countdown) {
+                countdown.textContent =
+                    `${countdownPrefix} ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+            }
+
+            if (remainingSeconds <= 0) {
+                disableVerification();
+
+                if (timerId !== null) {
+                    window.clearInterval(timerId);
+                }
+            }
+        };
+
+        otpInput?.addEventListener(
+            "input",
+            () => {
+                otpInput.value = otpInput.value
+                    .replace(/\D/g, "")
+                    .slice(0, 6);
+            }
+        );
+
+        let timerId = null;
+
+        updateCountdown();
+
+        if (!otpInput?.disabled) {
+            timerId = window.setInterval(
+                updateCountdown,
+                250
+            );
+        }
+    })();
+</script>

@@ -1,430 +1,353 @@
-@using System.Text.Json
-@model EchoConsole.Web.Models.Profile.ProfileIndexViewModel
+@model EchoConsole.Web.Models.Profile.ProfileDashboardViewModel
+@using EchoConsole.Web.Services.Profile
 
 @{
-    ViewData["Title"] = SharedLocalizer["Profile_PageTitle"].Value;
-    ViewData["TitleResourceKey"] = "Profile_PageTitle";
+    ViewData["Title"] = SharedLocalizer["Profile_DashboardPageTitle"].Value;
+    ViewData["TitleResourceKey"] = "Profile_DashboardPageTitle";
 
-    string LocalizedRole(string role) => role switch
-    {
-        "Admin" => SharedLocalizer["Role_Admin"].Value,
-        "Moderator" => SharedLocalizer["Role_Moderator"].Value,
-        "Viewer" => SharedLocalizer["Role_Viewer"].Value,
-        _ => SharedLocalizer["Role_User"].Value
-    };
+    var alias = string.IsNullOrWhiteSpace(Model.Alias)
+        ? "PLAYER"
+        : Model.Alias.Trim();
 
-    string LocalizedStatus(string status) => status switch
-    {
-        "Active" => SharedLocalizer["Common_Active"].Value,
-        "Suspended" => SharedLocalizer["Common_Suspended"].Value,
-        "Expired" => SharedLocalizer["Status_Expired"].Value,
-        _ => status
-    };
+    var avatarKey =
+        ProfileCatalog.NormalizeStoredAvatarKey(
+            Model.AvatarKey);
 
-    // Device ownership notification state
-    var claimStatusType = TempData["ClaimStatusType"]?.ToString();
-    var claimStatusMessage = TempData["ClaimStatusMessage"]?.ToString();
-    var isClaimSuccess = string.Equals(claimStatusType, "success", StringComparison.OrdinalIgnoreCase);
+    var avatarUrl =
+        Url.Content(
+            $"~/images/avatars/{avatarKey}.png");
 
-    // Profile update notification state
-    var profileStatusType = TempData["ProfileStatusType"]?.ToString();
-    var profileStatusMessage = TempData["ProfileStatusMessage"]?.ToString();
-    var isProfileSuccess = string.Equals(profileStatusType, "success", StringComparison.OrdinalIgnoreCase);
-
-    var availableThemes = new[] { "cyan", "fuchsia", "amber" };
-    var availableAvatars = new[] { "avatar-01", "avatar-02", "avatar-03", "avatar-04", "avatar-05" };
-    var unlinkConfirmJson = JsonSerializer.Serialize(
-        SharedLocalizer["Profile_UnlinkConfirm"].Value);
+    var fallbackAvatarUrl =
+        Url.Content(
+            "~/images/avatars/avatar_01.png");
 }
 
-<div class="min-h-screen bg-[#070B12] text-slate-100">
-    <div class="mx-auto max-w-[1600px] px-6 py-8">
-        <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <section class="rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
-                    @SharedLocalizer["Profile_OperatorIdentity"]
-                </p>
+<div data-profile-dashboard
+     data-live-url="@Url.Action("GetLiveSnapshot", "Profile")"
+     data-statistics-url="@Url.Action("GetStatisticsSnapshot", "Profile")"
+     data-hub-url="@Url.Content("~/hubs/profile-telemetry")"
+     data-label-online="@SharedLocalizer["Profile_Status_Online"]"
+     data-label-degraded="@SharedLocalizer["Profile_Status_Degraded"]"
+     data-label-offline="@SharedLocalizer["Profile_Status_Offline"]"
+     data-label-no-active-session="@SharedLocalizer["Profile_NoActiveSession"]"
+     data-label-not-available="@SharedLocalizer["Common_NotAvailable"]"
+     data-label-minutes="@SharedLocalizer["Common_MinutesShort"]"
+     data-label-hours="@SharedLocalizer["Common_HoursShort"]"
+     data-label-retrying="@SharedLocalizer["Profile_Retrying"]"
+     data-label-event-log-empty="@SharedLocalizer["Profile_EventLogEmpty"]"
+     data-label-session-started="@SharedLocalizer["Profile_Event_SessionStarted"]"
+     data-label-session-ended="@SharedLocalizer["Profile_Event_SessionEnded"]"
+     data-label-session-expired="@SharedLocalizer["Profile_Event_SessionExpired"]"
+     class="min-h-screen bg-black text-green-100">
 
-                <h1 class="mt-3 font-display text-4xl uppercase tracking-[0.16em] text-white">
-                    @Model.Alias
-                </h1>
+    <div class="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+        <header class="profile-crt-panel relative overflow-hidden border border-green-500/20 bg-black px-5 py-6 shadow-[0_0_36px_rgba(57,255,20,0.06)] sm:px-8">
+            <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(57,255,20,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,20,0.025)_1px,transparent_1px)] bg-[size:28px_28px]"></div>
 
-                <p class="mt-3 max-w-2xl text-sm text-slate-400">
-                    @SharedLocalizer["Profile_HeroSubtitle"]
-                </p>
+            <div class="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.38em] text-green-500">
+                        @SharedLocalizer["Profile_DashboardKicker"]
+                    </p>
 
-                <div class="mt-6 flex flex-wrap gap-3">
-                    <span class="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
-                        @SharedLocalizer["Profile_ThemeLabel"]: @Model.Theme
-                    </span>
+                    <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.12em] text-green-100 text-glow-cyan sm:text-5xl">
+                        @SharedLocalizer["Profile_DashboardTitle"]
+                    </h1>
 
-                    <span class="rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-fuchsia-200">
-                        @SharedLocalizer["Profile_RoleLabel"]: @LocalizedRole(Model.Role)
-                    </span>
-
-                    <span class="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
-                        @SharedLocalizer["Profile_StatusLabel"]: @LocalizedStatus(Model.Status)
-                    </span>
+                    <p class="mt-4 max-w-3xl text-sm leading-7 text-slate-500">
+                        @SharedLocalizer["Profile_DashboardDescription"]
+                    </p>
                 </div>
 
-                <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_Installations"]
+                <a asp-controller="ProfileSettings"
+                   asp-action="Index"
+                   class="group inline-flex items-center justify-center gap-3 border border-green-500/25 bg-green-500/[0.05] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-green-300 transition hover:border-green-300 hover:bg-green-500/10 hover:text-green-100"
+                   aria-label="@SharedLocalizer["Profile_OpenSettings"]">
+                    <svg class="h-5 w-5 transition group-hover:rotate-45"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.7"
+                         aria-hidden="true">
+                        <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+                        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.16.36.37.7.6 1 .3.33.7.54 1.1.6H21v4h-.09a1.7 1.7 0 0 0-1.51.4Z" />
+                    </svg>
+
+                    <span>@SharedLocalizer["Profile_OpenSettings"]</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="mt-5 grid gap-5">
+            <section class="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+                <article class="profile-crt-panel relative overflow-hidden border border-green-500/25 bg-green-950/30 p-6 sm:p-8">
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-green-300/70"></div>
+
+                    <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+                        <div class="h-28 w-28 shrink-0 overflow-hidden border border-green-400/40 bg-green-500/10 shadow-[inset_0_0_24px_rgba(57,255,20,0.08)]">
+                            <img src="@avatarUrl"
+                                 alt="@alias"
+                                 data-user-avatar-image
+                                 class="h-full w-full object-cover"
+                                 width="112"
+                                 height="112"
+                                 onerror="this.onerror=null;this.src='@fallbackAvatarUrl';" />
                         </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.TotalInstallations.ToString("N0")
+
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
+                                @SharedLocalizer["Profile_PlayerIdentification"]
+                            </p>
+
+                            <h2 class="mt-2 truncate font-display text-3xl uppercase tracking-[0.1em] text-green-100">
+                                @Model.Alias
+                            </h2>
+
+                            <p class="mt-2 text-sm text-slate-400">
+                                @Model.Name
+                            </p>
+
+                            <div class="mt-5 flex flex-wrap gap-2">
+                                <span class="border border-green-500/25 bg-green-500/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-green-300">
+                                    @Model.RoleDisplayName
+                                </span>
+
+                                <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                                    @SharedLocalizer["Profile_RecordLabel"]:
+                                    DS-@Model.UserId.ToString("D5")
+                                </span>
+
+                                <span class="border border-slate-700 bg-black px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                                    @SharedLocalizer["Profile_StatusLabel"]:
+                                    @Model.Status
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_Sessions"]
+                    <div class="mt-8 border-t border-green-500/15 pt-5">
+                        <div class="flex items-center justify-between gap-4 border border-slate-800 bg-black/80 p-4">
+                            <div>
+                                <span class="block text-[9px] uppercase tracking-[0.2em] text-slate-600">
+                                    @SharedLocalizer["Profile_ConnectionStatus"]
+                                </span>
+
+                                <strong data-connection-status
+                                        class="mt-2 block text-sm uppercase tracking-[0.16em] text-slate-400">
+                                    @SharedLocalizer["Profile_Status_Offline"]
+                                </strong>
+                            </div>
+
+                            <span data-connection-indicator
+                                  class="relative flex h-3 w-3"
+                                  aria-hidden="true">
+                                <span data-heartbeat-wave
+                                      class="absolute inset-0 rounded-full bg-green-400 opacity-0">
+                                </span>
+                                <span data-heartbeat-core
+                                      class="relative h-3 w-3 rounded-full bg-slate-600 shadow-[0_0_14px_rgba(100,116,139,0.7)]">
+                                </span>
+                            </span>
                         </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.TotalSessions.ToString("N0")
+                    </div>
+                </article>
+
+                <section class="profile-crt-panel border border-slate-800 bg-[#020402] p-5 sm:p-8">
+                    <div class="flex items-end justify-between gap-4">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
+                                @SharedLocalizer["Profile_LiveSessionKicker"]
+                            </p>
+
+                            <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.1em] text-green-100">
+                                @SharedLocalizer["Profile_LiveSessionTitle"]
+                            </h2>
+                        </div>
+
+                        <span data-dashboard-sync
+                              class="text-[9px] uppercase tracking-[0.18em] text-amber-400">
+                            @SharedLocalizer["Profile_Synchronizing"]
+                        </span>
+                    </div>
+
+                    <div data-active-session
+                         class="mt-6 grid gap-3 sm:grid-cols-2">
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_CurrentScene"]
+                            </span>
+                            <strong data-current-scene class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                        </div>
+
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_CurrentPhase"]
+                            </span>
+                            <strong data-current-phase class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                        </div>
+
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_CurrentState"]
+                            </span>
+                            <strong data-current-state class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                        </div>
+
+                        <div class="border border-green-500/15 bg-black p-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_SessionDuration"]
+                            </span>
+                            <strong data-session-duration class="mt-2 block text-sm uppercase tracking-[0.12em] text-green-300">@($"0{SharedLocalizer["Common_MinutesShort"]}")</strong>
+                        </div>
+
+                        <div class="border border-slate-800 bg-black p-4 sm:col-span-2">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-slate-600">
+                                @SharedLocalizer["Profile_LastHeartbeat"]
+                            </span>
+                            <strong data-last-heartbeat class="mt-2 block text-sm uppercase tracking-[0.12em] text-slate-300">@SharedLocalizer["Common_NotAvailable"]</strong>
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_PlayTime"]
-                        </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.TotalPlayTimeLabel
-                        </div>
+                    <div data-no-active-session
+                         class="mt-6 hidden border border-slate-800 bg-black p-8 text-center text-xs uppercase tracking-[0.18em] text-slate-600">
+                        @SharedLocalizer["Profile_NoActiveSession"]
                     </div>
-
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_FavoriteBuild"]
-                        </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.FavoriteBuild
-                        </div>
-                    </div>
-
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                        <div class="text-xs uppercase tracking-[0.22em] text-slate-500">
-                            @SharedLocalizer["Profile_LastActivity"]
-                        </div>
-                        <div class="mt-2 font-display text-2xl text-fuchsia-300">
-                            @Model.LastActivityLabel
-                        </div>
-                    </div>
-                </div>
+                </section>
             </section>
 
-            <aside class="rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-                <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                    @SharedLocalizer["Profile_PlayerCard"]
-                </p>
-
-                <div class="mt-6 rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-[0_0_24px_rgba(0,255,255,0.04)]">
-                    <div class="flex items-center gap-4">
-                        <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 font-display text-2xl uppercase tracking-[0.18em] text-cyan-200">
-                            @(Model.Alias.Length >= 2 ? Model.Alias.Substring(0, 2).ToUpperInvariant() : Model.Alias.ToUpperInvariant())
-                        </div>
-
+            <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <article class="profile-crt-panel border border-green-500/20 bg-green-950/30 p-5 sm:col-span-2 xl:col-span-1">
+                    <div class="flex items-start justify-between gap-4">
                         <div>
-                            <div class="font-display text-2xl uppercase tracking-[0.12em] text-white">
-                                @Model.Alias
-                            </div>
-                            <div class="mt-1 text-sm text-slate-400">
-                                @Model.Email
-                            </div>
+                            <span class="text-[10px] uppercase tracking-[0.22em] text-green-600">
+                                @SharedLocalizer["Profile_TotalPlayTime"]
+                            </span>
+                            <strong data-total-play-time
+                                    class="mt-3 block font-display text-4xl tracking-[0.08em] text-green-200">
+                                0h 0m
+                            </strong>
                         </div>
+
+                        <span class="text-[9px] uppercase tracking-[0.16em] text-slate-600">
+                            @SharedLocalizer["Profile_LastSevenDays"]
+                        </span>
                     </div>
 
-                    <div class="mt-6 grid grid-cols-2 gap-3">
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_Avatar"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @Model.AvatarKey
-                            </div>
+                    <div class="mt-5 border-t border-green-500/10 pt-4">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-[9px] uppercase tracking-[0.18em] text-green-700">
+                                @SharedLocalizer["Profile_ActivityTrend"]
+                            </span>
+                            <span data-activity-total
+                                  class="text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                                0m
+                            </span>
                         </div>
 
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_ThemeLabel"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @Model.Theme
-                            </div>
-                        </div>
+                        <svg data-activity-chart
+                             class="mt-3 h-20 w-full overflow-visible"
+                             viewBox="0 0 280 72"
+                             preserveAspectRatio="none"
+                             role="img"
+                             aria-label="@SharedLocalizer["Profile_ActivityTrend"]">
+                            <line x1="0"
+                                  y1="68"
+                                  x2="280"
+                                  y2="68"
+                                  stroke="rgba(57,255,20,0.12)"
+                                  stroke-width="1" />
+                            <polyline data-activity-area
+                                      points=""
+                                      fill="rgba(57,255,20,0.08)"
+                                      stroke="none" />
+                            <polyline data-activity-line
+                                      points=""
+                                      fill="none"
+                                      stroke="rgba(140,255,114,0.9)"
+                                      stroke-width="2"
+                                      vector-effect="non-scaling-stroke" />
+                        </svg>
 
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_Name"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @Model.Name
-                            </div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-                            <div class="text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_Access"]
-                            </div>
-                            <div class="mt-1 text-sm font-semibold text-cyan-200">
-                                @LocalizedRole(Model.Role)
-                            </div>
+                        <div data-activity-labels
+                             class="mt-2 grid grid-cols-7 gap-1 text-center text-[8px] uppercase tracking-[0.08em] text-slate-700">
                         </div>
                     </div>
-                </div>
-            </aside>
-        </div>
+                </article>
 
-        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        @SharedLocalizer["Profile_SettingsBadge"]
-                    </p>
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_TotalSessions"]
+                    </span>
+                    <strong data-total-sessions class="mt-3 block font-display text-3xl text-green-300">0</strong>
+                </article>
 
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                        @SharedLocalizer["Profile_SettingsTitle"]
-                    </h2>
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_LinkedNodes"]
+                    </span>
+                    <strong data-linked-nodes class="mt-3 block font-display text-3xl text-green-300">0</strong>
+                </article>
 
-                    <p class="mt-3 text-sm leading-6 text-slate-400">
-                        @SharedLocalizer["Profile_SettingsSubtitle"]
-                    </p>
-                </div>
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_LongestSession"]
+                    </span>
+                    <strong data-longest-session class="mt-3 block font-display text-3xl text-green-300">@($"0{SharedLocalizer["Common_MinutesShort"]}")</strong>
+                </article>
 
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-                    @if (!string.IsNullOrWhiteSpace(profileStatusMessage))
-                    {
-                        <div class="mb-4 rounded-xl border @(isProfileSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200") px-4 py-3 text-sm">
-                            @profileStatusMessage
-                        </div>
-                    }
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_FavoriteBuild"]
+                    </span>
+                    <strong data-favorite-build class="mt-3 block truncate font-display text-2xl text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                </article>
 
-                    <form asp-controller="Profile"
-                          asp-action="UpdateProfile"
-                          method="post"
-                          class="space-y-4">
-                        @Html.AntiForgeryToken()
+                <article class="profile-crt-panel border border-slate-800 bg-black p-5">
+                    <span class="text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                        @SharedLocalizer["Profile_LastActivity"]
+                    </span>
+                    <strong data-last-activity class="mt-3 block text-sm uppercase tracking-[0.12em] text-green-300">@SharedLocalizer["Common_NotAvailable"]</strong>
+                </article>
+            </section>
 
-                        <div>
-                            <label for="alias" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                @SharedLocalizer["Profile_Alias"]
-                            </label>
+            <section class="profile-crt-panel border border-green-500/20 bg-[#020402] p-5 sm:p-7">
+                <div class="flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-green-600">
+                            @SharedLocalizer["Profile_LiveFeed"]
+                        </p>
 
-                            <input id="alias"
-                                   name="Alias"
-                                   type="text"
-                                   value="@Model.Alias"
-                                   minlength="3"
-                                   maxlength="32"
-                                   autocomplete="off"
-                                   class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-400/40" />
-                        </div>
+                        <h2 class="mt-2 font-display text-xl uppercase tracking-[0.12em] text-green-100">
+                            &gt; EVENT_LOG
+                        </h2>
+                    </div>
 
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <label for="avatarKey" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                    @SharedLocalizer["Profile_Avatar"]
-                                </label>
-
-                                <select id="avatarKey"
-                                        name="AvatarKey"
-                                        class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400/40">
-                                    @foreach (var avatar in availableAvatars)
-                                    {
-                                        <option value="@avatar" selected="@(string.Equals(Model.AvatarKey, avatar, StringComparison.OrdinalIgnoreCase))">
-                                            @avatar
-                                        </option>
-                                    }
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="theme" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                    @SharedLocalizer["Profile_ThemeLabel"]
-                                </label>
-
-                                <select id="theme"
-                                        name="Theme"
-                                        class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400/40">
-                                    @foreach (var theme in availableThemes)
-                                    {
-                                        <option value="@theme" selected="@(string.Equals(Model.Theme, theme, StringComparison.OrdinalIgnoreCase))">
-                                            @theme
-                                        </option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-3 pt-2">
-                            <button type="submit"
-                                    class="inline-flex rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                                @SharedLocalizer["Profile_SaveProfile"]
-                            </button>
-
-                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 px-5 py-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                                @SharedLocalizer["Profile_RoleStatusLocked"]
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <section class="mt-6 rounded-2xl border border-fuchsia-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(232,121,249,0.05)]">
-            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-fuchsia-300">
-                        @SharedLocalizer["Profile_OwnershipBadge"]
-                    </p>
-
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                        @SharedLocalizer["Profile_LinkTitle"]
-                    </h2>
-
-                    <p class="mt-3 text-sm leading-6 text-slate-400">
-                        @SharedLocalizer["Profile_LinkSubtitle"]
-                    </p>
+                    <span class="text-[9px] uppercase tracking-[0.16em] text-slate-600">
+                        @SharedLocalizer["Profile_LastFiveEvents"]
+                    </span>
                 </div>
 
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-                    @if (!string.IsNullOrWhiteSpace(claimStatusMessage))
-                    {
-                        <div class="mb-4 rounded-xl border @(isClaimSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200") px-4 py-3 text-sm">
-                            @claimStatusMessage
-                        </div>
-                    }
+                <ol data-event-log
+                    aria-live="polite"
+                    class="mt-5 space-y-2 font-mono text-xs text-green-300/70">
+                    <li class="border-l border-green-500/20 pl-4 text-slate-600">
+                        @SharedLocalizer["Profile_EventLogEmpty"]
+                    </li>
+                </ol>
+            </section>
 
-                    <form asp-controller="Profile"
-                          asp-action="ClaimInstallation"
-                          method="post"
-                          class="space-y-4">
-                        @Html.AntiForgeryToken()
-
-                        <div>
-                            <label for="installationId" class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                @SharedLocalizer["Common_InstallationId"]
-                            </label>
-
-                            <input id="installationId"
-                                   name="installationId"
-                                   type="text"
-                                   autocomplete="off"
-                                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                                   class="w-full rounded-xl border border-cyan-500/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-400/40" />
-                        </div>
-
-                        <button type="submit"
-                                class="inline-flex rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200 transition hover:bg-cyan-500/15">
-                            @SharedLocalizer["Profile_LinkDevice"]
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <section class="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-950/70 p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)]">
-            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="font-display text-xs uppercase tracking-[0.35em] text-cyan-300">
-                        @SharedLocalizer["Profile_LinkedInstallationsBadge"]
-                    </p>
-                    <h2 class="mt-2 font-display text-2xl uppercase tracking-[0.14em] text-white">
-                        @SharedLocalizer["Profile_OwnedDevices"]
-                    </h2>
-                    <p class="mt-3 max-w-2xl text-sm text-slate-400">
-                        @SharedLocalizer["Profile_OwnedDevicesSubtitle"]
-                    </p>
-                    <a asp-controller="Profile"
-                       asp-action="Sessions"
-                       class="inline-flex rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-fuchsia-200 transition hover:bg-fuchsia-500/15">
-                        @SharedLocalizer["Profile_ViewSessionHistory"]
-                    </a>
-                </div>
-
-                <div class="rounded-xl border border-cyan-400/15 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
-                    @SharedLocalizer["Profile_DeviceCount", Model.Installations.Count]
-                </div>
-            </div>
-
-            @if (Model.Installations.Count == 0)
-            {
-                <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-8 text-center">
-                    <p class="font-display text-sm uppercase tracking-[0.24em] text-slate-400">
-                        @SharedLocalizer["Profile_NoLinkedDevices"]
-                    </p>
-
-                    <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">
-                        @SharedLocalizer["Profile_NoLinkedDevicesDescription"]
-                    </p>
-                </div>
-            }
-            else
-            {
-                <div class="mt-6 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-800">
-                        <thead>
-                            <tr class="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Device"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Platform"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Build"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Common_Status"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Profile_FirstSeen"]</th>
-                                <th class="px-4 py-3">@SharedLocalizer["Profile_LastUpdate"]</th>
-                                <th class="px-4 py-3 text-right">@SharedLocalizer["Common_Actions"]</th>
-                            </tr>
-                        </thead>
-
-                        <tbody class="divide-y divide-slate-900">
-                            @foreach (var installation in Model.Installations)
-                            {
-                                <tr class="text-sm text-slate-300">
-                                    <td class="px-4 py-4">
-                                        <div class="font-medium text-white">@installation.DeviceName</div>
-                                        <div class="text-xs text-slate-500">@installation.DeviceModel</div>
-                                        <div class="mt-1 text-[11px] text-slate-600">@installation.InstallationId</div>
-                                    </td>
-
-                                    <td class="px-4 py-4">@installation.Platform</td>
-
-                                    <td class="px-4 py-4">@installation.BuildVersion</td>
-
-                                    <td class="px-4 py-4">
-                                        <span class="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
-                                            @LocalizedStatus(installation.Status)
-                                        </span>
-                                    </td>
-
-                                    <td class="px-4 py-4">@installation.FirstSeenLabel</td>
-
-                                    <td class="px-4 py-4">@installation.LastUpdateLabel</td>
-
-                                    <td class="px-4 py-4 text-right">
-                                        <form asp-controller="Profile"
-                                              asp-action="UnlinkInstallation"
-                                              method="post"
-                                              class="inline-flex"
-                                              onsubmit='return confirm(@Html.Raw(unlinkConfirmJson));'>
-                                            @Html.AntiForgeryToken()
-
-                                            <input type="hidden"
-                                                   name="installationId"
-                                                   value="@installation.InstallationId" />
-
-                                            <button type="submit"
-                                                    class="rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-rose-200 transition hover:bg-rose-500/15">
-                                                @SharedLocalizer["Profile_Unlink"]
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </section>
+            <a asp-controller="Profile"
+               asp-action="Sessions"
+               class="inline-flex items-center justify-center border border-green-500/30 bg-green-500/10 px-5 py-4 text-xs font-bold uppercase tracking-[0.2em] text-green-200 transition hover:border-green-400 hover:bg-green-500/15">
+                @SharedLocalizer["Profile_OpenSessionArchive"]
+            </a>
+        </main>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/lib/signalr/signalr.min.js"></script>
+    <script src="~/js/profile-dashboard.js"
+            asp-append-version="true"
+            defer></script>
+}

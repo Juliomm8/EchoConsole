@@ -1,8 +1,16 @@
-@model EchoConsole.Web.Models.Auth.RegisterViewModel
+﻿@model EchoConsole.Web.Models.Auth.RegisterViewModel
 
 @{
-    ViewData["Title"] = SharedLocalizer["Auth_RegisterPageTitle"].Value;
-    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] =
+        SharedLocalizer["Auth_RegisterPageTitle"].Value;
+
+    Layout =
+        "~/Views/Shared/_AuthLayout.cshtml";
+
+    var profileReturnUrl =
+        Url.Action(
+            "Index",
+            "Profile");
 }
 
 <div class="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-20 sm:px-6">
@@ -18,6 +26,7 @@
                  aria-hidden="true">
                 <path d="m15 18-6-6 6-6" />
             </svg>
+
             @SharedLocalizer["Common_BackHome"]
         </a>
 
@@ -26,8 +35,9 @@
                 <div class="font-display text-3xl uppercase tracking-[0.12em] text-green-200 text-glow-cyan">
                     Echo Console
                 </div>
+
                 <div class="mt-2 text-xs uppercase tracking-[0.34em] text-amber-400">
-                    OPERATOR ENROLLMENT
+                    @SharedLocalizer["Auth_OperatorEnrollment"]
                 </div>
 
                 <div class="my-8 terminal-divider"></div>
@@ -35,18 +45,18 @@
                 <p class="terminal-kicker">
                     @SharedLocalizer["Auth_ProfileBootstrap"]
                 </p>
+
                 <h2 class="mt-3 font-display text-2xl uppercase tracking-[0.08em] text-amber-100">
                     @SharedLocalizer["Home_CreateAccount"]
                 </h2>
+
                 <p class="mt-4 max-w-md text-sm leading-7 text-slate-400">
                     @SharedLocalizer["Auth_RegisterDescription"]
                 </p>
 
                 <div class="mt-8 rounded border border-green-500/15 bg-black/70 p-4 text-xs leading-6 text-slate-500">
-                    <span class="text-green-400">&gt;</span>
-                    PROFILE BUFFER EMPTY<br />
-                    <span class="text-green-400">&gt;</span>
-                    AWAITING OPERATOR DATA
+                    @SharedLocalizer["Auth_ProfileBufferEmpty"]<br />
+                    @SharedLocalizer["Auth_AwaitingOperatorData"]
                 </div>
             </aside>
 
@@ -54,6 +64,7 @@
                 <p class="terminal-kicker">
                     @SharedLocalizer["Topbar_Station"]
                 </p>
+
                 <h1 class="mt-3 font-display text-3xl uppercase tracking-[0.1em] text-green-100 text-glow-cyan">
                     @SharedLocalizer["Common_Register"]
                 </h1>
@@ -64,18 +75,23 @@
                       novalidate
                       class="mt-8 grid gap-6 sm:grid-cols-2">
                     <div asp-validation-summary="ModelOnly"
-                         class="rounded border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm sm:col-span-2"></div>
+                         class="rounded border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm sm:col-span-2">
+                    </div>
 
                     <div>
                         <label asp-for="Name"
                                class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-green-200">
                             @SharedLocalizer["Auth_NameLabel"]
                         </label>
+
                         <input asp-for="Name"
                                autocomplete="name"
                                class="auth-field"
                                placeholder="@SharedLocalizer["Auth_NamePlaceholder"]" />
-                        <span asp-validation-for="Name" class="mt-2 block text-sm"></span>
+
+                        <span asp-validation-for="Name"
+                              class="mt-2 block text-sm">
+                        </span>
                     </div>
 
                     <div>
@@ -83,11 +99,15 @@
                                class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-green-200">
                             @SharedLocalizer["Auth_AliasLabel"]
                         </label>
+
                         <input asp-for="Alias"
                                autocomplete="nickname"
                                class="auth-field"
                                placeholder="@SharedLocalizer["Auth_AliasPlaceholder"]" />
-                        <span asp-validation-for="Alias" class="mt-2 block text-sm"></span>
+
+                        <span asp-validation-for="Alias"
+                              class="mt-2 block text-sm">
+                        </span>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -95,11 +115,15 @@
                                class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-green-200">
                             @SharedLocalizer["Auth_EmailLabel"]
                         </label>
+
                         <input asp-for="Email"
                                autocomplete="email"
                                class="auth-field"
                                placeholder="operator@echoconsole.local" />
-                        <span asp-validation-for="Email" class="mt-2 block text-sm"></span>
+
+                        <span asp-validation-for="Email"
+                              class="mt-2 block text-sm">
+                        </span>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -107,11 +131,31 @@
                                class="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-green-200">
                             @SharedLocalizer["Auth_PasswordLabel"]
                         </label>
-                        <input asp-for="Password"
-                               autocomplete="new-password"
-                               class="auth-field"
-                               placeholder="@SharedLocalizer["Auth_CreatePasswordPlaceholder"]" />
-                        <span asp-validation-for="Password" class="mt-2 block text-sm"></span>
+
+                        <div class="relative">
+                            <input asp-for="Password"
+                                   id="registerPassword"
+                                   autocomplete="new-password"
+                                   class="auth-field pr-16"
+                                   placeholder="@SharedLocalizer["Auth_CreatePasswordPlaceholder"]" />
+
+                            <button type="button"
+                                    data-password-toggle
+                                    data-show-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                    data-hide-label="@SharedLocalizer["Auth_HidePassword"]"
+                                    aria-controls="registerPassword"
+                                    aria-pressed="false"
+                                    aria-label="@SharedLocalizer["Auth_ShowPassword"]"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 whitespace-nowrap text-[9px] font-bold uppercase leading-none tracking-[0.16em] text-green-400 transition hover:text-green-200">
+                                <span data-password-toggle-label>
+                                    @SharedLocalizer["Auth_ShowPassword"]
+                                </span>
+                            </button>
+                        </div>
+
+                        <span asp-validation-for="Password"
+                              class="mt-2 block text-sm">
+                        </span>
                     </div>
 
                     <button type="submit"
@@ -121,10 +165,49 @@
                     </button>
                 </form>
 
+                <div class="my-7 flex items-center gap-4">
+                    <div class="h-px flex-1 bg-slate-800"></div>
+
+                    <span class="text-[9px] font-bold uppercase tracking-[0.24em] text-slate-600">
+                        @SharedLocalizer["Auth_RapidPlayerEnrollment"]
+                    </span>
+
+                    <div class="h-px flex-1 bg-slate-800"></div>
+                </div>
+
+                <form asp-controller="Auth"
+                      asp-action="ExternalLogin"
+                      method="post">
+                    <input type="hidden"
+                           name="provider"
+                           value="Google" />
+
+                    <input type="hidden"
+                           name="returnUrl"
+                           value="@profileReturnUrl" />
+
+                    <button type="submit"
+                            class="group flex w-full items-center justify-center gap-4 border border-slate-700 bg-black px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-slate-300 transition hover:border-green-500/60 hover:bg-green-500/[0.05] hover:text-green-100">
+                        <svg class="h-6 w-6"
+                             viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <path fill="#4285F4" d="M21.805 10.023h-9.596v3.955h5.515c-.238 1.273-.965 2.352-2.043 3.08v2.56h3.305c1.936-1.783 3.053-4.41 3.053-7.538 0-.69-.062-1.354-.234-2.057Z" />
+                            <path fill="#34A853" d="M12.209 22c2.763 0 5.08-.915 6.777-2.482l-3.305-2.56c-.915.614-2.085.977-3.472.977-2.668 0-4.928-1.802-5.738-4.223H3.055v2.638A10.238 10.238 0 0 0 12.209 22Z" />
+                            <path fill="#FBBC05" d="M6.471 13.712A6.158 6.158 0 0 1 6.148 12c0-.594.102-1.17.323-1.712V7.65H3.055A10.245 10.245 0 0 0 2 12c0 1.655.396 3.222 1.055 4.35l3.416-2.638Z" />
+                            <path fill="#EA4335" d="M12.209 6.065c1.504 0 2.85.516 3.916 1.528l2.936-2.936C17.283 3.001 14.966 2 12.209 2a10.238 10.238 0 0 0-9.154 5.65l3.416 2.638c.81-2.421 3.07-4.223 5.738-4.223Z" />
+                        </svg>
+
+                        <span>
+                            @SharedLocalizer["Auth_GoogleRegister"]
+                        </span>
+                    </button>
+                </form>
+
                 <div class="my-8 terminal-divider opacity-50"></div>
 
                 <p class="text-center text-sm text-slate-500">
                     @SharedLocalizer["Auth_AlreadyAccount"]
+
                     <a asp-controller="Auth"
                        asp-action="Login"
                        class="font-bold text-green-300 transition hover:text-green-100 hover:underline">
@@ -135,3 +218,10 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/password-visibility.js"
+            asp-append-version="true"
+            defer>
+    </script>
+}

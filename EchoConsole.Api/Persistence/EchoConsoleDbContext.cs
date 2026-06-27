@@ -21,6 +21,7 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
     public DbSet<AlertTypeDefinition> AlertTypeDefinitions => Set<AlertTypeDefinition>();
     public DbSet<AlertDiscordOutboxMessage> AlertDiscordOutboxMessages =>
         Set<AlertDiscordOutboxMessage>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
 
     public override int SaveChanges()
     {
@@ -101,6 +102,11 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
             user.Property(x => x.Alias).HasMaxLength(64).IsRequired();
             user.Property(x => x.AvatarKey).HasMaxLength(128).IsRequired();
             user.Property(x => x.Theme).HasMaxLength(32).IsRequired();
+            user.Property(x => x.PreferredLanguage)
+                .HasMaxLength(8)
+                .HasDefaultValue("en")
+                .IsRequired();
+            user.Property(x => x.ProfileUpdatedAtUtc);
 
             user.Property(x => x.Role)
                 .HasConversion(v => v.ToString(), v => Enum.Parse<UserRole>(v))
@@ -123,6 +129,63 @@ public sealed class EchoConsoleDbContext : IdentityUserContext<User, int>
         modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
         modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
         modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+
+        // --- UserSession ---
+        modelBuilder.Entity<UserSession>(userSession =>
+        {
+            userSession.ToTable("UserSessions");
+
+            userSession.HasKey(x => x.Id);
+
+            userSession.HasIndex(x => x.SessionKeyHash)
+                .IsUnique()
+                .HasDatabaseName("IX_UserSessions_SessionKeyHash");
+
+            userSession.HasIndex(x => x.UserId)
+                .HasDatabaseName("IX_UserSessions_UserId");
+
+            userSession.HasIndex(x => x.ExpiresAtUtc)
+                .HasDatabaseName("IX_UserSessions_ExpiresAtUtc");
+
+            userSession.HasIndex(x => new
+            {
+                x.UserId,
+                x.RevokedAtUtc,
+                x.LastSeenAtUtc
+            })
+                .IsDescending(false, false, true)
+                .HasDatabaseName(
+                    "IX_UserSessions_UserId_RevokedAtUtc_LastSeenAtUtc");
+
+            userSession.Property(x => x.SessionKeyHash)
+                .HasMaxLength(64)
+                .IsRequired();
+
+            userSession.Property(x => x.UserAgent)
+                .HasMaxLength(512)
+                .IsRequired();
+
+            userSession.Property(x => x.MaskedIpAddress)
+                .HasMaxLength(64)
+                .IsRequired();
+
+            userSession.Property(x => x.CreatedAtUtc)
+                .IsRequired();
+
+            userSession.Property(x => x.LastSeenAtUtc)
+                .IsRequired();
+
+            userSession.Property(x => x.ExpiresAtUtc)
+                .IsRequired();
+
+            userSession.Property(x => x.RevokedReason)
+                .HasMaxLength(128);
+
+            userSession.HasOne(x => x.User)
+                .WithMany(x => x.UserSessions)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         // --- Installation ---
         modelBuilder.Entity<Installation>(installation =>

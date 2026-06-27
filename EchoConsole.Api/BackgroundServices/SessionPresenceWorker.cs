@@ -107,6 +107,7 @@ public sealed class SessionPresenceWorker : BackgroundService
                 session.Id,
                 session.SessionId,
                 session.Installation.InstallationId,
+                session.Installation.OwnerUserId,
                 session.LastHeartbeatUtc))
             .ToListAsync(cancellationToken);
 
@@ -154,6 +155,7 @@ public sealed class SessionPresenceWorker : BackgroundService
                 {
                     sessionId = candidate.SessionId,
                     installationId = candidate.InstallationId,
+                    ownerUserId = candidate.OwnerUserId,
                     lastHeartbeatUtc = candidate.LastHeartbeatUtc
                 },
                 cancellationToken);
@@ -164,5 +166,6 @@ public sealed class SessionPresenceWorker : BackgroundService
         long DatabaseId,
         Guid SessionId,
         Guid InstallationId,
+        int? OwnerUserId,
         DateTimeOffset LastHeartbeatUtc);
 }

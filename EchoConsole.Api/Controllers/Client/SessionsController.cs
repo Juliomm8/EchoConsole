@@ -157,6 +157,7 @@ public sealed class SessionsController : ControllerBase
             ownerUserId = session.Installation.OwnerUserId,
             deviceName = session.Installation.DeviceName,
             buildVersion = session.BuildVersion,
+            startedAtUtc = session.StartedAtUtc,
             currentScene = session.CurrentScene,
             currentGameState = session.CurrentGameState,
             currentPhase = session.CurrentPhase,
@@ -313,6 +314,8 @@ public sealed class SessionsController : ControllerBase
                     session.Installation.DeviceName,
                 buildVersion =
                     session.BuildVersion,
+                startedAtUtc =
+                    session.StartedAtUtc,
                 eventId = sessionEvent.Id,
                 eventType = sessionEvent.EventType,
                 scene = sessionEvent.Scene,
@@ -391,6 +394,7 @@ public sealed class SessionsController : ControllerBase
         {
             sessionId = session.SessionId,
             installationId = session.Installation.InstallationId,
+            ownerUserId = session.Installation.OwnerUserId,
             reason = request.Reason,
             endedAtUtc = session.EndedAtUtc
         }, cancellationToken);

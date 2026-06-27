@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -879,7 +879,7 @@
     <value>{0} dispositivo(s)</value>
   </data>
   <data name="Profile_FavoriteBuild" xml:space="preserve">
-    <value>Build favorito</value>
+    <value>BUILD FAVORITA</value>
   </data>
   <data name="Profile_FirstSeen" xml:space="preserve">
     <value>Primera detección</value>
@@ -891,7 +891,7 @@
     <value>Instalaciones</value>
   </data>
   <data name="Profile_LastActivity" xml:space="preserve">
-    <value>Última actividad</value>
+    <value>ÚLTIMA ACTIVIDAD</value>
   </data>
   <data name="Profile_LastUpdate" xml:space="preserve">
     <value>Última actualización</value>
@@ -912,7 +912,7 @@
     <value>Nombre</value>
   </data>
   <data name="Profile_NoLinkedDevices" xml:space="preserve">
-    <value>No hay dispositivos vinculados</value>
+    <value>NO HAY DISPOSITIVOS VINCULADOS</value>
   </data>
   <data name="Profile_NoLinkedDevicesDescription" xml:space="preserve">
     <value>Pega el ID de instalación de Cosmic Diner en el panel superior para vincular tu primer dispositivo.</value>
@@ -957,13 +957,13 @@
     <value>Actualiza tu identidad pública de operador. El rol y el estado de la cuenta son campos protegidos y no pueden modificarse aquí.</value>
   </data>
   <data name="Profile_SettingsTitle" xml:space="preserve">
-    <value>Personalizar identidad del operador</value>
+    <value>CENTRAL DE CONFIGURACIÓN</value>
   </data>
   <data name="Profile_StatusLabel" xml:space="preserve">
-    <value>Estado</value>
+    <value>ESTADO</value>
   </data>
   <data name="Profile_ThemeLabel" xml:space="preserve">
-    <value>Tema</value>
+    <value>TEMA DE TERMINAL</value>
   </data>
   <data name="Profile_Unlink" xml:space="preserve">
     <value>Desvincular</value>
@@ -1818,7 +1818,7 @@
     <value>Cerrar</value>
   </data>
   <data name="Common_Cancel" xml:space="preserve">
-    <value>Cancelar</value>
+    <value>CANCELAR</value>
   </data>
   <data name="Builds_ColActions" xml:space="preserve">
     <value>Acciones</value>
@@ -2119,5 +2119,584 @@
   </data>
   <data name="SimulationOrchestrator_Events" xml:space="preserve">
     <value>Eventos</value>
+  </data>
+  <data name="Auth_VerifyTerminalTitle" xml:space="preserve">
+    <value>VERIFICAR TERMINAL</value>
+  </data>
+  <data name="Auth_VerifyTerminalDesc" xml:space="preserve">
+    <value>Ingresa la secuencia de autorización de seis dígitos asignada a</value>
+  </data>
+  <data name="Auth_AuthorizationCode" xml:space="preserve">
+    <value>CÓDIGO DE AUTORIZACIÓN</value>
+  </data>
+  <data name="Auth_ValidateTerminalBtn" xml:space="preserve">
+    <value>VALIDAR TERMINAL</value>
+  </data>
+  <data name="Auth_ResendOtpLink" xml:space="preserve">
+    <value>[ SOLICITAR NUEVA SECUENCIA / REENVIAR OTP ]</value>
+  </data>
+  <data name="Auth_OtpChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_OTP_PREPARADO</value>
+  </data>
+  <data name="Auth_AwaitingSequence" xml:space="preserve">
+    <value>&gt; ESPERANDO SECUENCIA DE SEIS DÍGITOS</value>
+  </data>
+  <data name="Auth_ReturnAccessNode" xml:space="preserve">
+    <value>&lt; VOLVER AL NODO DE ACCESO</value>
+  </data>
+  <data name="Auth_GoogleLink" xml:space="preserve">
+    <value>[ ENLACE SEGURO DE GOOGLE ]</value>
+  </data>
+  <data name="Auth_GoogleRegister" xml:space="preserve">
+    <value>[ REGISTRARSE CON GOOGLE ]</value>
+  </data>
+  <data name="Auth_ExternalAuthChannel" xml:space="preserve">
+    <value>CANAL DE AUTENTICACIÓN EXTERNO</value>
+  </data>
+  <data name="Auth_SecureEnrollmentChannel" xml:space="preserve">
+    <value>CANAL DE REGISTRO SEGURO</value>
+  </data>
+  <data name="Auth_SmtpDeliveryConfirmed" xml:space="preserve">
+    <value>&gt; ENTREGA SMTP CONFIRMADA</value>
+  </data>
+  <data name="Auth_OtpSequenceRequired" xml:space="preserve">
+    <value>&gt; SE REQUIERE SECUENCIA OTP</value>
+  </data>
+  <data name="Auth_TimeRemaining" xml:space="preserve">
+    <value>TIEMPO RESTANTE:</value>
+  </data>
+  <data name="Auth_AuthorizationProtocol" xml:space="preserve">
+    <value>PROTOCOLO DE AUTORIZACIÓN // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_SecureAccessNode" xml:space="preserve">
+    <value>NODO DE ACCESO SEGURO</value>
+  </data>
+  <data name="Auth_AuthChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_AUTENTICACIÓN_PREPARADO</value>
+  </data>
+  <data name="Auth_EncryptedSessionRequired" xml:space="preserve">
+    <value>&gt; SESIÓN CIFRADA REQUERIDA</value>
+  </data>
+  <data name="Auth_OperatorEnrollment" xml:space="preserve">
+    <value>REGISTRO DE OPERADOR</value>
+  </data>
+  <data name="Auth_ProfileBufferEmpty" xml:space="preserve">
+    <value>&gt; BÚFER DE PERFIL VACÍO</value>
+  </data>
+  <data name="Auth_AwaitingOperatorData" xml:space="preserve">
+    <value>&gt; ESPERANDO DATOS DEL OPERADOR</value>
+  </data>
+  <data name="Auth_RapidPlayerEnrollment" xml:space="preserve">
+    <value>REGISTRO RÁPIDO DE JUGADOR</value>
+  </data>
+  <data name="Auth_ForgotPasswordPageTitle" xml:space="preserve">
+    <value>RECUPERACIÓN DE CONTRASEÑA</value>
+  </data>
+  <data name="Auth_ForgotPasswordLink" xml:space="preserve">
+    <value>¿OLVIDASTE TU CONTRASEÑA?</value>
+  </data>
+  <data name="Auth_ReturnToLogin" xml:space="preserve">
+    <value>&lt; VOLVER AL NODO DE ACCESO</value>
+  </data>
+  <data name="Auth_CredentialRecoveryChannel" xml:space="preserve">
+    <value>CANAL DE RECUPERACIÓN DE CREDENCIALES</value>
+  </data>
+  <data name="Auth_ForgotPasswordTitle" xml:space="preserve">
+    <value>RECUPERAR ACCESO</value>
+  </data>
+  <data name="Auth_ForgotPasswordDescription" xml:space="preserve">
+    <value>Ingresa el correo asociado a tu cuenta de operador. Si está registrado, se enviará una secuencia segura de restablecimiento.</value>
+  </data>
+  <data name="Auth_RecoveryChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_RECUPERACIÓN PREPARADO</value>
+  </data>
+  <data name="Auth_AwaitingRecoveryEmail" xml:space="preserve">
+    <value>&gt; ESPERANDO CORREO DEL OPERADOR</value>
+  </data>
+  <data name="Auth_SendResetSequence" xml:space="preserve">
+    <value>DESPACHAR SECUENCIA DE RESTABLECIMIENTO</value>
+  </data>
+  <data name="Auth_RecoveryProtocol" xml:space="preserve">
+    <value>PROTOCOLO SEGURO DE RECUPERACIÓN // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_PasswordResetDispatchGeneric" xml:space="preserve">
+    <value>Si el correo está registrado, se ha despachado una secuencia de restablecimiento.</value>
+  </data>
+  <data name="Auth_ResetPasswordPageTitle" xml:space="preserve">
+    <value>RESTABLECER CONTRASEÑA</value>
+  </data>
+  <data name="Auth_ResetPasswordTitle" xml:space="preserve">
+    <value>RESTABLECER CREDENCIAL DE ACCESO</value>
+  </data>
+  <data name="Auth_ResetPasswordDescription" xml:space="preserve">
+    <value>Crea una nueva contraseña para tu cuenta de Echo Console.</value>
+  </data>
+  <data name="Auth_ResetChannelReady" xml:space="preserve">
+    <value>&gt; CANAL_RESTABLECIMIENTO PREPARADO</value>
+  </data>
+  <data name="Auth_AwaitingNewCredential" xml:space="preserve">
+    <value>&gt; ESPERANDO NUEVA CREDENCIAL</value>
+  </data>
+  <data name="Auth_NewPasswordLabel" xml:space="preserve">
+    <value>NUEVA CONTRASEÑA</value>
+  </data>
+  <data name="Auth_ConfirmPasswordLabel" xml:space="preserve">
+    <value>CONFIRMAR CONTRASEÑA</value>
+  </data>
+  <data name="Auth_NewPasswordPlaceholder" xml:space="preserve">
+    <value>Ingresa una nueva contraseña segura</value>
+  </data>
+  <data name="Auth_ConfirmPasswordPlaceholder" xml:space="preserve">
+    <value>Repite la nueva contraseña</value>
+  </data>
+  <data name="Auth_ResetPasswordButton" xml:space="preserve">
+    <value>RESTABLECER CREDENCIAL DE ACCESO</value>
+  </data>
+  <data name="Auth_ResetProtocol" xml:space="preserve">
+    <value>PROTOCOLO DE ROTACIÓN DE CREDENCIALES // ECHO CONSOLE</value>
+  </data>
+  <data name="Auth_ResetPasswordSucceeded" xml:space="preserve">
+    <value>Tu contraseña se restableció correctamente. Inicia sesión con tu nueva credencial.</value>
+  </data>
+  <data name="Auth_ResetPasswordInvalidOrExpired" xml:space="preserve">
+    <value>La autorización de restablecimiento es inválida o ha expirado.</value>
+  </data>
+  <data name="Auth_PasswordConfirmationMismatch" xml:space="preserve">
+    <value>La confirmación de la contraseña no coincide.</value>
+  </data>
+  <data name="Auth_ShowPassword" xml:space="preserve">
+    <value>[ MOSTRAR ]</value>
+  </data>
+  <data name="Auth_HidePassword" xml:space="preserve">
+    <value>[ OCULTAR ]</value>
+  </data>
+  <data name="Common_NotAvailable" xml:space="preserve">
+    <value>N/D</value>
+  </data>
+  <data name="Common_MinutesShort" xml:space="preserve">
+    <value>m</value>
+  </data>
+  <data name="Common_HoursShort" xml:space="preserve">
+    <value>h</value>
+  </data>
+  <data name="Profile_DashboardPageTitle" xml:space="preserve">
+    <value>Dashboard del Jugador</value>
+  </data>
+  <data name="Profile_DashboardKicker" xml:space="preserve">
+    <value>DARK SKY STUDIOS // TELEMETRÍA DEL JUGADOR</value>
+  </data>
+  <data name="Profile_DashboardTitle" xml:space="preserve">
+    <value>DASHBOARD DEL JUGADOR</value>
+  </data>
+  <data name="Profile_DashboardDescription" xml:space="preserve">
+    <value>Telemetría en vivo, estado de conexión y resumen de tu actividad en Cosmic Diner.</value>
+  </data>
+  <data name="Profile_OpenSettings" xml:space="preserve">
+    <value>[ CONFIGURACIÓN ]</value>
+  </data>
+  <data name="Profile_PlayerIdentification" xml:space="preserve">
+    <value>IDENTIFICACIÓN DEL JUGADOR</value>
+  </data>
+  <data name="Profile_RecordLabel" xml:space="preserve">
+    <value>EXPEDIENTE</value>
+  </data>
+  <data name="Profile_ConnectionStatus" xml:space="preserve">
+    <value>ESTADO DE CONEXIÓN</value>
+  </data>
+  <data name="Profile_Status_Online" xml:space="preserve">
+    <value>EN LÍNEA</value>
+  </data>
+  <data name="Profile_Status_Degraded" xml:space="preserve">
+    <value>DEGRADADO</value>
+  </data>
+  <data name="Profile_Status_Offline" xml:space="preserve">
+    <value>DESCONECTADO</value>
+  </data>
+  <data name="Profile_LiveSessionKicker" xml:space="preserve">
+    <value>CANAL DE SESIÓN EN TIEMPO REAL</value>
+  </data>
+  <data name="Profile_LiveSessionTitle" xml:space="preserve">
+    <value>SESIÓN DE JUEGO ACTIVA</value>
+  </data>
+  <data name="Profile_Synchronizing" xml:space="preserve">
+    <value>SINCRONIZANDO</value>
+  </data>
+  <data name="Profile_CurrentScene" xml:space="preserve">
+    <value>ESCENA ACTUAL</value>
+  </data>
+  <data name="Profile_CurrentPhase" xml:space="preserve">
+    <value>FASE ACTUAL</value>
+  </data>
+  <data name="Profile_CurrentState" xml:space="preserve">
+    <value>ESTADO DEL JUEGO</value>
+  </data>
+  <data name="Profile_SessionDuration" xml:space="preserve">
+    <value>DURACIÓN DE SESIÓN</value>
+  </data>
+  <data name="Profile_LastHeartbeat" xml:space="preserve">
+    <value>ÚLTIMO HEARTBEAT</value>
+  </data>
+  <data name="Profile_NoActiveSession" xml:space="preserve">
+    <value>NO HAY UNA SESIÓN DE JUEGO ACTIVA</value>
+  </data>
+  <data name="Profile_TotalPlayTime" xml:space="preserve">
+    <value>TIEMPO TOTAL JUGADO</value>
+  </data>
+  <data name="Profile_TotalSessions" xml:space="preserve">
+    <value>SESIONES TOTALES</value>
+  </data>
+  <data name="Profile_LinkedNodes" xml:space="preserve">
+    <value>NODOS VINCULADOS</value>
+  </data>
+  <data name="Profile_LongestSession" xml:space="preserve">
+    <value>SESIÓN MÁS LARGA</value>
+  </data>
+  <data name="Profile_OpenSessionArchive" xml:space="preserve">
+    <value>[ ABRIR ARCHIVO COMPLETO DE SESIONES ]</value>
+  </data>
+  <data name="Profile_SettingsPageTitle" xml:space="preserve">
+    <value>Configuración del Perfil</value>
+  </data>
+  <data name="Profile_SettingsKicker" xml:space="preserve">
+    <value>CONFIGURACIÓN DEL JUGADOR // CANAL SEGURO</value>
+  </data>
+  <data name="Profile_SettingsDescription" xml:space="preserve">
+    <value>Administra tu identidad, credenciales, sesiones autenticadas y hardware vinculado de Cosmic Diner.</value>
+  </data>
+  <data name="Profile_BackToDashboard" xml:space="preserve">
+    <value>VOLVER AL DASHBOARD</value>
+  </data>
+  <data name="Profile_SettingsNavigation" xml:space="preserve">
+    <value>Secciones de configuración del perfil</value>
+  </data>
+  <data name="Profile_AnchorIdentity" xml:space="preserve">
+    <value>[ IDENTIDAD ]</value>
+  </data>
+  <data name="Profile_AnchorSecurity" xml:space="preserve">
+    <value>[ ACCESO Y SEGURIDAD ]</value>
+  </data>
+  <data name="Profile_AnchorDevices" xml:space="preserve">
+    <value>[ DISPOSITIVOS ]</value>
+  </data>
+  <data name="Profile_AnchorDanger" xml:space="preserve">
+    <value>[ ZONA DE PELIGRO ]</value>
+  </data>
+  <data name="Profile_IdentitySectionLabel" xml:space="preserve">
+    <value>[ IDENTIDAD ]</value>
+  </data>
+  <data name="Profile_IdentitySectionTitle" xml:space="preserve">
+    <value>IDENTIDAD DEL JUGADOR</value>
+  </data>
+  <data name="Profile_CurrentIdentity" xml:space="preserve">
+    <value>EXPEDIENTE ACTUAL DEL JUGADOR</value>
+  </data>
+  <data name="Profile_AliasLabel" xml:space="preserve">
+    <value>ALIAS DEL JUGADOR</value>
+  </data>
+  <data name="Profile_AvatarLabel" xml:space="preserve">
+    <value>AVATAR DEL OPERADOR</value>
+  </data>
+  <data name="Profile_SelectedAvatar" xml:space="preserve">
+    <value>AVATAR SELECCIONADO</value>
+  </data>
+  <data name="Profile_SelectAvatar" xml:space="preserve">
+    <value>[ SELECCIONAR AVATAR ]</value>
+  </data>
+  <data name="Profile_LanguageLabel" xml:space="preserve">
+    <value>IDIOMA DE INTERFAZ</value>
+  </data>
+  <data name="Profile_SaveIdentity" xml:space="preserve">
+    <value>[ GUARDAR IDENTIDAD ]</value>
+  </data>
+  <data name="Profile_AvatarModalTitle" xml:space="preserve">
+    <value>SELECCIONAR AVATAR DEL OPERADOR</value>
+  </data>
+  <data name="Profile_Avatar_01" xml:space="preserve">
+    <value>Operador 01</value>
+  </data>
+  <data name="Profile_Avatar_02" xml:space="preserve">
+    <value>Operador 02</value>
+  </data>
+  <data name="Profile_Avatar_03" xml:space="preserve">
+    <value>Operador 03</value>
+  </data>
+  <data name="Profile_Avatar_04" xml:space="preserve">
+    <value>Operador 04</value>
+  </data>
+  <data name="Profile_Avatar_05" xml:space="preserve">
+    <value>Operador 05</value>
+  </data>
+  <data name="Profile_Avatar_06" xml:space="preserve">
+    <value>Operador 06</value>
+  </data>
+  <data name="Profile_Theme_Green" xml:space="preserve">
+    <value>VERDE FÓSFORO</value>
+  </data>
+  <data name="Profile_Theme_Amber" xml:space="preserve">
+    <value>MONITOR ÁMBAR</value>
+  </data>
+  <data name="Profile_Theme_Cyan" xml:space="preserve">
+    <value>CIAN FRÍO</value>
+  </data>
+  <data name="Profile_Theme_Monochrome" xml:space="preserve">
+    <value>CRT MONOCROMO</value>
+  </data>
+  <data name="Profile_SecuritySectionLabel" xml:space="preserve">
+    <value>[ ACCESO Y SEGURIDAD ]</value>
+  </data>
+  <data name="Profile_SecuritySectionTitle" xml:space="preserve">
+    <value>CREDENCIALES Y SESIONES ACTIVAS</value>
+  </data>
+  <data name="Profile_ChangePasswordTitle" xml:space="preserve">
+    <value>CAMBIAR CONTRASEÑA</value>
+  </data>
+  <data name="Profile_NoLocalPassword" xml:space="preserve">
+    <value>Esta cuenta usa un proveedor externo y no tiene una contraseña local.</value>
+  </data>
+  <data name="Profile_ChangePasswordAction" xml:space="preserve">
+    <value>[ ROTAR CREDENCIALES ]</value>
+  </data>
+  <data name="Profile_ActiveSessionsKicker" xml:space="preserve">
+    <value>TERMINALES AUTENTICADAS</value>
+  </data>
+  <data name="Profile_ActiveSessionsTitle" xml:space="preserve">
+    <value>SESIONES ACTIVAS</value>
+  </data>
+  <data name="Profile_TerminateOtherSessions" xml:space="preserve">
+    <value>[ CERRAR TODAS LAS DEMÁS SESIONES ]</value>
+  </data>
+  <data name="Profile_LoadingSessions" xml:space="preserve">
+    <value>CONSULTANDO MATRIZ DE AUTENTICACIÓN</value>
+  </data>
+  <data name="Profile_CurrentTerminal" xml:space="preserve">
+    <value>TERMINAL ACTUAL</value>
+  </data>
+  <data name="Profile_RevokeSession" xml:space="preserve">
+    <value>[ CERRAR SESIÓN ]</value>
+  </data>
+  <data name="Profile_NoActiveAuthSessions" xml:space="preserve">
+    <value>NO HAY SESIONES DE AUTENTICACIÓN ACTIVAS</value>
+  </data>
+  <data name="Profile_ConfirmRevokeSession" xml:space="preserve">
+    <value>¿Cerrar esta sesión de navegador autenticada?</value>
+  </data>
+  <data name="Profile_ConfirmTerminateOthers" xml:space="preserve">
+    <value>¿Cerrar todas las demás sesiones autenticadas?</value>
+  </data>
+  <data name="Profile_DevicesSectionLabel" xml:space="preserve">
+    <value>[ DISPOSITIVOS ]</value>
+  </data>
+  <data name="Profile_DevicesSectionTitle" xml:space="preserve">
+    <value>INVENTARIO DE HARDWARE VINCULADO</value>
+  </data>
+  <data name="Profile_InstallationIdLabel" xml:space="preserve">
+    <value>ID DE INSTALACIÓN</value>
+  </data>
+  <data name="Profile_VerifyHardware" xml:space="preserve">
+    <value>[ VERIFICAR Y VINCULAR HARDWARE ]</value>
+  </data>
+  <data name="Profile_LoadingDevices" xml:space="preserve">
+    <value>ESCANEANDO HARDWARE VINCULADO</value>
+  </data>
+  <data name="Profile_UnlinkDevice" xml:space="preserve">
+    <value>[ DESVINCULAR DISPOSITIVO ]</value>
+  </data>
+  <data name="Profile_ConfirmUnlinkDevice" xml:space="preserve">
+    <value>¿Eliminar este dispositivo de tu inventario?</value>
+  </data>
+  <data name="Profile_DangerSectionLabel" xml:space="preserve">
+    <value>[ ZONA DE PELIGRO ]</value>
+  </data>
+  <data name="Profile_DangerSectionTitle" xml:space="preserve">
+    <value>ELIMINACIÓN PERMANENTE DEL PERFIL</value>
+  </data>
+  <data name="Profile_DangerDescription" xml:space="preserve">
+    <value>Eliminar el perfil borra permanentemente la cuenta y sus sesiones de autenticación. La telemetría histórica queda desvinculada de la cuenta eliminada.</value>
+  </data>
+  <data name="Profile_DeleteProfileAction" xml:space="preserve">
+    <value>[ BORRAR PERFIL PERMANENTEMENTE ]</value>
+  </data>
+  <data name="Profile_DeleteModalTitle" xml:space="preserve">
+    <value>BORRAR PERFIL DEL JUGADOR</value>
+  </data>
+  <data name="Profile_DeleteModalDescription" xml:space="preserve">
+    <value>Completa ambas confirmaciones. Ingresa tu contraseña actual y escribe DELETE MY PROFILE exactamente.</value>
+  </data>
+  <data name="Profile_DeletePasswordLabel" xml:space="preserve">
+    <value>CONTRASEÑA ACTUAL</value>
+  </data>
+  <data name="Profile_DeletePhraseLabel" xml:space="preserve">
+    <value>FRASE DE CONFIRMACIÓN</value>
+  </data>
+  <data name="Profile_DeleteAcknowledgement" xml:space="preserve">
+    <value>Entiendo que esta acción elimina permanentemente mi cuenta de Echo Console.</value>
+  </data>
+  <data name="Profile_DeleteFinalAction" xml:space="preserve">
+    <value>[ BORRAR PERMANENTEMENTE ]</value>
+  </data>
+  <data name="Profile_DeleteFirstConfirmation" xml:space="preserve">
+    <value>¿Abrir el protocolo de eliminación permanente de cuenta?</value>
+  </data>
+  <data name="Profile_DeleteSecondConfirmation" xml:space="preserve">
+    <value>Confirmación final: ¿eliminar permanentemente este perfil?</value>
+  </data>
+  <data name="Profile_ToastSuccessPrefix" xml:space="preserve">
+    <value>[ SISTEMA CONFIRMADO ]</value>
+  </data>
+  <data name="Profile_ToastErrorPrefix" xml:space="preserve">
+    <value>[ COMANDO RECHAZADO ]</value>
+  </data>
+  <data name="Profile_Error_InvalidAlias" xml:space="preserve">
+    <value>El alias debe contener entre 3 y 32 letras, números, espacios, guiones o guiones bajos.</value>
+  </data>
+  <data name="Profile_Error_InvalidAvatar" xml:space="preserve">
+    <value>El avatar seleccionado no pertenece al catálogo aprobado.</value>
+  </data>
+  <data name="Profile_Error_InvalidTheme" xml:space="preserve">
+    <value>El tema seleccionado no pertenece al catálogo aprobado.</value>
+  </data>
+  <data name="Profile_Error_InvalidLanguage" xml:space="preserve">
+    <value>El idioma seleccionado no está soportado.</value>
+  </data>
+  <data name="Profile_Error_AliasUsed" xml:space="preserve">
+    <value>El alias seleccionado ya está asignado a otro jugador.</value>
+  </data>
+  <data name="Profile_Error_UpdateFailed" xml:space="preserve">
+    <value>No se pudo actualizar la identidad del jugador.</value>
+  </data>
+  <data name="Profile_IdentitySaved" xml:space="preserve">
+    <value>Identidad del jugador sincronizada.</value>
+  </data>
+  <data name="Profile_Error_NoLocalPassword" xml:space="preserve">
+    <value>Esta cuenta no tiene una contraseña local.</value>
+  </data>
+  <data name="Profile_Error_PasswordChange" xml:space="preserve">
+    <value>No se pudo cambiar la contraseña.</value>
+  </data>
+  <data name="Profile_PasswordChanged" xml:space="preserve">
+    <value>Credenciales actualizadas correctamente.</value>
+  </data>
+  <data name="Profile_Error_SessionNotFound" xml:space="preserve">
+    <value>No se encontró la sesión solicitada.</value>
+  </data>
+  <data name="Profile_Error_CurrentSession" xml:space="preserve">
+    <value>La sesión actual no puede cerrarse desde este comando.</value>
+  </data>
+  <data name="Profile_SessionRevoked" xml:space="preserve">
+    <value>La sesión seleccionada fue cerrada.</value>
+  </data>
+  <data name="Profile_RemoteSessionsTerminated" xml:space="preserve">
+    <value>Se cerraron todas las demás sesiones autenticadas.</value>
+  </data>
+  <data name="Profile_Error_InvalidInstallation" xml:space="preserve">
+    <value>Se requiere un identificador de instalación válido.</value>
+  </data>
+  <data name="Profile_Error_ClaimFailed" xml:space="preserve">
+    <value>No se pudo vincular el hardware.</value>
+  </data>
+  <data name="Profile_Error_InstallationNotFound" xml:space="preserve">
+    <value>No se encontró la instalación solicitada.</value>
+  </data>
+  <data name="Profile_Error_InstallationNotOwned" xml:space="preserve">
+    <value>La instalación no está vinculada al jugador actual.</value>
+  </data>
+  <data name="Profile_DeviceUnlinked" xml:space="preserve">
+    <value>El dispositivo fue eliminado del inventario.</value>
+  </data>
+  <data name="Profile_Error_DeletePhrase" xml:space="preserve">
+    <value>La frase de confirmación no coincide.</value>
+  </data>
+  <data name="Profile_Error_DeleteRequiresPassword" xml:space="preserve">
+    <value>Se requiere una contraseña local para eliminar este perfil.</value>
+  </data>
+  <data name="Profile_Error_InvalidPassword" xml:space="preserve">
+    <value>La contraseña actual es incorrecta.</value>
+  </data>
+  <data name="Profile_Error_DeleteFailed" xml:space="preserve">
+    <value>No se pudo eliminar el perfil del jugador.</value>
+  </data>
+  <data name="Profile_Error_Validation" xml:space="preserve">
+    <value>Uno o más campos son inválidos.</value>
+  </data>
+  <data name="Profile_Role_Admin" xml:space="preserve">
+    <value>Administrador</value>
+  </data>
+  <data name="Profile_Role_Supervisor" xml:space="preserve">
+    <value>Supervisor Técnico</value>
+  </data>
+  <data name="Profile_Role_Player" xml:space="preserve">
+    <value>Operador / Jugador</value>
+  </data>
+  <data name="Profile_AccountStatus_Active" xml:space="preserve">
+    <value>ACTIVA</value>
+  </data>
+  <data name="Profile_AccountStatus_Suspended" xml:space="preserve">
+    <value>SUSPENDIDA</value>
+  </data>
+  <data name="Auth_CurrentPasswordLabel" xml:space="preserve">
+    <value>CONTRASEÑA ACTUAL</value>
+  </data>
+  <data name="Common_English" xml:space="preserve">
+    <value>Inglés</value>
+  </data>
+  <data name="Common_Spanish" xml:space="preserve">
+    <value>Español</value>
+  </data>
+  <data name="Profile_Retrying" xml:space="preserve">
+    <value>REINTENTANDO</value>
+  </data>
+  <data name="Profile_GenericError" xml:space="preserve">
+    <value>No se pudo completar la operación.</value>
+  </data>
+  <data name="Profile_EventLogEmpty" xml:space="preserve">
+    <value>NO HAY EVENTOS DE TELEMETRÍA RECIENTES</value>
+  </data>
+  <data name="Profile_Event_SessionStarted" xml:space="preserve">
+    <value>SESIÓN INICIADA</value>
+  </data>
+  <data name="Profile_Event_SessionEnded" xml:space="preserve">
+    <value>SESIÓN FINALIZADA</value>
+  </data>
+  <data name="Profile_Event_SessionExpired" xml:space="preserve">
+    <value>HEARTBEAT DE SESIÓN EXPIRADO</value>
+  </data>
+  <data name="Profile_LastSevenDays" xml:space="preserve">
+    <value>ÚLTIMOS 7 DÍAS</value>
+  </data>
+  <data name="Profile_ActivityTrend" xml:space="preserve">
+    <value>TENDENCIA DE ACTIVIDAD</value>
+  </data>
+  <data name="Profile_LiveFeed" xml:space="preserve">
+    <value>TELEMETRÍA RECIENTE</value>
+  </data>
+  <data name="Profile_LastFiveEvents" xml:space="preserve">
+    <value>ÚLTIMOS 5 EVENTOS</value>
+  </data>
+  <data name="Profile_ChangePasswordDescription" xml:space="preserve">
+    <value>Disponible para toda cuenta de jugador autenticada que tenga contraseña local. Ingresa la credencial actual y una nueva contraseña que cumpla la política de seguridad.</value>
+  </data>
+  <data name="Profile_Error_CurrentPasswordIncorrect" xml:space="preserve">
+    <value>La contraseña actual es incorrecta.</value>
+  </data>
+  <data name="Profile_PasswordChangedEmailSent" xml:space="preserve">
+    <value>Credenciales actualizadas correctamente. Se envió un aviso de seguridad a tu correo registrado.</value>
+  </data>
+  <data name="Profile_PasswordChangedEmailFailed" xml:space="preserve">
+    <value>Credenciales actualizadas correctamente, pero no se pudo entregar el aviso de seguridad. Revisa la configuración del correo.</value>
+  </data>
+  <data name="Auth_CurrentPasswordRequired" xml:space="preserve">
+    <value>La contraseña actual es obligatoria.</value>
+  </data>
+  <data name="Auth_NewPasswordRequired" xml:space="preserve">
+    <value>La nueva contraseña es obligatoria.</value>
+  </data>
+  <data name="Auth_ConfirmPasswordRequired" xml:space="preserve">
+    <value>La confirmación de contraseña es obligatoria.</value>
+  </data>
+  <data name="Auth_PasswordRequiresUnique" xml:space="preserve">
+    <value>La contraseña debe incluir más caracteres únicos.</value>
+  </data>
+  <data name="Profile_ConfirmPasswordChange" xml:space="preserve">
+    <value>¿Cambiar la contraseña actual y cerrar todas las demás sesiones autenticadas?</value>
   </data>
 </root>
