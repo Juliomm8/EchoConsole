@@ -70,6 +70,9 @@
         passwordMismatch:
             root.dataset.messagePasswordMismatch ??
             "Passwords do not match.",
+        confirmPasswordChange:
+            root.dataset.messageConfirmPasswordChange ??
+            "Change the current password?",
         successPrefix:
             root.dataset.toastSuccessPrefix ??
             "[ SYSTEM ACKNOWLEDGED ]",
@@ -410,10 +413,21 @@
     }
 
     function bindPasswordForm() {
+        const feedback =
+            root.querySelector(
+                "[data-password-feedback]"
+            );
+
         passwordForm?.addEventListener(
             "submit",
             async event => {
                 event.preventDefault();
+
+                setPasswordFeedback(
+                    feedback,
+                    "",
+                    "neutral"
+                );
 
                 const formData =
                     new FormData(passwordForm);
@@ -432,6 +446,12 @@
                     newPassword !==
                     confirmPassword
                 ) {
+                    setPasswordFeedback(
+                        feedback,
+                        labels.passwordMismatch,
+                        "error"
+                    );
+
                     showToast(
                         labels.passwordMismatch,
                         "error"
@@ -441,7 +461,7 @@
 
                 if (
                     !window.confirm(
-                        labels.confirmTerminate
+                        labels.confirmPasswordChange
                     )
                 ) {
                     return;
@@ -475,13 +495,28 @@
                     securityLoaded = false;
                     await loadSecurity();
 
+                    setPasswordFeedback(
+                        feedback,
+                        response.message,
+                        "success"
+                    );
+
                     showToast(
                         response.message,
                         "success"
                     );
                 } catch (error) {
+                    const message =
+                        getErrorMessage(error);
+
+                    setPasswordFeedback(
+                        feedback,
+                        message,
+                        "error"
+                    );
+
                     showToast(
-                        getErrorMessage(error),
+                        message,
                         "error"
                     );
                 } finally {
@@ -1321,6 +1356,63 @@
             type === "error"
                 ? 7000
                 : 4500
+        );
+    }
+
+    function setPasswordFeedback(
+        element,
+        message,
+        type
+    ) {
+        if (!element) {
+            return;
+        }
+
+        const hasMessage =
+            Boolean(message);
+
+        element.textContent =
+            message ?? "";
+
+        element.classList.toggle(
+            "hidden",
+            !hasMessage
+        );
+
+        element.classList.toggle(
+            "border-green-500/30",
+            hasMessage &&
+                type === "success"
+        );
+
+        element.classList.toggle(
+            "bg-green-500/10",
+            hasMessage &&
+                type === "success"
+        );
+
+        element.classList.toggle(
+            "text-green-200",
+            hasMessage &&
+                type === "success"
+        );
+
+        element.classList.toggle(
+            "border-rose-500/30",
+            hasMessage &&
+                type === "error"
+        );
+
+        element.classList.toggle(
+            "bg-rose-500/[0.06]",
+            hasMessage &&
+                type === "error"
+        );
+
+        element.classList.toggle(
+            "text-rose-200",
+            hasMessage &&
+                type === "error"
         );
     }
 

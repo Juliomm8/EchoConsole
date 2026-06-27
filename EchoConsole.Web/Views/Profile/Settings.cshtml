@@ -49,6 +49,7 @@
      data-message-delete-first="@SharedLocalizer["Profile_DeleteFirstConfirmation"]"
      data-message-delete-second="@SharedLocalizer["Profile_DeleteSecondConfirmation"]"
      data-message-password-mismatch="@SharedLocalizer["Auth_PasswordConfirmationMismatch"]"
+     data-message-confirm-password-change="@SharedLocalizer["Profile_ConfirmPasswordChange"]"
      data-toast-success-prefix="@SharedLocalizer["Profile_ToastSuccessPrefix"]"
      data-toast-error-prefix="@SharedLocalizer["Profile_ToastErrorPrefix"]"
      data-message-generic-error="@SharedLocalizer["Profile_GenericError"]"
@@ -318,6 +319,16 @@
                         <h3 class="font-display text-xl uppercase tracking-[0.1em] text-green-100">
                             @SharedLocalizer["Profile_ChangePasswordTitle"]
                         </h3>
+
+                        <p class="text-sm leading-6 text-slate-500">
+                            @SharedLocalizer["Profile_ChangePasswordDescription"]
+                        </p>
+
+                        <div data-password-feedback
+                             role="status"
+                             aria-live="polite"
+                             class="hidden border p-4 text-sm leading-6">
+                        </div>
 
                         <div data-password-unavailable
                              class="hidden border border-amber-500/20 bg-amber-500/[0.05] p-4 text-sm leading-6 text-amber-200">

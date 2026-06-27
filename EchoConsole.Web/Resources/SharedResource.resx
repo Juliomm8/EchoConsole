@@ -2672,4 +2672,31 @@
   <data name="Profile_LastFiveEvents" xml:space="preserve">
     <value>LAST 5 EVENTS</value>
   </data>
+  <data name="Profile_ChangePasswordDescription" xml:space="preserve">
+    <value>Available to every authenticated player account with a local password. Enter the current credential and a new password that satisfies the security policy.</value>
+  </data>
+  <data name="Profile_Error_CurrentPasswordIncorrect" xml:space="preserve">
+    <value>The current password is incorrect.</value>
+  </data>
+  <data name="Profile_PasswordChangedEmailSent" xml:space="preserve">
+    <value>Credentials rotated successfully. A security notice was sent to your registered email.</value>
+  </data>
+  <data name="Profile_PasswordChangedEmailFailed" xml:space="preserve">
+    <value>Credentials rotated successfully, but the security notice could not be delivered. Review your email configuration.</value>
+  </data>
+  <data name="Auth_CurrentPasswordRequired" xml:space="preserve">
+    <value>The current password is required.</value>
+  </data>
+  <data name="Auth_NewPasswordRequired" xml:space="preserve">
+    <value>The new password is required.</value>
+  </data>
+  <data name="Auth_ConfirmPasswordRequired" xml:space="preserve">
+    <value>Password confirmation is required.</value>
+  </data>
+  <data name="Auth_PasswordRequiresUnique" xml:space="preserve">
+    <value>The password must include more unique characters.</value>
+  </data>
+  <data name="Profile_ConfirmPasswordChange" xml:space="preserve">
+    <value>Change the current password and revoke every other authenticated session?</value>
+  </data>
 </root>

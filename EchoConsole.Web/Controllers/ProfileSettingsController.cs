@@ -7,6 +7,7 @@ using EchoConsole.Web;
 using EchoConsole.Web.Models.Api.Profile;
 using EchoConsole.Web.Models.Profile;
 using EchoConsole.Web.Security;
+using EchoConsole.Web.Services.Accounts;
 using EchoConsole.Web.Services.Api;
 using EchoConsole.Web.Services.Profile;
 using Microsoft.AspNetCore.Authentication;
@@ -33,6 +34,7 @@ public sealed class ProfileSettingsController : Controller
     private readonly EchoConsoleProfileApiClient _profileApiClient;
     private readonly UserManager<User> _userManager;
     private readonly IUserSessionService _userSessionService;
+    private readonly IOtpEmailSender _emailSender;
     private readonly TimeProvider _timeProvider;
     private readonly IStringLocalizer<SharedResource> _localizer;
     private readonly ILogger<ProfileSettingsController> _logger;
@@ -42,6 +44,7 @@ public sealed class ProfileSettingsController : Controller
         EchoConsoleProfileApiClient profileApiClient,
         UserManager<User> userManager,
         IUserSessionService userSessionService,
+        IOtpEmailSender emailSender,
         TimeProvider timeProvider,
         IStringLocalizer<SharedResource> localizer,
         ILogger<ProfileSettingsController> logger)
@@ -50,6 +53,7 @@ public sealed class ProfileSettingsController : Controller
         _profileApiClient = profileApiClient;
         _userManager = userManager;
         _userSessionService = userSessionService;
+        _emailSender = emailSender;
         _timeProvider = timeProvider;
         _localizer = localizer;
         _logger = logger;
@@ -608,7 +612,8 @@ public sealed class ProfileSettingsController : Controller
                 message = _localizer[
                     "Profile_Error_PasswordChange"].Value,
                 errors = result.Errors
-                    .Select(x => x.Description)
+                    .Select(LocalizeIdentityError)
+                    .ToArray()
             });
         }
 
@@ -621,12 +626,34 @@ public sealed class ProfileSettingsController : Controller
                     updateSecurityStamp: false,
                     cancellationToken);
 
+        var notificationDispatched = false;
+
+        try
+        {
+            await _emailSender
+                .SendPasswordChangedNotificationAsync(
+                    user,
+                    cancellationToken);
+
+            notificationDispatched = true;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "Password changed, but the security notification email could not be delivered. UserId={UserId}.",
+                user.Id);
+        }
+
         return Json(new
         {
             success = true,
             message = _localizer[
-                "Profile_PasswordChanged"].Value,
-            revokedSessions
+                notificationDispatched
+                    ? "Profile_PasswordChangedEmailSent"
+                    : "Profile_PasswordChangedEmailFailed"].Value,
+            revokedSessions,
+            notificationDispatched
         });
     }
 
@@ -1041,6 +1068,38 @@ public sealed class ProfileSettingsController : Controller
             message = _localizer[
                 "Profile_Error_Validation"].Value,
             errors
+        };
+    }
+
+    private string LocalizeIdentityError(
+        IdentityError error)
+    {
+        return error.Code switch
+        {
+            "PasswordMismatch" =>
+                _localizer[
+                    "Profile_Error_CurrentPasswordIncorrect"].Value,
+            "PasswordTooShort" =>
+                _localizer[
+                    "Auth_PasswordTooShort"].Value,
+            "PasswordRequiresDigit" =>
+                _localizer[
+                    "Auth_PasswordRequiresDigit"].Value,
+            "PasswordRequiresLower" =>
+                _localizer[
+                    "Auth_PasswordRequiresLower"].Value,
+            "PasswordRequiresUpper" =>
+                _localizer[
+                    "Auth_PasswordRequiresUpper"].Value,
+            "PasswordRequiresNonAlphanumeric" =>
+                _localizer[
+                    "Auth_PasswordRequiresSymbol"].Value,
+            "PasswordRequiresUniqueChars" =>
+                _localizer[
+                    "Auth_PasswordRequiresUnique"].Value,
+            _ =>
+                _localizer[
+                    "Profile_Error_PasswordChange"].Value
         };
     }
 

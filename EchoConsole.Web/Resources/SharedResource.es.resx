@@ -2672,4 +2672,31 @@
   <data name="Profile_LastFiveEvents" xml:space="preserve">
     <value>ÚLTIMOS 5 EVENTOS</value>
   </data>
+  <data name="Profile_ChangePasswordDescription" xml:space="preserve">
+    <value>Disponible para toda cuenta de jugador autenticada que tenga contraseña local. Ingresa la credencial actual y una nueva contraseña que cumpla la política de seguridad.</value>
+  </data>
+  <data name="Profile_Error_CurrentPasswordIncorrect" xml:space="preserve">
+    <value>La contraseña actual es incorrecta.</value>
+  </data>
+  <data name="Profile_PasswordChangedEmailSent" xml:space="preserve">
+    <value>Credenciales actualizadas correctamente. Se envió un aviso de seguridad a tu correo registrado.</value>
+  </data>
+  <data name="Profile_PasswordChangedEmailFailed" xml:space="preserve">
+    <value>Credenciales actualizadas correctamente, pero no se pudo entregar el aviso de seguridad. Revisa la configuración del correo.</value>
+  </data>
+  <data name="Auth_CurrentPasswordRequired" xml:space="preserve">
+    <value>La contraseña actual es obligatoria.</value>
+  </data>
+  <data name="Auth_NewPasswordRequired" xml:space="preserve">
+    <value>La nueva contraseña es obligatoria.</value>
+  </data>
+  <data name="Auth_ConfirmPasswordRequired" xml:space="preserve">
+    <value>La confirmación de contraseña es obligatoria.</value>
+  </data>
+  <data name="Auth_PasswordRequiresUnique" xml:space="preserve">
+    <value>La contraseña debe incluir más caracteres únicos.</value>
+  </data>
+  <data name="Profile_ConfirmPasswordChange" xml:space="preserve">
+    <value>¿Cambiar la contraseña actual y cerrar todas las demás sesiones autenticadas?</value>
+  </data>
 </root>
