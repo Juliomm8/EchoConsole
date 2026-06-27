@@ -1061,16 +1061,39 @@
                 "[data-password-unavailable]"
             );
 
+        const hasLocalPassword =
+            Boolean(
+                data?.hasLocalPassword
+            );
+
         passwordUnavailable?.classList.toggle(
             "hidden",
-            Boolean(data?.hasLocalPassword)
+            hasLocalPassword
         );
 
         if (passwordForm) {
-            passwordForm.classList.toggle(
-                "hidden",
-                !data?.hasLocalPassword
+            passwordForm.classList.remove(
+                "hidden"
             );
+
+            const passwordControls =
+                passwordForm.querySelectorAll(
+                    [
+                        "input[type='password']",
+                        "input[type='text'][autocomplete='current-password']",
+                        "input[type='text'][autocomplete='new-password']",
+                        "[data-password-toggle]",
+                        "[data-password-submit]"
+                    ].join(",")
+                );
+
+            for (
+                const control of
+                passwordControls
+            ) {
+                control.disabled =
+                    !hasLocalPassword;
+            }
         }
 
         const sessions =

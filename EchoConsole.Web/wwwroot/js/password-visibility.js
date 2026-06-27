@@ -1,73 +1,87 @@
 (() => {
     "use strict";
 
-    const toggles = document.querySelectorAll(
-        "[data-password-toggle]"
-    );
+    document.addEventListener(
+        "click",
+        event => {
+            const toggle =
+                event.target.closest(
+                    "[data-password-toggle]"
+                );
 
-    for (const toggle of toggles) {
-        const targetId =
-            toggle.getAttribute("aria-controls");
+            if (!(toggle instanceof HTMLButtonElement)) {
+                return;
+            }
 
-        if (!targetId) {
-            continue;
-        }
+            event.preventDefault();
 
-        const input =
-            document.getElementById(targetId);
+            const targetId =
+                toggle.dataset.target ??
+                toggle.getAttribute(
+                    "aria-controls"
+                );
 
-        if (!(input instanceof HTMLInputElement)) {
-            continue;
-        }
+            if (!targetId) {
+                return;
+            }
 
-        toggle.addEventListener("click", () => {
-            const passwordIsVisible =
-                input.type === "text";
+            const input =
+                document.getElementById(
+                    targetId
+                );
+
+            if (!(input instanceof HTMLInputElement)) {
+                return;
+            }
+
+            const willShowPassword =
+                input.type === "password";
 
             input.type =
-                passwordIsVisible
-                    ? "password"
-                    : "text";
+                willShowPassword
+                    ? "text"
+                    : "password";
+
+            const label =
+                willShowPassword
+                    ? toggle.dataset.hideLabel
+                    : toggle.dataset.showLabel;
 
             toggle.setAttribute(
                 "aria-pressed",
-                passwordIsVisible
-                    ? "false"
-                    : "true"
+                willShowPassword
+                    ? "true"
+                    : "false"
             );
-
-            const label =
-                passwordIsVisible
-                    ? toggle.dataset.showLabel
-                    : toggle.dataset.hideLabel;
-
-            const textNode =
-                toggle.querySelector(
-                    "[data-password-toggle-label]"
-                );
 
             if (label) {
                 toggle.setAttribute(
                     "aria-label",
                     label
                 );
-            }
 
-            if (textNode && label) {
-                textNode.textContent = label;
+                const labelElement =
+                    toggle.querySelector(
+                        "[data-password-toggle-label]"
+                    );
+
+                if (labelElement) {
+                    labelElement.textContent =
+                        label;
+                }
             }
 
             input.focus({
                 preventScroll: true
             });
 
-            const valueLength =
+            const cursorPosition =
                 input.value.length;
 
             input.setSelectionRange(
-                valueLength,
-                valueLength
+                cursorPosition,
+                cursorPosition
             );
-        });
-    }
+        }
+    );
 })();
