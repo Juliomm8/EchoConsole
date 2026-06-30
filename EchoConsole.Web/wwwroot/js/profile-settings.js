@@ -52,6 +52,14 @@
             root.dataset.labelInactive ?? "INACTIVE",
         notAvailable:
             root.dataset.labelNotAvailable ?? "N/A",
+        sessionOs:
+            root.dataset.labelSessionOs ?? "OS",
+        sessionBrowser:
+            root.dataset.labelSessionBrowser ?? "BROWSER",
+        sessionIp:
+            root.dataset.labelSessionIp ?? "IP_NODE",
+        sessionLastSeen:
+            root.dataset.labelSessionLastSeen ?? "LAST_SEEN",
         confirmRevoke:
             root.dataset.messageConfirmRevoke ??
             "Revoke this session?",
@@ -1115,38 +1123,107 @@
         }
 
         sessionList.innerHTML = sessions
-            .map(session => `
-                <article class="border ${session.isCurrent
-                    ? "border-green-500/35 bg-green-500/[0.05]"
-                    : "border-slate-800 bg-black"} p-5">
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <h4 class="text-sm font-bold uppercase tracking-[0.12em] text-green-200">
-                                    ${escapeHtml(session.deviceLabel)}
-                                </h4>
-                                ${session.isCurrent
-                                    ? `<span class="border border-green-500/30 bg-green-500/10 px-2 py-1 text-[8px] uppercase tracking-[0.16em] text-green-300">${escapeHtml(labels.currentSession)}</span>`
-                                    : ""}
-                            </div>
-                            <p class="mt-2 text-xs text-slate-500">
-                                ${escapeHtml(session.browser)} // ${escapeHtml(session.operatingSystem)}
-                            </p>
-                            <p class="mt-2 text-[10px] uppercase tracking-[0.14em] text-slate-600">
-                                ${escapeHtml(session.maskedIpAddress)} // ${escapeHtml(formatDateTime(session.lastSeenAtUtc))}
-                            </p>
-                        </div>
-                        ${session.isCurrent
-                            ? ""
-                            : `<button type="button"
-                                       data-revoke-session="${Number(session.id)}"
-                                       class="border border-rose-500/25 bg-rose-500/[0.06] px-3 py-2 text-[9px] font-bold uppercase tracking-[0.14em] text-rose-300 hover:border-rose-400 disabled:opacity-40">
-                                    ${escapeHtml(labels.revokeSession)}
-                               </button>`}
-                    </div>
-                </article>
-            `)
+            .map(renderSession)
             .join("");
+    }
+
+    function renderSession(session) {
+        const browser =
+            session.browser ||
+            labels.notAvailable;
+
+        const operatingSystem =
+            session.operatingSystem ||
+            labels.notAvailable;
+
+        const deviceLabel =
+            session.deviceLabel ||
+            `${browser} on ${operatingSystem}`;
+
+        const currentBadge =
+            session.isCurrent
+                ? `
+                    <span class="border border-green-500/30 bg-green-500/10 px-2 py-1 text-[8px] uppercase tracking-[0.16em] text-green-300">
+                        ${escapeHtml(labels.currentSession)}
+                    </span>
+                `
+                : "";
+
+        const revokeButton =
+            session.isCurrent
+                ? ""
+                : `
+                    <button type="button"
+                            data-revoke-session="${Number(session.id)}"
+                            class="border border-rose-500/25 bg-rose-500/[0.06] px-3 py-2 text-[9px] font-bold uppercase tracking-[0.14em] text-rose-300 transition hover:border-rose-400 disabled:opacity-40">
+                        ${escapeHtml(labels.revokeSession)}
+                    </button>
+                `;
+
+        return `
+            <article class="border ${
+                session.isCurrent
+                    ? "border-green-500/35 bg-green-500/[0.05]"
+                    : "border-slate-800 bg-black"
+            } p-5">
+                <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h4 class="truncate text-sm font-bold uppercase tracking-[0.12em] text-green-200">
+                                ${escapeHtml(deviceLabel)}
+                            </h4>
+                            ${currentBadge}
+                        </div>
+
+                        <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                            <div class="border border-slate-800 bg-slate-950/60 p-3">
+                                <span class="block text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                                    ${escapeHtml(labels.sessionOs)}
+                                </span>
+                                <strong class="mt-2 block text-[10px] uppercase tracking-[0.14em] text-cyan-300">
+                                    ${escapeHtml(operatingSystem)}
+                                </strong>
+                            </div>
+
+                            <div class="border border-slate-800 bg-slate-950/60 p-3">
+                                <span class="block text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                                    ${escapeHtml(labels.sessionBrowser)}
+                                </span>
+                                <strong class="mt-2 block text-[10px] uppercase tracking-[0.14em] text-green-300">
+                                    ${escapeHtml(browser)}
+                                </strong>
+                            </div>
+
+                            <div class="border border-slate-800 bg-slate-950/60 p-3">
+                                <span class="block text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                                    ${escapeHtml(labels.sessionIp)}
+                                </span>
+                                <strong class="mt-2 block text-[10px] uppercase tracking-[0.14em] text-slate-400">
+                                    ${escapeHtml(session.maskedIpAddress)}
+                                </strong>
+                            </div>
+
+                            <div class="border border-slate-800 bg-slate-950/60 p-3">
+                                <span class="block text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                                    ${escapeHtml(labels.sessionLastSeen)}
+                                </span>
+                                <strong class="mt-2 block text-[10px] uppercase tracking-[0.14em] text-amber-300">
+                                    ${escapeHtml(
+                                        formatDateTime(
+                                            session.lastSeenAtUtc
+                                        )
+                                    )}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="shrink-0">
+                        ${revokeButton}
+                    </div>
+                </div>
+            </article>
+        `;
     }
 
     function renderFleet(data) {

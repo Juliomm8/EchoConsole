@@ -129,6 +129,102 @@
             </div>
         </header>
 
+        <section data-simulation-summary
+                 data-default-target="40"
+                 data-state-active="@SharedLocalizer["SimulationOrchestrator_StateActive"]"
+                 data-state-idle="@SharedLocalizer["SimulationOrchestrator_StateIdle"]"
+                 data-confirm-stop="@SharedLocalizer["Dashboard_ConfirmStopSimulation"]"
+                 class="mt-7 overflow-hidden rounded-lg border border-cyan-500/20 bg-[#010503] shadow-[0_0_32px_rgba(34,211,238,0.05)]">
+            <div class="flex flex-col gap-5 border-b border-slate-800 bg-[linear-gradient(90deg,rgba(34,211,238,0.08),transparent)] p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-[9px] font-bold uppercase tracking-[0.24em] text-cyan-600">
+                        &gt;_ SIMULATION_CONTROL
+                    </p>
+                    <h2 class="mt-2 font-display text-xl uppercase tracking-[0.1em] text-slate-100">
+                        @SharedLocalizer["Dashboard_SimulationPanelTitle"]
+                    </h2>
+                </div>
+
+                <span data-simulation-summary-state
+                      class="inline-flex items-center gap-2 border border-slate-700 bg-black px-3 py-2 text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    <span data-simulation-summary-dot
+                          class="h-2 w-2 rounded-full bg-slate-600">
+                    </span>
+                    <span data-simulation-summary-state-label>
+                        @SharedLocalizer["SimulationOrchestrator_StateIdle"]
+                    </span>
+                </span>
+            </div>
+
+            <div class="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <dl class="grid gap-3 sm:grid-cols-3">
+                    <div class="border border-slate-800 bg-black p-4">
+                        <dt class="text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                            @SharedLocalizer["Dashboard_SimulationSessionsLabel"]
+                        </dt>
+                        <dd data-simulation-summary-count
+                            class="mt-3 font-display text-3xl text-green-300">
+                            --
+                        </dd>
+                    </div>
+
+                    <div class="border border-slate-800 bg-black p-4">
+                        <dt class="text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                            @SharedLocalizer["Dashboard_SimulationTargetReadout"]
+                        </dt>
+                        <dd data-simulation-summary-target-readout
+                            class="mt-3 font-display text-3xl text-cyan-300">
+                            40
+                        </dd>
+                    </div>
+
+                    <div class="border border-slate-800 bg-black p-4">
+                        <dt class="text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                            @SharedLocalizer["Dashboard_SimulationPhase"]
+                        </dt>
+                        <dd data-simulation-summary-phase
+                            class="mt-3 truncate text-xs font-bold uppercase tracking-[0.14em] text-amber-300">
+                            IDLE
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="flex min-w-[17rem] flex-col gap-3">
+                    <label class="block">
+                        <span class="mb-2 block text-[8px] uppercase tracking-[0.18em] text-slate-600">
+                            @SharedLocalizer["Dashboard_SimulationTarget"]
+                        </span>
+                        <input data-simulation-summary-target
+                               type="number"
+                               min="1"
+                               max="250"
+                               value="40"
+                               class="w-full border border-cyan-500/25 bg-black px-3 py-3 text-sm text-cyan-200 outline-none focus:border-cyan-400" />
+                    </label>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button"
+                                data-simulation-summary-start
+                                class="border border-green-500/35 bg-green-500/10 px-4 py-3 text-[9px] font-bold uppercase tracking-[0.15em] text-green-300 transition hover:border-green-300 hover:bg-green-500/15 disabled:opacity-40">
+                            [ @SharedLocalizer["Dashboard_StartSimulation"] ]
+                        </button>
+
+                        <button type="button"
+                                data-simulation-summary-stop
+                                class="border border-rose-500/35 bg-rose-500/10 px-4 py-3 text-[9px] font-bold uppercase tracking-[0.15em] text-rose-300 transition hover:border-rose-300 hover:bg-rose-500/15 disabled:opacity-40">
+                            [ @SharedLocalizer["Dashboard_StopSimulation"] ]
+                        </button>
+                    </div>
+
+                    <button type="button"
+                            data-simulation-summary-open
+                            class="border border-slate-700 bg-black px-4 py-3 text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 transition hover:border-cyan-500/50 hover:text-cyan-300">
+                        @SharedLocalizer["Dashboard_OpenSimulationConsole"]
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <div class="my-7 flex items-center gap-4" aria-hidden="true">
             <span class="h-px flex-1 bg-gradient-to-r from-[#22d3ee]/35 via-slate-800 to-transparent"></span>
             <span class="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-600">
@@ -148,6 +244,10 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/dashboard-simulation-summary.js"
+            asp-append-version="true"
+            defer></script>
+
     <script src="~/lib/signalr/signalr.min.js"
             asp-append-version="true"></script>
 

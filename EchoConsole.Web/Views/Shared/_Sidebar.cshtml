@@ -219,6 +219,30 @@
     </nav>
 
     <div class="mt-4 shrink-0">
+        @if (isAdmin)
+        {
+            <div data-discord-relay-status
+                 data-status-url="@Url.Action("Discord", "SystemStatus")"
+                 data-label-operational="@SharedLocalizer["Discord_Operational"]"
+                 data-label-disabled="@SharedLocalizer["Discord_Disabled"]"
+                 data-label-misconfigured="@SharedLocalizer["Discord_Misconfigured"]"
+                 data-label-unavailable="@SharedLocalizer["Discord_Unavailable"]"
+                 title="@SharedLocalizer["Discord_RelayLabel"]"
+                 class="mb-2 flex h-12 items-center gap-3 overflow-hidden rounded-md border border-green-500/15 bg-green-500/[0.03] px-3">
+                <span data-discord-relay-dot
+                      class="h-2 w-2 shrink-0 rounded-full bg-slate-600">
+                </span>
+
+                <span class="min-w-max whitespace-nowrap text-[9px] font-bold uppercase tracking-[0.14em] text-slate-600 transition-all duration-200 xl:max-w-0 xl:overflow-hidden xl:opacity-0 xl:group-hover/sidebar:max-w-[15rem] xl:group-hover/sidebar:opacity-100">
+                    &gt; @SharedLocalizer["Discord_RelayLabel"]:
+                    <strong data-discord-relay-label
+                            class="text-slate-500">
+                        CHECKING
+                    </strong>
+                </span>
+            </div>
+        }
+
         <details data-echo-dropdown
                  class="group relative">
             <summary title="@SharedLocalizer["Topbar_Language"]"

@@ -891,6 +891,18 @@
 
                 this.state.lastUiFlushAt =
                     performance.now();
+
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        "echo-console:simulation-status",
+                        {
+                            detail: {
+                                ...status
+                            }
+                        }
+                    )
+                );
             });
         }
 
@@ -1041,6 +1053,30 @@
                 });
         }
 
+        async startSimulation(target) {
+            const parsedTarget = Number.parseInt(
+                String(target),
+                10
+            );
+
+            const normalizedTarget =
+                Number.isFinite(parsedTarget)
+                    ? Math.min(
+                        250,
+                        Math.max(1, parsedTarget)
+                    )
+                    : 40;
+
+            this.elements.target.value =
+                String(normalizedTarget);
+
+            this.startOrganicMode({
+                writeLog: false
+            });
+
+            await this.reconcileTarget();
+        }
+
         startOrganicMode(options = {}) {
             this.elements.organic.checked = true;
 
@@ -1071,8 +1107,9 @@
             }
         }
 
-        async terminateSimulation() {
+        async terminateSimulation(options = {}) {
             if (
+                options.confirm !== false &&
                 !window.confirm(
                     this.messages.confirmTerminate)
             ) {
@@ -1107,6 +1144,48 @@
         bindEvents() {
             const signal =
                 this.lifecycleController.signal;
+
+            document.addEventListener(
+                "echo-console:simulation-command",
+                event => {
+                    if (!(event instanceof CustomEvent)) {
+                        return;
+                    }
+
+                    const action =
+                        event.detail?.action;
+
+                    if (action === "start") {
+                        void this.startSimulation(
+                            event.detail?.target
+                        );
+
+                        return;
+                    }
+
+                    if (action === "stop") {
+                        void this.terminateSimulation({
+                            confirm: false
+                        });
+
+                        return;
+                    }
+
+                    if (action === "open") {
+                        this.setOpen(true);
+                        return;
+                    }
+
+                    if (action === "refresh") {
+                        void this.refreshStatus({
+                            immediate: true
+                        });
+                    }
+                },
+                {
+                    signal
+                }
+            );
 
             this.openButton.addEventListener(
                 "click",

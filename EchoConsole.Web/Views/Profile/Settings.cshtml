@@ -43,6 +43,10 @@
      data-label-active="@SharedLocalizer["Profile_Status_Online"]"
      data-label-inactive="@SharedLocalizer["Profile_Status_Offline"]"
      data-label-not-available="@SharedLocalizer["Common_NotAvailable"]"
+     data-label-session-os="@SharedLocalizer["Profile_SessionOs"]"
+     data-label-session-browser="@SharedLocalizer["Profile_SessionBrowser"]"
+     data-label-session-ip="@SharedLocalizer["Profile_SessionIpNode"]"
+     data-label-session-last-seen="@SharedLocalizer["Profile_SessionLastSeen"]"
      data-message-confirm-revoke="@SharedLocalizer["Profile_ConfirmRevokeSession"]"
      data-message-confirm-unlink="@SharedLocalizer["Profile_ConfirmUnlinkDevice"]"
      data-message-confirm-terminate="@SharedLocalizer["Profile_ConfirmTerminateOthers"]"
@@ -453,7 +457,7 @@
                             @SharedLocalizer["Profile_LoadingSessions"]
                         </div>
 
-                        <div data-session-list class="mt-6 space-y-3"></div>
+                        <div data-session-list class="mt-6 grid gap-3"></div>
                     </section>
                 </div>
             </section>

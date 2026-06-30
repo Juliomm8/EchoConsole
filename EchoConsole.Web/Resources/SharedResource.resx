@@ -2699,4 +2699,58 @@
   <data name="Profile_ConfirmPasswordChange" xml:space="preserve">
     <value>Change the current password and revoke every other authenticated session?</value>
   </data>
+  <data name="Dashboard_SimulationPanelTitle" xml:space="preserve">
+    <value>Simulation Traffic Control</value>
+  </data>
+  <data name="Dashboard_SimulationTarget" xml:space="preserve">
+    <value>Target Active Sessions</value>
+  </data>
+  <data name="Dashboard_StartSimulation" xml:space="preserve">
+    <value>Start Simulation</value>
+  </data>
+  <data name="Dashboard_StopSimulation" xml:space="preserve">
+    <value>Stop Simulation</value>
+  </data>
+  <data name="Dashboard_OpenSimulationConsole" xml:space="preserve">
+    <value>Open Advanced Console</value>
+  </data>
+  <data name="Dashboard_ConfirmStopSimulation" xml:space="preserve">
+    <value>Stop the simulation and disconnect simulated sessions?</value>
+  </data>
+  <data name="Dashboard_SimulationSessionsLabel" xml:space="preserve">
+    <value>Simulated Sessions</value>
+  </data>
+  <data name="Dashboard_SimulationTargetReadout" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="Dashboard_SimulationPhase" xml:space="preserve">
+    <value>Phase</value>
+  </data>
+  <data name="Discord_RelayLabel" xml:space="preserve">
+    <value>DISCORD_RELAY</value>
+  </data>
+  <data name="Discord_Operational" xml:space="preserve">
+    <value>OPERATIONAL</value>
+  </data>
+  <data name="Discord_Disabled" xml:space="preserve">
+    <value>DISABLED</value>
+  </data>
+  <data name="Discord_Misconfigured" xml:space="preserve">
+    <value>MISCONFIGURED</value>
+  </data>
+  <data name="Discord_Unavailable" xml:space="preserve">
+    <value>UNAVAILABLE</value>
+  </data>
+  <data name="Profile_SessionOs" xml:space="preserve">
+    <value>OS</value>
+  </data>
+  <data name="Profile_SessionBrowser" xml:space="preserve">
+    <value>BROWSER</value>
+  </data>
+  <data name="Profile_SessionIpNode" xml:space="preserve">
+    <value>IP_NODE</value>
+  </data>
+  <data name="Profile_SessionLastSeen" xml:space="preserve">
+    <value>LAST_SEEN</value>
+  </data>
 </root>
