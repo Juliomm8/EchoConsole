@@ -2699,4 +2699,58 @@
   <data name="Profile_ConfirmPasswordChange" xml:space="preserve">
     <value>¿Cambiar la contraseña actual y cerrar todas las demás sesiones autenticadas?</value>
   </data>
+  <data name="Dashboard_SimulationPanelTitle" xml:space="preserve">
+    <value>Control de Tráfico de Simulación</value>
+  </data>
+  <data name="Dashboard_SimulationTarget" xml:space="preserve">
+    <value>Sesiones Activas Objetivo</value>
+  </data>
+  <data name="Dashboard_StartSimulation" xml:space="preserve">
+    <value>Iniciar Simulación</value>
+  </data>
+  <data name="Dashboard_StopSimulation" xml:space="preserve">
+    <value>Detener Simulación</value>
+  </data>
+  <data name="Dashboard_OpenSimulationConsole" xml:space="preserve">
+    <value>Abrir Consola Avanzada</value>
+  </data>
+  <data name="Dashboard_ConfirmStopSimulation" xml:space="preserve">
+    <value>¿Detener la simulación y desconectar las sesiones simuladas?</value>
+  </data>
+  <data name="Dashboard_SimulationSessionsLabel" xml:space="preserve">
+    <value>Sesiones Simuladas</value>
+  </data>
+  <data name="Dashboard_SimulationTargetReadout" xml:space="preserve">
+    <value>Objetivo</value>
+  </data>
+  <data name="Dashboard_SimulationPhase" xml:space="preserve">
+    <value>Fase</value>
+  </data>
+  <data name="Discord_RelayLabel" xml:space="preserve">
+    <value>RELEVO_DISCORD</value>
+  </data>
+  <data name="Discord_Operational" xml:space="preserve">
+    <value>OPERATIVO</value>
+  </data>
+  <data name="Discord_Disabled" xml:space="preserve">
+    <value>DESACTIVADO</value>
+  </data>
+  <data name="Discord_Misconfigured" xml:space="preserve">
+    <value>MAL CONFIGURADO</value>
+  </data>
+  <data name="Discord_Unavailable" xml:space="preserve">
+    <value>NO DISPONIBLE</value>
+  </data>
+  <data name="Profile_SessionOs" xml:space="preserve">
+    <value>SISTEMA</value>
+  </data>
+  <data name="Profile_SessionBrowser" xml:space="preserve">
+    <value>NAVEGADOR</value>
+  </data>
+  <data name="Profile_SessionIpNode" xml:space="preserve">
+    <value>NODO_IP</value>
+  </data>
+  <data name="Profile_SessionLastSeen" xml:space="preserve">
+    <value>ÚLTIMA_ACTIVIDAD</value>
+  </data>
 </root>
