@@ -2753,4 +2753,136 @@
   <data name="Profile_SessionLastSeen" xml:space="preserve">
     <value>ÚLTIMA_ACTIVIDAD</value>
   </data>
+  <data name="GoldenCat_PageTitle" xml:space="preserve">
+    <value>GoldenCat Studio Hub</value>
+  </data>
+  <data name="GoldenCat_Signal" xml:space="preserve">
+    <value>DARK SKY STUDIOS // NODO OFICIAL</value>
+  </data>
+  <data name="GoldenCat_Eyebrow" xml:space="preserve">
+    <value>Ecosistema de desarrollo en línea</value>
+  </data>
+  <data name="GoldenCat_HeroDescription" xml:space="preserve">
+    <value>El hub oficial de Dark Sky Studios centraliza herramientas de producción, distribución controlada y mantenimiento automático en una aplicación nativa para Windows desarrollada con WPF y .NET 10.</value>
+  </data>
+  <data name="GoldenCat_DownloadButton" xml:space="preserve">
+    <value>Descargar GoldenCat</value>
+  </data>
+  <data name="GoldenCat_DownloadAccessibilityLabel" xml:space="preserve">
+    <value>Descargar el instalador de la última versión estable de GoldenCat Launcher</value>
+  </data>
+  <data name="GoldenCat_DownloadHintLabel" xml:space="preserve">
+    <value>Canal estable</value>
+  </data>
+  <data name="GoldenCat_DownloadHint" xml:space="preserve">
+    <value>Transferencia directa y segura desde el nodo oficial de releases.</value>
+  </data>
+  <data name="GoldenCat_SystemRequirementLabel" xml:space="preserve">
+    <value>Requisito del sistema:</value>
+  </data>
+  <data name="GoldenCat_SystemRequirement" xml:space="preserve">
+    <value>Compatibilidad exclusiva con Windows 10/11 x64</value>
+  </data>
+  <data name="GoldenCat_OfficialHub" xml:space="preserve">
+    <value>Telemetría del studio hub</value>
+  </data>
+  <data name="GoldenCat_PlatformLabel" xml:space="preserve">
+    <value>Plataforma</value>
+  </data>
+  <data name="GoldenCat_PlatformValue" xml:space="preserve">
+    <value>Windows x64</value>
+  </data>
+  <data name="GoldenCat_FrameworkLabel" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="GoldenCat_FrameworkValue" xml:space="preserve">
+    <value>WPF / .NET 10</value>
+  </data>
+  <data name="GoldenCat_ChannelLabel" xml:space="preserve">
+    <value>Release</value>
+  </data>
+  <data name="GoldenCat_ChannelValue" xml:space="preserve">
+    <value>Estable</value>
+  </data>
+  <data name="GoldenCat_ModulesEyebrow" xml:space="preserve">
+    <value>Suite integrada de herramientas</value>
+  </data>
+  <data name="GoldenCat_ModulesTitle" xml:space="preserve">
+    <value>Un launcher. Tres módulos de producción.</value>
+  </data>
+  <data name="GoldenCat_ModulesDescription" xml:space="preserve">
+    <value>GoldenCat reúne las utilidades esenciales de Dark Sky Studios en un workspace coherente, diseñado para reducir cambios de contexto y mantener cada herramienta en la versión aprobada.</value>
+  </data>
+  <data name="GoldenCat_NormalMapsTitle" xml:space="preserve">
+    <value>Generador de Normal Maps</value>
+  </data>
+  <data name="GoldenCat_NormalMapsDescription" xml:space="preserve">
+    <value>Genera normal maps listos para producción desde texturas de origen mediante un flujo enfocado en iteraciones rápidas de materiales.</value>
+  </data>
+  <data name="GoldenCat_NormalMapsTag" xml:space="preserve">
+    <value>Pipeline de texturas</value>
+  </data>
+  <data name="GoldenCat_ConverterTitle" xml:space="preserve">
+    <value>Convertidor de archivos 3D</value>
+  </data>
+  <data name="GoldenCat_ConverterDescription" xml:space="preserve">
+    <value>Estandariza recursos tridimensionales para el pipeline del estudio y reduce conversiones repetitivas entre formatos de producción.</value>
+  </data>
+  <data name="GoldenCat_ConverterTag" xml:space="preserve">
+    <value>Pipeline de assets</value>
+  </data>
+  <data name="GoldenCat_AutoPatcherTitle" xml:space="preserve">
+    <value>Auto-patcher</value>
+  </data>
+  <data name="GoldenCat_AutoPatcherDescription" xml:space="preserve">
+    <value>Mantiene los módulos del launcher sincronizados con releases estables controladas y reduce el mantenimiento manual del equipo.</value>
+  </data>
+  <data name="GoldenCat_AutoPatcherTag" xml:space="preserve">
+    <value>Control de releases</value>
+  </data>
+  <data name="GoldenCat_ModuleReady" xml:space="preserve">
+    <value>Módulo listo para despliegue</value>
+  </data>
+  <data name="GoldenCat_WorkflowEyebrow" xml:space="preserve">
+    <value>Flujo unificado</value>
+  </data>
+  <data name="GoldenCat_WorkflowTitle" xml:space="preserve">
+    <value>De la instalación a producción</value>
+  </data>
+  <data name="GoldenCat_WorkflowDescription" xml:space="preserve">
+    <value>Un único punto de acceso controlado para descubrir, ejecutar y mantener las herramientas utilizadas por el estudio.</value>
+  </data>
+  <data name="GoldenCat_WorkflowStep1Title" xml:space="preserve">
+    <value>Instala el hub</value>
+  </data>
+  <data name="GoldenCat_WorkflowStep1Description" xml:space="preserve">
+    <value>Descarga el instalador estable para Windows x64 desde el endpoint protegido de distribución.</value>
+  </data>
+  <data name="GoldenCat_WorkflowStep2Title" xml:space="preserve">
+    <value>Elige un módulo</value>
+  </data>
+  <data name="GoldenCat_WorkflowStep2Description" xml:space="preserve">
+    <value>Accede a la utilidad de producción requerida por la tarea actual desde una interfaz coherente.</value>
+  </data>
+  <data name="GoldenCat_WorkflowStep3Title" xml:space="preserve">
+    <value>Mantén la sincronización</value>
+  </data>
+  <data name="GoldenCat_WorkflowStep3Description" xml:space="preserve">
+    <value>Permite que el sistema de actualizaciones mantenga las herramientas aprobadas alineadas con la release estable actual.</value>
+  </data>
+  <data name="GoldenCat_DownloadPanelEyebrow" xml:space="preserve">
+    <value>Nodo de release GoldenCat</value>
+  </data>
+  <data name="GoldenCat_DownloadPanelTitle" xml:space="preserve">
+    <value>Activa el conjunto de herramientas del estudio</value>
+  </data>
+  <data name="GoldenCat_DownloadPanelDescription" xml:space="preserve">
+    <value>Instala el hub oficial de Dark Sky Studios y centraliza las herramientas que sostienen tu flujo de producción.</value>
+  </data>
+  <data name="GoldenCat_AlertTitle" xml:space="preserve">
+    <value>Advertencia del canal de descarga</value>
+  </data>
+  <data name="GoldenCatDownloadUnavailable" xml:space="preserve">
+    <value>Nodo de descarga temporalmente fuera de servicio</value>
+  </data>
 </root>
