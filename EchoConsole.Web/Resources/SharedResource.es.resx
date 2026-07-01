@@ -2885,4 +2885,88 @@
   <data name="GoldenCatDownloadUnavailable" xml:space="preserve">
     <value>Nodo de descarga temporalmente fuera de servicio</value>
   </data>
+  <data name="HomePortal_PageTitle" xml:space="preserve">
+    <value>Dark Sky Studios</value>
+  </data>
+  <data name="HomePortal_SystemEyebrow" xml:space="preserve">
+    <value>Puerta de acceso de Dark Sky Studios</value>
+  </data>
+  <data name="HomePortal_StudioName" xml:space="preserve">
+    <value>Bienvenido a Dark Sky Studios</value>
+  </data>
+  <data name="HomePortal_WelcomeDescription" xml:space="preserve">
+    <value>Selecciona el sistema del estudio al que deseas acceder. Entra a la consola operativa de Cosmic Diner o explora el conjunto de herramientas de desarrollo GoldenCat.</value>
+  </data>
+  <data name="HomePortal_SelectDestination" xml:space="preserve">
+    <value>Selecciona un nodo de destino</value>
+  </data>
+  <data name="HomePortal_GuestThemeStatus" xml:space="preserve">
+    <value>Paleta de identidad para visitantes activa</value>
+  </data>
+  <data name="HomePortal_ProfileThemeStatus" xml:space="preserve">
+    <value>Tema del perfil de operador sincronizado</value>
+  </data>
+  <data name="HomePortal_PathLabelA" xml:space="preserve">
+    <value>Ecosistema de operaciones</value>
+  </data>
+  <data name="HomePortal_PathLabelB" xml:space="preserve">
+    <value>Herramientas del estudio</value>
+  </data>
+  <data name="HomePortal_CosmicEyebrow" xml:space="preserve">
+    <value>Red de telemetría de Cosmic Diner</value>
+  </data>
+  <data name="HomePortal_CosmicTitle" xml:space="preserve">
+    <value>Echo Console</value>
+  </data>
+  <data name="HomePortal_CosmicDescription" xml:space="preserve">
+    <value>Abre el centro de mando operativo de Cosmic Diner. Supervisa telemetría en vivo, actividad de sesiones, hilos de ejecución, instalaciones y señales de incidentes.</value>
+  </data>
+  <data name="HomePortal_CosmicTelemetry" xml:space="preserve">
+    <value>Telemetría en vivo</value>
+  </data>
+  <data name="HomePortal_CosmicThreads" xml:space="preserve">
+    <value>Estado de hilos de ejecución</value>
+  </data>
+  <data name="HomePortal_CosmicAlerts" xml:space="preserve">
+    <value>Alertas y salud de la flota</value>
+  </data>
+  <data name="HomePortal_CosmicButton" xml:space="preserve">
+    <value>Entrar a Echo Console</value>
+  </data>
+  <data name="HomePortal_CosmicStatus" xml:space="preserve">
+    <value>Nodo de operaciones disponible</value>
+  </data>
+  <data name="HomePortal_GoldenEyebrow" xml:space="preserve">
+    <value>Suite de desarrollo GoldenCat</value>
+  </data>
+  <data name="HomePortal_GoldenTitle" xml:space="preserve">
+    <value>GoldenCat Studio Hub</value>
+  </data>
+  <data name="HomePortal_GoldenDescription" xml:space="preserve">
+    <value>Explora el hub oficial de Dark Sky Studios desarrollado en WPF y .NET 10 para instalar, ejecutar y mantener las herramientas de producción utilizadas por el estudio.</value>
+  </data>
+  <data name="HomePortal_GoldenHub" xml:space="preserve">
+    <value>Hub de lanzamiento unificado</value>
+  </data>
+  <data name="HomePortal_GoldenTools" xml:space="preserve">
+    <value>Módulos de producción</value>
+  </data>
+  <data name="HomePortal_GoldenUpdates" xml:space="preserve">
+    <value>Actualizaciones automáticas controladas</value>
+  </data>
+  <data name="HomePortal_GoldenButton" xml:space="preserve">
+    <value>Explorar GoldenCat</value>
+  </data>
+  <data name="HomePortal_GoldenStatus" xml:space="preserve">
+    <value>Portal comercial en línea</value>
+  </data>
+  <data name="HomePortal_SecurityLine" xml:space="preserve">
+    <value>Terminal segura de doble ruta de Dark Sky Studios</value>
+  </data>
+  <data name="HomePortal_KeyboardHint" xml:space="preserve">
+    <value>Usa Tab para seleccionar un módulo y Enter para abrirlo.</value>
+  </data>
+  <data name="HomePortal_Or" xml:space="preserve">
+    <value>O</value>
+  </data>
 </root>
