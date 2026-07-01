@@ -9,6 +9,7 @@ using EchoConsole.Web.Hubs;
 using EchoConsole.Web.Security;
 using EchoConsole.Web.Services.Accounts;
 using EchoConsole.Web.Services.Api;
+using EchoConsole.Web.Services.Releases;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -207,6 +209,9 @@ builder.Services.AddScoped<IUserSessionService, UserSessionService>();
 builder.Services.AddScoped<EchoConsoleCookieAuthenticationEvents>();
 builder.Services.AddScoped<IOtpEmailSender, SmtpEmailSender>();
 
+builder.Services.AddGitHubReleaseDownloads(
+    builder.Configuration);
+
 builder.Services.AddTransient<AdminApiKeyHandler>();
 
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]
@@ -290,5 +295,45 @@ app.MapHub<ProfileTelemetryHub>("/hubs/profile-telemetry");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+if (app.Environment.IsDevelopment())
+{
+    var routeLogger = app.Services
+        .GetRequiredService<ILoggerFactory>()
+        .CreateLogger("RouteDiagnostics");
+
+    app.Lifetime.ApplicationStarted.Register(() =>
+    {
+        var endpointRouteBuilder =
+            (IEndpointRouteBuilder)app;
+
+        var routeEndpoints = endpointRouteBuilder
+            .DataSources
+            .SelectMany(dataSource => dataSource.Endpoints)
+            .OfType<RouteEndpoint>()
+            .OrderBy(
+                endpoint => endpoint.RoutePattern.RawText,
+                StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        routeLogger.LogInformation(
+            "Registered ASP.NET Core routes: {RouteCount}",
+            routeEndpoints.Length);
+
+        foreach (var endpoint in routeEndpoints)
+        {
+            var methods = endpoint.Metadata
+                .GetMetadata<HttpMethodMetadata>()
+                ?.HttpMethods
+                ?? new[] { "ANY" };
+
+            routeLogger.LogInformation(
+                "Route {HttpMethods} {RoutePattern} => {DisplayName}",
+                string.Join(",", methods),
+                endpoint.RoutePattern.RawText,
+                endpoint.DisplayName);
+        }
+    });
+}
 
 app.Run();
